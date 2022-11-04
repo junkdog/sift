@@ -7,13 +7,13 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     private val context: Context = Context(classNodes.toMutableList())
-    fun execute(action: Action<Unit, Unit>, profile: Boolean, profileSummed: Boolean): PipelineResult {
+    fun execute(action: Action<Unit, Unit>, profile: Boolean): PipelineResult {
         val start = System.nanoTime()
         action(context, Unit)
         context.updateEntityLabels()
         val end = System.nanoTime()
 
-        if (profile || profileSummed) {
+        if (profile) {
             // tag scopes
             context.measurements
                 .walk()
@@ -35,7 +35,7 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
 
                     node.prev?.value?.scopeOut = node.value.scopeIn
 
-                    if (!profileSummed && node.children().isNotEmpty())
+                    if (node.children().isNotEmpty())
                         node.value.execution = (-1).nanoseconds
                 }
 

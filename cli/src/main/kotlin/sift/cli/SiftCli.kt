@@ -131,11 +131,7 @@ object SiftCli : CliktCommand(
     .flag()
 
     val profile: Boolean by option("--profile",
-        help = "prints execution times and input/output counts for leaf nodes of the executed pipeline")
-    .flag()
-
-    val profileSummed: Boolean by option("--profile-summed",
-        help = "prints execution times and input/output counts for the executed pipeline")
+        help = "prints execution times and input/output for the executed pipeline")
     .flag()
 
     val treeRoot: Entity.Type? by option("-T", "--tree-root",
@@ -346,7 +342,7 @@ object SiftCli : CliktCommand(
         if (paths.isEmpty()) return null
 
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
-            .execute(instrumenter.pipeline(), profile, profileSummed)
+            .execute(instrumenter.pipeline(), profile)
 
         return pr to instrumenter.toTree(pr.entityService, forType)
     }

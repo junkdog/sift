@@ -25,15 +25,6 @@
         <module>cli</module>
     </modules>
 
-    <profiles>
-        <profile>
-            <id>include-test-data</id>
-            <modules>
-                <module>test-data</module>
-            </modules>
-        </profile>
-    </profiles>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
