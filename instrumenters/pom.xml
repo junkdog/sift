@@ -19,10 +19,8 @@
         <module>instrumenter-core</module>
         <module>deprecated</module>
         <module>spring-boot-axon-cqrs</module>
-        <module>cs</module>
         <module>jpa</module>
         <module>jdbi</module>
-        <module>cfx</module>
     </modules>
 
     <profiles>
