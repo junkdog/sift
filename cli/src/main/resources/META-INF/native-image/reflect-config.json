@@ -1,0 +1,44 @@
+[
+{
+  "name":"java.lang.Object"
+},
+{
+  "name":"java.lang.String"
+},
+{
+  "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"kotlin.Metadata",
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"bv","parameterTypes":[] }, 
+    {"name":"d1","parameterTypes":[] }, 
+    {"name":"d2","parameterTypes":[] }, 
+    {"name":"k","parameterTypes":[] }, 
+    {"name":"mv","parameterTypes":[] }, 
+    {"name":"pn","parameterTypes":[] }, 
+    {"name":"xi","parameterTypes":[] }, 
+    {"name":"xs","parameterTypes":[] }
+  ]
+},
+{
+  "name":"kotlin.jvm.internal.DefaultConstructorMarker"
+},
+{
+  "name":"kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter",
+  "allPublicFields":true
+},
+{
+  "name":"sun.security.provider.NativePRNG",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
+]

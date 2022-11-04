@@ -1,0 +1,628 @@
+package sift.core.api
+
+import net.onedaybeard.collectionsby.filterBy
+import net.onedaybeard.collectionsby.firstBy
+import org.objectweb.asm.Handle
+import org.objectweb.asm.Type
+import org.objectweb.asm.tree.*
+import sift.core.entity.Entity
+import sift.core.entity.LabelFormatter
+import sift.core.Throw
+import sift.core.UniqueElementPerEntityViolation
+import sift.core.asm.*
+
+sealed class Action<IN, OUT> {
+
+
+    abstract fun id(): String
+    abstract fun execute(ctx: Context, input: IN): OUT
+
+    infix fun <T> andThen(action: Action<OUT, T>): Action<IN, T> = Compose(this, action)
+
+    operator fun invoke(ctx: Context, input: IN): OUT {
+        return ctx.measure(ctx, input, this)
+    }
+
+    object Instrumenter {
+        object InstrumenterScope : Action<Unit, Unit>() {
+            override fun id() = "instrumenter-scope"
+            override fun execute(ctx: Context, input: Unit): Unit = input
+        }
+
+        object InstrumentClasses : Action<Unit, IterClasses>() {
+            override fun id() = "classes"
+            override fun execute(ctx: Context, input: Unit): IterClasses {
+                return ctx.allClasses.map(Element::Class)
+            }
+        }
+
+        data class ClassesOf(val entity: Entity.Type) : Action<Unit, IterClasses>() {
+            override fun id() = "classes-of($entity)"
+            override fun execute(ctx: Context, input: Unit): IterClasses {
+                return ctx.entityService[entity].map { (elem, _) ->
+                    when (elem) {
+                        is Element.Class -> elem
+                        else             -> error("cannot iterate classes of ${elem::class.simpleName}: $elem")
+                    }
+                }
+            }
+        }
+
+        data class MethodsOf(val entity: Entity.Type) : Action<Unit, IterMethods>() {
+            override fun id() = "methods-of($entity)"
+            override fun execute(ctx: Context, input: Unit): IterMethods {
+                fun methodsOf(elem: Element.Class): Iterable<Element.Method> {
+                    return elem.cn.methods.map { Element.Method(elem.cn, it) }
+                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return ctx.entityService[entity].flatMap { (elem, _) ->
+                    when (elem) {
+                        is Element.Class  -> methodsOf(elem)
+                        is Element.Method -> listOf(elem)
+                        else              -> error("cannot iterate methods of ${elem::class.simpleName}: $elem")
+                    }
+                }
+            }
+        }
+
+    }
+
+    object Class {
+        data class Filter(val regex: Regex, val invert: Boolean) : Action<IterClasses, IterClasses>() {
+            override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterClasses): IterClasses {
+                val f = if (invert) input::filterNot else input::filter
+                return f { regex in it.cn.qualifiedName }
+            }
+        }
+
+        data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
+            override fun id() = "implements(${type.simpleName})"
+            override fun execute(ctx: Context, input: IterClasses): IterClasses {
+                return input.filter { elem -> type in ctx.allInterfacesOf(elem.cn) }
+            }
+        }
+
+        object ClassScope : Action<IterClasses, IterClasses>() {
+            override fun id() = "class-scope"
+            override fun execute(ctx: Context, input: IterClasses): IterClasses = input
+        }
+
+        object ToInstrumenterScope : Action<IterClasses, Unit>() {
+            override fun id() = "instrumenter-scope"
+            override fun execute(ctx: Context, input: IterClasses) {
+                return Instrumenter.InstrumenterScope.invoke(ctx, Unit)
+            }
+        }
+
+        object IntoMethods : Action<IterClasses, IterMethods>() {
+            override fun id() = "methods"
+            override fun execute(ctx: Context, input: IterClasses): IterMethods {
+                fun methodsOf(input: Element.Class): Iterable<Element.Method> {
+                    return input.cn.methods.map { Element.Method(input.cn, it) }
+                        .onEach { output -> ctx.scopeTransition(input, output) }
+                }
+
+                return input.flatMap(::methodsOf)
+            }
+        }
+
+        object IntoFields : Action<IterClasses, IterFields>() {
+            override fun id() = "fields"
+            override fun execute(ctx: Context, input: IterClasses): IterFields {
+                fun methodsOf(input: Element.Class): IterFields {
+                    return input.cn.fields.map { Element.Field(input.cn, it) }
+                        .onEach { output -> ctx.scopeTransition(input, output) }
+                }
+
+                return input.flatMap(::methodsOf)
+            }
+        }
+
+        object ReadType : Action<IterClasses, IterValues>() {
+            override fun id() = "read-type"
+            override fun execute(ctx: Context, input: IterClasses): IterValues {
+                return input
+                    .map { Element.Value(it.cn.type, it) }
+                    .onEach { ctx.scopeTransition(it.reference, it) }
+            }
+        }
+
+        object ReadName : Action<IterClasses, IterValues>() {
+            override fun id() = "read-name"
+            override fun execute(ctx: Context, input: IterClasses): IterValues {
+                return input
+                    .map { Element.Value(it.cn.type.simpleName, it) }
+                    .onEach { ctx.scopeTransition(it.reference, it) }
+            }
+        }
+    }
+
+    object Method {
+        object IntoParameters : Action<IterMethods, IterParameters>() {
+            override fun id() = "parameters"
+            override fun execute(ctx: Context, input: IterMethods): IterParameters {
+                fun parametersOf(input: Element.Method): Iterable<Element.Parameter> {
+                    return input.parameters()
+                        .map { Element.Parameter(input.cn, input.mn, it) }
+                        .onEach { output -> ctx.scopeTransition(input, output) }
+                }
+
+                return input.flatMap(::parametersOf)
+            }
+        }
+
+        object IntoParents : Action<IterMethods, IterClasses>() {
+            override fun id() = "parents"
+            override fun execute(ctx: Context, input: IterMethods): IterClasses {
+                return input
+                    .map { m -> m.into<Element.Class>().also { ctx.scopeTransition(m, it) } }
+                    .toSet()
+            }
+        }
+
+        object MethodScope : Action<IterMethods, IterMethods>() {
+            override fun id() = "method-scope"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods = input
+        }
+
+        object DeclaredMethods : Action<IterMethods, IterMethods>() {
+            override fun id() = "declared-scope"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                return input
+            }
+        }
+
+        data class Filter(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
+            override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                val f = if (invert) input::filterNot else input::filter
+                return f { regex in it.mn.name || regex in it.cn.qualifiedName }
+            }
+        }
+        
+        data class Instantiations(
+            val match: Entity.Type,
+        ) : Action<IterMethods, IterClasses>() {
+            override fun id() = "instantiations($match)"
+            override fun execute(ctx: Context, input: IterMethods): IterClasses {
+                val types = ctx.entityService[match]
+                    .map { (elem, _) -> elem as Element.Class } // FIXME: throw
+                    .map(Element.Class::cn)
+                    .map(ClassNode::type)
+
+                fun introspect(elem: Element.Method): List<Element.Class> {
+                    return ctx.methodsInvokedBy(elem.mn)
+                        .flatMap { mn -> instantiations(mn, types) }
+                        .map { Element.Class(ctx.classByType[it]!!) }
+                        .onEach { ctx.scopeTransition(elem, it) }
+                }
+
+                return input
+                    .flatMap(::introspect)
+            }
+
+            private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
+                return instantiations(mn).filter(types::contains)
+            }
+        }
+
+        data class Invokes(
+            val match: Entity.Type,
+        )  : Action<IterMethods, IterMethods>() {
+            override fun id() = "invokes($match)"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                val matched = ctx.coercedMethodsOf(match)
+
+                fun introspect(elem: Element.Method): List<Element.Method> {
+                    return ctx.methodsInvokedBy(elem.mn)
+                        .filter { mn -> mn in matched }
+                        .filter { mn -> elem.mn !== mn }
+                        .map { ctx.entityService[matched[it]!!] as Element.Method }
+                        .onEach { ctx.scopeTransition(elem, it) }
+                }
+
+                return input
+                    .filter { introspect(it).isNotEmpty() }
+            }
+        }
+
+        data class InvocationsOf(
+            val match: Entity.Type,
+            val synthesize: Boolean
+        ) : Action<IterMethods, IterMethods>() {
+            override fun id() = "invocations-of($match${", synthesize".takeIf { synthesize } ?: ""})"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                fun typeOf(elem: Element): Type {
+                    return when (elem) {
+                        is Element.Class -> elem.cn.type
+                        is Element.Method -> elem.cn.type
+                        is Element.Parameter -> elem.cn.type
+                        is Element.Value -> typeOf(elem.reference)
+                        else -> error("unable to extract methods from $elem")
+                    }
+                }
+
+                val matched: Set<Type> = ctx.entityService[match]
+                    .map { (elem, _) -> typeOf(elem) }
+                    .toSet()
+
+                fun invocations(mn: MethodNode): List<Invocation> {
+                    val invocationsA = mn.asSequence()
+                        .mapNotNull { it as? MethodInsnNode }
+                        .map(::Invocation)
+                        .toList()
+                    val invocationsB = mn.asSequence()
+                        .mapNotNull { it as? InvokeDynamicInsnNode }
+                        .flatMap { ins -> ins.bsmArgs.mapNotNull { it as? Handle } }
+                        .map(::Invocation)
+                        .toList()
+
+                    return invocationsA + invocationsB
+                }
+
+                fun methodElementOf(invocation: Invocation): Element.Method? {
+                    val cn = ctx.classByType[invocation.type] ?: return null
+                    val mn = when (synthesize) {
+                        true -> ctx.synthesize(invocation.type, invocation.name, invocation.desc)
+                        false -> cn.methods
+                            .filterBy(MethodNode::name, invocation.name)
+                            .filterBy(MethodNode::desc, invocation.desc)
+                            .also { mns -> require(mns.size < 2) { error("$mns") } }
+                            .firstOrNull()
+                    } ?: return null
+
+                    return Element.Method(cn, mn)
+                }
+
+                fun resolveInvocations(elem: Element.Method): List<Element.Method> {
+                    return ctx.methodsInvokedBy(elem.mn)
+                        .asSequence()
+                        .flatMap(::invocations)
+                        .distinct()
+                        .filter { it.type in matched }
+                        .mapNotNull(::methodElementOf)
+                        .onEach { ctx.scopeTransition(elem, it) }
+                        .toList()
+                }
+
+                return input
+                    .flatMap(::resolveInvocations)
+            }
+
+
+            data class Invocation(
+                val type: Type,
+                val name: String,
+                val desc: String
+            ) {
+                constructor(ins: MethodInsnNode) :
+                    this(ins.ownerType, ins.name, ins.desc)
+                constructor(handle: Handle) :
+                    this(handle.ownerType, handle.name, handle.desc)
+            }
+        }
+    }
+
+    object Field {
+        object FieldScope : Action<IterFields, IterFields>() {
+            override fun id() = "field-scope"
+            override fun execute(ctx: Context, input: IterFields): IterFields = input
+        }
+
+        object IntoParents : Action<IterFields, IterClasses>() {
+            override fun id() = "parents"
+            override fun execute(ctx: Context, input: IterFields): IterClasses {
+                return input
+                    .map { f -> f.into<Element.Class>().also { ctx.scopeTransition(f, it) } }
+                    .toSet()
+            }
+        }
+
+        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Field>() {
+            override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterFields): IterFields {
+                val f = if (invert) input::filterNot else input::filter
+                return f { regex in it.fn.name }
+            }
+        }
+    }
+
+    object Parameter {
+        object ParameterScope : Action<IterParameters, IterParameters>() {
+            override fun id() = "parameter-scope"
+            override fun execute(ctx: Context, input: IterParameters): IterParameters = input
+        }
+
+        class ExplodeType(val synthesize: Boolean = false): Action<IterParameters, IterClasses>() {
+            override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
+            override fun execute(ctx: Context, input: IterParameters): IterClasses {
+               fun explode(param: Element.Parameter): Element.Class? {
+
+                   var exploded = ctx.classByType[param.pn.type]
+                   if (exploded == null && synthesize)
+                       exploded = ctx.synthesize(param.pn.type)
+
+                   return Element.Class(exploded ?: return null)
+                       .also { ctx.scopeTransition(param, it) }
+               }
+
+                return input.mapNotNull(::explode)
+            }
+        }
+
+        object ReadType : Action<IterParameters, IterValues>() {
+            override fun id() = "read-type"
+            override fun execute(ctx: Context, input: IterParameters): IterValues {
+                return input
+                    .map { Element.Value(it.pn.type, it) }
+                    .onEach { ctx.scopeTransition(it.reference, it) }
+            }
+        }
+
+        @Name("parents")
+        object IntoParents : Action<IterParameters, IterMethods>() {
+            override fun id() = "parents"
+            override fun execute(ctx: Context, input: IterParameters): IterMethods {
+                return input
+                    .map { p -> p.into<Element.Method>().also { ctx.scopeTransition(p, it) } }
+                    .toSet()
+            }
+        }
+
+        data class FilterNth(val nth: Int) : Action<IterParameters, IterParameters>() {
+            override fun id() = "filter-nth($nth)"
+            override fun execute(ctx: Context, input: IterParameters): IterParameters {
+                return input.filter { it.mn.parameters?.indexOf(it.pn) == nth }
+            }
+        }
+
+        @Name("filter")
+        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Parameter>() {
+            override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterParameters): IterParameters {
+                val f = if (invert) input::filterNot else input::filter
+                return f { regex in it.pn.name }
+            }
+        }
+    }
+
+    data class DebugLog<T : Element>(
+        val tag: String,
+        val format: LogFormat = LogFormat.Elements
+    ) : IsoAction<T>() {
+        override fun id() = "log($tag)"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            if (!debugLog) return input
+            val elements = input.toList().takeUnless(List<T>::isEmpty)
+                ?: return input
+
+            when (format) {
+                LogFormat.Elements ->
+                    "$tag:\n${elements.joinToString(prefix = "    ", separator = "\n    ") { it.simpleName }}"
+                LogFormat.Count ->
+                    "$tag: ${elements.size} ${elements.first()::class.simpleName!!.lowercase()}" +
+                        if (elements.first() is Element.Class) "es" else "s"
+            }.let(::println)
+
+            return input
+        }
+
+        enum class LogFormat {
+            Elements, Count
+        }
+    }
+
+    data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
+        override fun id() = "annotated-by(${annotation.simpleName})"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.filter { annotation in it.annotations() }
+        }
+    }
+
+    data class EntityFilter<T : Element>(val entity: Entity.Type) : IsoAction<T>() {
+        override fun id() = "filter-entity($entity)"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.filter { it in ctx.entityService }
+        }
+    }
+
+    data class ReadAnnotation<T: Element>(val annotation: Type, val field: String) : Action<Iter<T>, IterValues>() {
+        override fun id() = "read-annotation(${annotation.simpleName}::$field)"
+        override fun execute(ctx: Context, input: Iter<T>): IterValues {
+            fun readAnnotation(input: T): Element.Value? {
+                return input.annotations()
+                    .find { an -> an.type == annotation }
+                    ?.let { an -> readFieldAny(field)(an) }
+                    ?.let { Element.Value(it, input) }
+                    ?.also { ctx.scopeTransition(input, it) }
+            }
+            return input.mapNotNull(::readAnnotation)
+        }
+
+    }
+
+    class WithValue<T : Element>(val value: Any) : Action<Iter<T>, IterValues>() {
+        override fun id() = "with-value($value)"
+        override fun execute(ctx: Context, input: Iter<T>): IterValues {
+            return input
+                .map { Element.Value(value, it) }
+                .onEach { ctx.scopeTransition(it.reference, it) }
+        }
+    }
+
+    data class Fork<T, FORK_T>(
+        val forked: Action<T, FORK_T>
+    ) : Action<T, T>() {
+        override fun id() = "fork"
+        override fun execute(ctx: Context, input: T): T {
+            ctx.pushMeasurementScope()
+            forked(ctx, input)
+            ctx.popMeasurementScope()
+            return input
+        }
+    }
+
+    data class ForkOnEntityExistence<T, FORK_T>(
+        val forked: Action<T, FORK_T>,
+        val entity: Entity.Type,
+        val invert: Boolean
+    ) : Action<T, T>() {
+        override fun id() = "fork-conditional($entity exists${"-not".takeIf { invert } ?: ""})"
+        override fun execute(ctx: Context, input: T): T {
+            if (entity in ctx.entityService != invert) {
+                ctx.pushMeasurementScope()
+                forked(ctx, input)
+                ctx.popMeasurementScope()
+            }
+
+            return input
+        }
+    }
+
+    data class RegisterEntity<T : Element>(
+        val id: Entity.Type,
+        val errorIfExists: Boolean,
+        val labelFormatter: LabelFormatter
+    ) : SimpleAction<T>() {
+        override fun id() = "register-entity($id)"
+        override fun invoke(ctx: Context, input: T): T {
+            try {
+                ctx.register(Entity(id, "N/A"), input, labelFormatter)
+            } catch (e: UniqueElementPerEntityViolation) {
+                if (errorIfExists)
+                    throw e
+            }
+
+            return input
+        }
+    }
+
+    data class RegisterSynthesizedEntity(
+        val id: Entity.Type,
+        val type: Type,
+        val labelFormatter: LabelFormatter
+    ) : Action<Unit, Unit>() {
+        override fun id() = "register-entity-synthesized($id, ${type.simpleName})"
+        override fun execute(ctx: Context, input: Unit) {
+            ctx.synthesize(type)
+                .let(Element::Class)
+                .let { elem -> ctx.register(Entity(id, "N/A"), elem, labelFormatter) }
+
+            return input
+        }
+    }
+
+    data class RegisterChildren<T : Element>(
+        val parentType: Entity.Type,
+        val key: String,
+        val childType: Entity.Type,
+    ) : IsoAction<T>() {
+        override fun id() = "register-children($parentType[$key], $childType)"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            if (input.toList().isEmpty())
+                return input
+            if (childType !in ctx.entityService)
+                Throw.entityNotRegistered(childType)
+            if (parentType !in ctx.entityService)
+                Throw.entityNotRegistered(parentType)
+
+            fun relations(elem: Element, type: Entity.Type): Set<Entity> {
+                val related = ctx.findRelatedEntities(elem, type)
+                if (related.isEmpty() && elem !in ctx.entityService) {
+                    Throw.entityNotFound(type, elem)
+                }
+                return related.filter { ctx.entityService[elem] != it }.toSet()
+            }
+
+            val a = ctx.entityService[parentType]
+                .flatMap { (elem, parent) -> relations(elem, childType).map { parent to it } }
+            val b = ctx.entityService[childType]
+                .flatMap { (elem, child) -> relations(elem, parentType).map { it to child } }
+
+            (a + b)
+                .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
+                ?.forEach { (parent, child) -> parent.addChild(key, child) }
+                ?: Throw.unableToResolveParentRelation(parentType, childType)
+
+            return input
+        }
+    }
+
+    data class RegisterChildrenFromResolver(
+        val parentType: Entity.Type,
+        val key: String,
+        val childResolver: EntityResolver,
+    ) : IsoAction<Element.Method>() {
+        override fun id() = "register-children($parentType, ${childResolver.type}.${childResolver.id})"
+        override fun execute(ctx: Context, input: IterMethods): IterMethods {
+            if (input.toList().isEmpty())
+                return input
+
+            if (parentType !in ctx.entityService)
+                Throw.entityNotRegistered(parentType)
+
+            childResolver.resolve(ctx, input)
+
+            return input
+        }
+    }
+
+    data class UpdateEntityProperty(
+        val key: String,
+        /** if null: resolves [Entity.Type] from currently referenced element */
+        val entity: Entity.Type? = null
+    ) : IsoAction<Element.Value>() {
+        override fun id() = "update-property(key${", $entity".takeIf { entity != null } ?: ""})"
+        override fun execute(ctx: Context, input: IterValues): IterValues {
+            when (entity) {
+                null -> {
+                    input.map { it to ctx.entityService[it.reference] }
+                        .forEach { (elem, e) -> e?.set(key, elem.data) }
+                }
+                else -> {
+                    input.map { it to ctx.findRelatedEntities(it, entity) }
+                        .forEach { (elem, e) -> e.forEach { it[key] = elem.data } }
+                }
+            }
+
+            return input
+        }
+    }
+
+    data class Compose<A, B, C>(
+        val a: Action<A, B>,
+        val b: Action<B, C>
+    ) : Action<A, C>() {
+        override fun id() = "composed"
+        override fun execute(ctx: Context, input: A): C = b(ctx, a(ctx, input))
+    }
+
+    abstract class SimpleAction<T : Element> : Action<Iter<T>, Iter<T>>() {
+
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.mapNotNull { t -> invoke(ctx, t) }
+        }
+
+        abstract fun invoke(ctx: Context, input: T): T?
+    }
+
+    data class Chain<T>(val actions: MutableList<Action<T, T>>) : Action<T, T>() {
+        override fun id() = "chain"
+        override fun execute(ctx: Context, input: T): T {
+            return actions.fold(input) { elems, action -> action(ctx, elems) }
+        }
+
+        operator fun plusAssign(action: Action<T, T>) {
+            actions += action
+        }
+    }
+}
+
+fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
+
+var debugLog = false
+
+@Target(AnnotationTarget.CLASS)
+annotation class Name(val value: String)
