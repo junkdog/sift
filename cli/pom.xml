@@ -49,16 +49,6 @@
         </dependency>
         <dependency>
             <groupId>net.onedaybeard.sift.instrumenter</groupId>
-            <artifactId>cs</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
-            <artifactId>cfx</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
             <artifactId>jpa</artifactId>
             <version>${project.version}</version>
         </dependency>

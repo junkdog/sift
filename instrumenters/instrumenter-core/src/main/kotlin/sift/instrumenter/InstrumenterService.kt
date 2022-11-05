@@ -2,6 +2,7 @@ package sift.instrumenter
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -55,13 +56,16 @@ private fun mapper() : ObjectMapper {
         }
 }
 
-fun InstrumenterService.serialize(): String {
+fun InstrumenterService.serialize(rootType: Entity.Type): String {
     val mapper = mapper()
-    val json = mapper.writeValueAsString(mapOf(
-        "name" to name,
-        "entity-types" to mapper.valueToTree(entityTypes.toList()),
-        "pipeline" to mapper.valueToTree<ObjectNode>(pipeline()),
-        "theme" to theme()
-    ))
+    val json = mapper.writeValueAsString(mapper.createObjectNode().apply {
+        put("name", name)
+        replace("root", mapper.valueToTree(rootType))
+        replace("entity-types", mapper.createArrayNode().apply {
+            entityTypes.forEach { add(mapper.valueToTree<JsonNode>(it)) }
+        })
+        putPOJO("theme", theme())
+        replace("pipeline", mapper.valueToTree<ObjectNode>(pipeline()))
+    })
     return json
 }

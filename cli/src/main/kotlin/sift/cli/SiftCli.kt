@@ -340,7 +340,7 @@ object SiftCli : CliktCommand(
         val instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
-        val json = instrumenter.serialize()
+        val json = instrumenter.serialize(Entity.Type("controller"))
 
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
             .execute(instrumenter.pipeline(), profile)
