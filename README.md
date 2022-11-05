@@ -2,6 +2,13 @@
 
 A tool to model and analyze the design of systems from java class files.
 
+## Features 
+- CLI tool to parse and interact with system models.  
+- Parses system models from existing classes using Instrumenter Pipelines.
+- Pipelines provide knowledge about technology stacks.
+- Declarative DSL for additional, user-defined pipelines.
+- JSON serialization of pipelines for simpler reuse and sharing.
+
 ![sift spring-boot axon framework demo](docs/images/sift-spring-boot-axon.gif)
 
 _Spring-Boot with Axon Framework [instrumenter][spring-axon] in action._ 
@@ -36,8 +43,11 @@ entity types of spring-axon
 ```
 ## Instrumenter pipelines
 
-Instrumenter Pipelines are responsible for producing the system model from input 
-classes. Pipelines are written in a declarative DSL, which provides high-level
+Instrumenter Pipelines provide knowledge about a technology stack and/or
+project-specific constructs. The pipeline produces the system model from 
+the input classes. 
+
+Pipelines are written in a declarative DSL, which provides high-level
 abstractions for identifying and interrelating entities from class structure or usage.
 
 ```kotlin
@@ -62,7 +72,9 @@ instrumenter {
 Input elements - classes, methods, parameters and fields - are processed in batch, line-by-line.
 
 A Instrumenter Pipeline can be expressed in about 100LOC. Some are notably shorter, e.g. [jpa][jpa]
-and [jdbi][jdbi]. Any pipeline can be included by user-defined pipelines using `include(pipeline)`.
+and [jdbi][jdbi]. User-defined pipelines may choose to `include()` multiple existing pipelines,
+e.g. `spring-axon` and `jpa`, to better describe the underlying system while also keeping the
+resulting pipeline DSL concise.
 
  [jpa]: instrumenters/jpa/src/main/kotlin/sift/instrumenter/jpa/JpaInstrumenter.kt#L48:L73
  [jdbi]: instrumenters/jdbi/src/main/kotlin/sift/instrumenter/jdbi/Jdbi3Instrumenter.kt#L54:L67
@@ -71,8 +83,6 @@ The execution of an Instrumenter Pipeline can be visualized with `--profile`:
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 
-
-## Features 
 
 ## Caveats and limitations
 - no flow control
