@@ -3,7 +3,7 @@
 
 package sift.cli
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.*
 import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
@@ -45,6 +45,7 @@ import sift.instrumenter.Gruvbox.yellow1
 import sift.instrumenter.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style
+import sift.instrumenter.serialize
 import sift.instrumenter.spi.InstrumenterServiceProvider
 import java.nio.file.Path
 import java.util.ServiceLoader
@@ -339,12 +340,7 @@ object SiftCli : CliktCommand(
         val instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
-        val mapper = jacksonObjectMapper()
-        val json = mapper.writerWithDefaultPrettyPrinter()
-            .writeValueAsString(instrumenter.pipeline())
-
-
-//        val pipeline = mapper.readValue<Action.Instrumenter.InstrumenterScope>()
+        val json = instrumenter.serialize()
 
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
             .execute(instrumenter.pipeline(), profile)

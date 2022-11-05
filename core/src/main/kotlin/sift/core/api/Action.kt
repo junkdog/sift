@@ -3,7 +3,6 @@ package sift.core.api
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
-import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
@@ -12,14 +11,16 @@ import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
+import sift.core.jackson.NoArgConstructor
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
     JsonSubTypes.Type(value = Action.Instrumenter.InstrumenterScope::class, name = "instrumenter-scope"),
     JsonSubTypes.Type(value = Action.Instrumenter.InstrumentClasses::class, name = "classes"),
     JsonSubTypes.Type(value = Action.Instrumenter.ClassesOf::class, name = "classes-of"),
     JsonSubTypes.Type(value = Action.Instrumenter.MethodsOf::class, name = "methods-of"),
 
+    JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
     JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
     JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
@@ -64,6 +65,8 @@ import sift.core.asm.*
 
     JsonSubTypes.Type(value = Action::class, name = "action"),
 )
+//@JsonSerialize(using = ActionSerializer::class)
+@NoArgConstructor
 sealed class Action<IN, OUT> {
 
 
@@ -373,7 +376,8 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Field>() {
+        data class Filter(val regex: Regex, val invert: Boolean) :
+            Action<Iter<Element.Field>, Iter<Element.Field>>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
                 val f = if (invert) input::filterNot else input::filter
@@ -430,7 +434,8 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Parameter>() {
+        data class Filter(val regex: Regex, val invert: Boolean) :
+            Action<Iter<Element.Parameter>, Iter<Element.Parameter>>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
                 val f = if (invert) input::filterNot else input::filter
@@ -442,7 +447,7 @@ sealed class Action<IN, OUT> {
     data class DebugLog<T : Element>(
         val tag: String,
         val format: LogFormat = LogFormat.Elements
-    ) : IsoAction<T>() {
+    ) : Action<Iter<T>, Iter<T>>() {
         override fun id() = "log($tag)"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             if (!debugLog) return input
@@ -465,14 +470,16 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
+    data class HasAnnotation<T : Element>(val annotation: Type) :
+        Action<Iter<T>, Iter<T>>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input.filter { annotation in it.annotations() }
         }
     }
 
-    data class EntityFilter<T : Element>(val entity: Entity.Type) : IsoAction<T>() {
+    data class EntityFilter<T : Element>(val entity: Entity.Type) :
+        Action<Iter<T>, Iter<T>>() {
         override fun id() = "filter-entity($entity)"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input.filter { it in ctx.entityService }
@@ -569,7 +576,7 @@ sealed class Action<IN, OUT> {
         val parentType: Entity.Type,
         val key: String,
         val childType: Entity.Type,
-    ) : IsoAction<T>() {
+    ) : Action<Iter<T>, Iter<T>>() {
         override fun id() = "register-children($parentType[$key], $childType)"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             if (input.toList().isEmpty())
@@ -605,7 +612,7 @@ sealed class Action<IN, OUT> {
         val parentType: Entity.Type,
         val key: String,
         val childResolver: EntityResolver,
-    ) : IsoAction<Element.Method>() {
+    ) : Action<Iter<Element.Method>, Iter<Element.Method>>() {
         override fun id() = "register-children($parentType, ${childResolver.type}.${childResolver.id})"
         override fun execute(ctx: Context, input: IterMethods): IterMethods {
             if (input.toList().isEmpty())
@@ -624,7 +631,7 @@ sealed class Action<IN, OUT> {
         val key: String,
         /** if null: resolves [Entity.Type] from currently referenced element */
         val entity: Entity.Type? = null
-    ) : IsoAction<Element.Value>() {
+    ) : Action<Iter<Element.Value>, Iter<Element.Value>>() {
         override fun id() = "update-property(key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {

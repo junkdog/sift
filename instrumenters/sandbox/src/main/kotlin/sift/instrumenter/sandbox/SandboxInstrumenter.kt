@@ -40,7 +40,7 @@ class SandboxInstrumenter : InstrumenterService {
 
     override fun create() = this
     override val name: String
-        get() = "jpa"
+        get() = "sanbox"
 
     override fun pipeline() = instrumenter {
         classes {

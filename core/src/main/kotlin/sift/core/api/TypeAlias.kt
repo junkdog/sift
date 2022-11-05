@@ -7,6 +7,4 @@ typealias IterParameters = Iterable<Element.Parameter>
 typealias IterValues     = Iterable<Element.Value>
 typealias Iter<T>        = Iterable<T>
 
-typealias IsoAction<T>   = Action<Iter<T>, Iter<T>>
-
 typealias AsmParameterNode = org.objectweb.asm.tree.ParameterNode
