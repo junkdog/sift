@@ -92,8 +92,14 @@ fun sqlStyle(
     insert: TextStyle = orange2,
     update: TextStyle = orange2 + bold,
     delete: TextStyle = orange2 + bold,
-): Style = object : Style {
+): Style = SqlStyle(select, insert, update, delete)
 
+class SqlStyle(
+    val select: TextStyle,
+    val insert: TextStyle,
+    val update: TextStyle,
+    val delete: TextStyle,
+) : Style {
     val repeatingWhitespace = Regex("\\s+")
 
     override fun format(e: Tree<EntityNode>, theme: Map<Entity.Type, Style>): String {

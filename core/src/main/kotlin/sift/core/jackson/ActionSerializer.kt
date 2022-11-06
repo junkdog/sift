@@ -30,6 +30,23 @@ object AsmTypeSerializer {
     }
 }
 
+object EntityTypeSerializer {
+    class Serializer : JsonSerializer<Entity.Type>() {
+        override fun serialize(value: Entity.Type, gen: JsonGenerator, serializers: SerializerProvider) {
+            gen.writeString(value.id)
+        }
+    }
+
+    class Deserializer : JsonDeserializer<Entity.Type>() {
+        override fun deserialize(
+            p: JsonParser,
+            ctxt: DeserializationContext
+        ): Entity.Type {
+            return Entity.Type(p.readValueAs(String::class.java))
+        }
+    }
+}
+
 object RegexSerializer {
     class Serializer : JsonSerializer<Regex>() {
         override fun serialize(value: Regex, gen: JsonGenerator, serializers: SerializerProvider) {

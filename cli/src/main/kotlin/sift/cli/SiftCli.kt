@@ -45,6 +45,7 @@ import sift.instrumenter.Gruvbox.yellow1
 import sift.instrumenter.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style
+import sift.instrumenter.deserialize
 import sift.instrumenter.serialize
 import sift.instrumenter.spi.InstrumenterServiceProvider
 import java.nio.file.Path
@@ -337,10 +338,13 @@ object SiftCli : CliktCommand(
     }
 
     private fun buildTree(forType: Entity.Type? = null): Pair<PipelineResult, Tree<EntityNode>>? {
-        val instrumenter = this.instrumenter ?: return null
+        var instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
         val json = instrumenter.serialize(Entity.Type("controller"))
+        val deserialized = InstrumenterService.deserialize(json)
+
+        instrumenter = deserialized
 
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
             .execute(instrumenter.pipeline(), profile)
