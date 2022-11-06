@@ -78,6 +78,7 @@ fun InstrumenterService.Companion.deserialize(json: String): InstrumenterService
     )
 }
 
+// save to ~/.local/share/sift/instrumenters/${instrumenter.name}.json
 fun InstrumenterService.serialize(): String {
     val mapper = mapper()
     val json = mapper.writeValueAsString(mapper.createObjectNode().apply {
