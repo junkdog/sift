@@ -342,6 +342,8 @@ object SiftCli : CliktCommand(
         val instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
+        InstrumenterService.deserialize(instrumenter.serialize())
+
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
             .execute(instrumenter.pipeline(), profile)
 
