@@ -265,23 +265,12 @@
                         <configuration>
                             <skip>${dokka.skip}</skip>
 
-                            <!-- html, markdown -->
-<!--                            <outputFormat>${dokka.format}</outputFormat>-->
                             <jdkVersion>17</jdkVersion>
                             <skipEmptyPackages>true</skipEmptyPackages>
                             <reportUndocumented>false</reportUndocumented>
 
-                            <sourceLinks>
-                                <link>
-                                    <path>${project.basedir}/src/main/kotlin</path>
-                                    <lineSuffix>#L</lineSuffix>
-                                </link>
-                            </sourceLinks>
-
                             <sourceDirectories>
-                                <directory>
-                                    ${project.basedir}/src/main/kotlin
-                                </directory>
+                                <dir>${project.basedir}/src/main/kotlin</dir>
                             </sourceDirectories>
                         </configuration>
                     </plugin>
