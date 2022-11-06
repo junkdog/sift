@@ -266,7 +266,7 @@
                             <skip>${dokka.skip}</skip>
 
                             <!-- html, markdown -->
-                            <outputFormat>${dokka.format}</outputFormat>
+<!--                            <outputFormat>${dokka.format}</outputFormat>-->
                             <jdkVersion>17</jdkVersion>
                             <skipEmptyPackages>true</skipEmptyPackages>
                             <reportUndocumented>false</reportUndocumented>
@@ -278,13 +278,11 @@
                                 </link>
                             </sourceLinks>
 
-                            <generateIndexPages>true</generateIndexPages>
-
-                            <sourceRoots>
-                                <root>
-                                    <path>${project.basedir}/src/main/kotlin</path>
-                                </root>
-                            </sourceRoots>
+                            <sourceDirectories>
+                                <directory>
+                                    ${project.basedir}/src/main/kotlin
+                                </directory>
+                            </sourceDirectories>
                         </configuration>
                     </plugin>
 
