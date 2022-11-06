@@ -21,6 +21,7 @@ class DeprecationInstrumenter : InstrumenterService {
     val field = Entity.Type("fields")
 
     override val entityTypes: Iterable<Entity.Type> = listOf(klazz, method, field, referencing)
+    override val defaultType: Entity.Type = entityTypes.first()
 
     override fun create() = this
     override val name: String

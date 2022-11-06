@@ -3,15 +3,10 @@ package sift.instrumenter.jpa
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Dsl.instrumenter
-import sift.core.entity.EntityService
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
-import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.Gruvbox.orange1
 import sift.instrumenter.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style
-import sift.instrumenter.dsl.buildTree
 
 typealias E = JpaInstrumenter.EntityTypes
 typealias A = JpaInstrumenter.Annotations
@@ -20,6 +15,7 @@ typealias T = JpaInstrumenter.AsmTypes
 @Suppress("unused")
 class JpaInstrumenter : InstrumenterService {
     override val entityTypes: Iterable<Entity.Type> = listOf(E.jpaMethod, E.jpaRepository)
+    override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
         private val String.type
@@ -70,22 +66,6 @@ class JpaInstrumenter : InstrumenterService {
                 }
             }
         }
-    }
-
-    override fun toTree(
-        es: EntityService,
-        forType: Entity.Type?
-    ): Tree<EntityNode> {
-        fun Entity.Type.entities(): List<Entity> = es[this].map { (_, entity) -> entity }
-
-        val type = forType ?: E.jpaRepository
-        return tree(type.id) {
-            type.entities().forEach { e ->
-                add(e) {
-                    buildTree(e)
-                }
-            }
-        }.also { it.sort(compareBy(EntityNode::toString)) }
     }
 
     override fun theme() = mapOf<Entity.Type, Style>(

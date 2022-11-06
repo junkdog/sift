@@ -15,6 +15,41 @@ _Spring-Boot with Axon Framework [instrumenter][spring-axon] in action._
 
  [spring-axon]: instrumenters/spring-boot-axon-cqrs/src/main/kotlin/sift/instrumenter/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
 
+## CLI options
+
+```
+Usage: sift [OPTIONS] [PATHS]...
+
+  A tool to model and analyze the design of systems from bytecode.
+
+  The PATHS argument can occur anywhere, and multiple times, in the argument list. Any argument which
+  isn't matched as an option is treated as an element of PATHS.
+
+Options:
+  -i, --instrumenter INSTRUMENTER             the instrumenter pipeline performing the scan
+  -t, --list-entity-types                     lists entity types defined by instrumenter.
+  -L, --max-depth INT                         Max display depth of the tree
+  -f, --filter REGEX                          filters nodes by label. can occur multiple times.
+  -F, --filter-context REGEX                  filters nodes by label, while also including sibling nodes.
+                                              can occur multiple times.
+  -e, --exclude REGEX                         excludes nodes when label matches REGEX. can occur multiple
+                                              times.
+  -E, --exclude-type ENTITY-TYPE              excludes entity types from tree. can occur multiple times.
+  -l, --list-instrumenters                    print all instrumenters detected on the current classpath
+  --debug                                     prints log/logCount statements from the executed pipeline
+  --profile                                   prints execution times and input/output counts for leaf
+                                              nodes of the executed pipeline
+  --profile-summed                            prints execution times and input/output counts for the
+                                              executed pipeline
+  -T, --tree-root ENTITY-TYPE                 tree built around requested entity type
+  -a, --ansi [none|ansi16|ansi256|truecolor]  override automatically detected ANSI support
+  --generate-completion [bash|zsh|fish]
+  -h, --help                                  Show this message and exit
+
+Arguments:
+  PATHS  jar or directory with classes
+```
+
 ## Entity and Entity Type
 
 The system model is described by its constituent entities and their relationships.

@@ -341,7 +341,7 @@ object SiftCli : CliktCommand(
         var instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
-        val json = instrumenter.serialize(Entity.Type("controller"))
+        val json = instrumenter.serialize()
         val deserialized = InstrumenterService.deserialize(json)
 
         instrumenter = deserialized

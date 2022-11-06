@@ -146,8 +146,6 @@
                                 --no-fallback
                                 -H:GenerateDebugInfo=1
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/cfx/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/cs/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/jpa/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/jdbi/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/instrumenter-core/src/main/kotlin

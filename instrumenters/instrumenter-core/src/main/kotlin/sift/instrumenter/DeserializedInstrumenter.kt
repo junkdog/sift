@@ -13,19 +13,14 @@ import com.fasterxml.jackson.module.kotlin.*
 import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.entity.Entity
-import sift.core.entity.EntityService
 import sift.core.jackson.*
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
-import sift.core.tree.TreeDsl
-import sift.instrumenter.dsl.buildTree
 
 @NoArgConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal class DeserializedInstrumenter(
     override val name: String,
 
-    val root: Entity.Type,
+    override val defaultType: Entity.Type,
     @field:JsonProperty("entity-types")
     val types: List<Entity.Type>,
     val pipeline: Action<Unit, Unit>,
@@ -37,19 +32,6 @@ internal class DeserializedInstrumenter(
     override fun pipeline() = pipeline
     override fun theme() = theme
     override fun create(): InstrumenterService = this
-
-    override fun toTree(es: EntityService, forType: Entity.Type?): Tree<EntityNode> {
-        fun Entity.Type.entities(): List<Entity> = es[this].map { (_, entity) -> entity }
-
-        val type = forType ?: root
-        return TreeDsl.tree(type.id) {
-            type.entities().forEach { e ->
-                add(e) {
-                    buildTree(e)
-                }
-            }
-        }.also { it.sort(compareBy(EntityNode::toString)) }
-    }
 }
 
 
@@ -96,11 +78,11 @@ fun InstrumenterService.Companion.deserialize(json: String): InstrumenterService
     )
 }
 
-fun InstrumenterService.serialize(rootType: Entity.Type): String {
+fun InstrumenterService.serialize(): String {
     val mapper = mapper()
     val json = mapper.writeValueAsString(mapper.createObjectNode().apply {
         put("name", name)
-        replace("root", mapper.valueToTree(rootType))
+        replace("root", mapper.valueToTree(defaultType))
         replace("entity-types", mapper.createArrayNode().apply {
             entityTypes.forEach { add(mapper.valueToTree<JsonNode>(it)) }
         })

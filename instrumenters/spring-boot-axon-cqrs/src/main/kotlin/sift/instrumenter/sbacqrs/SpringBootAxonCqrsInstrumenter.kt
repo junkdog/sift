@@ -81,7 +81,8 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
         val endpoint = "endpoint".type
     }
 
-    override val entityTypes: Iterable<Entity.Type> = EntityType.types
+    override val defaultType: Entity.Type = E.controller
+    override val entityTypes: Iterable<Entity.Type> = E.types
 
     override fun create() = this
     override val name: String
@@ -217,22 +218,6 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
             }
         }
-    }
-
-    override fun toTree(
-        es: EntityService,
-        forType: Entity.Type?
-    ): Tree<EntityNode> {
-        fun Entity.Type.entities(): List<Entity> = es[this].map { (_, entity) -> entity }
-
-        val type = forType ?: E.controller
-        return tree(type.id) {
-            type.entities().forEach { e ->
-                add(e) {
-                    buildTree(e)
-                }
-            }
-        }.also { it.sort(compareBy(EntityNode::toString)) }
     }
 
     override fun theme() = mapOf(

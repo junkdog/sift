@@ -5,15 +5,28 @@ import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
+import sift.core.tree.TreeDsl.Companion.tree
+import sift.instrumenter.dsl.buildTree
 import sift.instrumenter.spi.InstrumenterServiceProvider
 
 interface InstrumenterService : InstrumenterServiceProvider {
     val name: String
+    val defaultType: Entity.Type
     val entityTypes: Iterable<Entity.Type>
 
     fun pipeline(): Action<Unit, Unit>
-    fun toTree(es: EntityService, forType: Entity.Type?): Tree<EntityNode>
     fun theme(): Map<Entity.Type, Style>
 
-    companion object {}
+    fun toTree(es: EntityService, forType: Entity.Type?): Tree<EntityNode> {
+        val type = forType ?: defaultType
+        return tree(type.id) {
+            es[type].map { (_, entity) -> entity }.forEach { e ->
+                add(e) {
+                    buildTree(e)
+                }
+            }
+        }.also { it.sort(compareBy(EntityNode::toString)) }
+    }
+
+    companion object
 }
