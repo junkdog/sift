@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # prereq: mvn clean install, alt mvn clean install -P native-image (graalvm)
-VERSION="0.1.0-SNAPSHOT"
+VERSION="0.1.0"
 SIFT_M2_PATH="$HOME/.m2/repository/net/onedaybeard/sift/cli/$VERSION"
 SIFT_JAR="$SIFT_M2_PATH/cli-$VERSION.jar"
 SIFT_BIN="$SIFT_M2_PATH/sift"
