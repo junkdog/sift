@@ -3,18 +3,14 @@ package sift.instrumenter.jdbi
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
-import sift.core.api.Action
-import sift.core.api.Dsl.classes
+import sift.core.api.Dsl.instrumenter
 import sift.core.entity.Entity
-import sift.core.entity.EntityService
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
-import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.Gruvbox.orange1
 import sift.instrumenter.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style
-import sift.instrumenter.dsl.buildTree
 
 typealias E = Jdbi3Instrumenter.EntityTypes
 typealias A = Jdbi3Instrumenter.Annotations
@@ -24,6 +20,7 @@ typealias T = Jdbi3Instrumenter.AsmTypes
 class Jdbi3Instrumenter : InstrumenterService {
 
     override val entityTypes: Iterable<Entity.Type> = listOf(E.sqlQuery, E.sqlUpdate)
+    override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
         private val String.type
@@ -51,34 +48,23 @@ class Jdbi3Instrumenter : InstrumenterService {
     override val name: String
         get() = "jdbi3"
 
-    override fun pipeline(): Action<Unit, Unit> {
-        return classes {
+    override fun pipeline() = instrumenter {
+        classes {
             methods {
                 annotatedBy(A.sqlQuery)
-                entity(E.sqlQuery, label("\${sql}"),
-                    property("sql", readAnnotation(A.sqlQuery, "value")))
+                entity(
+                    E.sqlQuery, label("\${sql}"),
+                    property("sql", readAnnotation(A.sqlQuery, "value"))
+                )
             }
             methods {
                 annotatedBy(A.sqlUpdate)
-                entity(E.sqlUpdate, label("\${sql}"),
-                    property("sql", readAnnotation(A.sqlUpdate, "value")))
+                entity(
+                    E.sqlUpdate, label("\${sql}"),
+                    property("sql", readAnnotation(A.sqlUpdate, "value"))
+                )
             }
         }
-    }
-
-    override fun toTree(
-        es: EntityService,
-        forType: Entity.Type?
-    ): Tree<EntityNode> {
-        fun Entity.Type.entities(): List<Entity> = es[this].map { (_, entity) -> entity }
-
-        return tree("repositories") {
-            (E.sqlQuery.entities() + E.sqlUpdate.entities()).forEach { sql ->
-                add(sql) {
-                    buildTree(sql)
-                }
-            }
-        }.also { it.sort { o1, o2 -> o1.toString().compareTo(o2.toString()) } }
     }
 
     override fun theme() = mapOf(
@@ -92,8 +78,14 @@ fun sqlStyle(
     insert: TextStyle = orange2,
     update: TextStyle = orange2 + bold,
     delete: TextStyle = orange2 + bold,
-): Style = object : Style {
+): Style = SqlStyle(select, insert, update, delete)
 
+class SqlStyle(
+    val select: TextStyle,
+    val insert: TextStyle,
+    val update: TextStyle,
+    val delete: TextStyle,
+) : Style {
     val repeatingWhitespace = Regex("\\s+")
 
     override fun format(e: Tree<EntityNode>, theme: Map<Entity.Type, Style>): String {

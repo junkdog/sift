@@ -1,7 +1,8 @@
 package sift.core.api
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
-import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
@@ -10,7 +11,62 @@ import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
+import sift.core.jackson.NoArgConstructor
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Action.Instrumenter.InstrumenterScope::class, name = "instrumenter-scope"),
+    JsonSubTypes.Type(value = Action.Instrumenter.InstrumentClasses::class, name = "classes"),
+    JsonSubTypes.Type(value = Action.Instrumenter.ClassesOf::class, name = "classes-of"),
+    JsonSubTypes.Type(value = Action.Instrumenter.MethodsOf::class, name = "methods-of"),
+
+    JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
+    JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
+    JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
+    JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
+    JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
+    JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
+    JsonSubTypes.Type(value = Action.Class.ReadName::class, name = "read-name"),
+    JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
+
+    JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
+    JsonSubTypes.Type(value = Action.Method.IntoParents::class, name = "method-parents"),
+    JsonSubTypes.Type(value = Action.Method.MethodScope::class, name = "method-scope"),
+    JsonSubTypes.Type(value = Action.Method.Filter::class, name = "filter-method"),
+    JsonSubTypes.Type(value = Action.Method.Instantiations::class, name = "instantiations"),
+    JsonSubTypes.Type(value = Action.Method.Invokes::class, name = "invokes"),
+    JsonSubTypes.Type(value = Action.Method.InvocationsOf::class, name = "invocations-of"),
+
+    JsonSubTypes.Type(value = Action.Field.FieldScope::class, name = "field-scope"),
+    JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
+    JsonSubTypes.Type(value = Action.Field.IntoParents::class, name = "field-parents"),
+
+    JsonSubTypes.Type(value = Action.Parameter.ParameterScope::class, name = "parameter-scope"),
+    JsonSubTypes.Type(value = Action.Parameter.ExplodeType::class, name = "explode-type"),
+    JsonSubTypes.Type(value = Action.Parameter.ReadType::class, name = "read-type"),
+    JsonSubTypes.Type(value = Action.Parameter.IntoParents::class, name = "parameter-parents"),
+    JsonSubTypes.Type(value = Action.Parameter.FilterNth::class, name = "parameter-nth"),
+    JsonSubTypes.Type(value = Action.Parameter.Filter::class, name = "filter-parameter"),
+
+    JsonSubTypes.Type(value = Action.DebugLog::class, name = "log"),
+    JsonSubTypes.Type(value = Action.HasAnnotation::class, name = "has-annotation"),
+    JsonSubTypes.Type(value = Action.EntityFilter::class, name = "entity-filter"),
+    JsonSubTypes.Type(value = Action.ReadAnnotation::class, name = "read-annotation"),
+    JsonSubTypes.Type(value = Action.WithValue::class, name = "with-value"),
+    JsonSubTypes.Type(value = Action.Fork::class, name = "fork"),
+    JsonSubTypes.Type(value = Action.ForkOnEntityExistence::class, name = "fork-conditional"),
+    JsonSubTypes.Type(value = Action.RegisterEntity::class, name = "entity"),
+    JsonSubTypes.Type(value = Action.RegisterSynthesizedEntity::class, name = "synthesize-entity"),
+    JsonSubTypes.Type(value = Action.RegisterChildren::class, name = "children"),
+    JsonSubTypes.Type(value = Action.RegisterChildrenFromResolver::class, name = "children-resolver"),
+    JsonSubTypes.Type(value = Action.UpdateEntityProperty::class, name = "update-entity-property"),
+    JsonSubTypes.Type(value = Action.Compose::class, name = "compose"),
+    JsonSubTypes.Type(value = Action.Chain::class, name = "chain"),
+
+    JsonSubTypes.Type(value = Action::class, name = "action"),
+)
+//@JsonSerialize(using = ActionSerializer::class)
+@NoArgConstructor
 sealed class Action<IN, OUT> {
 
 
@@ -361,7 +417,6 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        @Name("parents")
         object IntoParents : Action<IterParameters, IterMethods>() {
             override fun id() = "parents"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
@@ -378,7 +433,6 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        @Name("filter")
         data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Parameter>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
@@ -623,6 +677,3 @@ sealed class Action<IN, OUT> {
 fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
 
 var debugLog = false
-
-@Target(AnnotationTarget.CLASS)
-annotation class Name(val value: String)

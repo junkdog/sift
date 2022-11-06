@@ -9,8 +9,7 @@ import sift.core.api.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.asm.type
-import sift.core.entity.EntityService
-import sift.core.tree.Tree
+import sift.core.jackson.NoArgConstructor
 import java.util.*
 import kotlin.reflect.KProperty1
 
@@ -92,7 +91,7 @@ object Dsl {
             if (properties.isNotEmpty()) {
                 action += properties
                     .mapNotNull(Property<ELEMENT>::action)
-                    .map { Action.Fork(it) as IsoAction<ELEMENT> }
+                    .map { Action.Fork(it) as Action<Iter<ELEMENT>, Iter<ELEMENT>> }
                     .reduce { acc, action -> acc andThen action }
             }
         }
@@ -343,7 +342,7 @@ object Dsl {
     }
 
     class Methods(
-        methods: IsoAction<Element.Method> = Action.Method.MethodScope
+        methods: Action<Iter<Element.Method>, Iter<Element.Method>> = Action.Method.MethodScope
     ) : Core<Element.Method>(),
         CommonOperations<Element.Method, Methods>,
         ParentOperations<Element.Class, Classes>
@@ -462,7 +461,7 @@ object Dsl {
     }
 
     class Parameters(
-        parameters: IsoAction<Element.Parameter> = Action.Parameter.ParameterScope
+        parameters: Action<Iter<Element.Parameter>, Iter<Element.Parameter>> = Action.Parameter.ParameterScope
     ) : Core<Element.Parameter>(),
         CommonOperations<Element.Parameter, Parameters>,
         ParentOperations<Element.Method, Methods>
@@ -544,7 +543,7 @@ object Dsl {
     }
 
     class Fields(
-        fields: IsoAction<Element.Field> = Action.Field.FieldScope
+        fields: Action<Iter<Element.Field>, Iter<Element.Field>> = Action.Field.FieldScope
     ) : Core<Element.Field>(),
         CommonOperations<Element.Field, Fields>,
         ParentOperations<Element.Class, Classes>
@@ -607,6 +606,7 @@ sealed interface EntityResolver {
     val type: Entity.Type
     val id: String
 
+    @NoArgConstructor
     class FromInvocationsOf(
         val key: String,
         override val type: Entity.Type
@@ -634,6 +634,7 @@ sealed interface EntityResolver {
         }
     }
 
+    @NoArgConstructor
     class FromInstantiationsOf(
         val key: String,
         override val type: Entity.Type

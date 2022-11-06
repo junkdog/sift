@@ -3,6 +3,7 @@
 
 package sift.cli
 
+import com.fasterxml.jackson.module.kotlin.*
 import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
@@ -19,10 +20,7 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.terminal.Terminal
-import sift.core.api.MeasurementScope
-import sift.core.api.PipelineProcessor
-import sift.core.api.PipelineResult
-import sift.core.api.debugLog
+import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
@@ -47,7 +45,10 @@ import sift.instrumenter.Gruvbox.yellow1
 import sift.instrumenter.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style
+import sift.instrumenter.deserialize
+import sift.instrumenter.serialize
 import sift.instrumenter.spi.InstrumenterServiceProvider
+import java.io.File
 import java.nio.file.Path
 import java.util.ServiceLoader
 import kotlin.io.path.exists
@@ -86,7 +87,7 @@ object SiftCli : CliktCommand(
             metavar = "INSTRUMENTER",
             help = "the instrumenter pipeline performing the scan",
             completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
-        .convert { instrumenters()[it] ?: fail("'$it' is not a valid instrumenter") }
+        .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
     val listEntityTypes: Boolean by option("-t", "--list-entity-types",
             help = "lists entity types defined by instrumenter.")
@@ -153,7 +154,7 @@ object SiftCli : CliktCommand(
         when {
             listInstrumenters -> {
                 instrumenters()
-                    .map { (_, v) -> fg(v.name) }
+                    .map { (_, v) -> fg(v().name) }
                     .joinToString(separator = "\n")
                     .let(terminal::println)
             }
@@ -341,6 +342,8 @@ object SiftCli : CliktCommand(
         val instrumenter = this.instrumenter ?: return null
         if (paths.isEmpty()) return null
 
+        InstrumenterService.deserialize(instrumenter.serialize())
+
         val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
             .execute(instrumenter.pipeline(), profile)
 
@@ -407,11 +410,21 @@ fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
 
 fun instermenterNames() = instrumenters().map { (name, _)  -> name }
 
-fun instrumenters(): Map<String, InstrumenterService> {
-    return ServiceLoader
+fun instrumenters(): Map<String, () -> InstrumenterService> {
+    val fromSpi = ServiceLoader
         .load(InstrumenterServiceProvider::class.java)
         .map(InstrumenterServiceProvider::create)
-        .associateBy(InstrumenterService::name)
+        .map { it.name to { it } }
+        .toMap()
+
+    // FIXME: windows paths
+    val fromUserLocal = File("${System.getProperty("user.home")}/.local/share/sift/instrumenters")
+        .also(File::mkdirs)
+        .listFiles()!!
+        .filter { it.extension == "json" }
+        .map { file -> file.nameWithoutExtension to { InstrumenterService.deserialize(file.readText()) } }
+
+    return (fromSpi + fromUserLocal).toSortedMap()
 }
 
 val Tree<EntityNode>.label: String
