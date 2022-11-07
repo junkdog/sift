@@ -37,6 +37,7 @@ Options:
   -E, --exclude-type ENTITY-TYPE              excludes entity types from tree. can occur multiple times.
   -l, --list-instrumenters                    print all instrumenters detected on the current classpath
   --debug                                     prints log/logCount statements from the executed pipeline
+  --version                                   prints version and release date
   --profile                                   prints execution times and input/output for the executed
                                               pipeline
   -T, --tree-root ENTITY-TYPE                 tree built around requested entity type
