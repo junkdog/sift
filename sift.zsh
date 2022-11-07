@@ -34,9 +34,9 @@ fi
 
 function _sift() {
     if [[ -x $SIFT_BIN ]]; then
-        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $* | less -FXR
+        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $* | less -FXRS
     elif [[ -f $SIFT_JAR ]]; then
-        java -jar $SIFT_JAR $SIFT_ARGS $* | less -FXR
+        java -jar $SIFT_JAR $SIFT_ARGS $* | less -FXRS
     else
         echo "Error: Unable to find sift binary or jar" >&2
         exit $ERROR_SIFT_NOT_FOUND

@@ -3,9 +3,9 @@
 A tool to model and analyze the design of systems from java class files.
 
 ## Features 
-- CLI tool to parse and interact with system models.  
-- Parses system models from existing classes using Instrumenter Pipelines.
-- Pipelines provide knowledge about technology stacks.
+- CLI tool for building and querying "system models" from parsed .class files.  
+- System models consist of Entities and are produced by Instrumenter Pipelines.
+- Instrumenter Pipelines provide knowledge about technology stacks for bytecode analysis. 
 - Declarative DSL for additional, user-defined pipelines.
 - JSON serialization of pipelines for simpler reuse and sharing.
 
@@ -37,10 +37,8 @@ Options:
   -E, --exclude-type ENTITY-TYPE              excludes entity types from tree. can occur multiple times.
   -l, --list-instrumenters                    print all instrumenters detected on the current classpath
   --debug                                     prints log/logCount statements from the executed pipeline
-  --profile                                   prints execution times and input/output counts for leaf
-                                              nodes of the executed pipeline
-  --profile-summed                            prints execution times and input/output counts for the
-                                              executed pipeline
+  --profile                                   prints execution times and input/output for the executed
+                                              pipeline
   -T, --tree-root ENTITY-TYPE                 tree built around requested entity type
   -a, --ansi [none|ansi16|ansi256|truecolor]  override automatically detected ANSI support
   --generate-completion [bash|zsh|fish]

@@ -28,6 +28,7 @@ import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
+import sift.instrumenter.*
 import sift.instrumenter.Gruvbox.aqua2
 import sift.instrumenter.Gruvbox.blue2
 import sift.instrumenter.Gruvbox.dark2
@@ -43,13 +44,10 @@ import sift.instrumenter.Gruvbox.red1
 import sift.instrumenter.Gruvbox.red2
 import sift.instrumenter.Gruvbox.yellow1
 import sift.instrumenter.Gruvbox.yellow2
-import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style
-import sift.instrumenter.deserialize
-import sift.instrumenter.serialize
 import sift.instrumenter.spi.InstrumenterServiceProvider
 import java.io.File
 import java.nio.file.Path
+import java.util.Properties
 import java.util.ServiceLoader
 import kotlin.io.path.exists
 import kotlin.math.log
@@ -131,6 +129,10 @@ object SiftCli : CliktCommand(
         help = "prints log/logCount statements from the executed pipeline")
     .flag()
 
+    val version: Boolean by option("--version",
+        help = "prints version and release date")
+    .flag()
+
     val profile: Boolean by option("--profile",
         help = "prints execution times and input/output for the executed pipeline")
     .flag()
@@ -152,6 +154,15 @@ object SiftCli : CliktCommand(
         val terminal = Terminal(ansi)
 
         when {
+            version -> {
+                val props = Properties()
+                SiftCli::class.java.getResourceAsStream("/sift-metadata.properties")
+                    .use(props::load)
+
+                val version = props.getProperty("version")
+                val timestamp = props.getProperty("timestamp")
+                terminal.println("${light0("sift-$version")} (${fg(timestamp)})")
+            }
             listInstrumenters -> {
                 instrumenters()
                     .map { (_, v) -> fg(v().name) }

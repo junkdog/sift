@@ -81,6 +81,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>embed-version-timestamp</id>
+                        <goals>
+                            <goal>create-metadata</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                            <outputName>sift-metadata.properties</outputName>
+                            <timestampFormat>yyyy-MM-dd</timestampFormat>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <!-- plugin configuration for native-image* profiles -->
