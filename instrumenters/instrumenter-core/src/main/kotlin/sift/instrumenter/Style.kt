@@ -1,7 +1,9 @@
 package sift.instrumenter
 
 import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.rendering.TextStyles.*
 import sift.core.entity.Entity
+import sift.core.tree.DiffNode
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 
@@ -32,7 +34,7 @@ interface Style {
             theme: Map<Entity.Type, Style>
         ): String {
             return (e.entity[key]
-                ?.let { theme[it.first() as Entity.Type] }
+                ?.let { theme[it.first() as? Entity.Type] }
                 ?: fallback).format(e, theme)
         }
     }
@@ -60,11 +62,28 @@ interface Style {
         }
     }
 
+    class Diff(val wrapped: Style) : Style {
+        override fun format(
+            e: Tree<EntityNode>,
+            theme: Map<Entity.Type, Style>
+        ): String {
+
+            val formatted = wrapped.format(e, theme)
+            return when (e.value["@diff"] as? DiffNode.State) {
+                null -> formatted
+                DiffNode.State.Unchanged -> formatted
+                DiffNode.State.Added -> (bold + underline + italic)(formatted)
+                DiffNode.State.Removed -> strikethrough(formatted)
+            }
+        }
+    }
+
     fun format(e: Tree<EntityNode>, theme: Map<Entity.Type, Style>): String
 
     companion object {
         fun plain(textStyle: TextStyle, dedupe: Char? = null) = Plain(textStyle, dedupe)
         fun entityRef(key: String = "@style-as", fallback: Style) = FromEntityRef(key, fallback)
+        fun diff(wrap: Style) = Diff(wrap)
         fun fromParent() = FromParent
         fun fromProperty(key: String) = FromProperty(key)
     }

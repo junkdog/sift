@@ -1,13 +1,17 @@
 package sift.core.api
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.objectweb.asm.tree.ClassNode
-import sift.core.entity.EntityService
+import sift.core.entity.Entity
+import sift.core.jackson.PipelineResultSerializer
 import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
 
 class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     private val context: Context = Context(classNodes.toMutableList())
-    fun execute(action: Action<Unit, Unit>, profile: Boolean): PipelineResult {
+
+    internal fun processPipeline(action: Action<Unit, Unit>, profile: Boolean): Context {
         val start = System.nanoTime()
         action(context, Unit)
         context.updateEntityLabels()
@@ -45,11 +49,28 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
             }
         }
 
-        return PipelineResult(context.entityService, context.measurements)
+        return context
+    }
+
+    fun execute(action: Action<Unit, Unit>, profile: Boolean): PipelineResult {
+        return processPipeline(action, profile).let { ctx -> PipelineResult(ctx, ctx.measurements) }
     }
 }
 
+@JsonSerialize(using = PipelineResultSerializer.Serializer::class)
+@JsonDeserialize(using = PipelineResultSerializer.Deserializer::class)
 data class PipelineResult(
-    val entityService: EntityService,
-    val measurements: Tree<Measurement>
-)
+    val entitiesByType: Map<Entity.Type, List<Entity>>,
+    val measurements: Tree<Measurement>,
+) {
+    internal constructor(
+        context: Context,
+        measurements: Tree<Measurement>
+    ) : this(
+        context.entityService.entitiesByType.map { (type, v) -> type to v.values.toList() }.toMap(),
+        measurements,
+    )
+
+    operator fun get(type: Entity.Type): List<Entity> = entitiesByType[type] ?: listOf()
+    operator fun contains(type: Entity.Type): Boolean = type in entitiesByType
+}

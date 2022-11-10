@@ -44,12 +44,14 @@ object Dsl {
         fun property(tag: String, extract: Action<Iter<T>, IterValues>): Core.Property<T>
     }
 
+    /** Define a new Instrumenter Pipeline */
     fun instrumenter(f: Instrumenter.() -> Unit): Action<Unit, Unit> {
         return Instrumenter()
             .also(f)
             .action
     }
 
+    /** Define a new Instrumenter Pipeline */
     fun classes(f: Classes.() -> Unit): Action<Unit, Unit> {
         return Classes()
             .also(f)
@@ -73,7 +75,25 @@ object Dsl {
 
         private var stack: MutableList<Action<*, *>> = mutableListOf()
 
+        /**
+         * Set the [entity] label from a [pattern], replacing any `${}` variables
+         * inside [pattern] with values from [Entity.properties].
+         *
+         * ## Example: jdbi3
+         *
+         * Entity labels from SQL inside `@SqlUpdate` annotation
+         *
+         * ```
+         * methods {
+         *     annotatedBy(A.sqlUpdate)
+         *     entity(E.sqlUpdate, label("\${sql}"),
+         *         property("sql", readAnnotation(A.sqlUpdate, "value"))
+         *     )
+         * }
+         * ```
+         */
         fun label(pattern: String) = LabelFormatter.FromPattern(pattern)
+
 
         fun filter(entity: Entity.Type) {
             action += Action.EntityFilter(entity)
@@ -96,6 +116,7 @@ object Dsl {
             }
         }
 
+        /** register entity */
         fun entity(
             id: Entity.Type,
             vararg properties: Property<ELEMENT>
@@ -103,6 +124,7 @@ object Dsl {
             entity(id, LabelFormatter.FromElement, true, *properties)
         }
 
+        /** register entity */
         fun entity(
             id: Entity.Type,
             labelFormatter: LabelFormatter,
@@ -131,14 +153,37 @@ object Dsl {
             )
         }
 
+        /**
+         * When `--debug` is past to the CLI, prints [tag] and all elements
+         * currently in scope.
+         *
+         * Note that for most use-cases, `--profile` yields better results
+         * without having to modify the pipeline.
+         **/
         fun log(tag: String) {
             action += Action.DebugLog(tag)
         }
 
+        /**
+         * When `--debug` is past to the CLI, prints [tag] and the count
+         * of elements currently in scope.
+         *
+         * Note that for most use-cases, `--profile` yields better results
+         * without having to modify the pipeline.
+         **/
         fun logCount(tag: String) {
             action += Action.DebugLog(tag, format = LogFormat.Count)
         }
 
+        /**
+         * Associates [value] with entity.
+         *
+         * ## Example
+         * ```
+         * annotatedBy(A.XmlController)
+         * update(SE.controller, "@style-as", withValue(E.XmlController))
+         * ```
+         */
         fun withValue(value: Any): Action<Iter<ELEMENT>, IterValues> {
             val forkTo = Action.WithValue<ELEMENT>(value)
                 .let { Action.Fork(it) }
@@ -148,6 +193,27 @@ object Dsl {
             return forkTo.forked
         }
 
+        /**
+         * This entity tracks [children] under the label denoted by [key].
+         *
+         * ## Example
+         * ```
+         * classes {
+         *     filter(Regex("^sift\\.core\\.api\\.testdata"))
+         *     annotatedBy<RestController>()
+         *     entity(controller)
+         *     methods {
+         *         annotatedBy<Endpoint>()
+         *         entity(endpoint, label("\${http-method} \${path}"),
+         *             property("http-method", readAnnotation(Endpoint::method)),
+         *             property("path", readAnnotation(Endpoint::path)))
+         *
+         *         // relating endpoints to controllers
+         *         controller["endpoints"] = endpoint
+         *     }
+         * }
+         * ```
+         */
         operator fun Entity.Type.set(
             key: String,
             children: Entity.Type
@@ -155,6 +221,16 @@ object Dsl {
             action += Action.RegisterChildren(this, key, children)
         }
 
+        /**
+         * Associates entity property [tag] with result of [extract] action.
+         *
+         * ## Example
+         * ```
+         * entity(endpoint, label("\${http-method} \${path}"),
+         *     property("http-method", readAnnotation(Endpoint::method)),
+         *     property("path", readAnnotation(Endpoint::path)))
+         * ```
+         */
         fun property(
             tag: String,
             extract: Action<Iter<ELEMENT>, IterValues>
@@ -189,7 +265,7 @@ object Dsl {
     class Synthesize(
         var action: Action.Chain<Unit> = chainFrom(Action.Instrumenter.InstrumenterScope)
     ) {
-        /** new entity with label from [labelFormatter] */
+        /** Stub missing class node for [type] and register it to an entity */
         fun entity(
             id: Entity.Type,
             type: Type,
@@ -198,6 +274,23 @@ object Dsl {
             action += Action.RegisterSynthesizedEntity(id, type, labelFormatter)
         }
 
+        /**
+         * Set the [entity] label from a [pattern], replacing any `${}` variables
+         * inside [pattern] with values from [Entity.properties].
+         *
+         * ## Example: jdbi3
+         *
+         * Entity labels from SQL inside `@SqlUpdate` annotation
+         *
+         * ```
+         * methods {
+         *     annotatedBy(A.sqlUpdate)
+         *     entity(E.sqlUpdate, label("\${sql}"),
+         *         property("sql", readAnnotation(A.sqlUpdate, "value"))
+         *     )
+         * }
+         * ```
+         */
         fun label(pattern: String) = LabelFormatter.FromPattern(pattern)
     }
 
@@ -206,10 +299,16 @@ object Dsl {
         var action: Action.Chain<Unit> = chainFrom(Action.Instrumenter.InstrumenterScope)
     ) {
 
+        /**
+         * Stub missing classes and register them with entities.
+         */
         fun synthesize(f: Synthesize.() -> Unit) {
             action += Synthesize().also(f).action
         }
 
+        /**
+         * Includes another instrumenter's pipeline by copying it into this pipeline.
+         */
         fun include(pipeline: Action<Unit, Unit>) {
             action += pipeline
         }

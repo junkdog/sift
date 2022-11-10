@@ -6,11 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.*
-import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.entity.Entity
 import sift.core.jackson.*
@@ -50,21 +48,9 @@ private fun mapper() : ObjectMapper {
             activateDefaultTyping(polymorphicTypeValidator, ObjectMapper.DefaultTyping.OBJECT_AND_NON_CONCRETE)
             setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
             setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-            registerModule(
-                SimpleModule()
-                .addSerializer(Type::class, AsmTypeSerializer.Serializer())
-                .addDeserializer(Type::class, AsmTypeSerializer.Deserializer())
-                .addSerializer(Entity.Type::class, EntityTypeSerializer.Serializer())
-                .addDeserializer(Entity.Type::class, EntityTypeSerializer.Deserializer())
-                .addSerializer(Regex::class, RegexSerializer.Serializer())
-                .addDeserializer(Regex::class, RegexSerializer.Deserializer())
-                .addSerializer(Action.WithValue::class, WithValueSerializer.Serializer())
-                .addDeserializer(Action.WithValue::class, WithValueSerializer.Deserializer())
-            )
-        }
+            registerModule(serializationModule())
+    }
 }
-
-
 
 fun InstrumenterService.Companion.deserialize(json: String): InstrumenterService {
     val mapper = mapper()

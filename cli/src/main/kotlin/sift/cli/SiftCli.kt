@@ -12,10 +12,7 @@ import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.*
 import com.github.ajalt.clikt.parameters.options.*
-import com.github.ajalt.clikt.parameters.types.enum
-import com.github.ajalt.clikt.parameters.types.int
-import com.github.ajalt.clikt.parameters.types.path
-import com.github.ajalt.clikt.parameters.types.restrictTo
+import com.github.ajalt.clikt.parameters.types.*
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
@@ -23,9 +20,9 @@ import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
-import sift.core.entity.EntityService
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
+import sift.core.jackson.*
+import sift.core.tree.*
+import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
 import sift.instrumenter.*
@@ -44,6 +41,7 @@ import sift.instrumenter.Gruvbox.red1
 import sift.instrumenter.Gruvbox.red2
 import sift.instrumenter.Gruvbox.yellow1
 import sift.instrumenter.Gruvbox.yellow2
+import sift.instrumenter.Style.Companion.diff
 import sift.instrumenter.spi.InstrumenterServiceProvider
 import java.io.File
 import java.nio.file.Path
@@ -61,9 +59,6 @@ object SiftCli : CliktCommand(
     name = "sift",
     help = """
         A tool to model and analyze the design of systems from bytecode.
-       
-        The PATHS argument can occur anywhere, and multiple times, in the argument list.
-        Any argument which isn't matched as an option is treated as an element of PATHS.
     """.trimIndent()
 ) {
     init {
@@ -73,13 +68,17 @@ object SiftCli : CliktCommand(
         }
     }
 
-    val paths: List<Path> by argument()
+    val path: Path? by option("-f", "--class-dir",
+            metavar = "PATH",
+            help = "Path to directory structure containing classes or path to .jar"
+        )
         .path(mustExist = true)
         .help("jar or directory with classes")
-        .multiple(required = false)
-        .transformAll { paths ->
-            paths.map { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
-        }
+        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
+
+    val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
+            help = "print all instrumenters detected on the current classpath")
+        .flag()
 
     val instrumenter by option("-i", "--instrumenter",
             metavar = "INSTRUMENTER",
@@ -87,54 +86,8 @@ object SiftCli : CliktCommand(
             completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
-    val listEntityTypes: Boolean by option("-t", "--list-entity-types",
-            help = "lists entity types defined by instrumenter.")
-        .flag()
-
-    val maxDepth: Int? by option("-L", "--max-depth",
-        help = "Max display depth of the tree")
-        .int()
-        .restrictTo(min = 0)
-
-    val filter: List<Regex> by option("-f", "--filter",
-            metavar = "REGEX",
-            help = "filters nodes by label. can occur multiple times.")
-        .convert { Regex(it) }
-        .multiple()
-
-    val filterContext: List<Regex> by option("-F", "--filter-context",
-            metavar = "REGEX",
-            help = "filters nodes by label, while also including sibling nodes." +
-                " can occur multiple times.")
-        .convert { Regex(it) }
-        .multiple()
-
-    val exclude: List<Regex> by option("-e", "--exclude",
-            metavar = "REGEX",
-            help = "excludes nodes when label matches REGEX. can occur multiple times.")
-        .convert { Regex(it) }
-        .multiple()
-
-    val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
-            metavar = "ENTITY-TYPE",
-            help = "excludes entity types from tree. can occur multiple times.")
-        .convert { Entity.Type(it) }
-        .multiple()
-
-    val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
-            help = "print all instrumenters detected on the current classpath")
-        .flag()
-
-    val debug: Boolean by option("--debug",
-        help = "prints log/logCount statements from the executed pipeline")
-    .flag()
-
-    val version: Boolean by option("--version",
-        help = "prints version and release date")
-    .flag()
-
     val profile: Boolean by option("--profile",
-        help = "prints execution times and input/output for the executed pipeline")
+        help = "print execution times and input/output for the executed pipeline")
     .flag()
 
     val treeRoot: Entity.Type? by option("-T", "--tree-root",
@@ -142,9 +95,66 @@ object SiftCli : CliktCommand(
             help = "tree built around requested entity type")
         .convert { Entity.Type(it) }
 
+    val listEntityTypes: Boolean by option("-t", "--list-entity-types",
+            help = "lists entity types defined by instrumenter")
+        .flag()
+
+    val maxDepth: Int? by option("-L", "--max-depth",
+        help = "Max display depth of the tree")
+        .int()
+        .restrictTo(min = 0)
+
+    val filter: List<Regex> by option("-F", "--filter",
+            metavar = "REGEX",
+            help = "filters nodes by label. can occur multiple times")
+        .convert { Regex(it) }
+        .multiple()
+
+    val filterContext: List<Regex> by option("-S", "--filter-context",
+            metavar = "REGEX",
+            help = "filters nodes by label, while also including sibling nodes." +
+                " can occur multiple times")
+        .convert { Regex(it) }
+        .multiple()
+
+    val exclude: List<Regex> by option("-e", "--exclude",
+            metavar = "REGEX",
+            help = "excludes nodes when label matches REGEX; can occur multiple times")
+        .convert { Regex(it) }
+        .multiple()
+
+    val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
+            metavar = "ENTITY-TYPE",
+            help = "excludes entity types from tree; can occur multiple times")
+        .convert { Entity.Type(it) }
+        .multiple()
+
+    val save: File? by option("-s", "--save",
+            metavar = "FILE_JSON",
+            help = "save the resulting system model as json; for later use by --diff or --load")
+        .file(canBeDir = false)
+
+    val load: File? by option("--load",
+            metavar = "FILE_JSON",
+            help = "load a previously saved system model")
+        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+
+    val diff: File? by option("-d", "--diff",
+            metavar = "FILE_JSON",
+            help = "load a previously saved system model")
+        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+
     val ansi: AnsiLevel? by option("-a", "--ansi",
             help = "override automatically detected ANSI support")
         .enum<AnsiLevel>(key = { it.name.lowercase() })
+
+    val version: Boolean by option("--version",
+        help = "print version and release date")
+    .flag()
+
+    val debug: Boolean by option("--debug",
+        help = "prints log/logCount statements from the executed pipeline")
+    .flag()
 
     private val noAnsi = Terminal(AnsiLevel.NONE)
 
@@ -171,14 +181,14 @@ object SiftCli : CliktCommand(
             }
             listEntityTypes && instrumenter != null -> {
                 buildTree()
-                    ?.let { (pr, _) -> terminal.println(toString(instrumenter!!, pr.entityService)) }
+                    ?.let { (pr, _) -> terminal.println(toString(instrumenter!!, pr)) }
                     ?: terminal.println(toString(instrumenter!!))
             }
             instrumenter == null -> {
                 terminal.println("${orange1("Error: ")} ${fg("Must specify an instrumenter")}")
                 exitProcess(1)
             }
-            paths.isEmpty() -> throw PrintMessage("PATHS was not specified")
+            path == null && load == null -> throw PrintMessage("PATH was not specified")
             profile -> {
                 val (pr, _) = buildTree(treeRoot)!!
                 fun MeasurementScope.style(): TextStyle = when (this) {
@@ -221,17 +231,86 @@ object SiftCli : CliktCommand(
                     }
                 ))
             }
-            else -> { // render tree
-                val (_, tree) = buildTree(treeRoot)!!
-                val theme = instrumenter!!.theme()
-                stylize(tree, theme)
-                filterTree(tree)
-                backtrackStyling(tree, theme)
+            diff != null -> {
+                val tree = diffHead(loadPipelineResult(diff!!), treeRoot, instrumenter!!)
+                terminal.printTree(tree)
+            }
+            load != null -> {
+                val pr = loadPipelineResult(load!!)
+                val tree = instrumenter!!.toTree(pr, treeRoot)
 
-                terminal.println(tree.toString(EntityNode::toString))
+                terminal.printTree(tree)
+            }
+            else -> { // render tree from classes under path
+                val (pr, tree) = buildTree(treeRoot)
+                save?.let { out -> savePipelineResult(pr, out) }
+
+                terminal.printTree(tree)
             }
         }
 
+    }
+
+    fun diffHead(
+        deserializedResult: PipelineResult,
+        root: Entity.Type?,
+        instrumenterService: InstrumenterService
+    ): Tree<DiffNode> {
+        val (_, new) = buildTree(root)
+        val old = instrumenterService.toTree(deserializedResult, root)
+
+        require(old.label == new.label)
+        return Tree(DiffNode(Unchanged, new.value)).apply {
+            merge(this, old.children(), new.children())
+        }
+    }
+
+    private fun Terminal.printTree(
+        tree: Tree<EntityNode>,
+    ) {
+        val theme = instrumenter!!.theme()
+        stylize(tree, theme)
+        filterTree(tree)
+        backtrackStyling(tree, theme)
+
+        println(tree.toString(EntityNode::toString))
+    }
+
+    @JvmName("printTreeDiff")
+    private fun Terminal.printTree(
+        diff: Tree<DiffNode>,
+    ) {
+        val tree = diff.map { n ->
+            when (val wrapped = n.wrapped) {
+                is EntityNode.Label -> wrapped
+                is EntityNode.Entity -> {
+                    wrapped["@diff"] = n.state
+                    wrapped
+                }
+            }
+        }
+
+        val theme = instrumenter!!.theme()
+            .map { (type, style) -> type to diff(style) }
+            .toMap()
+        stylize(tree, theme)
+        filterTree(tree)
+        backtrackStyling(tree, theme)
+
+        println(tree.toString(
+            prefix = { node ->
+                when (val n = node) {
+                    is EntityNode.Entity -> when (n["@diff"]!! as DiffNode.State) {
+                        DiffNode.State.Unchanged -> "     "
+                        DiffNode.State.Added -> " ${(aqua2 + bold)("+++")} "
+                        DiffNode.State.Removed -> " ${(red2 + bold)("---")} "
+                    }
+                    is EntityNode.Label -> "     "
+                }
+
+            },
+            format = EntityNode::toString)
+        )
     }
 
     fun filterTree(tree: Tree<EntityNode>) {
@@ -349,16 +428,15 @@ object SiftCli : CliktCommand(
             }
     }
 
-    private fun buildTree(forType: Entity.Type? = null): Pair<PipelineResult, Tree<EntityNode>>? {
-        val instrumenter = this.instrumenter ?: return null
-        if (paths.isEmpty()) return null
+    private fun buildTree(forType: Entity.Type? = null): Pair<PipelineResult, Tree<EntityNode>> {
+        val instrumenter = this.instrumenter!!
 
         InstrumenterService.deserialize(instrumenter.serialize())
 
-        val pr: PipelineResult = PipelineProcessor(paths.pFlatMap(::classNodes))
+        val pr: PipelineResult = PipelineProcessor(classNodes(path!!))
             .execute(instrumenter.pipeline(), profile)
 
-        return pr to instrumenter.toTree(pr.entityService, forType)
+        return pr to instrumenter.toTree(pr, forType)
     }
 
     fun toString(instrumenter: InstrumenterService): String {
@@ -367,10 +445,10 @@ object SiftCli : CliktCommand(
             .joinToString(separator = "\n") { label -> "${fg("-")} $label" }
     }
 
-    fun toString(instrumenter: InstrumenterService, es: EntityService): String {
+    fun toString(instrumenter: InstrumenterService, pr: PipelineResult): String {
         val types = stylizedEntityTypes(instrumenter)
         return "${fg("entity types of ")}${(fg + bold)(instrumenter.name)}\n" + types
-            .map { (type, label) -> es[type].size.toString().padStart(3) to label }
+            .map { (type, label) -> pr[type].size.toString().padStart(3) to label }
             .joinToString(separator = "\n") { (count, id) -> "${(fg + bold)(count)} $id" }
     }
 
@@ -409,9 +487,6 @@ object SiftCli : CliktCommand(
     }
 }
 
-val defaultStyle = Style.Plain(fg)
-
-
 fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
     return toList()
         .parallelStream()
@@ -438,13 +513,21 @@ fun instrumenters(): Map<String, () -> InstrumenterService> {
     return (fromSpi + fromUserLocal).toSortedMap()
 }
 
-val Tree<EntityNode>.label: String
-    get() = when (val v = value) {
-        is EntityNode.Entity -> v.label
-        is EntityNode.Label  -> v.label
-    }
+fun savePipelineResult(result: PipelineResult, file: File) {
+    jacksonObjectMapper()
+        .registerModule(serializationModule())
+        .writeValueAsString(result)
+        .let(file::writeText)
+}
+
+fun loadPipelineResult(file: File): PipelineResult {
+    return jacksonObjectMapper()
+        .registerModule(serializationModule())
+        .readValue(file)
+}
+
+val defaultStyle = Style.Plain(fg)
 
 fun main(args: Array<String>) {
     SiftCli.completionOption().main(args)
 }
-

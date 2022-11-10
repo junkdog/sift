@@ -2,68 +2,17 @@ package sift.core.jackson
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken.START_OBJECT
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.type.WritableTypeId
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.api.Element
 import sift.core.entity.Entity
-
-object AsmTypeSerializer {
-    class Serializer : JsonSerializer<Type>() {
-        override fun serialize(value: Type, gen: JsonGenerator, serializers: SerializerProvider) {
-            gen.writeString(value.className)
-        }
-    }
-
-    class Deserializer : JsonDeserializer<Type>() {
-        override fun deserialize(
-            p: JsonParser,
-            ctxt: DeserializationContext
-        ): Type {
-            val cls = p.readValueAs(String::class.java)
-            return Type.getType("L${cls.replace('.', '/')};")
-        }
-    }
-}
-
-object EntityTypeSerializer {
-    class Serializer : JsonSerializer<Entity.Type>() {
-        override fun serialize(value: Entity.Type, gen: JsonGenerator, serializers: SerializerProvider) {
-            gen.writeString(value.id)
-        }
-    }
-
-    class Deserializer : JsonDeserializer<Entity.Type>() {
-        override fun deserialize(
-            p: JsonParser,
-            ctxt: DeserializationContext
-        ): Entity.Type {
-            return Entity.Type(p.readValueAs(String::class.java))
-        }
-    }
-}
-
-object RegexSerializer {
-    class Serializer : JsonSerializer<Regex>() {
-        override fun serialize(value: Regex, gen: JsonGenerator, serializers: SerializerProvider) {
-            gen.writeString(value.pattern)
-        }
-    }
-
-    class Deserializer : JsonDeserializer<Regex>() {
-        override fun deserialize(
-            p: JsonParser,
-            ctxt: DeserializationContext
-        ): Regex {
-            val pattern = p.readValueAs(String::class.java)
-            return Regex(pattern)
-        }
-    }
-}
 
 object WithValueSerializer {
     class Serializer : JsonSerializer<Action.WithValue<*>>() {
@@ -73,7 +22,7 @@ object WithValueSerializer {
             serializers: SerializerProvider,
             typeSer: TypeSerializer
         ) {
-            val typeId: WritableTypeId = typeSer.typeId(value, START_OBJECT)
+            val typeId: WritableTypeId = typeSer.typeId(value, JsonToken.START_OBJECT)
             typeSer.writeTypePrefix(gen, typeId)
             serialize(value, gen, serializers)
             typeSer.writeTypeSuffix(gen, typeId)
@@ -102,6 +51,7 @@ object WithValueSerializer {
             val node = p.codec.readTree<ObjectNode>(p)
             val v = when (val cls = node["@type"].asText()) {
                 "sift.core.entity.Entity.Type" -> Entity.Type(node["value"].asText())
+                "kotlin.String"                -> node["value"].asText()
                 else -> ctxt.readValue(node["value"].traverse(), Class.forName(cls))
             }
 
@@ -109,7 +59,3 @@ object WithValueSerializer {
         }
     }
 }
-
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class NoArgConstructor

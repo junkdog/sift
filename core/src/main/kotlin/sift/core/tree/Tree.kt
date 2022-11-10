@@ -1,7 +1,12 @@
 package sift.core.tree
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import java.lang.StringBuilder
 
+@JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)
+@JsonIgnoreProperties("depth", "prev", "next")
 class Tree<T>(val value: T) {
     var parent: Tree<T>? = null
         private set

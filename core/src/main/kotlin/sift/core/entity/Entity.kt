@@ -10,8 +10,8 @@ class Entity(
     val type: Type,
     var label: String,
     values: Map<String, MutableList<Any>> = mapOf(),
+    internal val id: UUID = UUID.randomUUID()
 ) {
-    private val id: UUID = UUID.randomUUID()
     internal val children: MutableMap<String, MutableSet<Entity>> = mutableMapOf()
     internal val properties: MutableMap<String, MutableList<Any>> = values.toMutableMap()
 
@@ -62,6 +62,9 @@ class Entity(
         children.getOrPut(label, ::mutableSetOf) += child
     }
 
+    internal fun addChildren(label: String, entities: Iterable<Entity>) {
+        children.getOrPut(label, ::mutableSetOf) += entities
+    }
 
     fun children(key: String): List<Entity> = (children[key] ?: listOf()).toList()
     fun children(): List<String> = children.keys.toList()

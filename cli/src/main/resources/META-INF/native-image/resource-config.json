@@ -32,6 +32,9 @@
       "pattern":"\\Qkotlin/reflect/reflect.kotlin_builtins\\E"
     }, 
     {
+      "pattern":"\\Qsift-metadata.properties\\E"
+    }, 
+    {
       "pattern":"\\Qsift/core/SynthesisTemplate.class\\E"
     }
   ]},

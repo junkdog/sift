@@ -672,6 +672,14 @@
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
 },
 {
+  "name":"sift.core.jackson.PipelineResultSerializer$Deserializer",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.jackson.PipelineResultSerializer$Serializer",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.tree.EntityNode"
 },
 {

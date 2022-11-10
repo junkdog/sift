@@ -3,7 +3,7 @@
 A tool to model and analyze the design of systems from java class files.
 
 ## Features 
-- CLI tool for building and querying "system models" from parsed .class files.  
+- CLI tool for building, querying and [diff-ing][diff] "system models" from parsed .class files.  
 - System models consist of Entities and are produced by Instrumenter Pipelines.
 - Instrumenter Pipelines provide knowledge about technology stacks for bytecode analysis. 
 - Declarative DSL for additional, user-defined pipelines.
@@ -14,7 +14,7 @@ A tool to model and analyze the design of systems from java class files.
 _Spring-Boot with Axon Framework [instrumenter][spring-axon] in action._ 
 
  [spring-axon]: instrumenters/spring-boot-axon-cqrs/src/main/kotlin/sift/instrumenter/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
-
+ [diff]: docs/images/sift-spring-axon-diff.png
 ## CLI options
 
 ```

@@ -6,7 +6,7 @@ import sift.core.api.Element
 class EntityService {
     private val entityToElement: MutableMap<Entity, Element> = mutableMapOf()
     private val elementToEntity: MutableMap<Element, Entity> = mutableMapOf()
-    private val entitiesByType: MutableMap<Entity.Type, MutableMap<Element, Entity>> = mutableMapOf()
+    internal val entitiesByType: MutableMap<Entity.Type, MutableMap<Element, Entity>> = mutableMapOf()
 
     fun register(entity: Entity, element: Element) {
 

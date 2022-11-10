@@ -1,8 +1,8 @@
 package sift.instrumenter
 
 import sift.core.api.Action
+import sift.core.api.PipelineResult
 import sift.core.entity.Entity
-import sift.core.entity.EntityService
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
@@ -17,10 +17,10 @@ interface InstrumenterService : InstrumenterServiceProvider {
     fun pipeline(): Action<Unit, Unit>
     fun theme(): Map<Entity.Type, Style>
 
-    fun toTree(es: EntityService, forType: Entity.Type?): Tree<EntityNode> {
+    fun toTree(es: PipelineResult, forType: Entity.Type?): Tree<EntityNode> {
         val type = forType ?: defaultType
         return tree(type.id) {
-            es[type].map { (_, entity) -> entity }.forEach { e ->
+            es[type].forEach { e ->
                 add(e) {
                     buildTree(e)
                 }

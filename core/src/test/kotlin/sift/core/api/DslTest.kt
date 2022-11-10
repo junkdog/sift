@@ -1248,7 +1248,10 @@ class DslTest {
         cns: List<ClassNode> = allCns,
         block: (EntityService) -> Unit
     ) {
-        PipelineProcessor(cns).execute(this, false).let { pr -> pr.entityService }
+        PipelineProcessor(cns)
+            .processPipeline(this, false)
+            .entityService
+            .also(block)
     }
 }
 
