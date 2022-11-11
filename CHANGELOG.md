@@ -1,4 +1,6 @@
 ## Upcoming release
+
+## sift-0.2.0 2022-11-11
 ### Breaking
 - CLI: `-f` replaces PATHS argument; filter changed to `-F`
 
