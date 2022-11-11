@@ -13,9 +13,6 @@ import java.io.InputStream
 import java.lang.IllegalStateException
 import java.nio.file.Path
 import java.util.zip.ZipFile
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
 import kotlin.reflect.KClass
 
 val KClass<*>.internalName: String

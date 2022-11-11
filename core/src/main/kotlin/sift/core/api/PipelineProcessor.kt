@@ -1,10 +1,6 @@
 package sift.core.api
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.objectweb.asm.tree.ClassNode
-import sift.core.entity.Entity
-import sift.core.jackson.SystemModelSerializer
 import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
 
@@ -55,22 +51,4 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     fun execute(action: Action<Unit, Unit>, profile: Boolean): SystemModel {
         return processPipeline(action, profile).let { ctx -> SystemModel(ctx, ctx.measurements) }
     }
-}
-
-@JsonSerialize(using = SystemModelSerializer.Serializer::class)
-@JsonDeserialize(using = SystemModelSerializer.Deserializer::class)
-data class SystemModel(
-    val entitiesByType: Map<Entity.Type, List<Entity>>,
-    val measurements: Tree<Measurement>,
-) {
-    internal constructor(
-        context: Context,
-        measurements: Tree<Measurement>
-    ) : this(
-        context.entityService.entitiesByType.map { (type, v) -> type to v.values.toList() }.toMap(),
-        measurements,
-    )
-
-    operator fun get(type: Entity.Type): List<Entity> = entitiesByType[type] ?: listOf()
-    operator fun contains(type: Entity.Type): Boolean = type in entitiesByType
 }

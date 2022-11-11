@@ -88,6 +88,10 @@ object SiftCli : CliktCommand(
             completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
+    val graph: Boolean by option("-g", "--graph",
+        help = "renders system model in graphviz's DOT language")
+    .flag()
+
     val profile: Boolean by option("--profile",
         help = "print execution times and input/output for the executed pipeline")
     .flag()
@@ -490,8 +494,6 @@ object SiftCli : CliktCommand(
     }
 }
 
-
-
 fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
     return toList()
         .parallelStream()
@@ -516,19 +518,6 @@ fun instrumenters(): Map<String, () -> InstrumenterService> {
         .map { file -> file.nameWithoutExtension to { InstrumenterService.deserialize(file.readText()) } }
 
     return (fromSpi + fromUserLocal).toSortedMap()
-}
-
-fun saveSystemModel(result: SystemModel, file: File) {
-    jacksonObjectMapper()
-        .registerModule(serializationModule())
-        .writeValueAsString(result)
-        .let(file::writeText)
-}
-
-fun loadSystemModel(file: File): SystemModel {
-    return jacksonObjectMapper()
-        .registerModule(serializationModule())
-        .readValue(file)
 }
 
 val defaultStyle = Style.Plain(fg)
