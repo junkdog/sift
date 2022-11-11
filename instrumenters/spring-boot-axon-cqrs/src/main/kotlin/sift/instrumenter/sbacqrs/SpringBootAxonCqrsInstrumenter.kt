@@ -7,11 +7,8 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
-import sift.core.entity.EntityService
+import sift.core.graphviz.Dot
 import sift.core.product
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
-import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.Gruvbox.aqua2
 import sift.instrumenter.Gruvbox.blue2
 import sift.instrumenter.Gruvbox.green2
@@ -21,7 +18,6 @@ import sift.instrumenter.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style.Companion.fromProperty
 import sift.instrumenter.Style.Companion.plain
-import sift.instrumenter.dsl.buildTree
 import sift.instrumenter.dsl.registerInstantiationsOf
 
 typealias A = SpringBootAxonCqrsInstrumenter.Annotation
@@ -90,14 +86,18 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
 
     override fun pipeline(): Action<Unit, Unit> {
+
         fun Dsl.Methods.registerAxonHandlers(
             ownerType: Entity.Type,  // aggregate|projection
             handlerAnnotation: Type, // @(Command|Event|Query)Handler
             handledType: Entity.Type,
-            handler: Entity.Type
+            handler: Entity.Type,
+            handledDotType: Dot = Dot.edge
         ) {
             annotatedBy(handlerAnnotation)
-            entity(handler, property("owner-type", withValue(ownerType)))
+            entity(handler,
+                property("dot-id", withValue(ownerType)),
+            )
 
             parameters {
                 parameter(0)  // 1st parameter is command|event|query
@@ -105,7 +105,8 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                 // (re-)register command|event|query entity
                 explodeType(synthesize = true) { // class scope of parameter
-                    entity(handledType)
+                    entity(handledType,
+                        property("dot-type", withValue(handledDotType)))
                     handledType["received-by"] = handler
                 }
             }
@@ -137,7 +138,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
 
                 scope("register event sourcing handlers with aggregate") {
-                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler)
+                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler, Dot.node)
                     aggregate["events"] = E.eventSourcingHandler
                 }
 
@@ -186,7 +187,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                     methods {
                         scope("register event handlers with aggregate") {
-                            registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler)
+                            registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler, Dot.node)
                             E.projection["events"] = E.eventHandler
                         }
 
@@ -216,6 +217,39 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 methodsOf(E.commandHandler) {
                     E.commandHandler["sends"] = E.aggregateCtor.invocations
                 }
+            }
+
+            scope("dot graph property configuration") {
+                fun rank(e: Entity.Type, rank: Int) {
+                    methodsOf(e) {
+                        update(e, "dot-rank", withValue(rank))
+                        update(e, "dot-type", withValue(Dot.node))
+                    }
+                }
+
+                fun rankC(e: Entity.Type, rank: Int) {
+                    classesOf(e) {
+                        update(e, "dot-rank", withValue(rank))
+                        update(e, "dot-type", withValue(Dot.node))
+                    }
+                }
+
+                fun stripSuffix(e: Entity.Type, suffix: String) {
+                    methodsOf(e) {
+                        update(e, "dot-label-strip", withValue(suffix))
+                    }
+                }
+
+                rank(E.endpoint, 0)
+                rank(E.aggregate, 1)
+                rankC(E.event, 2)
+                rank(E.projection, 3)
+
+                stripSuffix(E.command, "Command")
+                stripSuffix(E.event, "Event")
+                stripSuffix(E.query, "Query")
+                stripSuffix(E.aggregate, "Aggregate")
+                stripSuffix(E.projection, "Projection")
             }
         }
     }

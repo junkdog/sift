@@ -1,4 +1,11 @@
 ## Upcoming release
+### Features
+- CLI: `--graph`/`-g` renders system model in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
+       pipe to graphviz and renders the output inline.
+- `mvn install -P install-sift` installs the executable into `~/.local/share/sift/bin` along with a
+  symlink in `~/.local/bin`. If sift is also built with `-P native-image`, the native executable
+  is symlinked instead of the sift. 
+
 
 ## sift-0.2.0 2022-11-11
 ### Breaking
