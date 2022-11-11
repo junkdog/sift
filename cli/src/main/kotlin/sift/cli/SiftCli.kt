@@ -22,6 +22,7 @@ import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.jackson.*
 import sift.core.tree.*
+import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
@@ -180,9 +181,7 @@ object SiftCli : CliktCommand(
                     .let(terminal::println)
             }
             listEntityTypes && instrumenter != null -> {
-                buildTree()
-                    ?.let { (pr, _) -> terminal.println(toString(instrumenter!!, pr)) }
-                    ?: terminal.println(toString(instrumenter!!))
+                buildTree().let { (pr, _) -> terminal.println(toString(instrumenter!!, pr)) }
             }
             instrumenter == null -> {
                 terminal.println("${orange1("Error: ")} ${fg("Must specify an instrumenter")}")
@@ -190,7 +189,7 @@ object SiftCli : CliktCommand(
             }
             path == null && load == null -> throw PrintMessage("PATH was not specified")
             profile -> {
-                val (pr, _) = buildTree(treeRoot)!!
+                val (sm, _) = buildTree(treeRoot)
                 fun MeasurementScope.style(): TextStyle = when (this) {
                     MeasurementScope.Instrumenter -> fg
                     MeasurementScope.Class        -> aqua2
@@ -202,7 +201,7 @@ object SiftCli : CliktCommand(
 
                 // print headers
                 terminal.println((fg + bold)("  exec   in     out"))
-                terminal.println(pr.measurements.toString(
+                terminal.println(sm.measurements.toString(
                     format = { measurement ->
                         measurement.scopeIn.style()(measurement.action)
                     },
@@ -232,18 +231,18 @@ object SiftCli : CliktCommand(
                 ))
             }
             diff != null -> {
-                val tree = diffHead(loadPipelineResult(diff!!), treeRoot, instrumenter!!)
+                val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
                 terminal.printTree(tree)
             }
             load != null -> {
-                val pr = loadPipelineResult(load!!)
-                val tree = instrumenter!!.toTree(pr, treeRoot)
+                val sm = loadSystemModel(load!!)
+                val tree = instrumenter!!.toTree(sm, treeRoot)
 
                 terminal.printTree(tree)
             }
             else -> { // render tree from classes under path
-                val (pr, tree) = buildTree(treeRoot)
-                save?.let { out -> savePipelineResult(pr, out) }
+                val (sm, tree) = buildTree(treeRoot)
+                save?.let { out -> saveSystemModel(sm, out) }
 
                 terminal.printTree(tree)
             }
@@ -252,7 +251,7 @@ object SiftCli : CliktCommand(
     }
 
     fun diffHead(
-        deserializedResult: PipelineResult,
+        deserializedResult: SystemModel,
         root: Entity.Type?,
         instrumenterService: InstrumenterService
     ): Tree<DiffNode> {
@@ -293,21 +292,18 @@ object SiftCli : CliktCommand(
         val theme = instrumenter!!.theme()
             .map { (type, style) -> type to diff(style) }
             .toMap()
+
         stylize(tree, theme)
         filterTree(tree)
         backtrackStyling(tree, theme)
 
         println(tree.toString(
             prefix = { node ->
-                when (val n = node) {
-                    is EntityNode.Entity -> when (n["@diff"]!! as DiffNode.State) {
-                        DiffNode.State.Unchanged -> "     "
-                        DiffNode.State.Added -> " ${(aqua2 + bold)("+++")} "
-                        DiffNode.State.Removed -> " ${(red2 + bold)("---")} "
-                    }
-                    is EntityNode.Label -> "     "
+                when (node["@diff"] as State?) {
+                    State.Added   -> " ${(aqua2 + bold)("+++")} "
+                    State.Removed -> " ${(red2 + bold)("---")} "
+                    else          -> "     "
                 }
-
             },
             format = EntityNode::toString)
         )
@@ -428,15 +424,15 @@ object SiftCli : CliktCommand(
             }
     }
 
-    private fun buildTree(forType: Entity.Type? = null): Pair<PipelineResult, Tree<EntityNode>> {
+    private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
         val instrumenter = this.instrumenter!!
 
         InstrumenterService.deserialize(instrumenter.serialize())
 
-        val pr: PipelineResult = PipelineProcessor(classNodes(path!!))
+        val sm: SystemModel = PipelineProcessor(classNodes(path!!))
             .execute(instrumenter.pipeline(), profile)
 
-        return pr to instrumenter.toTree(pr, forType)
+        return sm to instrumenter.toTree(sm, forType)
     }
 
     fun toString(instrumenter: InstrumenterService): String {
@@ -445,7 +441,7 @@ object SiftCli : CliktCommand(
             .joinToString(separator = "\n") { label -> "${fg("-")} $label" }
     }
 
-    fun toString(instrumenter: InstrumenterService, pr: PipelineResult): String {
+    fun toString(instrumenter: InstrumenterService, pr: SystemModel): String {
         val types = stylizedEntityTypes(instrumenter)
         return "${fg("entity types of ")}${(fg + bold)(instrumenter.name)}\n" + types
             .map { (type, label) -> pr[type].size.toString().padStart(3) to label }
@@ -513,14 +509,14 @@ fun instrumenters(): Map<String, () -> InstrumenterService> {
     return (fromSpi + fromUserLocal).toSortedMap()
 }
 
-fun savePipelineResult(result: PipelineResult, file: File) {
+fun saveSystemModel(result: SystemModel, file: File) {
     jacksonObjectMapper()
         .registerModule(serializationModule())
         .writeValueAsString(result)
         .let(file::writeText)
 }
 
-fun loadPipelineResult(file: File): PipelineResult {
+fun loadSystemModel(file: File): SystemModel {
     return jacksonObjectMapper()
         .registerModule(serializationModule())
         .readValue(file)

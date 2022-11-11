@@ -72,8 +72,8 @@ interface Style {
             return when (e.value["@diff"] as? DiffNode.State) {
                 null -> formatted
                 DiffNode.State.Unchanged -> formatted
-                DiffNode.State.Added -> (bold + underline + italic)(formatted)
-                DiffNode.State.Removed -> strikethrough(formatted)
+                DiffNode.State.Added     -> (bold + underline + italic)(formatted)
+                DiffNode.State.Removed   -> strikethrough(formatted)
             }
         }
     }

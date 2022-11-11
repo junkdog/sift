@@ -20,7 +20,7 @@ object AsmTypeSerializer {
             p: JsonParser,
             ctxt: DeserializationContext
         ): Type {
-            val cls = p.readValueAs(String::class.java)
+            val cls = p.readValueAs<String>()
             return Type.getType("L${cls.replace('.', '/')};")
         }
     }

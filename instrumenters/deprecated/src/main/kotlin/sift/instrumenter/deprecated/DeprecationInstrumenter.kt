@@ -4,7 +4,7 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.classes
-import sift.core.api.PipelineResult
+import sift.core.api.SystemModel
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
@@ -74,7 +74,7 @@ class DeprecationInstrumenter : InstrumenterService {
     }
 
     override fun toTree(
-        es: PipelineResult,
+        es: SystemModel,
         forType: Entity.Type?
     ): Tree<EntityNode> {
         return tree("deprecations") {

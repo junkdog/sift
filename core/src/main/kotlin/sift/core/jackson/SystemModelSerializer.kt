@@ -7,17 +7,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import sift.core.api.Measurement
 import sift.core.api.MeasurementScope
-import sift.core.api.PipelineResult
+import sift.core.api.SystemModel
 import sift.core.entity.Entity
 import sift.core.tree.Tree
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 
-object PipelineResultSerializer {
-    class Serializer : JsonSerializer<PipelineResult>() {
+object SystemModelSerializer {
+    class Serializer : JsonSerializer<SystemModel>() {
         override fun serialize(
-            value: PipelineResult,
+            value: SystemModel,
             gen: JsonGenerator,
             serializers: SerializerProvider
         ) {
@@ -79,11 +78,11 @@ object PipelineResultSerializer {
         }
     }
 
-    class Deserializer : JsonDeserializer<PipelineResult>() {
+    class Deserializer : JsonDeserializer<SystemModel>() {
         override fun deserialize(
             p: JsonParser,
             ctxt: DeserializationContext
-        ): PipelineResult {
+        ): SystemModel {
             require(p.isExpectedStartArrayToken)
 
             val deserialized = generateSequence(p::nextToken)
@@ -105,7 +104,7 @@ object PipelineResultSerializer {
                     .putAll(e.properties.mapValues { (_, v) -> v.filterNotNull().toMutableList() })
             }
 
-            return PipelineResult(
+            return SystemModel(
                 entitiesByType = entities.values.groupBy(Entity::type),
                 measurements = Tree(Measurement(".", MeasurementScope.Instrumenter, MeasurementScope.Instrumenter, 0, 0, 0.milliseconds))
             )
@@ -121,15 +120,15 @@ object PipelineResultSerializer {
             // id
             p.nextValue()
             require(p.currentName == "id")
-            val id = UUID.fromString(p.readValueAs(String::class.java))
+            val id = UUID.fromString(p.readValueAs<String>())
             // type
             p.nextValue()
             require(p.currentName == "type")
-            val type = Entity.Type(p.readValueAs(String::class.java))
+            val type = Entity.Type(p.readValueAs<String>())
             // label
             p.nextValue()
             require(p.currentName == "label")
-            val label = p.readValueAs(String::class.java)
+            val label = p.readValueAs<String>()
             // children
             p.nextValue()
             require(p.currentName == "children")
@@ -169,12 +168,10 @@ object PipelineResultSerializer {
     }
 }
 
-data class JsonEntity(
+internal data class JsonEntity(
     val id: UUID,
     val type: Entity.Type,
     val label: String,
     val children: MutableMap<String, List<UUID>>,
     val properties: MutableMap<String, List<*>>
 )
-
-data class TypedValue<T : Any>(val type: KClass<T>, val value: T)

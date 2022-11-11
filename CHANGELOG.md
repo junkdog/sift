@@ -1,6 +1,6 @@
 ## Upcoming release
 ### Breaking
-- CLI: `-f` replaces PATHS argument; filter `-f` -> `F`
+- CLI: `-f` replaces PATHS argument; filter changed to `-F`
 
 ### Features
 - CLI: `--version` option

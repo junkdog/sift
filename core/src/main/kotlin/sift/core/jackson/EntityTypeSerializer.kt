@@ -39,7 +39,7 @@ object EntityTypeSerializer {
             p: JsonParser,
             ctxt: DeserializationContext
         ): Entity.Type {
-            return Entity.Type(p.readValueAs(String::class.java))
+            return Entity.Type(p.readValueAs<String>())
         }
     }
 }

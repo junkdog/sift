@@ -1,6 +1,8 @@
 package sift.core.tree
 
+import sift.core.pop
 import sift.core.tree.DiffNode.State
+import sift.core.tree.DiffNode.State.*
 
 data class DiffNode(
     val state: State,
@@ -19,24 +21,21 @@ fun merge(
     val old = a.reversed().toMutableList()
     val new = b.reversed().toMutableList()
 
-    fun next(): MergeOp? {
-        return when {
-            old.isEmpty()                       -> MergeOp(null, new.removeLastOrNull() ?: return null, State.Added)
-            new.isEmpty()                       -> MergeOp(old.removeLastOrNull() ?: return null, null, State.Removed)
-            nodeEquals(old.last(), new.last())  -> MergeOp(old.removeLast(), new.removeLast(), State.Unchanged)
-            old.last().value > new.last().value -> MergeOp(null, new.removeLast(), State.Added)
-            else                                -> MergeOp(old.removeLast(), null, State.Removed)
-        }
+    fun next(): MergeOp? = when {
+        old.isEmpty() && new.isEmpty()      -> null
+        old.isEmpty()                       -> MergeOp(Added,     null,      new.pop())
+        new.isEmpty()                       -> MergeOp(Removed,   old.pop(), null)
+        nodeEquals(old.last(), new.last())  -> MergeOp(Unchanged, old.pop(), new.pop())
+        old.last().value > new.last().value -> MergeOp(Added,     null,      new.pop())
+        else                                -> MergeOp(Removed,   old.pop(), null)
     }
 
     generateSequence(::next).forEach { op ->
         when (op.state) {
-            State.Unchanged -> {
-                val child = node.add(DiffNode(State.Unchanged, op.new!!.value))
-                merge(child, op.old!!.children(), op.new.children())
-            }
-            State.Added -> node.add(op.new!!.map { DiffNode(State.Added, it) })
-            State.Removed -> node.add(op.old!!.map { DiffNode(State.Removed, it) })
+            Added     -> node.add(op.new!!.map { DiffNode(Added, it) })
+            Removed   -> node.add(op.old!!.map { DiffNode(Removed, it) })
+            Unchanged -> node.add(DiffNode(Unchanged, op.new!!.value))
+                .also { child -> merge(child, op.old!!.children(), op.new.children()) }
         }
     }
 }
@@ -51,7 +50,7 @@ private fun nodeEquals(
 }
 
 private data class MergeOp(
+    val state: State,
     val old: Tree<EntityNode>?,
     val new: Tree<EntityNode>?,
-    val state: State
 )

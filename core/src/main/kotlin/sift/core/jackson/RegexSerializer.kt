@@ -19,7 +19,7 @@ object RegexSerializer {
             p: JsonParser,
             ctxt: DeserializationContext
         ): Regex {
-            val pattern = p.readValueAs(String::class.java)
+            val pattern = p.readValueAs<String>()
             return Regex(pattern)
         }
     }

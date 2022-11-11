@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.objectweb.asm.tree.ClassNode
 import sift.core.entity.Entity
-import sift.core.jackson.PipelineResultSerializer
+import sift.core.jackson.SystemModelSerializer
 import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
 
@@ -52,14 +52,14 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
         return context
     }
 
-    fun execute(action: Action<Unit, Unit>, profile: Boolean): PipelineResult {
-        return processPipeline(action, profile).let { ctx -> PipelineResult(ctx, ctx.measurements) }
+    fun execute(action: Action<Unit, Unit>, profile: Boolean): SystemModel {
+        return processPipeline(action, profile).let { ctx -> SystemModel(ctx, ctx.measurements) }
     }
 }
 
-@JsonSerialize(using = PipelineResultSerializer.Serializer::class)
-@JsonDeserialize(using = PipelineResultSerializer.Deserializer::class)
-data class PipelineResult(
+@JsonSerialize(using = SystemModelSerializer.Serializer::class)
+@JsonDeserialize(using = SystemModelSerializer.Deserializer::class)
+data class SystemModel(
     val entitiesByType: Map<Entity.Type, List<Entity>>,
     val measurements: Tree<Measurement>,
 ) {

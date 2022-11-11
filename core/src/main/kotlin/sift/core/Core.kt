@@ -70,6 +70,9 @@ fun MethodNode.toDebugString(): String = stringWriter {
 //        .toList()
 //}
 
+fun <T> MutableList<T>.pop() = removeLast()
+fun <T> MutableList<T>.push(t: T) = add(t)
+
 fun stringWriter(f: StringWriter.() -> Unit): String = StringWriter().apply(f).toString()
 
 /** ensures [f] is only executed once, returning the original result on subsequent invocations */
