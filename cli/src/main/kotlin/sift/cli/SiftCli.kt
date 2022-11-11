@@ -71,7 +71,8 @@ object SiftCli : CliktCommand(
 
     val path: Path? by option("-f", "--class-dir",
             metavar = "PATH",
-            help = "Path to directory structure containing classes or path to .jar"
+            help = "Path to directory structure containing classes or path to .jar",
+            completionCandidates = CompletionCandidates.Path
         )
         .path(mustExist = true)
         .help("jar or directory with classes")
@@ -132,17 +133,20 @@ object SiftCli : CliktCommand(
 
     val save: File? by option("-s", "--save",
             metavar = "FILE_JSON",
-            help = "save the resulting system model as json; for later use by --diff or --load")
+            help = "save the resulting system model as json; for later use by --diff or --load",
+            completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false)
 
     val load: File? by option("--load",
             metavar = "FILE_JSON",
-            help = "load a previously saved system model")
+            help = "load a previously saved system model",
+            completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false, mustExist = true, mustBeReadable = true)
 
     val diff: File? by option("-d", "--diff",
             metavar = "FILE_JSON",
-            help = "load a previously saved system model")
+            help = "load a previously saved system model",
+            completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false, mustExist = true, mustBeReadable = true)
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
@@ -188,48 +192,7 @@ object SiftCli : CliktCommand(
                 exitProcess(1)
             }
             path == null && load == null -> throw PrintMessage("PATH was not specified")
-            profile -> {
-                val (sm, _) = buildTree(treeRoot)
-                fun MeasurementScope.style(): TextStyle = when (this) {
-                    MeasurementScope.Instrumenter -> fg
-                    MeasurementScope.Class        -> aqua2
-                    MeasurementScope.Field        -> blue2
-                    MeasurementScope.Method       -> green2
-                    MeasurementScope.Parameter    -> purple2
-                    MeasurementScope.FromContext  -> red2 // shouldn't happen often
-                }
-
-                // print headers
-                terminal.println((fg + bold)("  exec   in     out"))
-                terminal.println(sm.measurements.toString(
-                    format = { measurement ->
-                        measurement.scopeIn.style()(measurement.action)
-                    },
-                    prefix = { measurement ->
-                        val ms = (measurement.execution + 500.microseconds).inWholeMilliseconds
-                        val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)
-                        val c = if (ms < 1) {
-                            dark2
-                        } else {
-                            gradient[max(0, min(gradient.lastIndex, log(ms.toDouble(), 2.5).toInt()))]
-                        }
-
-                        val input = measurement.scopeIn.style()
-                        val output = when (measurement.scopeOut) {
-                            MeasurementScope.FromContext -> measurement.scopeIn
-                            else                         -> measurement.scopeOut
-                        }.style()
-
-                        if (measurement.execution.isPositive()) {
-                            "${c("%3d ms")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
-                                .format(ms, measurement.input, measurement.output)
-                        } else {
-                            "${c("      ")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
-                                .format(measurement.input, measurement.output)
-                        }
-                    }
-                ))
-            }
+            profile -> profile(terminal)
             diff != null -> {
                 val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
                 terminal.printTree(tree)
@@ -481,7 +444,53 @@ object SiftCli : CliktCommand(
             discard.filter { it !in fullMatch  }.forEach(Tree<EntityNode>::delete)
         }
     }
+
+    private fun profile(terminal: Terminal) {
+        val (sm, _) = buildTree(treeRoot)
+        fun MeasurementScope.style(): TextStyle = when (this) {
+            MeasurementScope.Instrumenter -> fg
+            MeasurementScope.Class        -> aqua2
+            MeasurementScope.Field        -> blue2
+            MeasurementScope.Method       -> green2
+            MeasurementScope.Parameter    -> purple2
+            MeasurementScope.FromContext  -> red2 // shouldn't happen often
+        }
+
+        val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)
+
+        // print headers
+        terminal.println((fg + bold)("  exec   in     out"))
+        terminal.println(sm.measurements.toString(
+            format = { measurement ->
+                measurement.scopeIn.style()(measurement.action)
+            },
+            prefix = { measurement ->
+                val ms = (measurement.execution + 500.microseconds).inWholeMilliseconds
+                val c = if (ms < 1) {
+                    dark2
+                } else {
+                    gradient[max(0, min(gradient.lastIndex, log(ms.toDouble(), 2.5).toInt()))]
+                }
+
+                val input = measurement.scopeIn.style()
+                val output = when (measurement.scopeOut) {
+                    MeasurementScope.FromContext -> measurement.scopeIn
+                    else -> measurement.scopeOut
+                }.style()
+
+                if (measurement.execution.isPositive()) {
+                    "${c("%3d ms")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
+                        .format(ms, measurement.input, measurement.output)
+                } else {
+                    "${c("      ")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
+                        .format(measurement.input, measurement.output)
+                }
+            }
+        ))
+    }
 }
+
+
 
 fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
     return toList()
