@@ -597,7 +597,8 @@ sealed class Action<IN, OUT> {
 
             (a + b)
                 .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
-                ?.forEach { (parent, child) -> parent.addChild(key, child) }
+                ?.onEach { (parent, child) -> parent.addChild(key, child) }
+                ?.onEach { (parent, child) -> child.addChild("backtrack", parent) }
                 ?: Throw.unableToResolveParentRelation(parentType, childType)
 
             return input

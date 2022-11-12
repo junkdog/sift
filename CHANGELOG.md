@@ -6,6 +6,9 @@
   symlink in `~/.local/bin`. If sift is also built with `-P native-image`, the native executable
   is symlinked instead of the sift. 
 
+### Changes
+- "backtrack" references are now added to all child entities. 
+
 
 ## sift-0.2.0 2022-11-11
 ### Breaking

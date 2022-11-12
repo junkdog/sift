@@ -20,6 +20,11 @@ interface Style {
             if (dedupe != null) {
                 val strip = Regex("$dedupe+")
                 text = text.replace(strip, "$dedupe")
+
+                // todo: consider moving out of styling
+                // updated label on entity used by graphviz
+                e.value.label = text
+                (e.value as? EntityNode.Entity)?.entity?.label = text
             }
             return styling(text)
         }

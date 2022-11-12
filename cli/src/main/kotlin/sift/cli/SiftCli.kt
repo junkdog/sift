@@ -20,6 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
+import sift.instrumenter.graphviz.GraphContext
 import sift.core.jackson.*
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
@@ -196,6 +197,33 @@ object SiftCli : CliktCommand(
                 exitProcess(1)
             }
             path == null && load == null -> throw PrintMessage("PATH was not specified")
+            graph -> {
+                require(diff == null)
+                val sm = systemModel()
+
+                fun color(style: Style): String {
+                    return when (style) {
+                        is Style.Plain -> style.styling.color?.toSRGB()?.toHex() ?: "#ffffff"
+                        is Style.FromEntityRef -> color(style.fallback)
+                        else -> "#ffffff"
+                    }
+                }
+
+                val theme = instrumenter!!.theme()
+                val lookup = theme
+                    .map { (type, style) -> type to color(style) }
+                    .toMap()
+                    .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
+
+                // for updating labels
+                stylize(buildTree(sm, treeRoot), theme)
+                sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
+
+                val graph = GraphContext(sm, treeRoot ?: Entity.Type("endpoint"), lookup)
+                val dot = graph.build()
+                File("graph.dot").writeText(dot)
+                noAnsi.println(dot)
+            }
             profile -> profile(terminal)
             diff != null -> {
                 val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
@@ -215,6 +243,15 @@ object SiftCli : CliktCommand(
             }
         }
 
+    }
+
+    fun systemModel(): SystemModel {
+        return if (load != null) {
+            loadSystemModel(load!!)
+        } else {
+            PipelineProcessor(classNodes(path!!))
+                .execute(instrumenter!!.pipeline(), profile)
+        }
     }
 
     fun diffHead(
@@ -394,12 +431,14 @@ object SiftCli : CliktCommand(
     private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
         val instrumenter = this.instrumenter!!
 
-        InstrumenterService.deserialize(instrumenter.serialize())
-
         val sm: SystemModel = PipelineProcessor(classNodes(path!!))
             .execute(instrumenter.pipeline(), profile)
 
         return sm to instrumenter.toTree(sm, forType)
+    }
+
+    private fun buildTree(sm: SystemModel, forType: Entity.Type? = null): Tree<EntityNode> {
+        return instrumenter!!.toTree(sm, forType)
     }
 
     fun toString(instrumenter: InstrumenterService): String {

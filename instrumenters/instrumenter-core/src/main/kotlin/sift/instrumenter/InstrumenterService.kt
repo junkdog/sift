@@ -18,15 +18,18 @@ interface InstrumenterService : InstrumenterServiceProvider {
     fun theme(): Map<Entity.Type, Style>
 
     fun toTree(es: SystemModel, forType: Entity.Type?): Tree<EntityNode> {
-        val type = forType ?: defaultType
-        return tree(type.id) {
-            es[type].forEach { e ->
-                add(e) {
-                    buildTree(e)
-                }
-            }
-        }.also { it.sort(compareBy(EntityNode::toString)) }
+        return es.toTree(forType ?: defaultType)
     }
 
     companion object
+}
+
+fun SystemModel.toTree(root: Entity.Type): Tree<EntityNode> {
+    return tree(root.id) {
+        this@toTree[root].forEach { e ->
+            add(e) {
+                buildTree(e)
+            }
+        }
+    }.also { it.sort(compareBy(EntityNode::toString)) }
 }

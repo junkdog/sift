@@ -7,7 +7,7 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
-import sift.core.graphviz.Dot
+import sift.instrumenter.graphviz.Dot
 import sift.core.product
 import sift.instrumenter.Gruvbox.aqua2
 import sift.instrumenter.Gruvbox.blue2
@@ -220,14 +220,14 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             }
 
             scope("dot graph property configuration") {
-                fun rank(e: Entity.Type, rank: Int) {
+                fun rankMn(e: Entity.Type, rank: Int) {
                     methodsOf(e) {
                         update(e, "dot-rank", withValue(rank))
                         update(e, "dot-type", withValue(Dot.node))
                     }
                 }
 
-                fun rankC(e: Entity.Type, rank: Int) {
+                fun rankCn(e: Entity.Type, rank: Int) {
                     classesOf(e) {
                         update(e, "dot-rank", withValue(rank))
                         update(e, "dot-type", withValue(Dot.node))
@@ -235,15 +235,15 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
 
                 fun stripSuffix(e: Entity.Type, suffix: String) {
-                    methodsOf(e) {
+                    classesOf(e) {
                         update(e, "dot-label-strip", withValue(suffix))
                     }
                 }
 
-                rank(E.endpoint, 0)
-                rank(E.aggregate, 1)
-                rankC(E.event, 2)
-                rank(E.projection, 3)
+                rankMn(E.endpoint, 0)
+                rankCn(E.aggregate, 1)
+                rankCn(E.event, 2)
+                rankCn(E.projection, 3)
 
                 stripSuffix(E.command, "Command")
                 stripSuffix(E.event, "Event")
