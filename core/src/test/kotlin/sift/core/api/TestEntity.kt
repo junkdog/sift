@@ -12,7 +12,7 @@ class TestEntity(
         e.type,
         e.label,
         e.properties,
-        e.children
+        (e.children - "backtrack")
             .mapValues { (_, v) -> v.map { e -> TestEntity(e) } }
     )
 
