@@ -223,7 +223,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
             scope("dot graph property configuration") {
                 fun rank(e: Entity.Type, rank: Int) {
-                    classesOf(e) {
+                    classesOf(e, ignoreOthers = true) {
                         property(e, "dot-rank", withValue(rank))
                         property(e, "dot-type", withValue(Dot.node))
                     }
@@ -234,7 +234,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
 
                 fun stripSuffix(e: Entity.Type, suffix: String) {
-                    classesOf(e) {
+                    classesOf(e, ignoreOthers = true) {
                         property(e, "dot-label-strip", withValue(suffix))
                     }
                     methodsOf(e) {

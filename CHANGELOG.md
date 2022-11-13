@@ -4,10 +4,13 @@
 
 ### Features
 - CLI: `--graph`/`-g` renders system model in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
-       pipe to graphviz and renders the output inline.
+  pipe to graphviz and renders the output inline.
 - `mvn install -P install-sift` installs the executable into `~/.local/share/sift/bin` along with a
   symlink in `~/.local/bin`. If sift is also built with `-P native-image`, the native executable
-  is symlinked instead of the sift. 
+  is symlinked instead of the sift jar. 
+- DSL: boolean parameter `ignoreOthers` on `classesOf` ignores non-class elements when iterating
+  the input elements. This is primarily useful for utility functions e.g. updating properties
+  on multiple entity types.
 
 ### Changes
 - "backtrack" references are now added to all child entities. 

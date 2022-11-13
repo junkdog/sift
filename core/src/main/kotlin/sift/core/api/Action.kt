@@ -92,19 +92,25 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        data class ClassesOf(val entity: Entity.Type) : Action<Unit, IterClasses>() {
+        data class ClassesOf(
+            val entity: Entity.Type,
+            val ignoreOthers: Boolean = false
+        ) : Action<Unit, IterClasses>() {
             override fun id() = "classes-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterClasses {
-                return ctx.entityService[entity].map { (elem, _) ->
+                return ctx.entityService[entity].mapNotNull { (elem, _) ->
                     when (elem) {
                         is Element.Class -> elem
-                        else             -> error("cannot iterate classes of ${elem::class.simpleName}: $elem")
+                        else -> if (!ignoreOthers)
+                            error("cannot iterate classes of ${elem::class.simpleName}: $elem") else null
                     }
                 }
             }
         }
 
-        data class MethodsOf(val entity: Entity.Type) : Action<Unit, IterMethods>() {
+        data class MethodsOf(
+            val entity: Entity.Type,
+            ) : Action<Unit, IterMethods>() {
             override fun id() = "methods-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterMethods {
                 fun methodsOf(elem: Element.Class): Iterable<Element.Method> {

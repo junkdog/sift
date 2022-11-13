@@ -711,6 +711,11 @@
   "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }]
 },
 {
+  "name":"sift.instrumenter.graphviz.Dot",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
   "name":"sift.instrumenter.jdbi.SqlStyle",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
