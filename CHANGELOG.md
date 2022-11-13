@@ -1,4 +1,7 @@
 ## Upcoming release
+### Breaking
+- DSL: `update` used for updating properties on existing entities is renamed to `property`. 
+
 ### Features
 - CLI: `--graph`/`-g` renders system model in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
        pipe to graphviz and renders the output inline.

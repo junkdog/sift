@@ -143,7 +143,7 @@ object Dsl {
         }
 
         /** updates existing entities with property */
-        fun update(
+        fun property(
             entity: Entity.Type,
             key: String,
             extract: Action<Iter<ELEMENT>, IterValues>

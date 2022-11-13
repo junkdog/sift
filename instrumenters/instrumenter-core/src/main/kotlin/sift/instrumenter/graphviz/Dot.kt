@@ -51,12 +51,12 @@ class GraphContext(
             |    node [
             |        shape=box;
             |        fontname="verdana";
-            |        fontcolor="#ababab";
+            |        fontcolor="#ebdbb2";
             |    ];
             |    edge [
             |        arrowhead=normal;
             |        arrowtail=dot;
-            |        fontcolor="#ababab";
+            |        fontcolor="#ebdbb2";
             |        fontname="verdana";
             |        fontsize=11;
             |    ];
@@ -74,7 +74,7 @@ class GraphContext(
     }
 
     private fun nodes(entities: List<Entity>): String {
-        fun describe(e: Entity) = "${e.nodeId}[label=\"${e.label}\",color=\"${e.color}\"];"
+        fun describe(e: Entity) = "${e.nodeId}[label=\"${e.dotLabel}\",color=\"${e.color}\"];"
         return entities.map(::describe).joinToString("\n    ")
     }
 
@@ -89,11 +89,11 @@ class GraphContext(
     private fun graph(tree: Tree<EntityNode>): String {
         // filter only dot nodes and edges
         tree.walk()
-            .filter { (it.value as? EntityNode.Entity)?.entity?.get("sns-type") != null }
+            .filter { it.entity?.get("sns-type") != null }
             .forEach(Tree<EntityNode>::delete)
 
         val paths = tree.walk()
-            .filter { it.children().isEmpty() } // FIXME: ignore backtrack
+            .filter { (it.children() - setOf("sent-by", "backtrack")).isEmpty() }
             .map { leaf -> listOf(leaf) + leaf.parents() }
             .toList()
 
@@ -109,7 +109,7 @@ class GraphContext(
                     continue
                 }
 
-                val current = remaining.pop().entity
+                val current = remaining.pop().entity!!
                 when {
                     relation.from == null       -> relation.from = current
                     current.dotType == Dot.edge -> relation.transit += current
@@ -129,7 +129,7 @@ class GraphContext(
                     "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[color=\"#ffffff\"];"
                 }
                 else -> {
-                    val label = relation.transit.map(Entity::label).joinToString("\\n")
+                    val label = relation.transit.map(Entity::dotLabel).joinToString("\\n")
                     "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[label=\"$label\"color=\"#ffffff\"];"
                 }
             }
@@ -150,17 +150,17 @@ private operator fun java.lang.StringBuilder.plusAssign(s: String) {
     append(s)
 }
 
-private val Tree<EntityNode>.entity: Entity
-    get() = (value as EntityNode.Entity).entity
+private val Tree<EntityNode>.entity: Entity?
+    get() = (value as? EntityNode.Entity)?.entity
 
 private val Tree<EntityNode>.nodeId: String
-    get() = entity.nodeId
+    get() = entity!!.nodeId
 
 private val Tree<EntityNode>.dotRank: Int
-    get() = entity.dotRank
+    get() = entity!!.dotRank
 
 private val Tree<EntityNode>.dotType: Dot?
-    get() = entity.dotType
+    get() = entity!!.dotType
 
 private val Entity.nodeId: String
     get() = when(val type = get("dot-id")?.firstOrNull() as Entity.Type?) {
@@ -170,6 +170,9 @@ private val Entity.nodeId: String
 
 private val Entity.dotRank: Int
     get() = this["dot-rank"]?.firstOrNull() as Int? ?: 0
+
+private val Entity.dotLabel: String
+    get() = label.removeSuffix((this["dot-label-strip"]?.firstOrNull() as String?) ?: "")
 
 private val Entity.dotType: Dot?
     get() = this["dot-type"]?.firstOrNull() as Dot?

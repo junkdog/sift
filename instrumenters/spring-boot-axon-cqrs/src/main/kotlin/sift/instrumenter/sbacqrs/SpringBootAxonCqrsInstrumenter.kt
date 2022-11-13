@@ -101,12 +101,13 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
             parameters {
                 parameter(0)  // 1st parameter is command|event|query
-                update(handler, "type", readType())
+                property(handler, "type", readType())
 
                 // (re-)register command|event|query entity
                 explodeType(synthesize = true) { // class scope of parameter
                     entity(handledType,
-                        property("dot-type", withValue(handledDotType)))
+                        property("dot-type", withValue(handledDotType))
+                    )
                     handledType["received-by"] = handler
                 }
             }
@@ -116,15 +117,16 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             scope(method) {
                 annotatedBy(httpMethod)
                 entity(E.endpoint, label("$method /\${base-path:}\${path:}"),
-                    property("path", readAnnotation(httpMethod, "value")))
+                    property("path", readAnnotation(httpMethod, "value"))
+                )
 
                 parentScope("read base path from @RequestMapping") {
-                    update(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
+                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
                 }
 
                 parameters {
                     annotatedBy(A.requestBody)
-                    update(E.endpoint, "request-object", readType())
+                    property(E.endpoint, "request-object", readType())
                 }
             }
         }
@@ -220,30 +222,30 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             }
 
             scope("dot graph property configuration") {
-                fun rankMn(e: Entity.Type, rank: Int) {
-                    methodsOf(e) {
-                        update(e, "dot-rank", withValue(rank))
-                        update(e, "dot-type", withValue(Dot.node))
-                    }
-                }
-
-                fun rankCn(e: Entity.Type, rank: Int) {
+                fun rank(e: Entity.Type, rank: Int) {
                     classesOf(e) {
-                        update(e, "dot-rank", withValue(rank))
-                        update(e, "dot-type", withValue(Dot.node))
+                        property(e, "dot-rank", withValue(rank))
+                        property(e, "dot-type", withValue(Dot.node))
+                    }
+                    methodsOf(e) {
+                        property(e, "dot-rank", withValue(rank))
+                        property(e, "dot-type", withValue(Dot.node))
                     }
                 }
 
                 fun stripSuffix(e: Entity.Type, suffix: String) {
                     classesOf(e) {
-                        update(e, "dot-label-strip", withValue(suffix))
+                        property(e, "dot-label-strip", withValue(suffix))
+                    }
+                    methodsOf(e) {
+                        property(e, "dot-label-strip", withValue(suffix))
                     }
                 }
 
-                rankMn(E.endpoint, 0)
-                rankCn(E.aggregate, 1)
-                rankCn(E.event, 2)
-                rankCn(E.projection, 3)
+                rank(E.endpoint, 0)
+                rank(E.aggregate, 1)
+                rank(E.event, 2)
+                rank(E.projection, 3)
 
                 stripSuffix(E.command, "Command")
                 stripSuffix(E.event, "Event")
