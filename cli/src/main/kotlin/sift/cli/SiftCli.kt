@@ -93,6 +93,10 @@ object SiftCli : CliktCommand(
         help = "renders system model in graphviz's DOT language")
     .flag()
 
+    val listEntities: Boolean by option("--list-entities",
+        help = "print all entities along with their properties and metadata")
+    .flag()
+
     val profile: Boolean by option("--profile",
         help = "print execution times and input/output for the executed pipeline")
     .flag()
@@ -224,6 +228,7 @@ object SiftCli : CliktCommand(
                 File("graph.dot").writeText(dot)
                 noAnsi.println(dot)
             }
+            listEntities -> listEntities(terminal)
             profile -> profile(terminal)
             diff != null -> {
                 val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
@@ -486,6 +491,46 @@ object SiftCli : CliktCommand(
 
             discard.filter { it !in fullMatch  }.forEach(Tree<EntityNode>::delete)
         }
+    }
+
+    private fun listEntities(terminal: Terminal) {
+        val sm = systemModel()
+
+        fun entry(
+            node: Tree<String>,
+            padLength: Int,
+            key: String,
+            value: Any,
+            style: TextStyle = aqua2
+        ) {
+            node.add(fg("$key:".padEnd(padLength)) + style(value.toString()))
+        }
+
+        val t = Tree(fg("entities"))
+        fun addEntity(e: Entity) {
+            t.add(Tree(fg("Entity[${green2(e.label.take(80))}]")).apply {
+                entry(this, 20, "id", e.id)
+                entry(this, 20, "type", e.type, orange1)
+                add("children").let { children ->
+                    e.children().forEach { child ->
+                        entry(children, 17, child, e.children(child).joinToString { it.id.toString() })
+                    }
+                }
+                add("properties").let { props ->
+                    e.properties().forEach { (prop, value) ->
+                        entry(props, 17, prop, value.joinToString(), green2)
+                    }
+                }
+            })
+
+        }
+
+        sm.entitiesByType.values
+            .flatten()
+            .sortedBy { it.type.id }
+            .forEach(::addEntity)
+
+        terminal.println(t.toString(String::toString))
     }
 
     private fun profile(terminal: Terminal) {

@@ -3,6 +3,8 @@
 - DSL: `update` used for updating properties on existing entities is renamed to `property`. 
 
 ### Features
+- CLI: `--list-entities` prints all entities and their properties 
+  pipe to graphviz and renders the output inline.
 - CLI: `--graph`/`-g` renders system model in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
   pipe to graphviz and renders the output inline.
 - `mvn install -P install-sift` installs the executable into `~/.local/share/sift/bin` along with a

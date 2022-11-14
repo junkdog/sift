@@ -222,36 +222,40 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             }
 
             scope("dot graph property configuration") {
-                fun rank(e: Entity.Type, rank: Int) {
+                fun rankCn(e: Entity.Type, rank: Int) {
                     classesOf(e, ignoreOthers = true) {
                         property(e, "dot-rank", withValue(rank))
                         property(e, "dot-type", withValue(Dot.node))
                     }
+                }
+                fun rankMn(e: Entity.Type, rank: Int) {
                     methodsOf(e) {
                         property(e, "dot-rank", withValue(rank))
                         property(e, "dot-type", withValue(Dot.node))
                     }
                 }
 
-                fun stripSuffix(e: Entity.Type, suffix: String) {
+                fun stripSuffixCn(e: Entity.Type, suffix: String) {
                     classesOf(e, ignoreOthers = true) {
                         property(e, "dot-label-strip", withValue(suffix))
                     }
+                }
+                fun stripSuffixMn(e: Entity.Type, suffix: String) {
                     methodsOf(e) {
                         property(e, "dot-label-strip", withValue(suffix))
                     }
                 }
 
-                rank(E.endpoint, 0)
-                rank(E.aggregate, 1)
-                rank(E.event, 2)
-                rank(E.projection, 3)
+                rankMn(E.endpoint, 0)
+                rankCn(E.aggregate, 1)
+                rankCn(E.event, 2)
+                rankCn(E.projection, 3)
 
-                stripSuffix(E.command, "Command")
-                stripSuffix(E.event, "Event")
-                stripSuffix(E.query, "Query")
-                stripSuffix(E.aggregate, "Aggregate")
-                stripSuffix(E.projection, "Projection")
+                stripSuffixCn(E.command, "Command")
+                stripSuffixCn(E.event, "Event")
+                stripSuffixCn(E.query, "Query")
+                stripSuffixCn(E.aggregate, "Aggregate")
+                stripSuffixCn(E.projection, "Projection")
             }
         }
     }

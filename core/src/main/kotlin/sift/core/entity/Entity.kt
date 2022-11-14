@@ -10,10 +10,12 @@ class Entity(
     val type: Type,
     var label: String,
     values: Map<String, MutableList<Any>> = mapOf(),
-    internal val id: UUID = UUID.randomUUID()
+    val id: UUID = UUID.randomUUID()
 ) {
     internal val children: MutableMap<String, MutableSet<Entity>> = mutableMapOf()
     internal val properties: MutableMap<String, MutableList<Any>> = values.toMutableMap()
+
+    fun properties(): Map<String, List<Any>> = properties
 
     operator fun set(property: String, value: Any) {
         val v = if (value !is List<*>) listOf(value) else value as List<Any>

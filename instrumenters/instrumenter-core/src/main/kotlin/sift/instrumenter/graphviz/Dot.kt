@@ -86,12 +86,12 @@ class GraphContext(
 
     private fun graph(tree: Tree<EntityNode>): String {
         // filter only dot nodes and edges
-        tree.walk()
-            .filter { it.entity?.get("sns-type") != null }
-            .forEach(Tree<EntityNode>::delete)
+//        tree.walk()
+//            .filter { it.entity?.let { it["dot-type"] == null } ?: false }
+//            .forEach(Tree<EntityNode>::delete)
 
         val paths = tree.walk()
-            .filter { (it.children() - setOf("sent-by", "backtrack")).isEmpty() }
+            .filter { (it.children() - setOf("backtrack")).isEmpty() }
             .map { leaf -> listOf(leaf) + leaf.parents() }
             .toList()
 
