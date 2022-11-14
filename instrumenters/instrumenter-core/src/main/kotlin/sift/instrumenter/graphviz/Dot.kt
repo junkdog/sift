@@ -4,6 +4,7 @@ import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.firstBy
 import sift.core.api.SystemModel
 import sift.core.entity.Entity
+import sift.core.graphviz.Dot
 import sift.core.pop
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
@@ -19,9 +20,6 @@ dot-rank            0..MAX
  */
 
 
-enum class Dot {
-    edge, node
-}
 
 // register + lookup for creation
 class GraphContext(

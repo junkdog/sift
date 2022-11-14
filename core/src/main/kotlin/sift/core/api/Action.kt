@@ -477,7 +477,8 @@ sealed class Action<IN, OUT> {
     data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
-            return input.filter { annotation in it.annotations() }
+            return input
+                .filter { annotation in it.annotations() }
         }
     }
 

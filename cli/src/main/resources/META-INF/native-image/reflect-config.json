@@ -672,6 +672,9 @@
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
 },
 {
+  "name":"sift.core.graphviz.Dot"
+},
+{
   "name":"sift.core.jackson.SystemModelSerializer$Deserializer",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },

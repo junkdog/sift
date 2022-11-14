@@ -52,7 +52,19 @@ object WithValueSerializer {
             val v = when (val cls = node["@type"].asText()) {
                 "sift.core.entity.Entity.Type" -> Entity.Type(node["value"].asText())
                 "kotlin.String"                -> node["value"].asText()
-                else -> ctxt.readValue(node["value"].traverse(), Class.forName(cls))
+                "kotlin.Int"                   -> node["value"].asInt()
+                "kotlin.Long"                  -> node["value"].asLong()
+                "kotlin.Float"                 -> node["value"].asDouble().toFloat()
+                "kotlin.Double"                -> node["value"].asDouble()
+                "kotlin.Short"                 -> node["value"].asInt().toShort()
+                "kotlin.Boolean"               -> node["value"].asBoolean()
+                else -> {
+                    val c = Class.forName(cls)
+                    when {
+                        c.isEnum -> c.enumConstants.first { it.toString() == node["value"].asText() }
+                        else     -> ctxt.readValue(node["value"].traverse(), Class.forName(cls))
+                    }
+                }
             }
 
             return Action.WithValue<Element.Value>(v) as Action.WithValue<*>

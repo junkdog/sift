@@ -7,7 +7,7 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
-import sift.instrumenter.graphviz.Dot
+import sift.core.graphviz.Dot
 import sift.core.product
 import sift.instrumenter.Gruvbox.aqua2
 import sift.instrumenter.Gruvbox.blue2
@@ -257,10 +257,10 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
     }
 
     override fun theme() = mapOf(
-        E.commandHandler       to fromProperty("owner-type"),
-        E.eventHandler         to fromProperty("owner-type"),
-        E.eventSourcingHandler to fromProperty("owner-type"),
-        E.queryHandler         to fromProperty("owner-type"),
+        E.commandHandler       to fromProperty("dot-id"),
+        E.eventHandler         to fromProperty("dot-id"),
+        E.eventSourcingHandler to fromProperty("dot-id"),
+        E.queryHandler         to fromProperty("dot-id"),
         E.aggregate            to plain(purple2),
         E.aggregateMember      to plain(purple2),
         E.command              to plain(yellow2 + bold),
