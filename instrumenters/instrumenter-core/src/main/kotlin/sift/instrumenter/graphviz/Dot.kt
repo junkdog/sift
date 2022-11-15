@@ -1,13 +1,16 @@
 package sift.instrumenter.graphviz
 
+import com.github.ajalt.mordant.rendering.TextStyle
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.firstBy
+import sift.core.anyOf
 import sift.core.api.SystemModel
 import sift.core.entity.Entity
 import sift.core.graphviz.Dot
 import sift.core.pop
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
+import sift.instrumenter.Gruvbox
 import sift.instrumenter.toTree
 
 /*
@@ -15,10 +18,12 @@ import sift.instrumenter.toTree
 dot-id              entity.type
 dot-label-strip     suffix
 dot-type            edge|node
+dot-ignore          true|false
 dot-rank            0..MAX
+dot-arrowhead       onormal|..
+dot-style           dashed|..
 
  */
-
 
 
 // register + lookup for creation
@@ -86,20 +91,31 @@ class GraphContext(
 
     private fun graph(tree: Tree<EntityNode>): String {
         // filter only dot nodes and edges
-//        tree.walk()
-//            .filter { it.entity?.let { it["dot-type"] == null } ?: false }
-//            .forEach(Tree<EntityNode>::delete)
+        tree.walk()
+            .filter { it.entity != null }
+            .filter { it.entity!!["dot-type"] == null && it.entity!!["dot-id"] == null && it.entity!!["dot-ignore"]?.firstOrNull() != true }
+            .forEach(Tree<EntityNode>::delete)
 
         val paths = tree.walk()
-            .filter { (it.children() - setOf("backtrack")).isEmpty() }
+            .filter { it.children().isEmpty() }
             .map { leaf -> listOf(leaf) + leaf.parents() }
             .toList()
 
+        val entitiesToSkip = anyOf<Tree<EntityNode>>(
+            { it.entity == null }, // label node
+            { "dot-ignore" in it.entity!!.properties() }
+        )
+
+        val colors = edgeColors()
         val graph = paths.flatMap { path ->
-            val remaining = path.toMutableList()
+            val remaining = path
+                .filterNot(entitiesToSkip)
+                .toMutableList()
+
+            val pathColor = colors[remaining.last().index % colors.size].hexColor
 
             val relations = mutableListOf<Relation>()
-            var relation = Relation(color = "#ffffff")
+            var relation = Relation(color = pathColor)
 
             while (remaining.isNotEmpty()) {
                 if (remaining.last().value is EntityNode.Label) {
@@ -115,22 +131,32 @@ class GraphContext(
                         relation.to = current
                         relations += relation
 
-                        relation = Relation(from = current, color = "#ffffff")
+                        relation = Relation(from = current, color = pathColor)
                     }
                 }
             }
 
             relations
         }.map { relation ->
-            when {
-                relation.transit.isEmpty() -> {
-                    "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[color=\"#ffffff\"];"
-                }
-                else -> {
-                    val label = relation.transit.map(Entity::dotLabel).joinToString("\\n")
-                    "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[label=\"$label\"color=\"#ffffff\"];"
-                }
-            }
+            val label = relation.transit
+                .map(Entity::dotLabel)
+                .joinToString("\\n")
+                .takeIf(String::isNotEmpty)
+                ?.let { """label="$it"""" }
+
+            val arrowhead = relation.transit
+                .map(Entity::dotArrowhead)
+                .firstOrNull()
+                ?.let { "arrowhead=$it" }
+
+            val style = relation.transit
+                .map(Entity::dotStyle)
+                .firstOrNull()
+                ?.let { "style=$it" }
+
+            val attributes = listOfNotNull(label, arrowhead, style).joinToString("") { "$it," }
+
+            "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[${attributes}color=\"${relation.color}\"];"
         }
 
         return graph.toSet().joinToString("\n    ")
@@ -172,5 +198,34 @@ private val Entity.dotRank: Int
 private val Entity.dotLabel: String
     get() = label.removeSuffix((this["dot-label-strip"]?.firstOrNull() as String?) ?: "")
 
+private val Entity.dotArrowhead: String?
+    get() = this["dot-arrowhead"]?.firstOrNull() as String?
+
+private val Entity.dotStyle: String?
+    get() = this["dot-style"]?.firstOrNull() as String?
+
 private val Entity.dotType: Dot?
     get() = this["dot-type"]?.firstOrNull() as Dot?
+
+private fun edgeColors() = listOf(
+    Gruvbox.aqua1,
+    Gruvbox.aqua2,
+    Gruvbox.blue1,
+    Gruvbox.blue2,
+    Gruvbox.fg,
+    Gruvbox.gray244,
+    Gruvbox.gray245,
+    Gruvbox.green1,
+    Gruvbox.green2,
+    Gruvbox.orange1,
+    Gruvbox.orange2,
+    Gruvbox.purple1,
+    Gruvbox.purple2,
+    Gruvbox.red1,
+    Gruvbox.red2,
+    Gruvbox.yellow1,
+    Gruvbox.yellow2,
+).shuffled()
+
+val TextStyle.hexColor
+    get() = color!!.toSRGB().toHex()

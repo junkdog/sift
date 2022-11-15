@@ -132,7 +132,9 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
         }
 
         fun Dsl.Classes.registerAggregate(aggregate: Entity.Type) {
-            entity(aggregate)
+            entity(aggregate,
+                property("dot-type", withValue(Dot.node)))
+
             methods {
                 scope("register command handlers with aggregate") {
                     registerAxonHandlers(aggregate, A.commandHandler, E.command, E.commandHandler)
@@ -155,7 +157,9 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             classes {
                 scope("register controllers") {
                     annotatedBy(A.restController)
-                    entity(E.controller)
+                    entity(E.controller,
+                         // --graph: prevents children from being deleted
+                        property("dot-ignore", withValue(true)))
 
                     methods {
                         // maps to EntityType.endpoint
@@ -248,6 +252,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                 rankMn(E.endpoint, 0)
                 rankCn(E.aggregate, 1)
+                rankCn(E.aggregateMember, 1)
                 rankCn(E.event, 2)
                 rankCn(E.projection, 3)
 
@@ -256,6 +261,11 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 stripSuffixCn(E.query, "Query")
                 stripSuffixCn(E.aggregate, "Aggregate")
                 stripSuffixCn(E.projection, "Projection")
+
+                classesOf(E.query) {
+                    property(E.query, "dot-arrowhead", withValue("onormal"))
+                    property(E.query, "dot-style", withValue("dashed"))
+                }
             }
         }
     }

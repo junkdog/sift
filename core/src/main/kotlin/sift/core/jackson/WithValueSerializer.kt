@@ -62,7 +62,7 @@ object WithValueSerializer {
                     val c = Class.forName(cls)
                     when {
                         c.isEnum -> c.enumConstants.first { it.toString() == node["value"].asText() }
-                        else     -> ctxt.readValue(node["value"].traverse(), Class.forName(cls))
+                        else     -> ctxt.readValue(node["value"].traverse(), c)
                     }
                 }
             }

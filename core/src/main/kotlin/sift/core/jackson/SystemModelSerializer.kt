@@ -162,7 +162,19 @@ object SystemModelSerializer {
                 .map { (type, node) -> when(type) {
                     "sift.core.entity.Entity.Type" -> Entity.Type(node.asText())
                     "kotlin.String"                -> node.asText()
-                    else                           -> ctxt.readTreeAsValue(node, Class.forName(type))
+                    "kotlin.Int"                   -> node.asInt()
+                    "kotlin.Long"                  -> node.asLong()
+                    "kotlin.Float"                 -> node.asDouble().toFloat()
+                    "kotlin.Double"                -> node.asDouble()
+                    "kotlin.Short"                 -> node.asInt().toShort()
+                    "kotlin.Boolean"               -> node.asBoolean()
+                    else                           -> {
+                        val c = Class.forName(type)
+                        when {
+                            c.isEnum -> c.enumConstants.first { it.toString() == node.asText() }
+                            else     -> ctxt.readTreeAsValue(node, c)
+                        }
+                    }
                 } }
         }
     }

@@ -223,7 +223,7 @@ object SiftCli : CliktCommand(
                 stylize(buildTree(sm, treeRoot), theme)
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = GraphContext(sm, treeRoot ?: Entity.Type("endpoint"), lookup)
+                val graph = GraphContext(sm, treeRoot ?: instrumenter!!.defaultType, lookup)
                 val dot = graph.build()
                 File("graph.dot").writeText(dot)
                 noAnsi.println(dot)

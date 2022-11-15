@@ -34,9 +34,9 @@ fi
 
 function _sift() {
     if [[ -x $SIFT_BIN ]]; then
-        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $* | less -FXRS
+        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $*
     elif [[ -f $SIFT_JAR ]]; then
-        java -jar $SIFT_JAR $SIFT_ARGS $* | less -FXRS
+        java -jar $SIFT_JAR $SIFT_ARGS $*
     else
         echo "Error: Unable to find sift binary or jar" >&2
         exit $ERROR_SIFT_NOT_FOUND
@@ -44,7 +44,7 @@ function _sift() {
 }
 
 function pipe_to_dot() {
-    # checks for --dot in args
+    # checks for --graph in args
     [[ ${*[(ie)--graph]} -le ${#*} ]]
 }
 
@@ -74,5 +74,5 @@ if pipe_to_dot $* ; then
 
     _sift $* | dot $DOT_ARGS | ${=SHOW_IMG}
 else
-    _sift $*
+    _sift $* | less -FXRS
 fi

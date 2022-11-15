@@ -636,7 +636,7 @@ sealed class Action<IN, OUT> {
         /** if null: resolves [Entity.Type] from currently referenced element */
         val entity: Entity.Type? = null
     ) : IsoAction<Element.Value>() {
-        override fun id() = "update-property(key${", $entity".takeIf { entity != null } ?: ""})"
+        override fun id() = "update-property($key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {
                 null -> {
