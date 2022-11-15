@@ -207,9 +207,9 @@ object SiftCli : CliktCommand(
 
                 fun color(style: Style): String {
                     return when (style) {
-                        is Style.Plain -> style.styling.color?.toSRGB()?.toHex() ?: "#ffffff"
+                        is Style.Plain         -> style.styling.color?.toSRGB()?.toHex() ?: "#ffffff"
                         is Style.FromEntityRef -> color(style.fallback)
-                        else -> "#ffffff"
+                        else                   -> "#ffffff"
                     }
                 }
 
@@ -220,10 +220,13 @@ object SiftCli : CliktCommand(
                     .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
 
                 // for updating labels
-                stylize(buildTree(sm, treeRoot), theme)
+                val tree = buildTree(sm, treeRoot)
+                stylize(tree, theme)
+                filterTree(tree)
+
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = GraphContext(sm, treeRoot ?: instrumenter!!.defaultType, lookup)
+                val graph = GraphContext(sm, tree, lookup)
                 val dot = graph.build()
                 File("graph.dot").writeText(dot)
                 noAnsi.println(dot)

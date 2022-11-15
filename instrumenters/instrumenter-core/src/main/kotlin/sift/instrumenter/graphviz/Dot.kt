@@ -29,7 +29,7 @@ dot-style           dashed|..
 // register + lookup for creation
 class GraphContext(
     val sm: SystemModel,
-    val root: Entity.Type,
+    val tree: Tree<EntityNode>,
     val colorLookup: (Entity.Type) -> String
 ) {
     private val nodes: List<Entity> = sm.entitiesByType
@@ -71,7 +71,7 @@ class GraphContext(
             |    ${ranks(nodes)}
             |    
             |    // graph
-            |    ${graph(sm.toTree(root))}
+            |    ${graph(tree)}
             |}
         """.trimMargin()
     }
