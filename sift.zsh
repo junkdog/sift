@@ -44,8 +44,8 @@ function _sift() {
 }
 
 function pipe_to_dot() {
-    # checks for --graph in args
-    [[ ${*[(ie)--graph]} -le ${#*} ]]
+    # checks for --render in args
+    [[ ${*[(ie)--render]} -le ${#*} ]]
 }
 
 function exists() {
