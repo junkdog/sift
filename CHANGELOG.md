@@ -3,10 +3,9 @@
 - DSL: `update` used for updating properties on existing entities is renamed to `property`. 
 
 ### Features
-- CLI: `--list-entities` prints all entities and their properties 
-  pipe to graphviz and renders the output inline.
-- CLI: `--graph`/`-g` renders system model in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
-  pipe to graphviz and renders the output inline.
+- CLI: `--dump-entities` prints all entities and their properties. Primarily useful for debugging.  
+- CLI: `--render`/`-R` prints entities in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
+  pipe to graphviz and displays the diagram inline.
 - `mvn install -P install-sift` installs the executable into `~/.local/share/sift/bin` along with a
   symlink in `~/.local/bin`. If sift is also built with `-P native-image`, the native executable
   is symlinked instead of the sift jar. 

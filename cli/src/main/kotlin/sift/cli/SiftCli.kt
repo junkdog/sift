@@ -89,11 +89,11 @@ object SiftCli : CliktCommand(
             completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
-    val graph: Boolean by option("-g", "--graph",
-        help = "renders system model in graphviz's DOT language")
+    val render: Boolean by option("-R", "--render",
+        help = "render entities in graphviz's DOT language")
     .flag()
 
-    val listEntities: Boolean by option("--list-entities",
+    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
         help = "print all entities along with their properties and metadata")
     .flag()
 
@@ -201,7 +201,7 @@ object SiftCli : CliktCommand(
                 exitProcess(1)
             }
             path == null && load == null -> throw PrintMessage("PATH was not specified")
-            graph -> {
+            render -> {
                 require(diff == null)
                 val sm = systemModel()
 
@@ -226,12 +226,12 @@ object SiftCli : CliktCommand(
 
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = GraphContext(sm, tree, lookup)
-                val dot = graph.build()
+                val graph = GraphContext(sm, lookup)
+                val dot = graph.build(tree)
                 File("graph.dot").writeText(dot)
                 noAnsi.println(dot)
             }
-            listEntities -> listEntities(terminal)
+            dumpSystemModel -> dumpEntities(terminal)
             profile -> profile(terminal)
             diff != null -> {
                 val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
@@ -496,7 +496,7 @@ object SiftCli : CliktCommand(
         }
     }
 
-    private fun listEntities(terminal: Terminal) {
+    private fun dumpEntities(terminal: Terminal) {
         val sm = systemModel()
 
         fun entry(

@@ -11,7 +11,6 @@ import sift.core.pop
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.instrumenter.Gruvbox
-import sift.instrumenter.toTree
 
 /*
 
@@ -29,7 +28,6 @@ dot-style           dashed|..
 // register + lookup for creation
 class GraphContext(
     val sm: SystemModel,
-    val tree: Tree<EntityNode>,
     val colorLookup: (Entity.Type) -> String
 ) {
     private val nodes: List<Entity> = sm.entitiesByType
@@ -37,16 +35,22 @@ class GraphContext(
         .flatten()
         .filterBy(Entity::dotType, Dot.node)
 
-    private val edges: List<Entity> = sm.entitiesByType
-        .values
-        .flatten()
-        .filterBy(Entity::dotType, Dot.edge)
-
     private val Entity.color: String
         get() = colorLookup(type)
 
+    fun build(tree: Tree<EntityNode>): String {
+        // filter only dot nodes and edges
+        tree.walk()
+            .filterNot(Tree<EntityNode>::validEntity)
+            .forEach(Tree<EntityNode>::delete)
 
-    fun build(): String {
+        val includedNodes = tree.walk()
+            .mapNotNull(Tree<EntityNode>::entity)
+            .map(Entity::nodeId)
+            .toSet()
+
+        val nodes = nodes.filter { it.nodeId in includedNodes }
+
         return """
             |digraph {
             |    // setup
@@ -90,12 +94,6 @@ class GraphContext(
     }
 
     private fun graph(tree: Tree<EntityNode>): String {
-        // filter only dot nodes and edges
-        tree.walk()
-            .filter { it.entity != null }
-            .filter { it.entity!!["dot-type"] == null && it.entity!!["dot-id"] == null && it.entity!!["dot-ignore"]?.firstOrNull() != true }
-            .forEach(Tree<EntityNode>::delete)
-
         val paths = tree.walk()
             .filter { it.children().isEmpty() }
             .map { leaf -> listOf(leaf) + leaf.parents() }
@@ -169,6 +167,13 @@ private data class Relation(
     var transit: MutableList<Entity> = mutableListOf(),
     var color: String
 )
+
+private fun Tree<EntityNode>.validEntity(): Boolean {
+    val e = entity ?: return false
+    return e["dot-type"] != null
+        || e["dot-id"] != null
+        || e["dot-ignore"]?.firstOrNull() == true // not rendered
+}
 
 private operator fun java.lang.StringBuilder.plusAssign(s: String) {
     append(s)

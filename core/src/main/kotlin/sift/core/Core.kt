@@ -1,25 +1,14 @@
 package sift.core
 
-import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.util.Textifier
 import org.objectweb.asm.util.TraceClassVisitor
 import org.objectweb.asm.util.TraceMethodVisitor
-import sift.core.asm.classNode
 import sift.core.collections.MultiIterable
 import sift.core.collections.MutableMultiIterable
-import java.io.File
-import java.io.FileNotFoundException
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.lang.IllegalStateException
-import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
 
 fun <T> anyOf(vararg predicates: (T) -> Boolean): (T) -> Boolean = { t -> predicates.any { it(t) } }
 fun <T> allOf(vararg predicates: (T) -> Boolean): (T) -> Boolean = { t -> predicates.all { it(t) } }
