@@ -25,20 +25,14 @@ dot-style           dashed|..
  */
 
 
-// register + lookup for creation
-class GraphContext(
-    val sm: SystemModel,
+class DiagramGenerator(
+    sm: SystemModel,
     val colorLookup: (Entity.Type) -> String
 ) {
     private val nodes: List<Entity> = sm.entitiesByType
         .values
         .flatten()
         .filterBy(Entity::dotType, Dot.node)
-
-    private val edges: List<Entity> = sm.entitiesByType
-        .values
-        .flatten()
-        .filterBy(Entity::dotType, Dot.edge)
 
     private val Entity.color: String
         get() = colorLookup(type)
@@ -62,7 +56,9 @@ class GraphContext(
             .map(Entity::nodeId)
             .toSet()
 
-        val nodes = (rootEntities + nodes).toSet().filter { it.nodeId in includedNodes }
+        val nodes = (rootEntities + nodes)
+            .toSet()
+            .filter { it.nodeId in includedNodes }
 
         return """
             |digraph {
@@ -245,5 +241,5 @@ private fun edgeColors() = listOf(
     Gruvbox.yellow2,
 ).shuffled()
 
-val TextStyle.hexColor
+private val TextStyle.hexColor
     get() = color!!.toSRGB().toHex()

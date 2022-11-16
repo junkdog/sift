@@ -20,7 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
-import sift.instrumenter.graphviz.GraphContext
+import sift.instrumenter.graphviz.DiagramGenerator
 import sift.core.jackson.*
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
@@ -226,7 +226,7 @@ object SiftCli : CliktCommand(
 
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = GraphContext(sm, lookup)
+                val graph = DiagramGenerator(sm, lookup)
                 val dot = graph.build(tree)
                 File("graph.dot").writeText(dot)
                 noAnsi.println(dot)
