@@ -35,21 +35,34 @@ class GraphContext(
         .flatten()
         .filterBy(Entity::dotType, Dot.node)
 
+    private val edges: List<Entity> = sm.entitiesByType
+        .values
+        .flatten()
+        .filterBy(Entity::dotType, Dot.edge)
+
     private val Entity.color: String
         get() = colorLookup(type)
 
     fun build(tree: Tree<EntityNode>): String {
+
         // filter only dot nodes and edges
         tree.walk()
             .filterNot(Tree<EntityNode>::validEntity)
             .forEach(Tree<EntityNode>::delete)
+
+        // we always want to render the --root entity type as nodes,
+        // even if they are marked as Dot.edge
+        val rootEntities = tree.children()
+            .mapNotNull(Tree<EntityNode>::entity)
+            .filter { e -> e["dot-type"]?.firstOrNull() == Dot.edge }
+            .toSet()
 
         val includedNodes = tree.walk()
             .mapNotNull(Tree<EntityNode>::entity)
             .map(Entity::nodeId)
             .toSet()
 
-        val nodes = nodes.filter { it.nodeId in includedNodes }
+        val nodes = (rootEntities + nodes).toSet().filter { it.nodeId in includedNodes }
 
         return """
             |digraph {
@@ -74,8 +87,8 @@ class GraphContext(
             |    // node ranks
             |    ${ranks(nodes)}
             |    
-            |    // graph
-            |    ${graph(tree)}
+            |    // relations
+            |    ${render(tree)}
             |}
         """.trimMargin()
     }
@@ -93,7 +106,7 @@ class GraphContext(
             .joinToString("\n    ")
     }
 
-    private fun graph(tree: Tree<EntityNode>): String {
+    private fun render(tree: Tree<EntityNode>): String {
         val paths = tree.walk()
             .filter { it.children().isEmpty() }
             .map { leaf -> listOf(leaf) + leaf.parents() }
