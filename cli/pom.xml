@@ -59,6 +59,7 @@
     </dependencies>
 
     <build>
+        <finalName>sift-cli</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -99,6 +100,15 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install-sift-jar</id>
+                        <phase>install</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <!-- plugin configuration for native-image* profiles -->
@@ -125,18 +135,36 @@
                     <version>3.3.0</version>
                     <executions>
                         <execution>
-                            <id>copy-sift-binary-to-local-m2</id>
+                            <id>install-sift-binary</id>
                             <phase>none</phase>
                             <goals>
                                 <goal>copy-resources</goal>
                             </goals>
                             <configuration>
-                                <outputDirectory>${user.home}/.m2/repository/net/onedaybeard/sift/cli/${project.version}</outputDirectory>
+                                <outputDirectory>${user.home}/.local/share/sift/bin</outputDirectory>
                                 <resources>
                                     <resource>
                                         <directory>${project.build.directory}</directory>
                                         <includes>
                                             <include>sift</include>
+                                        </includes>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>install-sift-jar</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${user.home}/.local/share/sift/bin</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>${project.build.directory}</directory>
+                                        <includes>
+                                            <include>sift-cli.jar</include>
                                         </includes>
                                     </resource>
                                 </resources>
@@ -198,7 +226,7 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-sift-binary-to-local-m2</id>
+                                <id>install-sift-binary</id>
                                 <phase>install</phase>
                             </execution>
                         </executions>

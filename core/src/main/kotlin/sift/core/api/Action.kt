@@ -92,19 +92,25 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        data class ClassesOf(val entity: Entity.Type) : Action<Unit, IterClasses>() {
+        data class ClassesOf(
+            val entity: Entity.Type,
+            val ignoreOthers: Boolean = false
+        ) : Action<Unit, IterClasses>() {
             override fun id() = "classes-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterClasses {
-                return ctx.entityService[entity].map { (elem, _) ->
+                return ctx.entityService[entity].mapNotNull { (elem, _) ->
                     when (elem) {
                         is Element.Class -> elem
-                        else             -> error("cannot iterate classes of ${elem::class.simpleName}: $elem")
+                        else -> if (!ignoreOthers)
+                            error("cannot iterate classes of ${elem::class.simpleName}: $elem") else null
                     }
                 }
             }
         }
 
-        data class MethodsOf(val entity: Entity.Type) : Action<Unit, IterMethods>() {
+        data class MethodsOf(
+            val entity: Entity.Type,
+            ) : Action<Unit, IterMethods>() {
             override fun id() = "methods-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterMethods {
                 fun methodsOf(elem: Element.Class): Iterable<Element.Method> {
@@ -471,7 +477,8 @@ sealed class Action<IN, OUT> {
     data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
-            return input.filter { annotation in it.annotations() }
+            return input
+                .filter { annotation in it.annotations() }
         }
     }
 
@@ -597,7 +604,8 @@ sealed class Action<IN, OUT> {
 
             (a + b)
                 .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
-                ?.forEach { (parent, child) -> parent.addChild(key, child) }
+                ?.onEach { (parent, child) -> parent.addChild(key, child) }
+                ?.onEach { (parent, child) -> child.addChild("backtrack", parent) }
                 ?: Throw.unableToResolveParentRelation(parentType, childType)
 
             return input
@@ -628,7 +636,7 @@ sealed class Action<IN, OUT> {
         /** if null: resolves [Entity.Type] from currently referenced element */
         val entity: Entity.Type? = null
     ) : IsoAction<Element.Value>() {
-        override fun id() = "update-property(key${", $entity".takeIf { entity != null } ?: ""})"
+        override fun id() = "update-property($key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {
                 null -> {

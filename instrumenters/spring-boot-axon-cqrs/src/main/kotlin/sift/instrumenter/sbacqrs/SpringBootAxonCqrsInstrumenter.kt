@@ -7,11 +7,8 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
-import sift.core.entity.EntityService
+import sift.core.graphviz.Dot
 import sift.core.product
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
-import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.Gruvbox.aqua2
 import sift.instrumenter.Gruvbox.blue2
 import sift.instrumenter.Gruvbox.green2
@@ -21,7 +18,6 @@ import sift.instrumenter.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.instrumenter.Style.Companion.fromProperty
 import sift.instrumenter.Style.Companion.plain
-import sift.instrumenter.dsl.buildTree
 import sift.instrumenter.dsl.registerInstantiationsOf
 
 typealias A = SpringBootAxonCqrsInstrumenter.Annotation
@@ -90,22 +86,28 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
 
     override fun pipeline(): Action<Unit, Unit> {
+
         fun Dsl.Methods.registerAxonHandlers(
             ownerType: Entity.Type,  // aggregate|projection
             handlerAnnotation: Type, // @(Command|Event|Query)Handler
             handledType: Entity.Type,
-            handler: Entity.Type
+            handler: Entity.Type,
+            handledDotType: Dot = Dot.edge
         ) {
             annotatedBy(handlerAnnotation)
-            entity(handler, property("owner-type", withValue(ownerType)))
+            entity(handler,
+                property("dot-id", withValue(ownerType)),
+            )
 
             parameters {
                 parameter(0)  // 1st parameter is command|event|query
-                update(handler, "type", readType())
+                property(handler, "type", readType())
 
                 // (re-)register command|event|query entity
                 explodeType(synthesize = true) { // class scope of parameter
-                    entity(handledType)
+                    entity(handledType,
+                        property("dot-type", withValue(handledDotType))
+                    )
                     handledType["received-by"] = handler
                 }
             }
@@ -115,21 +117,24 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             scope(method) {
                 annotatedBy(httpMethod)
                 entity(E.endpoint, label("$method /\${base-path:}\${path:}"),
-                    property("path", readAnnotation(httpMethod, "value")))
+                    property("path", readAnnotation(httpMethod, "value"))
+                )
 
                 parentScope("read base path from @RequestMapping") {
-                    update(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
+                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
                 }
 
                 parameters {
                     annotatedBy(A.requestBody)
-                    update(E.endpoint, "request-object", readType())
+                    property(E.endpoint, "request-object", readType())
                 }
             }
         }
 
         fun Dsl.Classes.registerAggregate(aggregate: Entity.Type) {
-            entity(aggregate)
+            entity(aggregate,
+                property("dot-type", withValue(Dot.node)))
+
             methods {
                 scope("register command handlers with aggregate") {
                     registerAxonHandlers(aggregate, A.commandHandler, E.command, E.commandHandler)
@@ -137,7 +142,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
 
                 scope("register event sourcing handlers with aggregate") {
-                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler)
+                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler, Dot.node)
                     aggregate["events"] = E.eventSourcingHandler
                 }
 
@@ -152,7 +157,9 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             classes {
                 scope("register controllers") {
                     annotatedBy(A.restController)
-                    entity(E.controller)
+                    entity(E.controller,
+                         // --graph: prevents children from being deleted
+                        property("dot-ignore", withValue(true)))
 
                     methods {
                         // maps to EntityType.endpoint
@@ -186,7 +193,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                     methods {
                         scope("register event handlers with aggregate") {
-                            registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler)
+                            registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler, Dot.node)
                             E.projection["events"] = E.eventHandler
                         }
 
@@ -217,14 +224,57 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                     E.commandHandler["sends"] = E.aggregateCtor.invocations
                 }
             }
+
+            scope("dot graph property configuration") {
+                fun rankCn(e: Entity.Type, rank: Int) {
+                    classesOf(e, ignoreOthers = true) {
+                        property(e, "dot-rank", withValue(rank))
+                        property(e, "dot-type", withValue(Dot.node))
+                    }
+                }
+                fun rankMn(e: Entity.Type, rank: Int) {
+                    methodsOf(e) {
+                        property(e, "dot-rank", withValue(rank))
+                        property(e, "dot-type", withValue(Dot.node))
+                    }
+                }
+
+                fun stripSuffixCn(e: Entity.Type, suffix: String) {
+                    classesOf(e, ignoreOthers = true) {
+                        property(e, "dot-label-strip", withValue(suffix))
+                    }
+                }
+                fun stripSuffixMn(e: Entity.Type, suffix: String) {
+                    methodsOf(e) {
+                        property(e, "dot-label-strip", withValue(suffix))
+                    }
+                }
+
+                rankMn(E.endpoint, 0)
+                rankCn(E.aggregate, 1)
+                rankCn(E.aggregateMember, 1)
+                rankCn(E.event, 2)
+                rankCn(E.projection, 3)
+
+                stripSuffixCn(E.command, "Command")
+                stripSuffixCn(E.event, "Event")
+                stripSuffixCn(E.query, "Query")
+                stripSuffixCn(E.aggregate, "Aggregate")
+                stripSuffixCn(E.projection, "Projection")
+
+                classesOf(E.query) {
+                    property(E.query, "dot-arrowhead", withValue("onormal"))
+                    property(E.query, "dot-style", withValue("dashed"))
+                }
+            }
         }
     }
 
     override fun theme() = mapOf(
-        E.commandHandler       to fromProperty("owner-type"),
-        E.eventHandler         to fromProperty("owner-type"),
-        E.eventSourcingHandler to fromProperty("owner-type"),
-        E.queryHandler         to fromProperty("owner-type"),
+        E.commandHandler       to fromProperty("dot-id"),
+        E.eventHandler         to fromProperty("dot-id"),
+        E.eventSourcingHandler to fromProperty("dot-id"),
+        E.queryHandler         to fromProperty("dot-id"),
         E.aggregate            to plain(purple2),
         E.aggregateMember      to plain(purple2),
         E.command              to plain(yellow2 + bold),

@@ -143,7 +143,7 @@ object Dsl {
         }
 
         /** updates existing entities with property */
-        fun update(
+        fun property(
             entity: Entity.Type,
             key: String,
             extract: Action<Iter<ELEMENT>, IterValues>
@@ -335,9 +335,10 @@ object Dsl {
                 .let { it andThen Action.Class.ToInstrumenterScope }
         }
 
+        // TOOD: document ignoreOthers
         /** iterates class elements of registered [entity] type */
-        fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
-            val classes = Action.Instrumenter.ClassesOf(entity)
+        fun classesOf(entity: Entity.Type, ignoreOthers: Boolean = false, f: Classes.() -> Unit) {
+            val classes = Action.Instrumenter.ClassesOf(entity, ignoreOthers)
             val forkTo = Classes().also(f).action
 
             action += Action.Fork(classes andThen forkTo)

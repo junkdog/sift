@@ -20,6 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
+import sift.instrumenter.graphviz.DiagramGenerator
 import sift.core.jackson.*
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
@@ -87,6 +88,14 @@ object SiftCli : CliktCommand(
             help = "the instrumenter pipeline performing the scan",
             completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
+
+    val render: Boolean by option("-R", "--render",
+        help = "render entities in graphviz's DOT language")
+    .flag()
+
+    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
+        help = "print all entities along with their properties and metadata")
+    .flag()
 
     val profile: Boolean by option("--profile",
         help = "print execution times and input/output for the executed pipeline")
@@ -192,6 +201,37 @@ object SiftCli : CliktCommand(
                 exitProcess(1)
             }
             path == null && load == null -> throw PrintMessage("PATH was not specified")
+            render -> {
+                require(diff == null)
+                val sm = systemModel()
+
+                fun color(style: Style): String {
+                    return when (style) {
+                        is Style.Plain         -> style.styling.color?.toSRGB()?.toHex() ?: "#ffffff"
+                        is Style.FromEntityRef -> color(style.fallback)
+                        else                   -> "#ffffff"
+                    }
+                }
+
+                val theme = instrumenter!!.theme()
+                val lookup = theme
+                    .map { (type, style) -> type to color(style) }
+                    .toMap()
+                    .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
+
+                // for updating labels
+                val tree = buildTree(sm, treeRoot)
+                stylize(tree, theme)
+                filterTree(tree)
+
+                sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
+
+                val graph = DiagramGenerator(sm, lookup)
+                val dot = graph.build(tree)
+                File("graph.dot").writeText(dot)
+                noAnsi.println(dot)
+            }
+            dumpSystemModel -> dumpEntities(terminal)
             profile -> profile(terminal)
             diff != null -> {
                 val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
@@ -211,6 +251,15 @@ object SiftCli : CliktCommand(
             }
         }
 
+    }
+
+    fun systemModel(): SystemModel {
+        return if (load != null) {
+            loadSystemModel(load!!)
+        } else {
+            PipelineProcessor(classNodes(path!!))
+                .execute(instrumenter!!.pipeline(), profile)
+        }
     }
 
     fun diffHead(
@@ -390,12 +439,14 @@ object SiftCli : CliktCommand(
     private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
         val instrumenter = this.instrumenter!!
 
-        InstrumenterService.deserialize(instrumenter.serialize())
-
         val sm: SystemModel = PipelineProcessor(classNodes(path!!))
             .execute(instrumenter.pipeline(), profile)
 
         return sm to instrumenter.toTree(sm, forType)
+    }
+
+    private fun buildTree(sm: SystemModel, forType: Entity.Type? = null): Tree<EntityNode> {
+        return instrumenter!!.toTree(sm, forType)
     }
 
     fun toString(instrumenter: InstrumenterService): String {
@@ -445,6 +496,46 @@ object SiftCli : CliktCommand(
         }
     }
 
+    private fun dumpEntities(terminal: Terminal) {
+        val sm = systemModel()
+
+        fun entry(
+            node: Tree<String>,
+            padLength: Int,
+            key: String,
+            value: Any,
+            style: TextStyle = aqua2
+        ) {
+            node.add(fg("$key:".padEnd(padLength)) + style(value.toString()))
+        }
+
+        val t = Tree(fg("entities"))
+        fun addEntity(e: Entity) {
+            t.add(Tree(fg("Entity[${green2(e.label.take(80))}]")).apply {
+                entry(this, 20, "id", e.id)
+                entry(this, 20, "type", e.type, orange1)
+                add("children").let { children ->
+                    e.children().forEach { child ->
+                        entry(children, 17, child, e.children(child).joinToString { it.id.toString() })
+                    }
+                }
+                add("properties").let { props ->
+                    e.properties().forEach { (prop, value) ->
+                        entry(props, 17, prop, value.joinToString(), green2)
+                    }
+                }
+            })
+
+        }
+
+        sm.entitiesByType.values
+            .flatten()
+            .sortedBy { it.type.id }
+            .forEach(::addEntity)
+
+        terminal.println(t.toString(String::toString))
+    }
+
     private fun profile(terminal: Terminal) {
         val (sm, _) = buildTree(treeRoot)
         fun MeasurementScope.style(): TextStyle = when (this) {
@@ -490,8 +581,6 @@ object SiftCli : CliktCommand(
     }
 }
 
-
-
 fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
     return toList()
         .parallelStream()
@@ -516,19 +605,6 @@ fun instrumenters(): Map<String, () -> InstrumenterService> {
         .map { file -> file.nameWithoutExtension to { InstrumenterService.deserialize(file.readText()) } }
 
     return (fromSpi + fromUserLocal).toSortedMap()
-}
-
-fun saveSystemModel(result: SystemModel, file: File) {
-    jacksonObjectMapper()
-        .registerModule(serializationModule())
-        .writeValueAsString(result)
-        .let(file::writeText)
-}
-
-fun loadSystemModel(file: File): SystemModel {
-    return jacksonObjectMapper()
-        .registerModule(serializationModule())
-        .readValue(file)
 }
 
 val defaultStyle = Style.Plain(fg)

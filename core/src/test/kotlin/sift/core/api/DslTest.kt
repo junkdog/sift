@@ -107,7 +107,8 @@ class DslTest {
                 property("int", readAnnotation(AnnoPrimitives::int)),
                 property("long", readAnnotation(AnnoPrimitives::long)),
                 property("float", readAnnotation(AnnoPrimitives::float)),
-                property("double", readAnnotation(AnnoPrimitives::double)))
+                property("double", readAnnotation(AnnoPrimitives::double))
+            )
 
             methods {
                 annotatedBy<AnnoPrimitives>()
@@ -119,7 +120,8 @@ class DslTest {
                     property("int", readAnnotation(AnnoPrimitives::int)),
                     property("long", readAnnotation(AnnoPrimitives::long)),
                     property("float", readAnnotation(AnnoPrimitives::float)),
-                    property("double", readAnnotation(AnnoPrimitives::double)))
+                    property("double", readAnnotation(AnnoPrimitives::double))
+                )
 
                 parameters {
                     annotatedBy<AnnoPrimitives>()
@@ -131,7 +133,8 @@ class DslTest {
                         property("int", readAnnotation(AnnoPrimitives::int)),
                         property("long", readAnnotation(AnnoPrimitives::long)),
                         property("float", readAnnotation(AnnoPrimitives::float)),
-                        property("double", readAnnotation(AnnoPrimitives::double)))
+                        property("double", readAnnotation(AnnoPrimitives::double))
+                    )
 
                 }
             }
@@ -146,7 +149,8 @@ class DslTest {
                     property("int", readAnnotation(AnnoPrimitives::int)),
                     property("long", readAnnotation(AnnoPrimitives::long)),
                     property("float", readAnnotation(AnnoPrimitives::float)),
-                    property("double", readAnnotation(AnnoPrimitives::double)))
+                    property("double", readAnnotation(AnnoPrimitives::double))
+                )
             }
         }.execute { entityService ->
             assertThat(entityService[klazz].values.map(Entity::toString))
@@ -284,7 +288,7 @@ class DslTest {
                 parameters {
                     parameter(1)
                     log("after")
-                    update(et, "a-parameter-type", readType())
+                    property(et, "a-parameter-type", readType())
                 }
             }
         }.execute(cns) { es ->
@@ -482,7 +486,8 @@ class DslTest {
 
         classes {
             entity(et, label("CLS \${name}"),
-                property("name", readName()))
+                property("name", readName())
+            )
         }.execute(cns) { es ->
             val e = es[et].map { (_, e) -> e }
             assertThat(e).hasSize(1)
@@ -799,7 +804,8 @@ class DslTest {
                     annotatedBy<Endpoint>()
                     entity(endpoint, label("\${http-method} \${path}"),
                         property("http-method", readAnnotation(Endpoint::method)),
-                        property("path", readAnnotation(Endpoint::path)))
+                        property("path", readAnnotation(Endpoint::path))
+                    )
                 }
             }
         }.execute { entityService ->
@@ -915,7 +921,8 @@ class DslTest {
                 annotatedBy<Endpoint>()
                 entity(endpoint, label("\${http-method} \${path}"),
                     property("http-method", readAnnotation(Endpoint::method)),
-                    property("path", readAnnotation(Endpoint::path)))
+                    property("path", readAnnotation(Endpoint::path))
+                )
 
                 controller["endpoints"] = endpoint
             }

@@ -1,25 +1,14 @@
 package sift.core
 
-import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.util.Textifier
 import org.objectweb.asm.util.TraceClassVisitor
 import org.objectweb.asm.util.TraceMethodVisitor
-import sift.core.asm.classNode
 import sift.core.collections.MultiIterable
 import sift.core.collections.MutableMultiIterable
-import java.io.File
-import java.io.FileNotFoundException
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.lang.IllegalStateException
-import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
 
 fun <T> anyOf(vararg predicates: (T) -> Boolean): (T) -> Boolean = { t -> predicates.any { it(t) } }
 fun <T> allOf(vararg predicates: (T) -> Boolean): (T) -> Boolean = { t -> predicates.all { it(t) } }
@@ -43,32 +32,6 @@ fun MethodNode.toDebugString(): String = stringWriter {
     accept(TraceMethodVisitor(printer))
     printer.print(PrintWriter(this))
 }
-
-///** reads all classes, where [root] points to a root directory or jar file */
-//fun classNodes(root: Path): List<ClassNode> = when {
-//    root.exists().not()     -> throw FileNotFoundException(root.toString())
-//    root.isDirectory()      -> classesDir(root.toFile())
-//    root.extension == "jar" -> classesJar(root.toFile())
-//    else                    -> throw IllegalStateException(root.toString())
-//}
-//
-//private fun classesJar(root: File): List<ClassNode> {
-//    return ZipFile(root).use { archive ->
-//        archive.entries()
-//            .asSequence()
-//            .filterBy(ZipEntry::getName) { it.endsWith(".class") }
-//            .map(archive::getInputStream)
-//            .map(::classNode)
-//            .toList()
-//    }
-//}
-//
-//private fun classesDir(root: File): List<ClassNode> {
-//    return root.walk()
-//        .filterBy(File::extension, "class")
-//        .map(::classNode)
-//        .toList()
-//}
 
 fun <T> MutableList<T>.pop() = removeLast()
 fun <T> MutableList<T>.push(t: T) = add(t)

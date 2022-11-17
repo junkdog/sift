@@ -672,6 +672,9 @@
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
 },
 {
+  "name":"sift.core.graphviz.Dot"
+},
+{
   "name":"sift.core.jackson.SystemModelSerializer$Deserializer",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -709,6 +712,11 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }]
+},
+{
+  "name":"sift.instrumenter.graphviz.Dot",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"sift.instrumenter.jdbi.SqlStyle",

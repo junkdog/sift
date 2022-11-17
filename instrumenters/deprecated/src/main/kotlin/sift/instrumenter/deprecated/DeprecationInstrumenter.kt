@@ -74,15 +74,15 @@ class DeprecationInstrumenter : InstrumenterService {
     }
 
     override fun toTree(
-        es: SystemModel,
+        sm: SystemModel,
         forType: Entity.Type?
     ): Tree<EntityNode> {
         return tree("deprecations") {
-            if (klazz in es)
-                add(klazz.id) { es[klazz].forEach(::add) }
-            if (referencing in es)
+            if (klazz in sm)
+                add(klazz.id) { sm[klazz].forEach(::add) }
+            if (referencing in sm)
                 add(referencing.id) {
-                    es[referencing].forEach { e ->
+                    sm[referencing].forEach { e ->
                         add(e) {
                             e.children("deprecated").forEach(::add)
                         }
