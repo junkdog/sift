@@ -8,7 +8,7 @@ A tool to model and analyze the design of systems from java class files.
 - Instrumenter Pipelines provide knowledge about technology stacks for (static) bytecode analysis. 
 - Declarative DSL for additional, user-defined pipelines.
 - JSON serialization of pipelines for simpler reuse and sharing.
-- Inline render system with [graphviz](docs/images/sift-spring-axon-render.png).
+- Inline render representations of the system with [graphviz](docs/images/sift-spring-axon-render.png).
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-boot-axon.gif)
 
