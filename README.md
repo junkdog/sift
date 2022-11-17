@@ -8,6 +8,7 @@ A tool to model and analyze the design of systems from java class files.
 - Instrumenter Pipelines provide knowledge about technology stacks for (static) bytecode analysis. 
 - Declarative DSL for additional, user-defined pipelines.
 - JSON serialization of pipelines for simpler reuse and sharing.
+- Inline render system with [graphviz](docs/images/sift-spring-axon-render.png).
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-boot-axon.gif)
 
@@ -19,9 +20,6 @@ _Spring-Boot with Axon Framework [instrumenter][spring-axon] in action._
 ## CLI options
 
 ```
-Usage: sift [OPTIONS] [PATHS]...
-
-
 Usage: sift [OPTIONS]
 
   A tool to model and analyze the design of systems from bytecode.
@@ -30,6 +28,8 @@ Options:
   -f, --class-dir PATH                        jar or directory with classes
   -l, --list-instrumenters                    print all instrumenters detected on the current classpath
   -i, --instrumenter INSTRUMENTER             the instrumenter pipeline performing the scan
+  -R, --render                                render entities in graphviz's DOT language
+  -X, --dump-system-model                     print all entities along with their properties and metadata
   --profile                                   print execution times and input/output for the executed
                                               pipeline
   -T, --tree-root ENTITY-TYPE                 tree built around requested entity type
