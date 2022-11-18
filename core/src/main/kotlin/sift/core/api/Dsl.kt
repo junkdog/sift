@@ -21,7 +21,7 @@ annotation class SiftTemplateDsl
 @Suppress("UNCHECKED_CAST")
 object Dsl {
     interface ParentOperations<T : Element, PARENT_SCOPE : Core<T>> {
-        fun parentScope(label: String, f: PARENT_SCOPE.() -> Unit)
+        fun outerScope(label: String, f: PARENT_SCOPE.() -> Unit)
     }
 
     interface CommonOperations<T : Element, SCOPE : Core<T>> {
@@ -337,8 +337,8 @@ object Dsl {
 
         // TOOD: document ignoreOthers
         /** iterates class elements of registered [entity] type */
-        fun classesOf(entity: Entity.Type, ignoreOthers: Boolean = false, f: Classes.() -> Unit) {
-            val classes = Action.Instrumenter.ClassesOf(entity, ignoreOthers)
+        fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
+            val classes = Action.Instrumenter.ClassesOf(entity)
             val forkTo = Classes().also(f).action
 
             action += Action.Fork(classes andThen forkTo)
@@ -480,7 +480,7 @@ object Dsl {
             action += Action.ForkOnEntityExistence(forkTo, entity, op == ifExistsNot)
         }
 
-        override fun parentScope(
+        override fun outerScope(
             label: String,
             f: Classes.() -> Unit
         ) {
@@ -591,7 +591,7 @@ object Dsl {
             action += Action.ForkOnEntityExistence(forkTo, entity, op == ifExistsNot)
         }
 
-        override fun parentScope(label: String, f: Methods.() -> Unit) {
+        override fun outerScope(label: String, f: Methods.() -> Unit) {
             val forkTo = Action.Parameter.IntoParents andThen Methods().also(f).action
             action += Action.Fork(forkTo)
         }
@@ -669,7 +669,7 @@ object Dsl {
             action += Action.ForkOnEntityExistence(forkTo, entity, op == ifExistsNot)
         }
 
-        override fun parentScope(label: String, f: Classes.() -> Unit) {
+        override fun outerScope(label: String, f: Classes.() -> Unit) {
             val forkTo = Action.Field.IntoParents andThen Classes().also(f).action
             action += Action.Fork(forkTo)
         }

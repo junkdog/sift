@@ -6,6 +6,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.Type.getInternalName
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import java.io.File
 import java.io.FileNotFoundException
@@ -59,6 +60,9 @@ val MethodInsnNode.returnType: Type
 
 fun MethodInsnNode.argumentTypes(): Array<Type> = Type.getArgumentTypes(desc) ?: arrayOf()
 val MethodInsnNode.ownerType: Type
+    get() = Type.getType("L$owner;")
+
+val FieldInsnNode.ownerType: Type
     get() = Type.getType("L$owner;")
 
 val Handle.ownerType: Type

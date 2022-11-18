@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
+import org.reflections.Reflections
 import sift.core.*
 import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
@@ -16,6 +17,7 @@ import sift.core.api.ScopeEntityPredicate.ifExists
 import sift.core.api.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
+import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
 import sift.core.asm.type
 import sift.core.entity.Entity
@@ -194,7 +196,7 @@ class DslTest {
                 annotatedBy<Endpoint>()
                 entity(endpoint)
 
-                parentScope("register controller class") {
+                outerScope("register controller class") {
                     log("iterating set of classes with @Endpoint methods")
                     entity(controller)
                     controller["endpoints"] = endpoint
@@ -222,7 +224,7 @@ class DslTest {
                 logCount("found endpoints")
                 entity(endpoint)
 
-                parentScope("register controller class") {
+                outerScope("register controller class") {
                     log("iterating set of classes with @Endpoint methods")
                     entity(controller)
                     controller["endpoints"] = endpoint
@@ -255,7 +257,7 @@ class DslTest {
             }
 
             methodsOf(endpoint) {
-                parentScope("register controller") {
+                outerScope("register controller") {
                     entity(controller)
                     controller["endpoints"] = endpoint
                 }
@@ -495,6 +497,41 @@ class DslTest {
                 .isEqualTo("CLS MethodsWithTypes")
 
 
+        }
+    }
+
+    @Test
+    fun `handle kotlin functions with noinline and crossinline parameters`() {
+        val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set3")
+            .getTypesAnnotatedWith(Metadata::class.java)
+            .map(::classNode)
+
+        val hof = Entity.Type("hof")
+        val foo = Entity.Type("foo")
+
+        classes {
+
+            scope("register Foo") {
+                filter(Regex("Foo\$"))
+                entity(foo)
+            }
+
+            methods {
+                annotatedBy<InlineMarker>()
+                entity(hof)
+
+                hof["foo"] = foo.instantiations
+            }
+        }.execute(cns) { es ->
+            assertThat(es[foo]).hasSize(1)
+            assertThat(es[hof]).hasSize(5)
+
+            val (a, b, c, d, e) = es[hof].values.toList()
+            assertThat(a.children["foo"]).isNotEmpty()
+            assertThat(b.children["foo"]).isNotEmpty()
+            assertThat(c.children["foo"]).isNotEmpty()
+            assertThat(d.children["foo"]).isNotEmpty()
+            assertThat(e.children["foo"]).isNotEmpty()
         }
     }
 

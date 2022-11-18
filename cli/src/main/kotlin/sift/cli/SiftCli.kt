@@ -86,7 +86,7 @@ object SiftCli : CliktCommand(
     val instrumenter by option("-i", "--instrumenter",
             metavar = "INSTRUMENTER",
             help = "the instrumenter pipeline performing the scan",
-            completionCandidates = CompletionCandidates.Fixed(instermenterNames().toSet()))
+            completionCandidates = CompletionCandidates.Fixed(instrumenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
     val render: Boolean by option("-R", "--render",
@@ -219,7 +219,7 @@ object SiftCli : CliktCommand(
                     .toMap()
                     .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
 
-                // for updating labels
+                // updating labels and filtering
                 val tree = buildTree(sm, treeRoot)
                 stylize(tree, theme)
                 filterTree(tree)
@@ -228,7 +228,6 @@ object SiftCli : CliktCommand(
 
                 val graph = DiagramGenerator(sm, lookup)
                 val dot = graph.build(tree)
-                File("graph.dot").writeText(dot)
                 noAnsi.println(dot)
             }
             dumpSystemModel -> dumpEntities(terminal)
@@ -588,7 +587,7 @@ fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
         .toList()
 }
 
-fun instermenterNames() = instrumenters().map { (name, _)  -> name }
+fun instrumenterNames() = instrumenters().map { (name, _)  -> name }
 
 fun instrumenters(): Map<String, () -> InstrumenterService> {
     val fromSpi = ServiceLoader

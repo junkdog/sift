@@ -61,7 +61,6 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
         // axon
         val aggregate = "aggregate".type
-        val aggregateCtor = "aggregate-ctor".type // explicit aggregate creation
         val aggregateMember = "aggregate-member".type
         val command = "command".type
         val event = "event".type
@@ -120,7 +119,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                     property("path", readAnnotation(httpMethod, "value"))
                 )
 
-                parentScope("read base path from @RequestMapping") {
+                outerScope("read base path from @RequestMapping") {
                     property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
                 }
 
@@ -145,11 +144,6 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                     registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler, Dot.node)
                     aggregate["events"] = E.eventSourcingHandler
                 }
-
-                scope("register explicit aggregate creation via constructor") {
-                    filter("<init>".toRegex())
-                    entity(E.aggregateCtor, errorIfExists = false)
-                }
             }
         }
 
@@ -158,7 +152,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 scope("register controllers") {
                     annotatedBy(A.restController)
                     entity(E.controller,
-                         // --graph: prevents children from being deleted
+                         // when --render: prevents children from being deleted
                         property("dot-ignore", withValue(true)))
 
                     methods {
@@ -181,7 +175,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 scope("register member aggregates") {
                     fields {
                         annotatedBy(A.entityId)
-                        parentScope("member aggregate") {
+                        outerScope("member aggregate") {
                             registerAggregate(E.aggregateMember)
                         }
                     }
@@ -209,7 +203,6 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                 val soughtTypes = listOf(E.command, E.event, E.query)
                 val methodsToScan = listOf(
-                    E.aggregateCtor,
                     E.commandHandler,
                     E.endpoint,
                     E.eventHandler,
@@ -219,15 +212,11 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
 
                 soughtTypes.product(methodsToScan)
                     .forEach { (type, methods) -> registerInstantiationsOf(type, methods) }
-
-                methodsOf(E.commandHandler) {
-                    E.commandHandler["sends"] = E.aggregateCtor.invocations
-                }
             }
 
             scope("dot graph property configuration") {
                 fun rankCn(e: Entity.Type, rank: Int) {
-                    classesOf(e, ignoreOthers = true) {
+                    classesOf(e) {
                         property(e, "dot-rank", withValue(rank))
                         property(e, "dot-type", withValue(Dot.node))
                     }
@@ -240,7 +229,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 }
 
                 fun stripSuffixCn(e: Entity.Type, suffix: String) {
-                    classesOf(e, ignoreOthers = true) {
+                    classesOf(e) {
                         property(e, "dot-label-strip", withValue(suffix))
                     }
                 }

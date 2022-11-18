@@ -29,12 +29,12 @@ class DeprecationInstrumenter : InstrumenterService {
 
     override fun pipeline(): Action<Unit, Unit> {
         fun Dsl.Methods.registerWithParent() {
-            parentScope("tag class") { entity(referencing) }
+            outerScope("tag class") { entity(referencing) }
             referencing["deprecated"] = method
         }
 
         fun Dsl.Fields.registerWithParent() {
-            parentScope("tag class") { entity(referencing) }
+            outerScope("tag class") { entity(referencing) }
             referencing["deprecated"] = field
         }
 

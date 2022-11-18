@@ -60,7 +60,7 @@ class JpaInstrumenter : InstrumenterService {
                 invocationsOf(E.jpaRepository, synthesize = true) {
                     entity(E.jpaMethod)
                     log("jpa methods")
-                    parentScope("repository classes") {
+                    outerScope("repository classes") {
                         E.jpaRepository["methods"] = E.jpaMethod
                     }
                 }
