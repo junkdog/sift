@@ -214,6 +214,38 @@ class DslTest {
     }
 
     @Test
+    fun `read field name and explode synthesized field type`() {
+        val field = Entity.Type("field")
+        val foo = Entity.Type("foo")
+
+        val cns = listOf(
+            classNode<ClassWithFields>(),
+        )
+
+        // note that kotlin properties are usually not backed by actual fields
+        classes {
+            filter(Regex("ClassWithFields\$"))
+            fields {
+                entity(field, label("\${name}"),
+                    property("name", readName()))
+
+                explodeType(true) {
+                    entity(foo)
+                }
+            }
+        }.execute(cns) { es ->
+            assertThat(es[foo].values.map(Entity::label))
+                .hasSize(1)
+                .first()
+                .isEqualTo("ClassWithFields.Foo")
+            assertThat(es[field].values.map(Entity::label))
+                .hasSize(1)
+                .first()
+                .isEqualTo("field")
+        }
+    }
+
+    @Test
     fun `entity assignment from method to class via parentScope`() {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")

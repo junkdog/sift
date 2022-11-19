@@ -682,6 +682,13 @@ object Dsl {
             action += Action.Field.Filter(regex, invert)
         }
 
+        fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {
+            val explodeType = Action.Field.ExplodeType(synthesize)
+            val forkTo = Classes().also(f).action
+
+            action += Action.Fork(explodeType andThen forkTo)
+        }
+
         inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
 
         override fun annotatedBy(annotation: Type) {

@@ -2,6 +2,7 @@
 
 ### Features
 - DSL: `readName()` now also works for methods, fields and parameters.
+- DSL: `explodeType()` for fields.
  
 
 ### Changes

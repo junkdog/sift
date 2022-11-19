@@ -26,7 +26,6 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
-    JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
 
     JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
@@ -39,6 +38,7 @@ import sift.core.jackson.NoArgConstructor
 
     JsonSubTypes.Type(value = Action.Field.FieldScope::class, name = "field-scope"),
     JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
+    JsonSubTypes.Type(value = Action.Field.ExplodeType::class, name = "field-explode-type"),
     JsonSubTypes.Type(value = Action.Field.IntoParents::class, name = "field-parents"),
 
     JsonSubTypes.Type(value = Action.Parameter.ParameterScope::class, name = "parameter-scope"),
@@ -53,6 +53,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.EntityFilter::class, name = "entity-filter"),
     JsonSubTypes.Type(value = Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(value = Action.WithValue::class, name = "with-value"),
+    JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(value = Action.Fork::class, name = "fork"),
     JsonSubTypes.Type(value = Action.ForkOnEntityExistence::class, name = "fork-conditional"),
     JsonSubTypes.Type(value = Action.RegisterEntity::class, name = "entity"),
@@ -376,6 +377,22 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterFields): IterFields {
                 val f = if (invert) input::filterNot else input::filter
                 return f { regex in it.fn.name }
+            }
+        }
+
+        class ExplodeType(val synthesize: Boolean = false): Action<IterFields, IterClasses>() {
+            override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
+            override fun execute(ctx: Context, input: IterFields): IterClasses {
+               fun explode(field: Element.Field): Element.Class? {
+                   var exploded = ctx.classByType[field.fn.type]
+                   if (exploded == null && synthesize)
+                       exploded = ctx.synthesize(field.fn.type)
+
+                   return Element.Class(exploded ?: return null)
+                       .also { ctx.scopeTransition(field, it) }
+               }
+
+                return input.mapNotNull(::explode)
             }
         }
     }

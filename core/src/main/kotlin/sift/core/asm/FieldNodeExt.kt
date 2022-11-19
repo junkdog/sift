@@ -5,6 +5,8 @@ import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.FieldNode
 import sift.core.combine
 
+val FieldNode.type: Type
+    get() = Type.getType(desc)
 
 fun FieldNode.annotations(): MutableIterable<AnnotationNode> =
     combine(invisibleAnnotations, visibleAnnotations)
