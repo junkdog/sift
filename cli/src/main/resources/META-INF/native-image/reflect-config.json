@@ -554,6 +554,13 @@
   "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }]
 },
 {
+  "name":"sift.core.api.Action$ReadName",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.Action$RegisterChildren",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

@@ -13,7 +13,8 @@ import sift.instrumenter.Gruvbox
 
 /*
 
-dot-id              entity.type
+dot-id-as           entity.type
+dot-edge-label      str; for edge in conj with `dot-id-as`
 dot-label-strip     suffix
 dot-type            edge|node
 dot-ignore          true|false
@@ -33,6 +34,14 @@ class DiagramGenerator(
         .flatten()
         .filterBy(Entity::dotType, Dot.node)
 
+    init {
+        // move lingering dot-id to dot-id-as (todo: remove)
+        sm.entitiesByType
+            .values
+            .flatten()
+            .forEach { e -> e["dot-id"]?.firstOrNull()?.let { e["dot-id-as"] = it }  }
+    }
+
     private val Entity.color: String
         get() = colorLookup(type)
 
@@ -42,6 +51,7 @@ class DiagramGenerator(
         tree.walk()
             .filterNot(Tree<EntityNode>::validEntity)
             .forEach(Tree<EntityNode>::delete)
+
 
         // we always want to render the --root entity type as nodes,
         // even if they are marked as Dot.edge
@@ -156,11 +166,12 @@ private fun graph(
 }
 
 private fun toDotString(relation: Relation): String {
-    val label = relation.transit
+    val label = (relation.transit
         .map(Entity::dotLabel)
         .joinToString("\\n")
         .takeIf(String::isNotEmpty)
-        ?.let { """label="$it"""" }
+        ?: relation.to!!.dotEdgeLabel
+    )?.let { """label="$it"""" }
 
     val arrowhead = relation.transit
         .map(Entity::dotArrowhead)
@@ -199,7 +210,7 @@ private val Tree<EntityNode>.entity: Entity?
     get() = (value as? EntityNode.Entity)?.entity
 
 private val Entity.nodeId: String
-    get() = when(val type = get("dot-id")?.firstOrNull() as Entity.Type?) {
+    get() = when(val type = get("dot-id-as")?.firstOrNull() as Entity.Type?) {
         null -> label.replace(Regex("[\\s/|\\[\\]:(){}-]"), "_")
         else -> children("backtrack").firstBy(Entity::type, type).nodeId
     }
@@ -218,6 +229,9 @@ private val Entity.dotStyle: String?
 
 private val Entity.dotType: Dot?
     get() = this["dot-type"]?.firstOrNull() as Dot?
+
+private val Entity.dotEdgeLabel: String?
+    get() = this["dot-edge-label"]?.firstOrNull() as String?
 
 private fun edgeColors() = listOf(
     Gruvbox.aqua1,

@@ -26,7 +26,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
-    JsonSubTypes.Type(value = Action.Class.ReadName::class, name = "read-name"),
+    JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
 
     JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
@@ -185,15 +185,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterClasses): IterValues {
                 return input
                     .map { Element.Value(it.cn.type, it) }
-                    .onEach { ctx.scopeTransition(it.reference, it) }
-            }
-        }
-
-        object ReadName : Action<IterClasses, IterValues>() {
-            override fun id() = "read-name"
-            override fun execute(ctx: Context, input: IterClasses): IterValues {
-                return input
-                    .map { Element.Value(it.cn.type.simpleName, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -484,6 +475,23 @@ sealed class Action<IN, OUT> {
         override fun id() = "filter-entity($entity)"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input.filter { it in ctx.entityService }
+        }
+    }
+
+    class ReadName<T : Element> : Action<Iter<T>, IterValues>() {
+        override fun id() = "read-name"
+        override fun execute(ctx: Context, input: Iter<T>): IterValues {
+            fun nameOf(elem: T): String = when (elem) {
+                is Element.Class     -> elem.cn.type.simpleName
+                is Element.Method    -> elem.mn.name
+                is Element.Field     -> elem.fn.name
+                is Element.Parameter -> elem.pn.name
+                else                 -> error("$elem")
+            }
+
+            return input
+                .map { Element.Value(nameOf(it), it) }
+                .onEach { ctx.scopeTransition(it.reference, it) }
         }
     }
 

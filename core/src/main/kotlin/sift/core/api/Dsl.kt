@@ -194,6 +194,18 @@ object Dsl {
         }
 
         /**
+         * Reads the short form name of the element
+         */
+        fun readName(): Action<Iter<ELEMENT>, IterValues> {
+            val forkTo = Action.ReadName<ELEMENT>()
+                .let { Action.Fork(it) }
+
+            action +=  forkTo
+
+            return forkTo.forked
+        }
+
+        /**
          * This entity tracks [children] under the label denoted by [key].
          *
          * ## Example
@@ -379,6 +391,7 @@ object Dsl {
         ): Action<IterClasses, IterValues> {
             val forkTo = Action.ReadAnnotation<Element.Class>(annotation, field)
                 .let { Action.Fork(it) }
+
             action +=  forkTo
 
             return forkTo.forked
@@ -392,15 +405,6 @@ object Dsl {
 
         fun readType(): Action<IterClasses, IterValues> {
             val forkTo = Action.Class.ReadType
-                .let { Action.Fork(it) }
-
-            action +=  forkTo
-
-            return forkTo.forked
-        }
-
-        fun readName(): Action<IterClasses, IterValues> {
-            val forkTo = Action.Class.ReadName
                 .let { Action.Fork(it) }
 
             action +=  forkTo

@@ -1,5 +1,12 @@
 ## Upcoming release
 
+### Features
+- DSL: `readName()` now also works for methods, fields and parameters.
+ 
+
+### Changes
+- graphviz property `dot-id` renamed to`dot-id-as`.  
+
 ## sift-0.3.0 2022-11-18
 ### Breaking
 - DSL: `update` used for updating properties on existing entities is renamed to `property`. 
