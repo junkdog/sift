@@ -20,6 +20,7 @@
         <module>spring-boot-axon-cqrs</module>
         <module>jpa</module>
         <module>jdbi</module>
+        <module>sift</module>
     </modules>
 
     <profiles>
