@@ -196,8 +196,8 @@ object Dsl {
         /**
          * Reads the short form name of the element
          */
-        fun readName(): Action<Iter<ELEMENT>, IterValues> {
-            val forkTo = Action.ReadName<ELEMENT>()
+        fun readName(shorten: Boolean = false): Action<Iter<ELEMENT>, IterValues> {
+            val forkTo = Action.ReadName<ELEMENT>(shorten)
                 .let { Action.Fork(it) }
 
             action +=  forkTo
@@ -367,8 +367,9 @@ object Dsl {
 
     class Classes(
         override var action: Action.Chain<IterClasses> = chainFrom(Action.Class.ClassScope)
-    ) : Core<Element.Class>(), CommonOperations<Element.Class, Classes> {
-
+    ) : Core<Element.Class>(), CommonOperations<Element.Class, Classes>,
+        ParentOperations<Element.Class, Classes>
+    {
         // utility
 
         inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
@@ -430,6 +431,15 @@ object Dsl {
             action += Action.ForkOnEntityExistence(forkTo, entity, op == ifExistsNot)
         }
 
+        /** iterates any outer classes */
+        override fun outerScope(
+            label: String,
+            f: Classes.() -> Unit
+        ) {
+            val forkTo = Action.Class.IntoOuterClass andThen Classes().also(f).action
+            action += Action.Fork(forkTo)
+        }
+
         fun methods(f: Methods.() -> Unit) {
             val forkTo = Methods().also(f).action
                 .let { methodScope -> Action.Class.IntoMethods andThen methodScope }
@@ -488,7 +498,7 @@ object Dsl {
             label: String,
             f: Classes.() -> Unit
         ) {
-            val forkTo = Action.Method.IntoParents andThen Classes().also(f).action
+            val forkTo = Action.Method.IntoOuterScope andThen Classes().also(f).action
             action += Action.Fork(forkTo)
         }
 
@@ -596,7 +606,7 @@ object Dsl {
         }
 
         override fun outerScope(label: String, f: Methods.() -> Unit) {
-            val forkTo = Action.Parameter.IntoParents andThen Methods().also(f).action
+            val forkTo = Action.Parameter.IntoOuterScope andThen Methods().also(f).action
             action += Action.Fork(forkTo)
         }
 
@@ -674,7 +684,7 @@ object Dsl {
         }
 
         override fun outerScope(label: String, f: Classes.() -> Unit) {
-            val forkTo = Action.Field.IntoParents andThen Classes().also(f).action
+            val forkTo = Action.Field.IntoOuterScope andThen Classes().also(f).action
             action += Action.Fork(forkTo)
         }
 

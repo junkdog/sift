@@ -1,8 +1,11 @@
 ## Upcoming release
 
 ### Features
-- DSL: `readName()` now also works for methods, fields and parameters.
-- DSL: `explodeType()` for fields.
+- DSL.Class: `outerScope()` iterates any outer classes.
+- DSL.Method: `readName()` now also works for methods, fields and parameters.
+- DSL.Field: `explodeType()` iterates class elements of fields.
+- DSL.Field: `readName()` for fields.
+- DSL: `readName(shorten=true)` shortens names of inner classes.
  
 
 ### Changes

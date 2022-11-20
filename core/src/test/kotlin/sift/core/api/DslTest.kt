@@ -567,6 +567,32 @@ class DslTest {
         }
     }
 
+
+    @Test
+    fun `read outer class`() {
+        val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set3")
+            .getTypesAnnotatedWith(Metadata::class.java)
+            .map(::classNode)
+
+        val foo = Entity.Type("foo")
+
+        classes {
+
+            filter(Regex("Foo\$"))
+            entity(foo, label("\${outer}[\${name}]"),
+                property("name", readName(shorten = true)))
+
+            outerScope("read outer class name") {
+                property(foo, "outer", readName())
+            }
+
+
+        }.execute(cns) { es ->
+            assertThat(es[foo].values.map(Entity::label))
+                .containsExactly("KotlinInliningIntrospection[Foo]")
+        }
+    }
+
     @Test
     fun `filter classes`() {
         val controller = Entity.Type("controller")

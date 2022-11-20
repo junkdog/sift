@@ -387,6 +387,9 @@
   "name":"sift.core.api.Action$Field"
 },
 {
+  "name":"sift.core.api.Action$Field$ExplodeType"
+},
+{
   "name":"sift.core.api.Action$Field$FieldScope",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

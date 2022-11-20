@@ -25,11 +25,12 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
     JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
+    JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
     JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
 
     JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
-    JsonSubTypes.Type(value = Action.Method.IntoParents::class, name = "method-parents"),
+    JsonSubTypes.Type(value = Action.Method.IntoOuterScope::class, name = "method-parents"),
     JsonSubTypes.Type(value = Action.Method.MethodScope::class, name = "method-scope"),
     JsonSubTypes.Type(value = Action.Method.Filter::class, name = "filter-method"),
     JsonSubTypes.Type(value = Action.Method.Instantiations::class, name = "instantiations"),
@@ -39,12 +40,12 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Field.FieldScope::class, name = "field-scope"),
     JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
     JsonSubTypes.Type(value = Action.Field.ExplodeType::class, name = "field-explode-type"),
-    JsonSubTypes.Type(value = Action.Field.IntoParents::class, name = "field-parents"),
+    JsonSubTypes.Type(value = Action.Field.IntoOuterScope::class, name = "field-parents"),
 
     JsonSubTypes.Type(value = Action.Parameter.ParameterScope::class, name = "parameter-scope"),
     JsonSubTypes.Type(value = Action.Parameter.ExplodeType::class, name = "explode-type"),
     JsonSubTypes.Type(value = Action.Parameter.ReadType::class, name = "read-type"),
-    JsonSubTypes.Type(value = Action.Parameter.IntoParents::class, name = "parameter-parents"),
+    JsonSubTypes.Type(value = Action.Parameter.IntoOuterScope::class, name = "parameter-parents"),
     JsonSubTypes.Type(value = Action.Parameter.FilterNth::class, name = "parameter-nth"),
     JsonSubTypes.Type(value = Action.Parameter.Filter::class, name = "filter-parameter"),
 
@@ -181,6 +182,23 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        object IntoOuterClass : Action<IterClasses, IterClasses>() {
+            override fun id() = "outer-class"
+            override fun execute(ctx: Context, input: IterClasses): IterClasses {
+                fun outerClass(elem: Element.Class): Element.Class? {
+                    val self = (elem.cn.innerClasses ?: listOf())
+                        .firstOrNull { it.name == elem.cn.name }
+                        ?: return null
+
+                    return ctx.classByType[self.outerType]
+                        ?.let(Element::Class)
+                        ?.also { ctx.scopeTransition(elem, it) }
+                }
+
+                return input.mapNotNull(::outerClass)
+            }
+        }
+
         object ReadType : Action<IterClasses, IterValues>() {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterClasses): IterValues {
@@ -205,8 +223,8 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        object IntoParents : Action<IterMethods, IterClasses>() {
-            override fun id() = "parents"
+        object IntoOuterScope : Action<IterMethods, IterClasses>() {
+            override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 return input
                     .map { m -> m.into<Element.Class>().also { ctx.scopeTransition(m, it) } }
@@ -363,8 +381,8 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterFields): IterFields = input
         }
 
-        object IntoParents : Action<IterFields, IterClasses>() {
-            override fun id() = "parents"
+        object IntoOuterScope : Action<IterFields, IterClasses>() {
+            override fun id() = "outer"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
                     .map { f -> f.into<Element.Class>().also { ctx.scopeTransition(f, it) } }
@@ -429,8 +447,8 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        object IntoParents : Action<IterParameters, IterMethods>() {
-            override fun id() = "parents"
+        object IntoOuterScope : Action<IterParameters, IterMethods>() {
+            override fun id() = "outer"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input
                     .map { p -> p.into<Element.Method>().also { ctx.scopeTransition(p, it) } }
@@ -495,14 +513,23 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    class ReadName<T : Element> : Action<Iter<T>, IterValues>() {
+    class ReadName<T : Element>(val shortened: Boolean = false) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun nameOf(elem: T): String = when (elem) {
-                is Element.Class     -> elem.cn.type.simpleName
                 is Element.Method    -> elem.mn.name
                 is Element.Field     -> elem.fn.name
                 is Element.Parameter -> elem.pn.name
+                is Element.Class     -> {
+                    if (shortened) {
+                        (elem.cn.innerClasses ?: listOf())
+                            .firstOrNull { it.name == elem.cn.name }
+                            ?.innerName
+                            ?: elem.cn.type.simpleName
+                    } else {
+                        elem.cn.type.simpleName
+                    }
+                }
                 else                 -> error("$elem")
             }
 
@@ -706,5 +733,8 @@ sealed class Action<IN, OUT> {
 }
 
 fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
+
+private val InnerClassNode.outerType: Type
+    get() = Type.getType("L${outerName};")
 
 var debugLog = false
