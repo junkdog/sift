@@ -341,6 +341,13 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Class$IntoOuterClass",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.Action$Class$ReadName",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -398,6 +405,9 @@
 },
 {
   "name":"sift.core.api.Action$Field$Filter"
+},
+{
+  "name":"sift.core.api.Action$Field$IntoOuterScope"
 },
 {
   "name":"sift.core.api.Action$Field$IntoParents",
@@ -472,11 +482,21 @@
   "methods":[{"name":"<init>","parameterTypes":["kotlin.text.Regex","boolean"] }]
 },
 {
+  "name":"sift.core.api.Action$Method$FilterName",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["kotlin.text.Regex","boolean"] }]
+},
+{
   "name":"sift.core.api.Action$Method$Instantiations",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Method$IntoOuterScope"
 },
 {
   "name":"sift.core.api.Action$Method$IntoParameters",
@@ -533,6 +553,9 @@
   "methods":[{"name":"<init>","parameterTypes":["int"] }]
 },
 {
+  "name":"sift.core.api.Action$Parameter$IntoOuterScope"
+},
+{
   "name":"sift.core.api.Action$Parameter$IntoParents"
 },
 {
@@ -561,7 +584,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["boolean"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$RegisterChildren",

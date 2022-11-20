@@ -211,7 +211,7 @@ private val Tree<EntityNode>.entity: Entity?
 
 private val Entity.nodeId: String
     get() = when(val type = get("dot-id-as")?.firstOrNull() as Entity.Type?) {
-        null -> label.replace(Regex("[\\s/|\\[\\]:(){}-]"), "_")
+        null -> label.replace(Regex("[\\s/|\\[\\]:(){}.\\-$]"), "_")
         else -> children("backtrack").firstBy(Entity::type, type).nodeId
     }
 

@@ -510,6 +510,10 @@ object Dsl {
             action += Action.Method.Filter(regex, invert)
         }
 
+        fun filterName(regex: Regex, invert: Boolean = false) {
+            action += Action.Method.FilterName(regex, invert)
+        }
+
         fun declaredMethods() {
             action += Action.Method.DeclaredMethods
         }

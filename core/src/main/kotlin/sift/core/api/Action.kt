@@ -33,6 +33,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Method.IntoOuterScope::class, name = "method-parents"),
     JsonSubTypes.Type(value = Action.Method.MethodScope::class, name = "method-scope"),
     JsonSubTypes.Type(value = Action.Method.Filter::class, name = "filter-method"),
+    JsonSubTypes.Type(value = Action.Method.FilterName::class, name = "filter-method-name"),
     JsonSubTypes.Type(value = Action.Method.Instantiations::class, name = "instantiations"),
     JsonSubTypes.Type(value = Action.Method.Invokes::class, name = "invokes"),
     JsonSubTypes.Type(value = Action.Method.InvocationsOf::class, name = "invocations-of"),
@@ -251,7 +252,15 @@ sealed class Action<IN, OUT> {
                 return f { regex in it.mn.name || regex in it.cn.qualifiedName }
             }
         }
-        
+
+        data class FilterName(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
+            override fun id() = "filter-name($regex${", invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                val f = if (invert) input::filterNot else input::filter
+                return f { regex in it.mn.name }
+            }
+        }
+
         data class Instantiations(
             val match: Entity.Type,
         ) : Action<IterMethods, IterClasses>() {

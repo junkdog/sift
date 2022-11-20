@@ -5,8 +5,11 @@
 - DSL.Method: `readName()` now also works for methods, fields and parameters.
 - DSL.Field: `explodeType()` iterates class elements of fields.
 - DSL.Field: `readName()` for fields.
+- DSL.Field: `filterName()` only inspects the methods name; `filter()` also checks the class name.
 - DSL: `readName(shorten=true)` shortens names of inner classes.
  
+### Fixes
+- DOT: illegal node ids containing `.` and `$`.  
 
 ### Changes
 - graphviz property `dot-id` renamed to`dot-id-as`.  

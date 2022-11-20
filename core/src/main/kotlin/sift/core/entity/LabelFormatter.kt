@@ -16,7 +16,12 @@ sealed interface LabelFormatter : Entity.LabelFormatter {
                         else -> error("':' can only occur once and is not escapable atm")
                     }
 
-                    entity[key]?.first()?.toString() ?: defaultValue
+                    if (key.startsWith("+")) {
+                        entity[key.substring(1)]?.joinToString() ?: defaultValue
+                    } else {
+                        entity[key]?.first()?.toString() ?: defaultValue
+                    }
+
                 }
         }
 
