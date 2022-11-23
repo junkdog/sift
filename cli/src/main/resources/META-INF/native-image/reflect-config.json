@@ -407,7 +407,11 @@
   "name":"sift.core.api.Action$Field$Filter"
 },
 {
-  "name":"sift.core.api.Action$Field$IntoOuterScope"
+  "name":"sift.core.api.Action$Field$IntoOuterScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sift.core.api.Action$Field$IntoParents",
@@ -496,7 +500,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sift.core.api.Action$Method$IntoOuterScope"
+  "name":"sift.core.api.Action$Method$IntoOuterScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sift.core.api.Action$Method$IntoParameters",
@@ -586,7 +594,8 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
-    {"name":"<init>","parameterTypes":["boolean"] }
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"<init>","parameterTypes":["boolean","int","kotlin.jvm.internal.DefaultConstructorMarker"] }
   ]
 },
 {
