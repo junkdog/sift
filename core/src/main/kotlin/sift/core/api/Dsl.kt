@@ -724,6 +724,11 @@ object Dsl {
         inline fun <reified T : Annotation> readAnnotation(
             field: KProperty1<T, *>
         ): Action<IterFields, IterValues> = readAnnotation(type<T>(), field.name)
+
+        fun genericType(synthesize: Boolean = false, f: Classes.() -> Unit) {
+            val scope = Classes().also(f).action
+            action += Action.Fork(Action.Field.ToGenericType(synthesize) andThen scope)
+        }
     }
 }
 

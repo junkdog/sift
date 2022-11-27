@@ -500,9 +500,19 @@ class DslTest {
         TODO()
     }
 
-    @Test @Disabled
+    @Test
     fun `read generic type`() {
-        TODO()
+        val cns = listOf(classNode<ClassWithGenericTypes<*>>())
+
+        classes {
+            fields {
+                genericType() {
+
+                }
+            }
+        }.execute(cns) { es ->
+
+        }
     }
 
     @Test @Disabled

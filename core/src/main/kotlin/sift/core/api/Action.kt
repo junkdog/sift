@@ -407,6 +407,13 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        data class ToGenericType(val synthesize: Boolean) : Action<IterFields, IterClasses>() {
+            override fun id() = "generic-type(${", synthesize".takeIf { synthesize } ?: ""})"
+            override fun execute(ctx: Context, input: IterFields): IterClasses {
+                TODO()
+            }
+        }
+
         class ExplodeType(val synthesize: Boolean = false): Action<IterFields, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
