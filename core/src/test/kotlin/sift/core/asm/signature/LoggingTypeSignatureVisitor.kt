@@ -52,4 +52,9 @@ class LoggingTypeSignatureVisitor(
         return LoggingTypeSignatureVisitor()
             .also { it.indent = indent + 1 }
     }
+
+    override fun visitParameterType(): SignatureVisitor {
+        return LoggingTypeSignatureVisitor()
+            .also { it.indent = indent + 1 }
+    }
 }

@@ -5,26 +5,26 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
 
 class TypeArgumentVisitor(
-    val onTypeArgument: (TypeArgument) -> Unit,
+    val onTypeArgument: (TypeSignature) -> Unit,
     val formalTypeParameters: (String) -> FormalTypeParameter,
     api: Int = Opcodes.ASM9,
     signatureVisitor: SignatureVisitor? = null,
 ) : BaseSignatureVisitor(api, signatureVisitor) {
 
-    private var arg: TypeArgument? = null
+    private var arg: TypeSignature? = null
 
     // recursive; initial TypeArgumentVisitor created earlier
     override fun visitTypeArgument(wildcard: Char): SignatureVisitor {
         requireNotNull(arg)
 
-        return TypeArgumentVisitor(arg!!.inner::add, formalTypeParameters, api, sv?.visitTypeArgument(wildcard))
+        return TypeArgumentVisitor(arg!!.args::add, formalTypeParameters, api, sv?.visitTypeArgument(wildcard))
     }
 
     override fun visitTypeVariable(name: String) {
         require(arg == null)
 
         val param = formalTypeParameters(name)
-        arg = TypeArgument(ArgType.Var(param), MetaType.GenericType, 'X')
+        arg = TypeSignature(ArgType.Var(param), MetaType.GenericType, 'X')
             .also(onTypeArgument)
 
         sv?.visitTypeVariable(name)
@@ -34,19 +34,46 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         val type = Type.getType("L$name;")
-        arg = TypeArgument(ArgType.Plain(type), MetaType.Class, 'X')
+        arg = TypeSignature(ArgType.Plain(type), MetaType.Class, 'X')
             .also(onTypeArgument)
 
         sv?.visitClassType(name)
     }
 
     override fun visitArrayType(): SignatureVisitor {
-        TODO("test me")
-        return sv?.visitArrayType()!!
+        require(arg == null)
+//
+//        val type = Type.getType("L$name;")
+//        val argType = ArgType.Array(null)
+//        arg = TypeArgument(argType, MetaType.Array, 'X')
+//            .also(onTypeArgument)
+
+        return TypeArgumentVisitor(
+            onTypeArgument = onTypeArgument, // FIXME: don't ignore arrays
+            formalTypeParameters = formalTypeParameters,
+            api = api,
+            signatureVisitor = sv?.visitArrayType()
+
+        )
     }
 
     override fun visitBaseType(descriptor: Char) {
-        TODO("test me")
+        val type = when (descriptor) {
+            'Z' -> Type.BOOLEAN_TYPE
+            'B' -> Type.BYTE_TYPE
+            'C' -> Type.CHAR_TYPE
+            'S' -> Type.SHORT_TYPE
+            'I' -> Type.INT_TYPE
+            'J' -> Type.LONG_TYPE
+            'F' -> Type.FLOAT_TYPE
+            'D' -> Type.DOUBLE_TYPE
+            'V' -> Type.VOID_TYPE
+            else -> error(descriptor)
+        }
+
+        arg = TypeSignature(ArgType.Plain(type), MetaType.Class, 'X')
+            .also(onTypeArgument)
+
         sv?.visitBaseType(descriptor)
     }
 

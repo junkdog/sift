@@ -235,21 +235,22 @@ private val Entity.dotEdgeLabel: String?
 
 private fun edgeColors() = listOf(
     Gruvbox.aqua1,
-    Gruvbox.aqua2,
     Gruvbox.blue1,
-    Gruvbox.blue2,
     Gruvbox.fg,
     Gruvbox.gray244,
-    Gruvbox.gray245,
     Gruvbox.green1,
-    Gruvbox.green2,
     Gruvbox.orange1,
-    Gruvbox.orange2,
     Gruvbox.purple1,
-    Gruvbox.purple2,
     Gruvbox.red1,
-    Gruvbox.red2,
     Gruvbox.yellow1,
+).shuffled() + listOf(
+    Gruvbox.aqua2,
+    Gruvbox.blue2,
+    Gruvbox.gray245,
+    Gruvbox.green2,
+    Gruvbox.orange2,
+    Gruvbox.purple2,
+    Gruvbox.red2,
     Gruvbox.yellow2,
 ).shuffled()
 
