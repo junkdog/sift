@@ -1,10 +1,7 @@
 package sift.core.asm.signature
 
 import org.junit.jupiter.api.Test
-import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Opcodes.ASM9
-import org.objectweb.asm.signature.SignatureReader
-import org.objectweb.asm.util.TraceSignatureVisitor
 import sift.core.asm.*
 
 class GenericsTest {
@@ -18,63 +15,31 @@ class GenericsTest {
             classNode(ClassExtendingAnyAny2::class),
             classNode(InterfaceA::class),
         ).forEach { cn ->
-
-            val sp = SignatureParser(Opcodes.ASM9, LoggingSignatureVisitor(Opcodes.ASM9))
-
-            println(cn.type.simpleName + ":")
-            SignatureReader(cn.signature)
-                .accept(sp)
-
-            println()
-            println(sp.asClassSignatureNode)
+            println(cn.name)
+            println(cn.signature(LoggingSignatureVisitor(ASM9)))
             println()
         }
 
 
         classNode<GenericFields>().fields!!.forEach { fn ->
-            SignatureParser(ASM9, LoggingSignatureVisitor(ASM9)).let { sp ->
-                println("${fn.name}:")
-                SignatureReader(fn.signature)
-                    .accept(sp)
-
-                println()
-                println(sp.asTypeSignatureNode)
-                println()
-            }
+            println(fn.name)
+            println(fn.signature(listOf(), LoggingSignatureVisitor(ASM9)))
+            println()
         }
 
 
         val genericFields2 = classNode(GenericFields2::class)
-
-        val formalTypeParams = SignatureParser(ASM9, null)
-            .also { SignatureReader(genericFields2.signature).accept(it) }
-            .typeParameters
-
-        SignatureParser(formalTypeParams, ASM9, LoggingSignatureVisitor(ASM9)).let { sp ->
-            genericFields2.fields!!.forEach { fn ->
-
-                println("${fn.name}:")
-                SignatureReader(fn.signature)
-                    .accept(sp)
-
-                println()
-                println(sp.asTypeSignatureNode)
-                println()
-            }
+        val formalTypeParams = genericFields2.signature()!!.formalParameters
+        genericFields2.fields!!.forEach { fn ->
+            println(fn.name)
+            println(fn.signature(formalTypeParams, LoggingSignatureVisitor(ASM9)))
+            println()
         }
 
-        SignatureParser(ASM9, LoggingSignatureVisitor(ASM9)).let { sp ->
-            classNode<GenericMethods>().methods!!.filter { it.signature != null }.forEach { mn ->
-
-                println("${mn.name}:")
-                SignatureReader(mn.signature)
-                    .accept(sp)
-
-
-                println()
-                println(sp.asMethodSignatureNode)
-                println()
-            }
+        classNode<GenericMethods>().methods!!.filter { it.signature != null }.forEach { mn ->
+            println(mn.name)
+            println(mn.signature(listOf(), LoggingSignatureVisitor(ASM9)))
+            println()
         }
     }
 }

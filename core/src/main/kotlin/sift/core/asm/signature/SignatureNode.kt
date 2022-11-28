@@ -1,70 +1,61 @@
 package sift.core.asm.signature
 
-import org.objectweb.asm.Type
-import sift.core.asm.simpleName
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.signature.SignatureReader
+import org.objectweb.asm.signature.SignatureVisitor
+import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldNode
+import org.objectweb.asm.tree.MethodNode
 
-class SignatureNode(
-    val type: ArgType,
-    val parameters: List<FormalTypeParameter>,
-    val args: List<TypeSignature>,
+
+fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
+    signature ?: return null
+
+    return SignatureParser(Opcodes.ASM9, wrap)
+        .also { SignatureReader(signature).accept(it) }
+        .asClassSignatureNode
+}
+
+fun FieldNode.signature(
+    formalTypeParams: List<FormalTypeParameter>,
+    wrap: SignatureVisitor? = null
+): TypeSignatureNode? {
+    signature ?: return null
+
+    return SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
+        .also { SignatureReader(signature).accept(it) }
+        .asTypeSignatureNode
+}
+
+fun MethodNode.signature(
+    formalTypeParams: List<FormalTypeParameter>,
+    wrap: SignatureVisitor? = null,
+): MethodSignatureNode? {
+    signature ?: return null
+
+    return SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
+        .also { SignatureReader(signature).accept(it) }
+        .asMethodSignatureNode
+}
+
+data class MethodSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
+    val methodParameters: List<TypeSignature>,
     val returnType: TypeSignature?,
+)
+
+data class TypeSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
     val extends: List<TypeSignature>
 )
 
-/** "usage" of generic type and constraints */
-data class TypeSignature(
-    val type: ArgType,
-    val bound: MetaType,
-    val wildcard: Char,
-    val args: MutableList<TypeSignature> = mutableListOf()
+data class ClassSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
+    val extends: TypeSignature,
+    val implements: List<TypeSignature>
 ) {
-    override fun toString(): String {
-        val inner = args
-            .takeIf(MutableList<TypeSignature>::isNotEmpty)
-            ?.joinToString(prefix = "<", postfix = ">")
-            ?: ""
-
-        return "$type$inner"
-    }
+    constructor(
+        parameters: List<FormalTypeParameter>,
+        extends: List<TypeSignature>
+    ) : this(parameters, extends.first(), extends.drop(1))
 }
-
-/** declaration of generic type and constraints */
-data class FormalTypeParameter(
-    val name: String,
-    var extends: Type? = null, // visitClassType of T
-    val args: MutableList<TypeSignature> = mutableListOf()
-) {
-    override fun toString(): String {
-        val ext = extends?.let { " : ${it.simpleName}" }
-
-        val inner = args
-            .takeIf(MutableList<TypeSignature>::isNotEmpty)
-            ?.joinToString(prefix = "<", postfix = ">")
-            ?: ""
-
-        return "<$name$ext$inner>"
-    }
-}
-
-sealed interface ArgType {
-    data class Plain(val type: Type) : ArgType {
-        override fun toString(): String = type.simpleName
-    }
-
-    data class Var(val type: FormalTypeParameter) : ArgType {
-        override fun toString(): String = type.name
-    }
-
-    data class Array(var wrapped: ArgType?) : ArgType {
-        override fun toString(): String = "$wrapped[]"
-    }
-}
-
-enum class MetaType {
-    GenericType, Class, Interface, Array
-}
-
-data class TypeVariable(
-    val name: String,
-    val type: Type
-)

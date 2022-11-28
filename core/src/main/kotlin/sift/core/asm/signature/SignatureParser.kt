@@ -4,31 +4,8 @@ import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.signature.SignatureVisitor
 
 
-data class TypeSignatureNode(
-    val parameters: List<FormalTypeParameter>,
-    val extends: List<TypeSignature>
-)
-
-data class ClassSignatureNode(
-    val parameters: List<FormalTypeParameter>,
-    val extends: TypeSignature,
-    val implements: List<TypeSignature>
-) {
-    constructor(
-        parameters: List<FormalTypeParameter>,
-        extends: List<TypeSignature>
-    ) : this(parameters, extends.first(), extends.drop(1))
-}
-
-data class MethodSignatureNode(
-    val parameters: List<FormalTypeParameter>,
-    val methodParameters: List<TypeSignature>,
-    val returnType: TypeSignature?,
-)
-
-
 class SignatureParser(
-    typeParams: MutableList<FormalTypeParameter>,
+    typeParams: List<FormalTypeParameter>,
     api: Int,
     sv: SignatureVisitor? = null
 ) : BaseSignatureVisitor(api, sv) {
