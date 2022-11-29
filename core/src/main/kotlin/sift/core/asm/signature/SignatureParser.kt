@@ -29,18 +29,18 @@ class SignatureParser(
         get() = TypeSignatureNode(typeParameters.toList(), extends.toList())
     val asMethodSignatureNode: MethodSignatureNode
         get() = MethodSignatureNode(typeParameters.toList(), methodParameters.toList(), returnType)
+    val asFieldSignatureNode: FieldSignatureNode
+        get() = FieldSignatureNode(typeParameters.toList(), methodParameters.first())
 
     override fun visitFormalTypeParameter(name: String) {
-        typeParameters += FormalTypeParameter(name, null)
+        typeParameters += FormalTypeParameter(name)
         sv?.visitFormalTypeParameter(name)
     }
 
     override fun visitClassBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last(),
-            MetaType.Class,
+            typeParameters.last().also { it.metaType = MetaType.Class },
             typeParameters::firstByName,
-            typeParameters::add,
             api,
             sv?.visitClassBound()
         )
@@ -48,10 +48,8 @@ class SignatureParser(
 
     override fun visitInterfaceBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last(),
-            MetaType.Interface,
+            typeParameters.last().also { it.metaType = MetaType.Interface },
             typeParameters::firstByName,
-            typeParameters::add,
             api,
             sv?.visitInterfaceBound()
         )

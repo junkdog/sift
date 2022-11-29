@@ -17,14 +17,20 @@ class TypeArgumentVisitor(
     override fun visitTypeArgument(wildcard: Char): SignatureVisitor {
         requireNotNull(arg)
 
-        return TypeArgumentVisitor(arg!!.args::add, formalTypeParameters, api, sv?.visitTypeArgument(wildcard))
+
+        return TypeArgumentVisitor(
+            arg!!.args::add,
+            formalTypeParameters,
+            api,
+            sv?.visitTypeArgument(wildcard)
+        )
     }
 
     override fun visitTypeVariable(name: String) {
         require(arg == null)
 
         val param = formalTypeParameters(name)
-        arg = TypeSignature(ArgType.Var(param), MetaType.GenericType, 'X')
+        arg = TypeSignature(ArgType.Var(param), MetaType.GenericType)
             .also(onTypeArgument)
 
         sv?.visitTypeVariable(name)
@@ -34,7 +40,7 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         val type = Type.getType("L$name;")
-        arg = TypeSignature(ArgType.Plain(type), MetaType.Class, 'X')
+        arg = TypeSignature(ArgType.Plain(type), MetaType.Class)
             .also(onTypeArgument)
 
         sv?.visitClassType(name)
@@ -53,7 +59,6 @@ class TypeArgumentVisitor(
             formalTypeParameters = formalTypeParameters,
             api = api,
             signatureVisitor = sv?.visitArrayType()
-
         )
     }
 
@@ -71,7 +76,7 @@ class TypeArgumentVisitor(
             else -> error(descriptor)
         }
 
-        arg = TypeSignature(ArgType.Plain(type), MetaType.Class, 'X')
+        arg = TypeSignature(ArgType.Plain(type), MetaType.Class)
             .also(onTypeArgument)
 
         sv?.visitBaseType(descriptor)

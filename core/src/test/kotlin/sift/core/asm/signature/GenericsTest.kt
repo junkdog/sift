@@ -1,10 +1,71 @@
 package sift.core.asm.signature
 
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.objectweb.asm.Opcodes.ASM9
 import sift.core.asm.*
+import kotlin.reflect.KClass
 
 class GenericsTest {
+
+    @Nested
+    inner class ClassSignature {
+        @Test
+        fun `nested generics`() {
+            assertSignature(
+                cls = InterfaceA::class,
+                typeParameters = "<T : Comparable<T>, S : Map<Integer, T>>",
+                extends = "Object",
+                implements = "[Comparable<T>]"
+            )
+        }
+
+        @Test
+        fun `extending map of concrete types`() {
+            assertSignature(
+                cls = ClassExtendingMap::class,
+                typeParameters = null,
+                extends = "HashMap<String, Double>",
+                implements = null,
+            )
+        }
+
+        @Test
+        fun `implementing map of concrete and variable type`() {
+            assertSignature(
+                cls = ClassImplementingMapOfS::class,
+                typeParameters = "<T, S : List<T>>",
+                extends = null,
+                implements = "[Map<String, S>, KMappedMarker]", // TODO: consider stripping internal annotations
+            )
+        }
+
+        private fun assertSignature(
+            cls: KClass<*>,
+            typeParameters: String?,
+            extends: String?,
+            implements: String?,
+        ) {
+            val signature = classNode(cls).signature(LoggingSignatureVisitor())!!
+
+            typeParameters?.let { expected ->
+                assertThat("<${signature.formalParameters.joinToString()}>")
+                    .isEqualTo(expected)
+            } ?: run { assertThat(signature.formalParameters).isEmpty() }
+
+            extends?.let { expected ->
+                assertThat(signature.extends.toString())
+                    .isEqualTo(expected)
+            } ?: run { assertThat(signature.extends.toString()).isEqualTo("Object") }
+
+            implements?.let { expected ->
+                assertThat(signature.implements.toString())
+                    .isEqualTo(expected)
+            } ?: run { assertThat(signature.implements).isEmpty() }
+        }
+    }
+
     @Test
     fun `read simple class signature`() {
         listOf(
@@ -44,11 +105,15 @@ class GenericsTest {
     }
 }
 
+private interface InterfaceA<T : Comparable<T>, S : Map<Int, T>> : Comparable<T>
+private class ClassExtendingMap() : HashMap<String, Double>()
+abstract class ClassImplementingMapOfS<T, S : List<T>> : Map<String, S>
+
+
+
 private class ClassExtendingAny<T>(var t: T)
 
-private interface InterfaceA<T : Comparable<T>, S : Map<Int, T>> : Comparable<T>
 
-private class ClassExtendingMap() : HashMap<String, Double>()
 private class ClassExtendingList() : ArrayList<String>() {
     val strings: List<String> = listOf()
 }
@@ -56,6 +121,7 @@ private class ClassExtendingListMap() : ArrayList<HashMap<String, Double>>()
 
 private class ClassExtendingAnyAny<T, U : List<T>, S : Map<T, U>>(var t: T, u: U)
 abstract class ClassExtendingAnyAny2<T, U : List<T>, S : Map<T, String>> : Map<T, String>
+
 
 private class GenericFields {
     var listOfString = listOf<String>()

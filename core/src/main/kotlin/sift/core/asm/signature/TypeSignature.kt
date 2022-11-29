@@ -6,7 +6,6 @@ import sift.core.asm.simpleName
 data class TypeSignature(
     val type: ArgType,
     val bound: MetaType,
-    val wildcard: Char,
     val args: MutableList<TypeSignature> = mutableListOf()
 ) {
     override fun toString(): String {
@@ -34,5 +33,5 @@ sealed interface ArgType {
 }
 
 enum class MetaType {
-    GenericType, Class, Interface, Array
+    GenericType, Class, Interface, Array, Undefined
 }

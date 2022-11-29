@@ -8,6 +8,8 @@ import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 
 
+// todo; param signature node
+
 fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
     signature ?: return null
 
@@ -19,12 +21,12 @@ fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
 fun FieldNode.signature(
     formalTypeParams: List<FormalTypeParameter>,
     wrap: SignatureVisitor? = null
-): TypeSignatureNode? {
+): FieldSignatureNode? {
     signature ?: return null
 
     return SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
         .also { SignatureReader(signature).accept(it) }
-        .asTypeSignatureNode
+        .asFieldSignatureNode
 }
 
 fun MethodNode.signature(
@@ -38,16 +40,6 @@ fun MethodNode.signature(
         .asMethodSignatureNode
 }
 
-data class MethodSignatureNode(
-    val formalParameters: List<FormalTypeParameter>,
-    val methodParameters: List<TypeSignature>,
-    val returnType: TypeSignature?,
-)
-
-data class TypeSignatureNode(
-    val formalParameters: List<FormalTypeParameter>,
-    val extends: List<TypeSignature>
-)
 
 data class ClassSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
@@ -59,3 +51,19 @@ data class ClassSignatureNode(
         extends: List<TypeSignature>
     ) : this(parameters, extends.first(), extends.drop(1))
 }
+
+data class FieldSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
+    val extends: TypeSignature
+)
+
+data class MethodSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
+    val methodParameters: List<TypeSignature>,
+    val returnType: TypeSignature?,
+)
+data class TypeSignatureNode(
+    val formalParameters: List<FormalTypeParameter>,
+    val extends: List<TypeSignature>
+)
+

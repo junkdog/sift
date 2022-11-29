@@ -6,16 +6,20 @@ import sift.core.asm.simpleName
 data class FormalTypeParameter(
     val name: String,
     var extends: Type? = null, // visitClassType of T
+    var metaType: MetaType = MetaType.Undefined,
     val args: MutableList<TypeSignature> = mutableListOf()
 ) {
     override fun toString(): String {
-        val ext = extends?.let { " : ${it.simpleName}" }
+        val ext = extends
+            ?.takeUnless { it.descriptor == "Ljava/lang/Object;" }
+            ?.let { " : ${it.simpleName}" }
+            ?: ""
 
         val inner = args
             .takeIf(MutableList<TypeSignature>::isNotEmpty)
             ?.joinToString(prefix = "<", postfix = ">")
             ?: ""
 
-        return "<$name$ext$inner>"
+        return "$name$ext$inner"
     }
 }
