@@ -30,7 +30,7 @@ class SignatureParser(
     val asMethodSignatureNode: MethodSignatureNode
         get() = MethodSignatureNode(typeParameters.toList(), methodParameters.toList(), returnType)
     val asFieldSignatureNode: FieldSignatureNode
-        get() = FieldSignatureNode(typeParameters.toList(), methodParameters.first())
+        get() = FieldSignatureNode(typeParameters.toList(), extends.first())
 
     override fun visitFormalTypeParameter(name: String) {
         typeParameters += FormalTypeParameter(name)
