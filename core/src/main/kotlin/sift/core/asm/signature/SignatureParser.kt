@@ -39,7 +39,7 @@ class SignatureParser(
 
     override fun visitClassBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last().also { it.metaType = MetaType.Class },
+            typeParameters.last(), // .also { it.metaType = MetaType.Class },
             typeParameters::firstByName,
             api,
             sv?.visitClassBound()
@@ -48,7 +48,7 @@ class SignatureParser(
 
     override fun visitInterfaceBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last().also { it.metaType = MetaType.Interface },
+            typeParameters.last(), //.also { it.metaType = MetaType.Interface },
             typeParameters::firstByName,
             api,
             sv?.visitInterfaceBound()
