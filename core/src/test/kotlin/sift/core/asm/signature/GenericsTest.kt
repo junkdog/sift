@@ -2,10 +2,8 @@ package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.firstBy
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.MethodOrderer.MethodName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import sift.core.asm.*
@@ -160,12 +158,12 @@ class GenericsTest {
         }
 
         @Test
-        fun `array of string`() {
+        fun `array of array of string`() {
             assertSignature(
                 cls = GenericFields::class,
                 name = "arrayofString",
                 typeParameters = null,
-                extends = "List<String[]>"
+                extends = "List<String[][]>"
             )
         }
 
@@ -206,7 +204,7 @@ class GenericsTest {
             extends: String
         ) {
             val cn = classNode(cls)
-            val types = cn.signature()?.formalParameters ?: listOf()
+            val types = cn.signature(LoggingSignatureVisitor())?.formalParameters ?: listOf()
             val signature = cn.fields
                 .firstBy(FieldNode::name, name)
                 .signature(types, LoggingSignatureVisitor())!!
@@ -229,7 +227,7 @@ abstract class ClassImplementingMapOfS<T, S : List<T>> : Map<String, S>
 
 private class GenericFields {
     var listOfString = listOf<String>()
-    var arrayofString = listOf(arrayOf("hi"))
+    var arrayofString = listOf(arrayOf(arrayOf("hi")))
     var listOfNumber: List<Number>  = listOf()
     var mapOfKeyToValue: Map<Key, Value> = mapOf()
 }

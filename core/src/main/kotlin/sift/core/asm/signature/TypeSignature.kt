@@ -5,16 +5,18 @@ import sift.core.asm.simpleName
 
 data class TypeSignature(
     val type: ArgType,
+    val arrayDepth: Int,
     val bound: MetaType,
     val args: MutableList<TypeSignature> = mutableListOf()
 ) {
     override fun toString(): String {
+        val array = "[]".repeat(arrayDepth)
         val inner = args
             .takeIf(MutableList<TypeSignature>::isNotEmpty)
             ?.joinToString(prefix = "<", postfix = ">")
             ?: ""
 
-        return "$type$inner"
+        return "$type$array$inner"
     }
 }
 

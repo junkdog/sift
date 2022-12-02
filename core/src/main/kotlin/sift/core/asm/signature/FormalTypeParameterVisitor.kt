@@ -12,7 +12,7 @@ class FormalTypeParameterVisitor(
 ) : BaseSignatureVisitor(api, signatureVisitor) {
 
     override fun visitClassType(name: String) {
-        parameter.extends = Type.getType("L$name;")
+        parameter.extends += Type.getType("L$name;")
         sv?.visitClassType(name)
     }
 
@@ -20,6 +20,7 @@ class FormalTypeParameterVisitor(
         return TypeArgumentVisitor(
             parameter.args::add,
             lookup,
+            0,
             api,
             sv?.visitTypeArgument(wildcard)
         )

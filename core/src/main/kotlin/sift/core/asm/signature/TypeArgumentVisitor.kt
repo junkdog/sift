@@ -7,6 +7,7 @@ import org.objectweb.asm.signature.SignatureVisitor
 class TypeArgumentVisitor(
     val onTypeArgument: (TypeSignature) -> Unit,
     val formalTypeParameters: (String) -> FormalTypeParameter,
+    val arrayDepth: Int = 0,
     api: Int = Opcodes.ASM9,
     signatureVisitor: SignatureVisitor? = null,
 ) : BaseSignatureVisitor(api, signatureVisitor) {
@@ -21,6 +22,7 @@ class TypeArgumentVisitor(
         return TypeArgumentVisitor(
             arg!!.args::add,
             formalTypeParameters,
+            arrayDepth,
             api,
             sv?.visitTypeArgument(wildcard)
         )
@@ -30,7 +32,7 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         val param = formalTypeParameters(name)
-        arg = TypeSignature(ArgType.Var(param), MetaType.GenericType)
+        arg = TypeSignature(ArgType.Var(param), arrayDepth, MetaType.GenericType)
             .also(onTypeArgument)
 
         sv?.visitTypeVariable(name)
@@ -40,7 +42,7 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         val type = Type.getType("L$name;")
-        arg = TypeSignature(ArgType.Plain(type), MetaType.Class)
+        arg = TypeSignature(ArgType.Plain(type), arrayDepth, MetaType.Class)
             .also(onTypeArgument)
 
         sv?.visitClassType(name)
@@ -57,6 +59,7 @@ class TypeArgumentVisitor(
         return TypeArgumentVisitor(
             onTypeArgument = onTypeArgument, // FIXME: don't ignore arrays
             formalTypeParameters = formalTypeParameters,
+            arrayDepth = arrayDepth + 1,
             api = api,
             signatureVisitor = sv?.visitArrayType()
         )
@@ -76,7 +79,7 @@ class TypeArgumentVisitor(
             else -> error(descriptor)
         }
 
-        arg = TypeSignature(ArgType.Plain(type), MetaType.Class)
+        arg = TypeSignature(ArgType.Plain(type), arrayDepth, MetaType.Class)
             .also(onTypeArgument)
 
         sv?.visitBaseType(descriptor)
