@@ -8,15 +8,14 @@ data class FormalTypeParameter(
     val extends: MutableList<TypeSignature> = mutableListOf(), // visitClassType of T
 ) {
     override fun toString(): String {
-        val extendsAny = ArgType.Plain(Type.getType(java.lang.Object::class.java))
         val filtered = extends.filterNotBy(TypeSignature::type, extendsAny)
 
-        val ext = when (filtered.size) {
-            1 -> filtered.first().toString()
-            0 -> null
-            else -> filtered.toString()
-        }?.let { " : $it" } ?: ""
-
-        return "$name$ext"
+        return name + when (filtered.size) {
+            0    -> ""
+            1    -> " : ${filtered.first()}"
+            else -> " : $filtered"
+        }
     }
 }
+
+private val extendsAny = ArgType.Plain(Type.getType(java.lang.Object::class.java))

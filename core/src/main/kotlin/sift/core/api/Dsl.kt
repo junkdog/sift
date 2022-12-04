@@ -365,6 +365,28 @@ object Dsl {
         }
     }
 
+    class Signature(
+        var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
+    ) {
+        fun typeArguments(f: Signature.() -> Unit) {
+            val inner = Signature().also(f).action
+            action += Action.Fork(Action.Signature.InnerTypeArguments andThen inner)
+        }
+
+        fun argument(index: Int) {
+            action += Action.Signature.FilterNth(index)
+        }
+
+        fun explodeRawType(synthesize: Boolean = false, f: Signature.() -> Unit) {
+            TODO("Not yet implemented")
+        }
+
+        fun formalType(name: String) {
+            TODO("Not yet implemented")
+        }
+
+    }
+
     class Classes(
         override var action: Action.Chain<IterClasses> = chainFrom(Action.Class.ClassScope)
     ) : Core<Element.Class>(), CommonOperations<Element.Class, Classes>,
@@ -452,6 +474,13 @@ object Dsl {
                 .let { fieldScope -> Action.Class.IntoFields andThen fieldScope }
 
             action += Action.Fork(forkTo)
+        }
+
+        fun superclassSignature(f: Signature.() -> Unit) {
+            val forkTo = Signature().also(f).action
+                .let { signatureScope -> Action.Class.IntoSuperclassSignature andThen signatureScope }
+
+            TODO("Not yet implemented")
         }
     }
 

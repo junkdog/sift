@@ -3,7 +3,9 @@ package sift.core.asm.signature
 import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.signature.SignatureVisitor
 
-
+/**
+ * Parses a generic signature string into a [TypeSignature] object.
+ */
 class SignatureParser(
     typeParams: List<FormalTypeParameter>,
     api: Int,
@@ -28,7 +30,7 @@ class SignatureParser(
     val asTypeSignatureNode: TypeSignatureNode
         get() = TypeSignatureNode(typeParameters.toList(), extends.toList())
     val asMethodSignatureNode: MethodSignatureNode
-        get() = MethodSignatureNode(typeParameters.toList(), methodParameters.toList(), returnType)
+        get() = MethodSignatureNode(typeParameters.toList(), methodParameters.toList(), returnType!!)
     val asFieldSignatureNode: FieldSignatureNode
         get() = FieldSignatureNode(typeParameters.toList(), extends.first())
 
@@ -39,7 +41,7 @@ class SignatureParser(
 
     override fun visitClassBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last(), // .also { it.metaType = MetaType.Class },
+            typeParameters.last(),
             typeParameters::firstByName,
             api,
             sv?.visitClassBound()
@@ -48,7 +50,7 @@ class SignatureParser(
 
     override fun visitInterfaceBound(): SignatureVisitor {
         return FormalTypeParameterVisitor(
-            typeParameters.last(), //.also { it.metaType = MetaType.Interface },
+            typeParameters.last(),
             typeParameters::firstByName,
             api,
             sv?.visitInterfaceBound()

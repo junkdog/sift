@@ -55,12 +55,13 @@ Options:
 
 ## Entity and Entity Type
 
-The system model is described by its constituent entities and their relationships.
-Each entity is uniquely identified by either a class, method, field or parameter element;
-an element can not be associated with more than one entity.
+In a system model, entities are the individual components that make up the system, 
+such as classes, methods, fields, and parameters. Each entity is uniquely identified
+by one of these elements and cannot be associated with more than one entity.
 
-All entities are mapped to a type. A type represents any notable part of the system,
-e.g. REST controllers, HTTP endpoints, inbound/outbound messages, RDS etc. 
+Each entity is mapped to a specific type, which represents any notable part of the
+system. For example, types can include REST controllers, HTTP endpoints, inbound/outbound
+messages, RDS, and more.
 
 ```bash
 $ sift --instrumenter spring-axon --list-entity-types target/classes
@@ -81,12 +82,18 @@ entity types of spring-axon
 ```
 ## Instrumenter pipelines
 
-Instrumenter Pipelines provide knowledge about a technology stack and/or
-project-specific constructs. The pipeline produces the system model from 
-the input classes. 
+The system model describes the structure and relationships of entities within a system.
+An entity is a unique object within the system, identified by a class, method, field, or
+parameter. Each entity is mapped to a type, which represents a notable part of the system,
+such as a REST controller or an inbound message.
 
-Pipelines are written in a declarative DSL, which provides high-level
-abstractions for identifying and interrelating entities from class structure or usage.
+Instrumenter Pipelines provide knowledge about a technology stack and/or project-specific
+constructs. These pipelines are written in a declarative DSL and are used to produce the
+system model from input classes. The DSL provides high-level abstractions for identifying
+and interrelating entities from class structure or usage.
+
+The code below shows a simple Instrumenter Pipeline that identifies REST controllers and
+HTTP endpoints within a system and associates the two entities.
 
 ```kotlin
 val controller = Entity.Type("controller")
@@ -107,17 +114,16 @@ instrumenter {
     }
 }
 ```
-Input elements - classes, methods, parameters and fields - are processed in batch, line-by-line.
+Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
+The execution of an Instrumenter Pipeline can be visualized with the --profile option.
 
-A Instrumenter Pipeline can be expressed in about 100LOC. Some are notably shorter, e.g. [jpa][jpa]
-and [jdbi][jdbi]. User-defined pipelines may choose to `include()` multiple existing pipelines,
-e.g. `spring-axon` and `jpa`, to better describe the underlying system while also keeping the
-resulting pipeline DSL concise.
+A typical Instrumenter Pipeline can be expressed in about 100 lines of code. Some pipelines,
+such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined pipelines
+can include multiple existing pipelines to better describe the underlying system while also
+keeping the resulting pipeline DSL concise.
 
  [jpa]: instrumenters/jpa/src/main/kotlin/sift/instrumenter/jpa/JpaInstrumenter.kt#L48:L73
  [jdbi]: instrumenters/jdbi/src/main/kotlin/sift/instrumenter/jdbi/Jdbi3Instrumenter.kt#L54:L67
-
-The execution of an Instrumenter Pipeline can be visualized with `--profile`:
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 

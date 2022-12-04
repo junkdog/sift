@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.LocalVariableNode
 import org.objectweb.asm.tree.MethodNode
 import sift.core.asm.*
+import sift.core.asm.signature.TypeSignature
 import kotlin.reflect.KClass
 
 sealed class Element {
@@ -70,12 +71,25 @@ sealed class Element {
         }
     }
 
+    data class Signature(
+        val signature: TypeSignature,
+        val reference: Element
+    ) : Element() {
+        override fun hashCode(): Int = AsmNodeHashcoder.hashcodeOf(this)
+        override fun equals(other: Any?): Boolean {
+            return other is Signature
+                && reference == other.reference
+                && signature == other.signature
+        }
+    }
+
     val simpleName: String
         get() = when (this) {
             is Class     -> cn.type.simpleName
             is Field     -> "${cn.type.simpleName}.${fn.name}"
             is Method    -> "${cn.type.simpleName}::${mn.name}"
             is Parameter -> "${cn.type.simpleName}::${mn.name}(${pn.name}: ${pn.type.simpleName})"
+            is Signature -> "$signature"
             is Value     -> "$data/${reference.simpleName}"
         }
 
@@ -86,6 +100,7 @@ sealed class Element {
             is Method    -> mn.annotations()
             is Parameter -> pn.annotations
             is Value     -> reference.annotations()
+            is Signature -> error("annotations not yet supported for signature")
         }
     }
 
@@ -98,11 +113,12 @@ object AsmNodeHashcoder {
 
     fun hashcodeOf(element: Element): Int {
         return when (val e = element) {
-            is Element.Class -> idHash(e.cn)
-            is Element.Field -> idHash(e.cn, e.fn)
-            is Element.Method -> idHash(e.cn, e.mn)
+            is Element.Class     -> idHash(e.cn)
+            is Element.Field     -> idHash(e.cn, e.fn)
+            is Element.Method    -> idHash(e.cn, e.mn)
             is Element.Parameter -> idHash(e.cn, e.mn, e.pn)
-            is Element.Value -> hashcodeOf(e.reference) * 31 + e.data.hashCode()
+            is Element.Signature -> hashcodeOf(e.reference) * 31 + e.signature.hashCode()
+            is Element.Value     -> hashcodeOf(e.reference) * 31 + e.data.hashCode()
         }
     }
 }
@@ -181,6 +197,11 @@ fun <T : Element> Element.into(element: KClass<T>): T {
             Element.Parameter::class -> this
             else -> error("can't convert ${this::class.simpleName} into ${element.simpleName}")
         }
+
+        is Element.Signature -> when (element) {
+            else -> error("can't convert ${this::class.simpleName} into ${element.simpleName}")
+        }
+
         is Element.Value -> this.reference.into(element)
     } as T
 }

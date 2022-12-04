@@ -50,11 +50,6 @@ class TypeArgumentVisitor(
 
     override fun visitArrayType(): SignatureVisitor {
         require(arg == null)
-//
-//        val type = Type.getType("L$name;")
-//        val argType = ArgType.Array(null)
-//        arg = TypeArgument(argType, MetaType.Array, 'X')
-//            .also(onTypeArgument)
 
         return TypeArgumentVisitor(
             onTypeArgument = onTypeArgument, // FIXME: don't ignore arrays
@@ -86,7 +81,7 @@ class TypeArgumentVisitor(
     }
 
     override fun visitInnerClassType(name: String) {
-        TODO("test me")
+        error("test me")
         sv?.visitInnerClassType(name)
     }
 

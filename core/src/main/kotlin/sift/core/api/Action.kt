@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import sift.core.entity.Entity
@@ -11,6 +13,8 @@ import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
+import sift.core.asm.signature.SignatureParser
+import sift.core.asm.signature.signature
 import sift.core.jackson.NoArgConstructor
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
@@ -131,6 +135,35 @@ sealed class Action<IN, OUT> {
 
     }
 
+    object Signature {
+        object SignatureScope : Action<IterSignatures, IterSignatures>() {
+            override fun id() = "signature-scope"
+            override fun execute(ctx: Context, input: IterSignatures) = input
+        }
+
+        object InnerTypeArguments : Action<IterSignatures, IterSignatures>() {
+            override fun id() = "inner-type-arguments"
+            override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
+                fun argumentsOf(elem: Element.Signature): Iterable<Element.Signature> {
+                    return elem.signature.args
+                        .map { Element.Signature(it, elem) }
+                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.flatMap(::argumentsOf)
+            }
+        }
+
+        data class FilterNth(
+            val n: Int,
+        ) : Action<IterSignatures, IterSignatures>() {
+            override fun id() = "filter-nth($n)"
+            override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
+                TODO("")
+            }
+        }
+    }
+
     object Class {
         data class Filter(val regex: Regex, val invert: Boolean) : Action<IterClasses, IterClasses>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
@@ -150,6 +183,19 @@ sealed class Action<IN, OUT> {
         object ClassScope : Action<IterClasses, IterClasses>() {
             override fun id() = "class-scope"
             override fun execute(ctx: Context, input: IterClasses): IterClasses = input
+        }
+
+        object IntoSuperclassSignature : Action<IterClasses, IterSignatures>() {
+            override fun id() = "into-superclass-signature"
+            override fun execute(ctx: Context, input: IterClasses): IterSignatures {
+                fun signatureOf(elem: Element.Class): Element.Signature? {
+                    return elem.cn.signature()
+                        ?.let { Element.Signature(it.extends, elem) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.mapNotNull(::signatureOf)
+            }
         }
 
         object ToInstrumenterScope : Action<IterClasses, Unit>() {

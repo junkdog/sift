@@ -41,6 +41,12 @@ fun MethodNode.signature(
 }
 
 
+class SignatureAdapterNode(
+    val extends: TypeSignature
+) {
+
+}
+
 data class ClassSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: TypeSignature,
@@ -60,8 +66,9 @@ data class FieldSignatureNode(
 data class MethodSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val methodParameters: List<TypeSignature>,
-    val returnType: TypeSignature?,
+    val returnType: TypeSignature,
 )
+
 data class TypeSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: List<TypeSignature>

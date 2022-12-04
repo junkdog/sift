@@ -1,18 +1,40 @@
 ## Upcoming release
 
-### Features
-- DSL.Class: `outerScope()` iterates any outer classes.
-- DSL.Method: `readName()` now also works for methods, fields and parameters.
-- DSL.Field: `explodeType()` iterates class elements of fields.
-- DSL.Field: `readName()` for fields.
-- DSL.Field: `filterName()` only inspects the methods name; `filter()` also checks the class name.
+### New
+*Signature Scope*: Limited DSL support for exploring generics/type signatures, e.g. `Foo` inside `List<Foo>`.
+Note that entities registered inside the signature scope are identified by their class; same effect as calling
+`explodeType(false) {}` before calling `entity()`. As such, it is currently not possible to register entities
+together with any runtime-like type signature - `MyClass<Foo>` and `MyClass<Bar>` both resolve to `MyClass`.
+
+Support for method parameter signatures is currently lacking from the DSL.
+
+- DSL.Signature: `scope {}` - local scope.
+- DSL.Signature: `property()` - update key-values property of entity.
+- DSL.Signature: `scope {}` - local scope, as found elsewhere.
+- DSL.Signature: `filter(Regex)` - filters type argument by type.
+- DSL.Signature: `typeArguments {}` - iterate nested type signature.
+- DSL.Signature: `explodeRawType {}` - iterate raw classes - e.g. `List` in `List<T>`.
+- DSL.Signature: `explodeType(synthesize=false) {}` - class scope of current type arguments.  
+- DSL.Signature: `implements(regex)` - filter on constraint of formal type parameter; e.g. `T` implements `Foo`.
+- DSL.Signature: `formalType(String)` - filters type argument by formal type name, e.g. `V` in `HashMap<String, Foo>`. 
+- DSL.Signature: `argument(index)` - filters type argument by position.
+
+- DSL.Class: `superclassSignature(synthesize=false) {}` - parent class signature `Foo<Bar>`; skips non-generic parents (WIP).
+  - DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
+- DSL.Method: `returns(synthesize=false) {}` signature scope for method return 
+
+- DSL.Class: `outerScope {}` inner classes iterate over their outer classes.
+- DSL.Method, DSL.Field, DSL.Parameter: entity property method `readName()`.
+- DSL.Field: `explodeType(synthesize=false) {}` iterates class elements of fields.
+- DSL.Field: `filterName()` only inspects the method name; `filter()` also checks the class name.
 - DSL: `readName(shorten=true)` shortens names of inner classes.
  
 ### Fixes
 - DOT: illegal node ids containing `.` and `$`.  
 
 ### Changes
-- graphviz property `dot-id` renamed to`dot-id-as`.  
+- graphviz property `dot-id` renamed to`dot-id-as`. 
+- 
 
 ## sift-0.3.0 2022-11-18
 ### Breaking
@@ -22,7 +44,7 @@
 ### Fixes
 - introspection of kotlin's noinline lambdas  
 
-### Features
+### New
 - CLI: `--render`/`-R` prints entities in graphviz's DOT language. `sift.zsh` and `sift.sh` automatically
   pipe to graphviz and displays the diagram inline. Note that `-R` will print the DOT script to stdout.
 ![sift-render](docs/images/sift-spring-axon-render.png)

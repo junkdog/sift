@@ -53,6 +53,107 @@ class DslTest {
         classNode<DslTest>()
     )
 
+    @Test
+    fun `explode generic parameter type from class signature`() {
+//        val synthesizePayload
+
+        val payload = Entity.Type("payload")
+
+        val cns = listOf(classNode(ArrayListOfPayload::class))
+
+
+        classes {
+            superclassSignature {
+                typeArguments { // <String, Payload>
+                    argument(1) // filter n Payload
+                    explodeRawType(synthesize=false) {
+                        entity(payload)
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(0)
+        }
+
+        classes {
+            superclassSignature{
+                typeArguments { // <String, Payload>
+                    argument(1) // filter n Payload
+                    explodeRawType(synthesize=true) {
+                        entity(payload)
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
+
+        classes {
+            superclassSignature{
+                typeArguments { // <String, Payload>
+                    argument(1) // filter n Payload
+                    explodeRawType {
+                        entity(payload)
+                    }
+                }
+            }
+        }.execute(cns + classNode(Payload::class)) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
+
+        classes {
+            superclassSignature{
+                typeArguments { // <String, Payload>
+                    formalType("K") // filter n Payload
+                    explodeRawType {
+                        entity(payload)
+                    }
+                }
+            }
+        }.execute(cns + classNode(Payload::class)) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
+
+        classes {
+            superclassSignature{
+                typeArguments { // <String, Payload>
+                    formalType("K") // filter n Payload
+                    explodeRawType {
+                        entity(payload)
+                    }
+                }
+            }
+        }.execute(cns + classNode(Payload::class)) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
+
+    }
+
+    @Test
+    fun `explode generic parameter type of field`() {
+        TODO()
+    }
+
+    @Test
+    fun `explode nested generic parameter types from method return`() {
+        TODO()
+    }
+
+    @Test
+    fun `resolve reified type from method invocation`() {
+        TODO()
+    }
+
+    @Test @Disabled
+    fun `generic method parameters`() {
+        TODO("impl when asm's node classes are wrapped")
+    }
+
     @Test @Disabled
     fun `read class and enum from annotation`() {
         TODO()
