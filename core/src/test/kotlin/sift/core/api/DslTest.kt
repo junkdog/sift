@@ -63,7 +63,6 @@ class DslTest {
             superclassSignature {
                 typeArgument(1) {// filter n Payload
                     explodeType(synthesize = false) {
-                        logCount("entity")
                         entity(payload)
                     }
                 }
@@ -1032,48 +1031,7 @@ class DslTest {
         }
     }
 
-    @Test @Disabled
-    fun `correctly identify relations when scanning instantiations`() {
-        val cns = listOf(
-            classNode<HandlerFn>(),
-            classNode<Payload>(),
-            classNode<HandlerOfFns>(),
-        )
 
-        val handler = Entity.Type("handler")
-        val data = Entity.Type("data")
-
-        classes {
-            scope("scan handler") {
-                methods {
-                    annotatedBy<HandlerFn>()
-                    entity(handler)
-
-                    parameters {
-                        parameter(0)
-                        explodeType {
-                            entity(data)
-                        }
-                    }
-
-//                    data["sent-by"] = handler
-
-                    // works; reverse lookup via "backtrack" children
-//                    handler["sent-by"] = data.instantiations
-
-                    instantiationsOf(data) {
-                        log("data")
-                        data["sent-by"] = handler
-                    }
-                }
-            }
-        }.execute(cns) { es ->
-            assertThat(es[data].values.first().children["sent-by"]!!.map(Entity::toString))
-                .containsExactlyInAnyOrder(
-                    e(handler, "HandlerOfFns::boo").toString(),
-                )
-        }
-    }
 
     @Test
     fun `correctly identify relations when scanning invocations`() {

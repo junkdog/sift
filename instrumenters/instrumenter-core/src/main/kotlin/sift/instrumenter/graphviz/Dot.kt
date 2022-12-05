@@ -72,10 +72,11 @@ class DiagramGenerator(
             .toSet()
             .filter { it.nodeId in includedNodes }
 
+        val ortho = "" // " splines=ortho,"
         return """
             |digraph {
             |    // setup
-            |    graph [rankdir=LR, splines=ortho, truecolor=true, bgcolor="#00000000", margin=0.2, nodesep=0.2, ranksep=0.2];
+            |    graph [rankdir=LR,$ortho truecolor=true, bgcolor="#00000000", margin=0.2, nodesep=0.2, ranksep=0.2];
             |    node [
             |        shape=box;
             |        fontname="verdana";

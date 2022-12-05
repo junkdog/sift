@@ -1,14 +1,15 @@
 # sift
 
-A tool to model and analyze the design of systems from java class files.
+Sift is a tool that allows you to model and analyze the design of systems from Java class
+files. With Sift, you can build, query, and diff system models using the command-line interface.
 
-## Features 
-- CLI tool for building, querying and [diff-ing][diff] "system models" from parsed .class files.  
-- System models consist of Entities and are produced by Instrumenter Pipelines.
-- Instrumenter Pipelines provide knowledge about technology stacks for (static) bytecode analysis. 
-- Declarative DSL for additional, user-defined pipelines.
-- JSON serialization of pipelines for simpler reuse and sharing.
-- Inline [render representations][graphviz] of the system with graphviz.
+## Features
+- CLI tool for building, querying, and [diff-ing][diff] system models from parsed .class files.
+- System Models consist of Entities and are produced by Instrumenter Pipelines.
+- Instrumenter Pipelines provide knowledge about technology stacks for static bytecode analysis.
+- Declarative DSL for user-defined pipelines.
+- JSON serialization of pipelines for easy reuse and sharing.
+- Inline [rendering of system representations][graphviz] using Graphviz.
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-boot-axon.gif)
 
