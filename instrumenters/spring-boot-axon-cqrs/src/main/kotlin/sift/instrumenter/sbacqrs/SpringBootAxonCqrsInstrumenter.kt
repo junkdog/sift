@@ -251,6 +251,12 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                     }
                 }
 
+                fun shapeCn(e: Entity.Type, shape: String) {
+                    classesOf(e) {
+                        property(e, "dot-shape", withValue(shape))
+                    }
+                }
+
                 rankMn(E.endpoint, 0)
                 rankCn(E.aggregate, 1)
                 rankCn(E.aggregateMember, 1)
@@ -262,6 +268,11 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 stripSuffixCn(E.query, "Query")
                 stripSuffixCn(E.aggregate, "Aggregate")
                 stripSuffixCn(E.projection, "Projection")
+
+                shapeCn(E.aggregate, "component")
+                shapeCn(E.aggregateMember, "component")
+                shapeCn(E.event, "folder")
+                shapeCn(E.projection, "box3d")
 
                 classesOf(E.query) {
                     property(E.query, "dot-arrowhead", withValue("onormal"))

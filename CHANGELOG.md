@@ -8,30 +8,27 @@ together with any runtime-like type signature - `MyClass<Foo>` and `MyClass<Bar>
 
 Support for method parameter signatures is currently lacking from the DSL.
 
-- DSL.Signature: `scope {}` - local scope.
-- DSL.Signature: `property()` - update key-values property of entity.
-- DSL.Signature: `scope {}` - local scope, as found elsewhere.
-- DSL.Signature: `filter(Regex)` - filters concrete type argument by class name.
-- DSL.Signature: `explodeType(synthesize=false) {}` - class scope of current type arguments.  
-- DSL.Signature: `typeArgument(index) {}` - filters nested type argument by position.
-- DSL.Signature: `typeArguments {}` - iterate nested type arguments.
-
-- DSL.Class: `superclassSignature(synthesize=false) {}` - parent class signature `Foo<Bar>`; skips non-generic parents (WIP).
-- DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
-- DSL.Method: `returns(synthesize=false) {}` signature scope for method return 
-
 - DSL.Class: `outerScope {}` inner classes iterate over their outer classes.
-- DSL.Method, DSL.Field, DSL.Parameter: entity property method `readName()`.
+- DSL.Class: `superclassSignature(synthesize=false) {}` - parent class signature `Foo<Bar>`; skips non-generic parents (WIP).
 - DSL.Field: `explodeType(synthesize=false) {}` iterates class elements of fields.
 - DSL.Field: `filterName()` only inspects the method name; `filter()` also checks the class name.
+- DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
+- DSL.Method, DSL.Field, DSL.Parameter: entity property method `readName()`.
+- DSL.Method: `returns(synthesize=false) {}` signature scope for method return 
+- DSL.Signature: `explodeType(synthesize=false) {}` - class scope of current type arguments.  
+- DSL.Signature: `filter(Regex)` - filters concrete type argument by class name.
+- DSL.Signature: `scope {}` - local scope, as found elsewhere.
+- DSL.Signature: `typeArgument(index) {}` - filters nested type argument by position.
+- DSL.Signature: `typeArguments {}` - iterate nested type arguments.
 - DSL: `readName(shorten=true)` shortens names of inner classes.
+- Dot entity property `dot-shape` accepts valid graphviz shapes
  
 ### Fixes
 - DOT: illegal node ids containing `.` and `$`.  
 
 ### Changes
 - graphviz property `dot-id` renamed to`dot-id-as`. 
-- 
+- updated spring-axon grahpviz to use `dot-shape`.
 
 ## sift-0.3.0 2022-11-18
 ### Breaking

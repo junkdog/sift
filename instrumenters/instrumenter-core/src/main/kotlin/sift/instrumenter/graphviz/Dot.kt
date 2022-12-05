@@ -22,6 +22,9 @@ dot-rank            0..MAX
 dot-arrowhead       onormal|..
 dot-style           dashed|..
 
+dot-shape           folder|box3d|cylinder|component|..
+
+
  */
 
 
@@ -72,7 +75,7 @@ class DiagramGenerator(
         return """
             |digraph {
             |    // setup
-            |    graph [rankdir=LR, truecolor=true, bgcolor="#00000000", margin=0.2 nodesep=0.2, ranksep=0.2];
+            |    graph [rankdir=LR, splines=ortho, truecolor=true, bgcolor="#00000000", margin=0.2, nodesep=0.2, ranksep=0.2];
             |    node [
             |        shape=box;
             |        fontname="verdana";
@@ -99,7 +102,10 @@ class DiagramGenerator(
     }
 
     private fun nodes(entities: List<Entity>): String {
-        fun describe(e: Entity) = "${e.nodeId}[label=\"${e.dotLabel}\",color=\"${e.color}\"];"
+        fun describe(e: Entity): String {
+            val shape = e.dotShape?.let { ",shape=$it" } ?: ""
+            return "${e.nodeId}[label=\"${e.dotLabel}\",color=\"${e.color}\"$shape];"
+        }
         return entities.map(::describe).joinToString("\n    ")
     }
 }
@@ -229,6 +235,9 @@ private val Entity.dotStyle: String?
 
 private val Entity.dotType: Dot?
     get() = this["dot-type"]?.firstOrNull() as Dot?
+
+private val Entity.dotShape: String?
+    get() = this["dot-shape"]?.firstOrNull() as String?
 
 private val Entity.dotEdgeLabel: String?
     get() = this["dot-edge-label"]?.firstOrNull() as String?
