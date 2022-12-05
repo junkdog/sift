@@ -22,6 +22,12 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Instrumenter.ClassesOf::class, name = "classes-of"),
     JsonSubTypes.Type(value = Action.Instrumenter.MethodsOf::class, name = "methods-of"),
 
+    JsonSubTypes.Type(value = Action.Signature.ExplodeType::class, name = "signature-explode-type"),
+    JsonSubTypes.Type(value = Action.Signature.Filter::class, name = "filter-signature"),
+    JsonSubTypes.Type(value = Action.Signature.FilterNth::class, name = "signature-filter-nth"),
+    JsonSubTypes.Type(value = Action.Signature.InnerTypeArguments::class, name = "type-arguments"),
+    JsonSubTypes.Type(value = Action.Signature.SignatureScope::class, name = "signature-scope"),
+
     JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
     JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
@@ -29,10 +35,12 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
+    JsonSubTypes.Type(value = Action.Class.IntoSuperclassSignature::class, name = "superclass"),
     JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
 
     JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
     JsonSubTypes.Type(value = Action.Method.IntoOuterScope::class, name = "method-parents"),
+    JsonSubTypes.Type(value = Action.Method.IntoReturnSignature::class, name = "returns"),
     JsonSubTypes.Type(value = Action.Method.MethodScope::class, name = "method-scope"),
     JsonSubTypes.Type(value = Action.Method.Filter::class, name = "filter-method"),
     JsonSubTypes.Type(value = Action.Method.FilterName::class, name = "filter-method-name"),
@@ -44,6 +52,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
     JsonSubTypes.Type(value = Action.Field.ExplodeType::class, name = "field-explode-type"),
     JsonSubTypes.Type(value = Action.Field.IntoOuterScope::class, name = "field-parents"),
+    JsonSubTypes.Type(value = Action.Field.IntoSignature::class, name = "field-signature"),
 
     JsonSubTypes.Type(value = Action.Parameter.ParameterScope::class, name = "parameter-scope"),
     JsonSubTypes.Type(value = Action.Parameter.ExplodeType::class, name = "explode-type"),
@@ -134,7 +143,7 @@ sealed class Action<IN, OUT> {
     }
 
     object Signature {
-        data class ExplodeRawType(val synthesize: Boolean) : Action<IterSignatures, IterClasses>() {
+        data class ExplodeType(val synthesize: Boolean) : Action<IterSignatures, IterClasses>() {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
                 fun classOf(elem: Element.Signature): Element.Class? {
@@ -509,13 +518,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterFields): IterFields {
                 val f = if (invert) input::filterNot else input::filter
                 return f { regex in it.fn.name }
-            }
-        }
-
-        data class ToGenericType(val synthesize: Boolean) : Action<IterFields, IterClasses>() {
-            override fun id() = "generic-type(${", synthesize".takeIf { synthesize } ?: ""})"
-            override fun execute(ctx: Context, input: IterFields): IterClasses {
-                TODO()
             }
         }
 

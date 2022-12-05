@@ -1,5 +1,6 @@
 package sift.core.api
 
+import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.tree.ClassNode
 import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
@@ -20,7 +21,7 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
                 .filter { "-scope" in it.value.action }
                 .forEach { node ->
                     enumValues<MeasurementScope>()
-                        .first { it.id == node.value.action }
+                        .firstBy(MeasurementScope::id, node.value.action)
                         .let { scope -> node.value.scopeIn = scope }
                 }
 

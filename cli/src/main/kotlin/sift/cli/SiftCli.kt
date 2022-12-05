@@ -38,6 +38,7 @@ import sift.instrumenter.Gruvbox.green2
 import sift.instrumenter.Gruvbox.light0
 import sift.instrumenter.Gruvbox.light3
 import sift.instrumenter.Gruvbox.orange1
+import sift.instrumenter.Gruvbox.orange2
 import sift.instrumenter.Gruvbox.purple2
 import sift.instrumenter.Gruvbox.red1
 import sift.instrumenter.Gruvbox.red2
@@ -544,6 +545,7 @@ object SiftCli : CliktCommand(
             MeasurementScope.Method       -> green2
             MeasurementScope.Parameter    -> purple2
             MeasurementScope.FromContext  -> red2 // shouldn't happen often
+            MeasurementScope.Signature    -> orange2
         }
 
         val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)

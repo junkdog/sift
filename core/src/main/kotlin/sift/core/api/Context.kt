@@ -201,6 +201,7 @@ data class Measurement(
 
 enum class MeasurementScope(val id: String) {
     Instrumenter("instrumenter-scope"),
+    Signature("signature-scope"),
     Class("class-scope"),
     Field("field-scope"),
     Method("method-scope"),

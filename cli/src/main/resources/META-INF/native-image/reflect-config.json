@@ -348,6 +348,9 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Class$IntoSuperclassSignature"
+},
+{
   "name":"sift.core.api.Action$Class$ReadName",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -415,6 +418,13 @@
 },
 {
   "name":"sift.core.api.Action$Field$IntoParents",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Field$IntoSignature",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -519,6 +529,9 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Method$IntoReturnSignature"
 },
 {
   "name":"sift.core.api.Action$Method$InvocationsOf",
@@ -627,6 +640,36 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Signature"
+},
+{
+  "name":"sift.core.api.Action$Signature$ExplodeType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["boolean"] }]
+},
+{
+  "name":"sift.core.api.Action$Signature$Filter"
+},
+{
+  "name":"sift.core.api.Action$Signature$FilterNth"
+},
+{
+  "name":"sift.core.api.Action$Signature$InnerTypeArguments",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Signature$SignatureScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.Action$SimpleAction",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true
@@ -658,6 +701,9 @@
 },
 {
   "name":"sift.core.api.Element$Parameter"
+},
+{
+  "name":"sift.core.api.Element$Signature"
 },
 {
   "name":"sift.core.api.Element$Value"

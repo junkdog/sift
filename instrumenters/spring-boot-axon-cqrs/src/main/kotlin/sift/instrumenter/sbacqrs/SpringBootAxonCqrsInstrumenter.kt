@@ -7,6 +7,7 @@ import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
+import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
 import sift.core.product
 import sift.instrumenter.Gruvbox.aqua2
@@ -130,8 +131,11 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
             }
         }
 
-        fun Dsl.Classes.registerAggregate(aggregate: Entity.Type) {
-            entity(aggregate,
+        fun Dsl.Classes.registerAggregate(
+            aggregate: Entity.Type,
+            label: LabelFormatter = LabelFormatter.FromElement
+        ) {
+            entity(aggregate, label,
                 property("dot-type", withValue(Dot.node)))
 
             methods {
@@ -170,15 +174,23 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService {
                 scope("register aggregates") {
                     annotatedBy(A.aggregate)
                     registerAggregate(E.aggregate)
-                }
 
-                scope("register member aggregates") {
-                    fields {
-                        annotatedBy(A.entityId)
-                        outerScope("member aggregate") {
-                            registerAggregate(E.aggregateMember)
+                    scope("register member aggregates") {
+                        fields {
+                            annotatedBy(A.aggregateMember)
+                            signature {            // List<MemberAggregate>
+                                typeArguments {    // MemberAggregate
+                                    explodeType {  // class
+                                        registerAggregate(E.aggregateMember) // label("\${aggregate}[\${member}]"))
+                                        property(E.aggregateMember, "member", readName())
+                                    }
+                                }
+                            }
                         }
                     }
+
+                    // fixme; does not trace aggregate members back to aggregate
+                    property(E.aggregateMember, "aggregate", readName())
                 }
 
                 scope("register projections") {
