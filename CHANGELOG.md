@@ -11,16 +11,13 @@ Support for method parameter signatures is currently lacking from the DSL.
 - DSL.Signature: `scope {}` - local scope.
 - DSL.Signature: `property()` - update key-values property of entity.
 - DSL.Signature: `scope {}` - local scope, as found elsewhere.
-- DSL.Signature: `filter(Regex)` - filters type argument by type.
-- DSL.Signature: `typeArguments {}` - iterate nested type signature.
-- DSL.Signature: `explodeRawType {}` - iterate raw classes - e.g. `List` in `List<T>`.
+- DSL.Signature: `filter(Regex)` - filters concrete type argument by class name.
 - DSL.Signature: `explodeType(synthesize=false) {}` - class scope of current type arguments.  
-- DSL.Signature: `implements(regex)` - filter on constraint of formal type parameter; e.g. `T` implements `Foo`.
-- DSL.Signature: `formalType(String)` - filters type argument by formal type name, e.g. `V` in `HashMap<String, Foo>`. 
-- DSL.Signature: `argument(index)` - filters type argument by position.
+- DSL.Signature: `typeArgument(index) {}` - filters nested type argument by position.
+- DSL.Signature: `typeArguments {}` - iterate nested type arguments.
 
 - DSL.Class: `superclassSignature(synthesize=false) {}` - parent class signature `Foo<Bar>`; skips non-generic parents (WIP).
-  - DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
+- DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
 - DSL.Method: `returns(synthesize=false) {}` signature scope for method return 
 
 - DSL.Class: `outerScope {}` inner classes iterate over their outer classes.

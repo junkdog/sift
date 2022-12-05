@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import sift.core.entity.Entity
@@ -13,7 +11,7 @@ import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
-import sift.core.asm.signature.SignatureParser
+import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.signature
 import sift.core.jackson.NoArgConstructor
 
@@ -136,6 +134,20 @@ sealed class Action<IN, OUT> {
     }
 
     object Signature {
+        data class ExplodeRawType(val synthesize: Boolean) : Action<IterSignatures, IterClasses>() {
+            override fun id() = "explode-raw-type"
+            override fun execute(ctx: Context, input: IterSignatures): IterClasses {
+                fun classOf(elem: Element.Signature): Element.Class? {
+                    val type = (elem.signature.type as? ArgType.Plain)?.type ?: return null
+                    return (ctx.classByType[type] ?: if (synthesize) ctx.synthesize(type) else null)
+                        ?.let { Element.Class(it) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.mapNotNull(::classOf)
+            }
+        }
+
         object SignatureScope : Action<IterSignatures, IterSignatures>() {
             override fun id() = "signature-scope"
             override fun execute(ctx: Context, input: IterSignatures) = input
@@ -154,12 +166,29 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        data class FilterNth(
-            val n: Int,
-        ) : Action<IterSignatures, IterSignatures>() {
-            override fun id() = "filter-nth($n)"
+        data class Filter(val regex: Regex, val invert: Boolean) : Action<IterSignatures, IterSignatures>() {
+            override fun id() = "filter-signature"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
-                TODO("")
+                fun classNameOf(elem: Element.Signature): String? =
+                    (elem.signature.type as? ArgType.Plain)?.type?.className
+
+                return input
+                    .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }
+            }
+        }
+
+        data class FilterNth(
+            val nth: Int,
+        ) : Action<IterSignatures, IterSignatures>() {
+            override fun id() = "filter-nth($nth)"
+            override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
+                fun resolve(elem: Element.Signature): Element.Signature? {
+                    val arg = elem.signature.args.getOrNull(nth) ?: return null
+                    return Element.Signature(arg, elem)
+                        .also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.mapNotNull(::resolve)
             }
         }
     }
@@ -192,6 +221,9 @@ sealed class Action<IN, OUT> {
                     return elem.cn.signature()
                         ?.let { Element.Signature(it.extends, elem) }
                         ?.also { output -> ctx.scopeTransition(elem, output) }
+                        ?.also {
+                            println("hi: $it")
+                        }
                 }
 
                 return input.mapNotNull(::signatureOf)
@@ -257,6 +289,19 @@ sealed class Action<IN, OUT> {
     }
 
     object Method {
+        object IntoReturnSignature : Action<IterMethods, IterSignatures>() {
+            override fun id() = "returns"
+            override fun execute(ctx: Context, input: IterMethods): IterSignatures {
+                fun signatureOf(elem: Element.Method): Element.Signature? {
+                    return elem.mn.signature(elem.cn.signature()?.formalParameters ?: listOf())
+                        ?.let { Element.Signature(it.returnType, elem) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.mapNotNull(::signatureOf)
+            }
+        }
+
         object IntoParameters : Action<IterMethods, IterParameters>() {
             override fun id() = "parameters"
             override fun execute(ctx: Context, input: IterMethods): IterParameters {
@@ -434,6 +479,20 @@ sealed class Action<IN, OUT> {
         object FieldScope : Action<IterFields, IterFields>() {
             override fun id() = "field-scope"
             override fun execute(ctx: Context, input: IterFields): IterFields = input
+        }
+
+        object IntoSignature : Action<IterFields, IterSignatures>() {
+            override fun id() = "field-into-signature"
+            override fun execute(ctx: Context, input: IterFields): IterSignatures {
+                fun signatureOf(elem: Element.Field): Element.Signature? {
+                    val formalTypeParameters = elem.cn.signature()?.formalParameters ?: listOf()
+                    return elem.fn.signature(formalTypeParameters)
+                        ?.let { Element.Signature(it.extends, elem) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input.mapNotNull(::signatureOf)
+            }
         }
 
         object IntoOuterScope : Action<IterFields, IterClasses>() {

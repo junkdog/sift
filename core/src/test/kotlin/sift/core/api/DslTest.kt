@@ -55,18 +55,15 @@ class DslTest {
 
     @Test
     fun `explode generic parameter type from class signature`() {
-//        val synthesizePayload
-
         val payload = Entity.Type("payload")
-
         val cns = listOf(classNode(ArrayListOfPayload::class))
 
 
         classes {
             superclassSignature {
-                typeArguments { // <String, Payload>
-                    argument(1) // filter n Payload
-                    explodeRawType(synthesize=false) {
+                typeArgument(1) {// filter n Payload
+                    explodeType(synthesize = false) {
+                        logCount("entity")
                         entity(payload)
                     }
                 }
@@ -77,10 +74,10 @@ class DslTest {
         }
 
         classes {
-            superclassSignature{
-                typeArguments { // <String, Payload>
-                    argument(1) // filter n Payload
-                    explodeRawType(synthesize=true) {
+            superclassSignature {
+                typeArgument(1) { // filter n Payload
+                    explodeType(synthesize = true) {
+                        logCount("entity")
                         entity(payload)
                     }
                 }
@@ -89,64 +86,85 @@ class DslTest {
             val entities = es[payload].values.toList()
             assertThat(entities).hasSize(1)
         }
-
-        classes {
-            superclassSignature{
-                typeArguments { // <String, Payload>
-                    argument(1) // filter n Payload
-                    explodeRawType {
-                        entity(payload)
-                    }
-                }
-            }
-        }.execute(cns + classNode(Payload::class)) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(1)
-        }
-
-        classes {
-            superclassSignature{
-                typeArguments { // <String, Payload>
-                    formalType("K") // filter n Payload
-                    explodeRawType {
-                        entity(payload)
-                    }
-                }
-            }
-        }.execute(cns + classNode(Payload::class)) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(1)
-        }
-
-        classes {
-            superclassSignature{
-                typeArguments { // <String, Payload>
-                    formalType("K") // filter n Payload
-                    explodeRawType {
-                        entity(payload)
-                    }
-                }
-            }
-        }.execute(cns + classNode(Payload::class)) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(1)
-        }
-
     }
 
     @Test
     fun `explode generic parameter type of field`() {
-        TODO()
+        val cns = listOf(classNode(ClassWithGenericElements::class))
+
+        val payload = Entity.Type("payload")
+
+        classes {
+            fields {
+                signature {
+                    typeArguments {
+                        filter(Regex("Payload"))
+                        explodeType(synthesize = true) {
+                            entity(payload)
+                        }
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
+    }
+
+    @Test
+    fun `internal scope in signature scope`() {
+        val cns = listOf(classNode(ClassExtendingMapOfOmgPayload::class))
+
+        val omg = Entity.Type("omg")
+        val payload = Entity.Type("payload")
+
+        classes {
+            superclassSignature {
+                typeArguments {
+                    scope("omg") {
+                        filter(Regex("Omg\$"))
+                        explodeType(synthesize = true) {
+                            entity(omg)
+                        }
+                    }
+                    scope("payload") {
+                        filter(Regex("Payload\$"))
+                        explodeType(synthesize = true) {
+                            entity(payload)
+                        }
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            assertThat(es[omg].values).hasSize(1)
+            assertThat(es[payload].values).hasSize(1)
+        }
     }
 
     @Test
     fun `explode nested generic parameter types from method return`() {
-        TODO()
-    }
+        val cns = listOf(classNode(ClassWithGenericElements::class))
+        val payload = Entity.Type("payload")
 
-    @Test
-    fun `resolve reified type from method invocation`() {
-        TODO()
+        // Map<String, List<Pair<Payload, Int>>>
+        classes {
+            methods {
+                returns {
+                    typeArgument(1) { // List<Pair<Payload, Int>>
+                        typeArguments { // Pair<Payload, Int>
+                            typeArgument(0) { // Payload
+                                explodeType(synthesize = true) {
+                                    entity(payload)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            val entities = es[payload].values.toList()
+            assertThat(entities).hasSize(1)
+        }
     }
 
     @Test @Disabled
@@ -601,20 +619,6 @@ class DslTest {
         TODO()
     }
 
-    @Test
-    fun `read generic type`() {
-        val cns = listOf(classNode<ClassWithGenericTypes<*>>())
-
-        classes {
-            fields {
-                genericType() {
-
-                }
-            }
-        }.execute(cns) { es ->
-
-        }
-    }
 
     @Test @Disabled
     fun `treat constructor properties as fields`() {

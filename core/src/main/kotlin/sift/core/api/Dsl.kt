@@ -365,26 +365,36 @@ object Dsl {
         }
     }
 
+    @SiftTemplateDsl
     class Signature(
         var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
     ) {
+        fun scope(label: String, f: Signature.() -> Unit) {
+            action += Action.Fork(Signature().also(f).action)
+        }
+
+        fun filter(regex: Regex, invert: Boolean = false) {
+            action += Action.Signature.Filter(regex, invert)
+        }
+
         fun typeArguments(f: Signature.() -> Unit) {
             val inner = Signature().also(f).action
             action += Action.Fork(Action.Signature.InnerTypeArguments andThen inner)
         }
 
-        fun argument(index: Int) {
-            action += Action.Signature.FilterNth(index)
+        fun typeArgument(index: Int, f: Signature.() -> Unit) {
+            val filterNth = Action.Signature.FilterNth(index)
+            val forkTo = Signature().also(f).action
+
+            action += Action.Fork(filterNth andThen forkTo)
         }
 
-        fun explodeRawType(synthesize: Boolean = false, f: Signature.() -> Unit) {
-            TODO("Not yet implemented")
-        }
+        fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {
+            val explodeType = Action.Signature.ExplodeRawType(synthesize)
+            val forkTo = Classes().also(f).action
 
-        fun formalType(name: String) {
-            TODO("Not yet implemented")
+            action += Action.Fork(explodeType andThen forkTo)
         }
-
     }
 
     class Classes(
@@ -480,7 +490,7 @@ object Dsl {
             val forkTo = Signature().also(f).action
                 .let { signatureScope -> Action.Class.IntoSuperclassSignature andThen signatureScope }
 
-            TODO("Not yet implemented")
+            action += Action.Fork(forkTo)
         }
     }
 
@@ -599,6 +609,13 @@ object Dsl {
             type: Entity.Type,
         ) {
             action += Action.Method.Invokes(type)
+        }
+
+        fun returns(f: Signature.() -> Unit) {
+            val forkTo = Signature().also(f).action
+                .let { signatureScope -> Action.Method.IntoReturnSignature andThen signatureScope }
+
+            action += Action.Fork(forkTo)
         }
 
         val Entity.Type.instantiations
@@ -757,6 +774,11 @@ object Dsl {
         fun genericType(synthesize: Boolean = false, f: Classes.() -> Unit) {
             val scope = Classes().also(f).action
             action += Action.Fork(Action.Field.ToGenericType(synthesize) andThen scope)
+        }
+
+        fun signature(f: Signature.() -> Unit) {
+            val forkTo = Signature().also(f).action
+            action += Action.Fork(Action.Field.IntoSignature andThen forkTo)
         }
     }
 }

@@ -7,7 +7,7 @@ data class TypeSignature(
     val type: ArgType,
     val arrayDepth: Int,
     val bound: MetaType,
-    val args: MutableList<TypeSignature> = mutableListOf()
+    val args: MutableList<TypeSignature> = mutableListOf(),
 ) {
     override fun toString(): String {
         val array = "[]".repeat(arrayDepth)
