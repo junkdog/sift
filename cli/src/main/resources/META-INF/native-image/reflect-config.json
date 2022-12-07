@@ -663,6 +663,9 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Signature$ReadSignature"
+},
+{
   "name":"sift.core.api.Action$Signature$SignatureScope",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

@@ -186,6 +186,19 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        class ReadSignature : Action<IterSignatures, IterValues>() {
+            override fun id() = "read-name"
+            override fun execute(ctx: Context, input: IterSignatures): IterValues {
+                fun nameOf(elem: Element.Signature): String {
+                    return elem.signature.toString()
+                }
+
+                return input
+                    .map { Element.Value(nameOf(it), it) }
+                    .onEach { ctx.scopeTransition(it.reference, it) }
+            }
+        }
+
         data class FilterNth(
             val nth: Int,
         ) : Action<IterSignatures, IterSignatures>() {
@@ -356,8 +369,7 @@ sealed class Action<IN, OUT> {
         data class FilterName(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
             override fun id() = "filter-name($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.mn.name }
+                return input.filter { (regex in it.mn.name) xor invert }
             }
         }
 

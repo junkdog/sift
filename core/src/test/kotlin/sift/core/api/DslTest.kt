@@ -60,7 +60,7 @@ class DslTest {
 
 
         classes {
-            superclassSignature {
+            superclass {
                 typeArgument(1) {// filter n Payload
                     explodeType(synthesize = false) {
                         entity(payload)
@@ -73,7 +73,7 @@ class DslTest {
         }
 
         classes {
-            superclassSignature {
+            superclass {
                 typeArgument(1) { // filter n Payload
                     explodeType(synthesize = true) {
                         logCount("entity")
@@ -118,7 +118,7 @@ class DslTest {
         val payload = Entity.Type("payload")
 
         classes {
-            superclassSignature {
+            superclass {
                 typeArguments {
                     scope("omg") {
                         filter(Regex("Omg\$"))

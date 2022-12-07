@@ -114,6 +114,10 @@ data class Context(
 
     fun scopeTransition(input: Element, output: Element) {
         // TODO: ensure no duplicates
+        if (output is Element.Signature) {
+//            println(output)
+        }
+
         trailsOf(output) += trailsOf(input).map { it + output }
     }
 

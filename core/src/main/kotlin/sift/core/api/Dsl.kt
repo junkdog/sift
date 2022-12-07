@@ -369,6 +369,15 @@ object Dsl {
     class Signature(
         var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
     ) {
+        fun readName(): Action<IterSignatures, IterValues> {
+            val forkTo = Action.Signature.ReadSignature()
+                .let { Action.Fork(it) }
+
+            action +=  forkTo
+
+            return forkTo.forked
+        }
+
         fun scope(label: String, f: Signature.() -> Unit) {
             action += Action.Fork(Signature().also(f).action)
         }
@@ -486,7 +495,7 @@ object Dsl {
             action += Action.Fork(forkTo)
         }
 
-        fun superclassSignature(f: Signature.() -> Unit) {
+        fun superclass(f: Signature.() -> Unit) {
             val forkTo = Signature().also(f).action
                 .let { signatureScope -> Action.Class.IntoSuperclassSignature andThen signatureScope }
 

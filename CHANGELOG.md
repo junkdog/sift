@@ -1,18 +1,27 @@
 ## Upcoming release
 
+
+## sift-0.3.0 2022-12-07
+
 ### New
-*Signature Scope*: Limited DSL support for exploring generics/type signatures, e.g. `Foo` inside `List<Foo>`.
-Note that entities registered inside the signature scope are identified by their class; same effect as calling
-`explodeType(false) {}` before calling `entity()`. As such, it is currently not possible to register entities
-together with any runtime-like type signature - `MyClass<Foo>` and `MyClass<Bar>` both resolve to `MyClass`.
+**Signature Scope**: Limited DSL support for exploring generics/type signatures, e.g. `Foo` inside `List<Foo>`.
+Note that entities cannot be registered inside the signature scope. The type argument has to be registered by
+its raw class, using `explodeType() {}`.
 
 Support for method parameter signatures is currently lacking from the DSL.
+
+**`sift` Self Instrumenter**: A new instrumenter has been added that extracts the system model centered around
+the DSL. This instrumenter allows you to compare the changes to the DSL between releases using the --diff option.
+Currently, Sift does not have support for resolving Kotlin constructs, so some of the DSL method names may
+be mangled.
+
+![sift diff 0.4.0 vs 0.3.0](docs/images/sift-diff-0.4.0-0.3.0.png)
 
 - DSL.Class: `outerScope {}` inner classes iterate over their outer classes.
 - DSL.Class: `superclassSignature(synthesize=false) {}` - parent class signature `Foo<Bar>`; skips non-generic parents (WIP).
 - DSL.Field: `explodeType(synthesize=false) {}` iterates class elements of fields.
-- DSL.Field: `filterName()` only inspects the method name; `filter()` also checks the class name.
 - DSL.Field: `signature(synthesize=false) {}` - generic field signature; skips non-generic fields.
+- DSL.Method: `filterName()` only inspects the method name; `filter()` also checks the class name.
 - DSL.Method, DSL.Field, DSL.Parameter: entity property method `readName()`.
 - DSL.Method: `returns(synthesize=false) {}` signature scope for method return 
 - DSL.Signature: `explodeType(synthesize=false) {}` - class scope of current type arguments.  
@@ -22,7 +31,8 @@ Support for method parameter signatures is currently lacking from the DSL.
 - DSL.Signature: `typeArguments {}` - iterate nested type arguments.
 - DSL: `readName(shorten=true)` shortens names of inner classes.
 - Dot entity property `dot-shape` accepts valid graphviz shapes
- 
+- Entity labels: extract all property values by prefixing the property name with  `+`. E.g. `${+property}`.
+
 ### Fixes
 - DOT: illegal node ids containing `.` and `$`.  
 
@@ -30,7 +40,9 @@ Support for method parameter signatures is currently lacking from the DSL.
 - graphviz property `dot-id` renamed to`dot-id-as`. 
 - updated spring-axon grahpviz to use `dot-shape`.
 
+
 ## sift-0.3.0 2022-11-18
+
 ### Breaking
 - DSL: `update` used for updating properties on existing entities is renamed to `property`. 
 - DSL: `parentScope` renamed to `outerScope` in the name of clarity.  

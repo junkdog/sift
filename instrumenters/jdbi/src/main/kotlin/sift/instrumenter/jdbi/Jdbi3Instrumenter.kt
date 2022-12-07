@@ -54,14 +54,14 @@ class Jdbi3Instrumenter : InstrumenterService {
                 annotatedBy(A.sqlQuery)
                 entity(
                     E.sqlQuery, label("\${sql}"),
-                    property("sql", readAnnotation(A.sqlQuery, "value"))
+                        property("sql", readAnnotation(A.sqlQuery, "value"))
                 )
             }
             methods {
                 annotatedBy(A.sqlUpdate)
                 entity(
                     E.sqlUpdate, label("\${sql}"),
-                    property("sql", readAnnotation(A.sqlUpdate, "value"))
+                        property("sql", readAnnotation(A.sqlUpdate, "value"))
                 )
             }
         }

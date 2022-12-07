@@ -104,7 +104,10 @@ sealed class Element {
         }
     }
 
-    override fun toString(): String = "${this::class.simpleName}($simpleName)"
+    override fun toString(): String = when (this) {
+        is Signature -> "Signature($signature)"
+        else         -> "${this::class.simpleName}($simpleName)"
+    }
 }
 
 object AsmNodeHashcoder {

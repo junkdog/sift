@@ -11,13 +11,15 @@ files. With Sift, you can build, query, and diff system models using the command
 - JSON serialization of pipelines for easy reuse and sharing.
 - Inline [rendering of system representations][graphviz] using Graphviz.
 
-![sift spring-boot axon framework demo](docs/images/sift-spring-boot-axon.gif)
+![sift spring-boot axon framework][sift-render]
 
-_Spring-Boot with Axon Framework [instrumenter][spring-axon] in action._ 
+_Spring-Boot with Axon Framework [instrumenter][spring-axon] in action; filtering on shipped and confirmed orders
+in https://github.com/eugenp/tutorials/tree/master/axon._
 
  [spring-axon]: instrumenters/spring-boot-axon-cqrs/src/main/kotlin/sift/instrumenter/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
+ [sift-render]: docs/images/sift-render-s.png
 
 ## CLI options
 
@@ -127,6 +129,18 @@ keeping the resulting pipeline DSL concise.
  [jdbi]: instrumenters/jdbi/src/main/kotlin/sift/instrumenter/jdbi/Jdbi3Instrumenter.kt#L54:L67
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
+
+
+## Building a native binary on linux using graalvm
+
+If graalvm and native-image is installed, a native binary can be built with the `native-image`
+maven profile: `mvn clean install -P native-image`. The resulting binary will be located in
+`~/.local/share/sift/bin/sift`. `sift.zsh` and `sift.sh` first checks if the native binary
+is available, otherwise it tries to run the jar.
+
+The native binary is considerably faster than the jar, but it can cause issues if it needs
+to deserialize a system model (via `--load` or `--diff`) or instrumenter pipeline containing
+unknown types (e.g. from `withValue()`).
 
 
 ## Caveats and limitations

@@ -56,6 +56,11 @@
             <artifactId>jdbi</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <artifactId>sift</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
