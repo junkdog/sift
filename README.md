@@ -9,12 +9,13 @@ files. With Sift, you can build, query, and diff system models using the command
 - Instrumenter Pipelines provide knowledge about technology stacks for static bytecode analysis.
 - Declarative DSL for user-defined pipelines.
 - JSON serialization of pipelines for easy reuse and sharing.
-- Inline [rendering of system representations][graphviz] using Graphviz.
+- Inline rendering of system representations using Graphviz.
 
 ![sift spring-boot axon framework][sift-render]
 
 _Spring-Boot with Axon Framework [instrumenter][spring-axon] in action; filtering on shipped and confirmed orders
-in https://github.com/eugenp/tutorials/tree/master/axon._
+in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
+straight into the terminal.)_
 
  [spring-axon]: instrumenters/spring-boot-axon-cqrs/src/main/kotlin/sift/instrumenter/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
