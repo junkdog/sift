@@ -87,8 +87,7 @@ entity types of spring-axon
 
 The system model describes the structure and relationships of entities within a system.
 An entity is a unique object within the system, identified by a class, method, field, or
-parameter. Each entity is mapped to a type, which represents a notable part of the system,
-such as a REST controller or an inbound message.
+parameter.
 
 Instrumenter Pipelines provide knowledge about a technology stack and/or project-specific
 constructs. These pipelines are written in a declarative DSL and are used to produce the
@@ -118,7 +117,7 @@ instrumenter {
 }
 ```
 Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
-The execution of an Instrumenter Pipeline can be visualized with the --profile option.
+The execution of an Instrumenter Pipeline can be visualized with the `--profile` option.
 
 A typical Instrumenter Pipeline can be expressed in about 100 lines of code. Some pipelines,
 such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined pipelines
