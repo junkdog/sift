@@ -11,7 +11,7 @@ its raw class, using `explodeType() {}`.
 Support for method parameter signatures is currently lacking from the DSL.
 
 **`sift` Self Instrumenter**: A new instrumenter has been added that extracts the system model centered around
-the DSL. This instrumenter allows you to compare the changes to the DSL between releases using the --diff option.
+the DSL. This instrumenter allows you to compare the changes to the DSL between releases using the `--diff` option.
 Currently, Sift does not have support for resolving Kotlin constructs, so some of the DSL method names may
 be mangled.
 
