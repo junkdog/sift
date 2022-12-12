@@ -1,5 +1,7 @@
 package sift.core.api
 
+import sift.core.element.Element
+
 class ElementTrail : Sequence<Element> {
     constructor(input: Element) : this(listOf(input))
 

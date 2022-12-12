@@ -1,13 +1,16 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.filterBy
+import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
+//import org.objectweb.asm.Type
+//import org.objectweb.asm.tree.ClassNode
+//import org.objectweb.asm.tree.MethodNode
 import sift.core.SynthesisTemplate
 import sift.core.api.MeasurementScope.Instrumenter
 import sift.core.asm.classNode
 import sift.core.asm.type
+import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
@@ -21,6 +24,10 @@ import kotlin.time.Duration.Companion.seconds
 data class Context(
     val allClasses: MutableList<ClassNode>
 ) {
+    constructor(
+        cns: Iterable<AsmClassNode>
+    ) : this(cns.map(ClassNode::from).toMutableList())
+
     val classByMethod: IdentityHashMap<MethodNode, ClassNode> = allClasses
         .flatMap { cn -> cn.methods.map { mn -> mn to cn } }
         .toMap()
@@ -31,21 +38,21 @@ data class Context(
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
-    val classByType: MutableMap<Type, ClassNode> = allClasses
+    val classByType: MutableMap<AsmType, ClassNode> = allClasses
         .associateBy(ClassNode::type)
         .toMutableMap()
 
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
 
     val parents: MutableMap<ClassNode, List<ClassNode>> = allClasses
-        .associateWith(allClasses::parentsOf)
+        .associateWith(classByType::parentsOf)
         .toMutableMap()
-    val implementedInterfaces: MutableMap<ClassNode, List<Type>> = allClasses
+    val implementedInterfaces: MutableMap<ClassNode, List<AsmType>> = allClasses
         .associateWith { cn ->
 
-            val found = mutableSetOf<Type>()
+            val found = mutableSetOf<AsmType>()
             fun recurse(node: ClassNode) {
-                interfacesOf(node)
+                node.interfaces
                     .filter { it !in found }
                     .onEach { found += it }
                     .mapNotNull { classByType[it] }
@@ -66,28 +73,23 @@ data class Context(
     private var measurementStack: MutableList<Tree<Measurement>> = mutableListOf(measurements)
     private var pushScopes: Int = 0
 
-    init {
-        allClasses.associateWith { cn ->
-            val cns = (parents[cn] ?: listOf()) + cn
-            cns.map(::interfacesOf)
-        }
-    }
-
-    fun synthesize(type: Type): ClassNode {
-        return classByType[type] ?: classNode<SynthesisTemplate>().apply {
-            name = type.internalName
-            allClasses += this
-            implementedInterfaces[this] = listOf()
-            parents[this] = listOf()
-            classByType[type] = this
-        }
+    fun synthesize(type: AsmType): ClassNode {
+        return classByType[type] ?: (classNode<SynthesisTemplate>()
+            .also { cn -> cn.name = type.internalName }
+            .let(ClassNode::from)
+            .apply {
+                allClasses += this
+                implementedInterfaces[this] = listOf()
+                parents[this] = listOf()
+                classByType[type] = this
+        })
     }
 
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
         return methodInvocationsCache.getOrPut(mn) { methodsInvokedBy(mn, classByType) }
     }
 
-    fun synthesize(owner: Type, name: String, desc: String): MethodNode {
+    fun synthesize(owner: AsmType, name: String, desc: String): MethodNode {
         val cn = classByType[owner]
             ?: error("'${owner}' not found")
 
@@ -98,26 +100,21 @@ data class Context(
             .also { mns -> require(mns.size < 2) { error("$mns") } }
             .firstOrNull()
 
-        return mn ?: MethodNode().also { method ->
-            // stub
+        return mn ?: AsmMethodNode().also { method -> // stub
             method.name = name
             method.desc = desc
+        }.let { method -> MethodNode.from(cn, method) }.also {
+            method ->
+                // register
+                cn.methods.add(method)
+                classByMethod[method] = cn
 
-            // register
-            cn.methods.add(method)
-            classByMethod[method] = cn
-
-            // must rebuild method invocation cache
-            methodInvocationsCache.clear()
+                // must rebuild method invocation cache
+                methodInvocationsCache.clear()
         }
     }
 
     fun scopeTransition(input: Element, output: Element) {
-        // TODO: ensure no duplicates
-        if (output is Element.Signature) {
-//            println(output)
-        }
-
         trailsOf(output) += trailsOf(input).map { it + output }
     }
 
@@ -192,6 +189,18 @@ data class Context(
     internal fun popMeasurementScope() {
         measurementStack.removeLast()
     }
+}
+
+private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
+    return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
+        .drop(1)
+        .toList()
+}
+
+internal fun Map<Type, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
+    return generateSequence(cn) { get(it.superType) }
+        .drop(1)
+        .toList()
 }
 
 data class Measurement(
