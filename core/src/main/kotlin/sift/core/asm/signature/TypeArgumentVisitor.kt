@@ -52,7 +52,7 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         return TypeArgumentVisitor(
-            onTypeArgument = onTypeArgument, // FIXME: don't ignore arrays
+            onTypeArgument = onTypeArgument,
             formalTypeParameters = formalTypeParameters,
             arrayDepth = arrayDepth + 1,
             api = api,

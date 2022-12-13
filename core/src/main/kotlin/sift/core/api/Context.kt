@@ -3,13 +3,9 @@ package sift.core.api
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
-//import org.objectweb.asm.Type
-//import org.objectweb.asm.tree.ClassNode
-//import org.objectweb.asm.tree.MethodNode
 import sift.core.SynthesisTemplate
 import sift.core.api.MeasurementScope.Instrumenter
 import sift.core.asm.classNode
-import sift.core.asm.type
 import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
@@ -34,7 +30,7 @@ data class Context(
         .let(::IdentityHashMap)
 
     internal val entityService: EntityService = EntityService()
-    var trails: MutableMap<Element, MutableList<ElementTrail>> = mutableMapOf()
+    var trails: MutableMap<Element, MutableList<ScopeTrail>> = mutableMapOf()
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
@@ -133,8 +129,8 @@ data class Context(
         labelFormatters[entity] = formatter
     }
 
-    fun trailsOf(element: Element): MutableList<ElementTrail> {
-        return trails.getOrPut(element) { mutableListOf(ElementTrail(element)) }
+    fun trailsOf(element: Element): MutableList<ScopeTrail> {
+        return trails.getOrPut(element) { mutableListOf(ScopeTrail(element)) }
     }
 
     fun updateEntityLabels() {
@@ -223,7 +219,7 @@ enum class MeasurementScope(val id: String) {
 }
 
 private fun EntityService.filter(
-    trail: ElementTrail,
+    trail: ScopeTrail,
     entity: Entity.Type
 ): Entity? = trail
     .mapNotNull { this[it] }

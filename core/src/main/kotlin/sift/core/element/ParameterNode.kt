@@ -3,7 +3,6 @@ package sift.core.element
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.LocalVariableNode
 import sift.core.AsmNodeHashcoder.hash
-import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.simpleName
 
 class ParameterNode private constructor(

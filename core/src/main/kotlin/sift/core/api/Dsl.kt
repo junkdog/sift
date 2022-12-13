@@ -62,9 +62,6 @@ object Dsl {
     @SiftTemplateDsl
     abstract class Core<ELEMENT : Element> {
 
-        // hack: FIXME
-        internal var currentProperty: Property<Element>? = null
-
         internal abstract var action: Action.Chain<Iter<ELEMENT>>
 
         data class Property<T: Element>(
@@ -248,28 +245,6 @@ object Dsl {
         ): Property<ELEMENT> {
             return Property(tag, extract andThen Action.UpdateEntityProperty(tag))
         }
-
-        internal inline fun <reified S: Core<T>, reified T : Element> scopedProperty(
-            tag: String,
-            scope: S,
-            f: S.() -> Unit
-        ): Property<T> {
-            if (scope.currentProperty != null)
-                Throw.publishOutsideOfProperty(action)
-
-            // f() populates currentProperty.actioni
-            scope.currentProperty  = Property(tag, null)
-            scope.also(f)
-
-            // dependent on executedScope; it is expected to publish() a value action
-            val property = scope.currentProperty as Property<T>
-            property.action ?: Throw.publishNeverCalled(tag)
-
-            // clean up
-            scope.currentProperty = null
-
-            return property
-        }
     }
 
     @SiftTemplateDsl
@@ -346,7 +321,6 @@ object Dsl {
                 .let { it andThen Action.Class.ToInstrumenterScope }
         }
 
-        // TOOD: document ignoreOthers
         /** iterates class elements of registered [entity] type */
         fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
             val classes = Action.Instrumenter.ClassesOf(entity)
