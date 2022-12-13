@@ -36,6 +36,7 @@ class MethodNode(
             ?.let { ts -> SignatureNode.from(ts, this) }
     }
 
+    override fun toString(): String = "$cn::$name"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
 

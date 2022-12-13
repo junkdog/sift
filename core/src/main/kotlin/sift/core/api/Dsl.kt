@@ -369,7 +369,7 @@ object Dsl {
         var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
     ) {
         fun readName(): Action<IterSignatures, IterValues> {
-            val forkTo = Action.Signature.ReadSignature()
+            val forkTo = Action.Signature.ReadSignature
                 .let { Action.Fork(it) }
 
             action +=  forkTo

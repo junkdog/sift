@@ -3,11 +3,11 @@ package sift.core.element
 import sift.core.AsmNodeHashcoder.hash
 
 class ValueNode private constructor(
-    private val any: Any,
+    val data: Any,
     internal val reference: Element
 ) : Element {
     override val simpleName: String
-        get() = "$any: ${reference.simpleName}"
+        get() = "$data: ${reference.simpleName}"
 
     override val annotations: List<AnnotationNode>
         get() = listOf() // fixme: remove
@@ -15,11 +15,11 @@ class ValueNode private constructor(
     override fun equals(other: Any?): Boolean {
         return other is ValueNode
             && reference == other.reference
-            && any == other.any
+            && data == other.data
     }
 
     override fun hashCode(): Int {
-        return hash(any, reference)
+        return hash(data, reference)
     }
 
     companion object {

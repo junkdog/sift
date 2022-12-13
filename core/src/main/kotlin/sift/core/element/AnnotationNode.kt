@@ -1,6 +1,7 @@
 package sift.core.element
 
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.asm.readFieldAny
 import sift.core.asm.simpleName
 import sift.core.asm.type
 import sift.core.combine
@@ -10,6 +11,13 @@ class AnnotationNode private constructor(
 ) : Element {
     override val simpleName: String
         get() = an.type.simpleName
+
+    val type: AsmType
+        get() = an.type
+
+    operator fun get(field: String): Any? {
+        return readFieldAny(field)(an)
+    }
 
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 

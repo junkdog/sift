@@ -14,7 +14,6 @@ import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
-import sift.core.asm.signature.signature
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
 
@@ -187,7 +186,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        class ReadSignature : Action<IterSignatures, IterValues>() {
+        object ReadSignature : Action<IterSignatures, IterValues>() {
             override fun id() = "read-name"
             override fun execute(ctx: Context, input: IterSignatures): IterValues {
                 return input
@@ -492,13 +491,12 @@ sealed class Action<IN, OUT> {
             override fun id() = "field-into-signature"
             override fun execute(ctx: Context, input: IterFields): IterSignatures {
                 fun signatureOf(elem: FieldNode): SignatureNode? {
-                    val formalTypeParameters = elem.cn.signature()?.formalParameters ?: listOf()
-                    return elem.signature(formalTypeParameters)
-                        ?.let { SignatureNode(it.extends, elem) }
+                    return elem.returns
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
-                return input.mapNotNull(::signatureOf)
+                return input
+                    .mapNotNull(::signatureOf)
             }
         }
 
@@ -506,7 +504,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
-                    .map { f -> f.into<ClassNode>().also { ctx.scopeTransition(f, it) } }
+                    .map { f -> f.owner.also { ctx.scopeTransition(f, it) } }
                     .toSet()
             }
         }
@@ -515,7 +513,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
                 val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.fn.name }
+                return f { regex in it.name }
             }
         }
 
@@ -523,12 +521,12 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                fun explode(field: FieldNode): ClassNode? {
-                   var exploded = ctx.classByType[field.fn.type]
+                   var exploded = ctx.classByType[field.type]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(field.fn.type)
+                       exploded = ctx.synthesize(field.type)
 
-                   return ClassNode(exploded ?: return null)
-                       .also { ctx.scopeTransition(field, it) }
+                   return exploded
+                       ?.also { ctx.scopeTransition(field, it) }
                }
 
                 return input.mapNotNull(::explode)
@@ -545,14 +543,14 @@ sealed class Action<IN, OUT> {
         class ExplodeType(val synthesize: Boolean = false): Action<IterParameters, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterClasses {
-               fun explode(param: Element.Parameter): ClassNode? {
+               fun explode(param: ParameterNode): ClassNode? {
 
-                   var exploded = ctx.classByType[param.pn.type]
+                   var exploded = ctx.classByType[param.type]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(param.pn.type)
+                       exploded = ctx.synthesize(param.type)
 
-                   return ClassNode(exploded ?: return null)
-                       .also { ctx.scopeTransition(param, it) }
+                   return exploded
+                       ?.also { ctx.scopeTransition(param, it) }
                }
 
                 return input.mapNotNull(::explode)
@@ -563,7 +561,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { ValueNode(it.pn.type, it) }
+                    .map { ValueNode.from(it.type, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -572,7 +570,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input
-                    .map { p -> p.into<MethodNode>().also { ctx.scopeTransition(p, it) } }
+                    .map { p -> p.owner.also { ctx.scopeTransition(p, it) } }
                     .toSet()
             }
         }
@@ -580,15 +578,15 @@ sealed class Action<IN, OUT> {
         data class FilterNth(val nth: Int) : Action<IterParameters, IterParameters>() {
             override fun id() = "filter-nth($nth)"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
-                return input.filter { it.mn.parameters?.indexOf(it.pn) == nth }
+                return input.filter { pn -> pn.owner.parameters.indexOf(pn) == nth }
             }
         }
 
-        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Parameter>() {
+        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<ParameterNode>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
                 val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.pn.name }
+                return f { regex in it.name }
             }
         }
     }
@@ -623,7 +621,7 @@ sealed class Action<IN, OUT> {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
-                .filter { annotation in it.annotations() }
+                .filter { annotation in it.annotations.map(AnnotationNode::type) }
         }
     }
 
@@ -638,24 +636,15 @@ sealed class Action<IN, OUT> {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun nameOf(elem: T): String = when (elem) {
-                is MethodNode    -> elem.mn.name
-                is FieldNode     -> elem.fn.name
-                is Element.Parameter -> elem.pn.name
-                is ClassNode     -> {
-                    if (shortened) {
-                        (elem.cn.innerClasses ?: listOf())
-                            .firstOrNull { it.name == elem.cn.name }
-                            ?.innerName
-                            ?: elem.cn.type.simpleName
-                    } else {
-                        elem.cn.type.simpleName
-                    }
-                }
-                else                 -> error("$elem")
+                is MethodNode    -> elem.name
+                is FieldNode     -> elem.name
+                is ParameterNode -> elem.name
+                is ClassNode     -> elem.innerName?.takeIf { shortened } ?: elem.simpleName
+                else             -> error("$elem")
             }
 
             return input
-                .map { ValueNode(nameOf(it), it) }
+                .map { ValueNode.from(nameOf(it), it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
     }
@@ -664,10 +653,10 @@ sealed class Action<IN, OUT> {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun readAnnotation(input: T): ValueNode? {
-                return input.annotations()
+                return input.annotations
                     .find { an -> an.type == annotation }
-                    ?.let { an -> readFieldAny(field)(an) }
-                    ?.let { ValueNode(it, input) }
+                    ?.let { an -> an[field]!! }
+                    ?.let { ValueNode.from(it, input) }
                     ?.also { ctx.scopeTransition(input, it) }
             }
             return input.mapNotNull(::readAnnotation)
@@ -679,7 +668,7 @@ sealed class Action<IN, OUT> {
         override fun id() = "with-value($value)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             return input
-                .map { ValueNode(value, it) }
+                .map { ValueNode.from(value, it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
     }
@@ -739,7 +728,6 @@ sealed class Action<IN, OUT> {
         override fun id() = "register-entity-synthesized($id, ${type.simpleName})"
         override fun execute(ctx: Context, input: Unit) {
             ctx.synthesize(type)
-                .let(Element::Class)
                 .let { elem -> ctx.register(Entity(id, "N/A"), elem, labelFormatter) }
 
             return input

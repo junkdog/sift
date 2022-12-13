@@ -21,6 +21,11 @@ class ClassNode private constructor(
             ?.findBy(InnerClassNode::name, cn.name)
             ?.outerType
 
+    val innerName: String?
+        get() = cn.innerClasses
+            ?.findBy(InnerClassNode::name, cn.name)
+            ?.innerName
+
     val fields: List<FieldNode> = cn.fields
         .map { fn -> FieldNode.from(this, fn) }
 

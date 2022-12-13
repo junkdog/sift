@@ -11,6 +11,7 @@ class ParameterNode private constructor(
     private val mn: MethodNode,
     val name: String,
     val type: AsmType,
+//    val signature: SignatureNode?,
     override val annotations: List<AnnotationNode>,
     val source: Source
 ) : Element {
@@ -31,6 +32,8 @@ class ParameterNode private constructor(
     override fun hashCode(): Int {
         return hash(cn, mn, name, type)
     }
+
+    override fun toString(): String = "$mn($name: ${type.simpleName})"
 
     companion object {
         fun from(cn: ClassNode, mn: MethodNode, asmMn: AsmMethodNode): List<ParameterNode> {
