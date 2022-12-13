@@ -66,7 +66,7 @@ data class FieldSignatureNode(
 data class MethodSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val methodParameters: List<TypeSignature>,
-    val returnType: TypeSignature,
+    val returns: TypeSignature,
 )
 
 data class TypeSignatureNode(

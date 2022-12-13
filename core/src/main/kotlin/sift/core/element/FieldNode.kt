@@ -34,8 +34,7 @@ class FieldNode private constructor(
     override fun hashCode(): Int = hash(cn) * 31 + idHash(fn)
 
     val returns: SignatureNode?
-        get() = cn.signature?.formalParameters
-            ?.let(fn::signature)
+        get() = fn.signature(cn.signature?.formalParameters ?: listOf())
             ?.let(FieldSignatureNode::extends)
             ?.let { tsn -> SignatureNode.from(tsn, this) }
 

@@ -4,7 +4,6 @@ import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.asSequence
-import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
 
@@ -26,13 +25,13 @@ class MethodNode(
         get() = mn.desc
 
     val signature: MethodSignatureNode? by lazy {
-        cn.signature?.formalParameters?.let(mn::signature)
+        mn.signature(cn.signature?.formalParameters ?: listOf())
     }
 
     val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn)
 
     fun returns(): SignatureNode? {
-        return signature?.returnType
+        return signature?.returns
             ?.let { ts -> SignatureNode.from(ts, this) }
     }
 
