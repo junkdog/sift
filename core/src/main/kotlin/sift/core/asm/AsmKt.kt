@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
+import sift.core.element.AsmType
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -69,9 +70,22 @@ val Handle.ownerType: Type
     get() = Type.getType("L$owner;")
 
 val Type.simpleName: String
-    get() = className
+    get() = simpleNameOf(this)
+
+private fun simpleNameOf(type: Type) = when (val name = type.className) {
+    "V" -> "Unit"
+    "Z" -> "Boolean"
+    "C" -> "Char"
+    "B" -> "Byte"
+    "S" -> "String"
+    "I" -> "Int"
+    "F" -> "Float"
+    "D" -> "Double"
+    "J" -> "Long"
+    else -> name
         .substringAfterLast(".")
         .replace("$", ".")
+}
 
 private fun classesJar(root: File): List<ClassNode> {
     return ZipFile(root).use { archive ->

@@ -1,5 +1,6 @@
 package sift.core.api
 
+import sift.core.element.Element
 import sift.core.entity.Entity
 
 class TestEntity(

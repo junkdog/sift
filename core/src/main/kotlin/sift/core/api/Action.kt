@@ -5,14 +5,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.*
+import org.objectweb.asm.tree.InvokeDynamicInsnNode
+import org.objectweb.asm.tree.MethodInsnNode
+import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
-import sift.core.asm.signature.signature
+import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
@@ -58,6 +60,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Parameter.ExplodeType::class, name = "explode-type"),
     JsonSubTypes.Type(value = Action.Parameter.ReadType::class, name = "read-type"),
     JsonSubTypes.Type(value = Action.Parameter.IntoOuterScope::class, name = "parameter-parents"),
+    JsonSubTypes.Type(value = Action.Parameter.IntoSignature::class, name = "parameter-signature"),
     JsonSubTypes.Type(value = Action.Parameter.FilterNth::class, name = "parameter-nth"),
     JsonSubTypes.Type(value = Action.Parameter.Filter::class, name = "filter-parameter"),
 
@@ -79,7 +82,6 @@ import sift.core.jackson.NoArgConstructor
 
     JsonSubTypes.Type(value = Action::class, name = "action"),
 )
-//@JsonSerialize(using = ActionSerializer::class)
 @NoArgConstructor
 sealed class Action<IN, OUT> {
 
@@ -102,7 +104,7 @@ sealed class Action<IN, OUT> {
         object InstrumentClasses : Action<Unit, IterClasses>() {
             override fun id() = "classes"
             override fun execute(ctx: Context, input: Unit): IterClasses {
-                return ctx.allClasses.map(Element::Class)
+                return ctx.allClasses
             }
         }
 
@@ -113,7 +115,7 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: Unit): IterClasses {
                 return ctx.entityService[entity].mapNotNull { (elem, _) ->
                     when (elem) {
-                        is Element.Class -> elem
+                        is ClassNode -> elem
                         else ->  error("cannot iterate classes of ${elem::class.simpleName}: $elem")
                     }
                 }
@@ -125,16 +127,16 @@ sealed class Action<IN, OUT> {
             ) : Action<Unit, IterMethods>() {
             override fun id() = "methods-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterMethods {
-                fun methodsOf(elem: Element.Class): Iterable<Element.Method> {
-                    return elem.cn.methods.map { Element.Method(elem.cn, it) }
+                fun methodsOf(elem: ClassNode): Iterable<MethodNode> {
+                    return elem.methods
                         .onEach { output -> ctx.scopeTransition(elem, output) }
                 }
 
                 return ctx.entityService[entity].flatMap { (elem, _) ->
                     when (elem) {
-                        is Element.Class  -> methodsOf(elem)
-                        is Element.Method -> listOf(elem)
-                        else              -> error("cannot iterate methods of ${elem::class.simpleName}: $elem")
+                        is ClassNode  -> methodsOf(elem)
+                        is MethodNode -> listOf(elem)
+                        else          -> error("cannot iterate methods of ${elem::class.simpleName}: $elem")
                     }
                 }
             }
@@ -146,10 +148,9 @@ sealed class Action<IN, OUT> {
         data class ExplodeType(val synthesize: Boolean) : Action<IterSignatures, IterClasses>() {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
-                fun classOf(elem: Element.Signature): Element.Class? {
-                    val type = (elem.signature.type as? ArgType.Plain)?.type ?: return null
+                fun classOf(elem: SignatureNode): ClassNode? {
+                    val type = (elem.argType as? ArgType.Plain)?.type ?: return null
                     return (ctx.classByType[type] ?: if (synthesize) ctx.synthesize(type) else null)
-                        ?.let { Element.Class(it) }
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
@@ -165,9 +166,8 @@ sealed class Action<IN, OUT> {
         object InnerTypeArguments : Action<IterSignatures, IterSignatures>() {
             override fun id() = "inner-type-arguments"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
-                fun argumentsOf(elem: Element.Signature): Iterable<Element.Signature> {
-                    return elem.signature.args
-                        .map { Element.Signature(it, elem) }
+                fun argumentsOf(elem: SignatureNode): Iterable<SignatureNode> {
+                    return elem.inner
                         .onEach { output -> ctx.scopeTransition(elem, output) }
                 }
 
@@ -178,23 +178,19 @@ sealed class Action<IN, OUT> {
         data class Filter(val regex: Regex, val invert: Boolean) : Action<IterSignatures, IterSignatures>() {
             override fun id() = "filter-signature"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
-                fun classNameOf(elem: Element.Signature): String? =
-                    (elem.signature.type as? ArgType.Plain)?.type?.className
+                fun classNameOf(elem: SignatureNode): String? =
+                    (elem.argType as? ArgType.Plain)?.type?.className
 
                 return input
                     .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }
             }
         }
 
-        class ReadSignature : Action<IterSignatures, IterValues>() {
+        object ReadSignature : Action<IterSignatures, IterValues>() {
             override fun id() = "read-name"
             override fun execute(ctx: Context, input: IterSignatures): IterValues {
-                fun nameOf(elem: Element.Signature): String {
-                    return elem.signature.toString()
-                }
-
                 return input
-                    .map { Element.Value(nameOf(it), it) }
+                    .map { ValueNode.from(it.simpleName, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -204,9 +200,9 @@ sealed class Action<IN, OUT> {
         ) : Action<IterSignatures, IterSignatures>() {
             override fun id() = "filter-nth($nth)"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
-                fun resolve(elem: Element.Signature): Element.Signature? {
-                    val arg = elem.signature.args.getOrNull(nth) ?: return null
-                    return Element.Signature(arg, elem)
+                fun resolve(elem: SignatureNode): SignatureNode? {
+                    val arg = elem.inner.getOrNull(nth) ?: return null
+                    return arg
                         .also { output -> ctx.scopeTransition(elem, output) }
                 }
 
@@ -220,14 +216,14 @@ sealed class Action<IN, OUT> {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
                 val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.cn.qualifiedName }
+                return f { cn -> regex in cn.qualifiedName }
             }
         }
 
         data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
             override fun id() = "implements(${type.simpleName})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                return input.filter { elem -> type in ctx.allInterfacesOf(elem.cn) }
+                return input.filter { elem -> type in ctx.allInterfacesOf(elem) } // TODO: refactor; away w context
             }
         }
 
@@ -239,13 +235,10 @@ sealed class Action<IN, OUT> {
         object IntoSuperclassSignature : Action<IterClasses, IterSignatures>() {
             override fun id() = "into-superclass-signature"
             override fun execute(ctx: Context, input: IterClasses): IterSignatures {
-                fun signatureOf(elem: Element.Class): Element.Signature? {
-                    return elem.cn.signature()
-                        ?.let { Element.Signature(it.extends, elem) }
+                fun signatureOf(elem: ClassNode): SignatureNode? {
+                    return elem.signature?.extends
+                        ?.let { SignatureNode.from(it, elem) }
                         ?.also { output -> ctx.scopeTransition(elem, output) }
-                        ?.also {
-                            println("hi: $it")
-                        }
                 }
 
                 return input.mapNotNull(::signatureOf)
@@ -262,8 +255,8 @@ sealed class Action<IN, OUT> {
         object IntoMethods : Action<IterClasses, IterMethods>() {
             override fun id() = "methods"
             override fun execute(ctx: Context, input: IterClasses): IterMethods {
-                fun methodsOf(input: Element.Class): Iterable<Element.Method> {
-                    return input.cn.methods.map { Element.Method(input.cn, it) }
+                fun methodsOf(input: ClassNode): Iterable<MethodNode> {
+                    return input.methods
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
@@ -274,8 +267,8 @@ sealed class Action<IN, OUT> {
         object IntoFields : Action<IterClasses, IterFields>() {
             override fun id() = "fields"
             override fun execute(ctx: Context, input: IterClasses): IterFields {
-                fun methodsOf(input: Element.Class): IterFields {
-                    return input.cn.fields.map { Element.Field(input.cn, it) }
+                fun methodsOf(input: ClassNode): IterFields {
+                    return input.fields
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
@@ -286,13 +279,10 @@ sealed class Action<IN, OUT> {
         object IntoOuterClass : Action<IterClasses, IterClasses>() {
             override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                fun outerClass(elem: Element.Class): Element.Class? {
-                    val self = (elem.cn.innerClasses ?: listOf())
-                        .firstOrNull { it.name == elem.cn.name }
-                        ?: return null
+                fun outerClass(elem: ClassNode): ClassNode? {
+                    val outer = elem.outerType ?: return null
 
-                    return ctx.classByType[self.outerType]
-                        ?.let(Element::Class)
+                    return ctx.classByType[outer]
                         ?.also { ctx.scopeTransition(elem, it) }
                 }
 
@@ -304,7 +294,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterClasses): IterValues {
                 return input
-                    .map { Element.Value(it.cn.type, it) }
+                    .map { ValueNode.from(it.type, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -314,9 +304,8 @@ sealed class Action<IN, OUT> {
         object IntoReturnSignature : Action<IterMethods, IterSignatures>() {
             override fun id() = "returns"
             override fun execute(ctx: Context, input: IterMethods): IterSignatures {
-                fun signatureOf(elem: Element.Method): Element.Signature? {
-                    return elem.mn.signature(elem.cn.signature()?.formalParameters ?: listOf())
-                        ?.let { Element.Signature(it.returnType, elem) }
+                fun signatureOf(elem: MethodNode): SignatureNode? {
+                    return elem.returns()
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
@@ -327,9 +316,8 @@ sealed class Action<IN, OUT> {
         object IntoParameters : Action<IterMethods, IterParameters>() {
             override fun id() = "parameters"
             override fun execute(ctx: Context, input: IterMethods): IterParameters {
-                fun parametersOf(input: Element.Method): Iterable<Element.Parameter> {
-                    return input.parameters()
-                        .map { Element.Parameter(input.cn, input.mn, it) }
+                fun parametersOf(input: MethodNode): IterParameters {
+                    return input.parameters
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
@@ -341,7 +329,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 return input
-                    .map { m -> m.into<Element.Class>().also { ctx.scopeTransition(m, it) } }
+                    .map { m -> m.owner.also { ctx.scopeTransition(m, it) } }
                     .toSet()
             }
         }
@@ -361,15 +349,16 @@ sealed class Action<IN, OUT> {
         data class Filter(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.mn.name || regex in it.cn.qualifiedName }
+//                val f = if (invert) input::filterNot else input::filter
+//                return f { regex in it.mn.name || regex in it.cn.qualifiedName }
+                return input.filter { (regex in it.name || regex in it.owner.qualifiedName) xor invert }
             }
         }
 
         data class FilterName(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
             override fun id() = "filter-name($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                return input.filter { (regex in it.mn.name) xor invert }
+                return input.filter { (regex in it.name) xor invert }
             }
         }
 
@@ -379,14 +368,13 @@ sealed class Action<IN, OUT> {
             override fun id() = "instantiations($match)"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 val types = ctx.entityService[match]
-                    .map { (elem, _) -> elem as Element.Class } // FIXME: throw
-                    .map(Element.Class::cn)
+                    .map { (elem, _) -> elem as ClassNode } // FIXME: throw
                     .map(ClassNode::type)
 
-                fun introspect(elem: Element.Method): List<Element.Class> {
-                    return ctx.methodsInvokedBy(elem.mn)
+                fun introspect(elem: MethodNode): List<ClassNode> {
+                    return ctx.methodsInvokedBy(elem)
                         .flatMap { mn -> instantiations(mn, types) }
-                        .map { Element.Class(ctx.classByType[it]!!) }
+                        .map { ctx.classByType[it]!! }
                         .onEach { ctx.scopeTransition(elem, it) }
                 }
 
@@ -406,11 +394,11 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
                 val matched = ctx.coercedMethodsOf(match)
 
-                fun introspect(elem: Element.Method): List<Element.Method> {
-                    return ctx.methodsInvokedBy(elem.mn)
+                fun introspect(elem: MethodNode): List<MethodNode> {
+                    return ctx.methodsInvokedBy(elem)
                         .filter { mn -> mn in matched }
-                        .filter { mn -> elem.mn !== mn }
-                        .map { ctx.entityService[matched[it]!!] as Element.Method }
+                        .filter { mn -> elem != mn }
+                        .map { ctx.entityService[matched[it]!!] as MethodNode }
                         .onEach { ctx.scopeTransition(elem, it) }
                 }
 
@@ -427,11 +415,11 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
                 fun typeOf(elem: Element): Type {
                     return when (elem) {
-                        is Element.Class -> elem.cn.type
-                        is Element.Method -> elem.cn.type
-                        is Element.Parameter -> elem.cn.type
-                        is Element.Value -> typeOf(elem.reference)
-                        else -> error("unable to extract methods from $elem")
+                        is ClassNode     -> elem.type
+                        is MethodNode    -> elem.owner.type
+                        is ParameterNode -> elem.owner.owner.type
+                        is ValueNode     -> typeOf(elem.reference)
+                        else             -> error("unable to extract methods from $elem")
                     }
                 }
 
@@ -440,11 +428,11 @@ sealed class Action<IN, OUT> {
                     .toSet()
 
                 fun invocations(mn: MethodNode): List<Invocation> {
-                    val invocationsA = mn.asSequence()
+                    val invocationsA = mn.instructions()
                         .mapNotNull { it as? MethodInsnNode }
                         .map(::Invocation)
                         .toList()
-                    val invocationsB = mn.asSequence()
+                    val invocationsB = mn.instructions()
                         .mapNotNull { it as? InvokeDynamicInsnNode }
                         .flatMap { ins -> ins.bsmArgs.mapNotNull { it as? Handle } }
                         .map(::Invocation)
@@ -453,22 +441,20 @@ sealed class Action<IN, OUT> {
                     return invocationsA + invocationsB
                 }
 
-                fun methodElementOf(invocation: Invocation): Element.Method? {
+                fun methodElementOf(invocation: Invocation): MethodNode? {
                     val cn = ctx.classByType[invocation.type] ?: return null
-                    val mn = when (synthesize) {
+                    return when (synthesize) {
                         true -> ctx.synthesize(invocation.type, invocation.name, invocation.desc)
                         false -> cn.methods
                             .filterBy(MethodNode::name, invocation.name)
                             .filterBy(MethodNode::desc, invocation.desc)
                             .also { mns -> require(mns.size < 2) { error("$mns") } }
                             .firstOrNull()
-                    } ?: return null
-
-                    return Element.Method(cn, mn)
+                    }
                 }
 
-                fun resolveInvocations(elem: Element.Method): List<Element.Method> {
-                    return ctx.methodsInvokedBy(elem.mn)
+                fun resolveInvocations(elem: MethodNode): List<MethodNode> {
+                    return ctx.methodsInvokedBy(elem)
                         .asSequence()
                         .flatMap(::invocations)
                         .distinct()
@@ -481,7 +467,6 @@ sealed class Action<IN, OUT> {
                 return input
                     .flatMap(::resolveInvocations)
             }
-
 
             data class Invocation(
                 val type: Type,
@@ -505,14 +490,13 @@ sealed class Action<IN, OUT> {
         object IntoSignature : Action<IterFields, IterSignatures>() {
             override fun id() = "field-into-signature"
             override fun execute(ctx: Context, input: IterFields): IterSignatures {
-                fun signatureOf(elem: Element.Field): Element.Signature? {
-                    val formalTypeParameters = elem.cn.signature()?.formalParameters ?: listOf()
-                    return elem.fn.signature(formalTypeParameters)
-                        ?.let { Element.Signature(it.extends, elem) }
+                fun signatureOf(elem: FieldNode): SignatureNode? {
+                    return elem.returns
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
-                return input.mapNotNull(::signatureOf)
+                return input
+                    .mapNotNull(::signatureOf)
             }
         }
 
@@ -520,29 +504,29 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
-                    .map { f -> f.into<Element.Class>().also { ctx.scopeTransition(f, it) } }
+                    .map { f -> f.owner.also { ctx.scopeTransition(f, it) } }
                     .toSet()
             }
         }
 
-        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Field>() {
+        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<FieldNode>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
                 val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.fn.name }
+                return f { regex in it.name }
             }
         }
 
         class ExplodeType(val synthesize: Boolean = false): Action<IterFields, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
-               fun explode(field: Element.Field): Element.Class? {
-                   var exploded = ctx.classByType[field.fn.type]
+               fun explode(field: FieldNode): ClassNode? {
+                   var exploded = ctx.classByType[field.type]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(field.fn.type)
+                       exploded = ctx.synthesize(field.type)
 
-                   return Element.Class(exploded ?: return null)
-                       .also { ctx.scopeTransition(field, it) }
+                   return exploded
+                       ?.also { ctx.scopeTransition(field, it) }
                }
 
                 return input.mapNotNull(::explode)
@@ -556,17 +540,31 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterParameters): IterParameters = input
         }
 
+        object IntoSignature : Action<IterParameters, IterSignatures>() {
+            override fun id() = "parameter-into-signature"
+            override fun execute(ctx: Context, input: IterParameters): IterSignatures {
+                fun signatureOf(elem: ParameterNode): SignatureNode? {
+                    return elem.signature
+                        ?.let { SignatureNode.from(it, elem) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input
+                    .mapNotNull(::signatureOf)
+            }
+        }
+
         class ExplodeType(val synthesize: Boolean = false): Action<IterParameters, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterClasses {
-               fun explode(param: Element.Parameter): Element.Class? {
+               fun explode(param: ParameterNode): ClassNode? {
 
-                   var exploded = ctx.classByType[param.pn.type]
+                   var exploded = ctx.classByType[param.type]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(param.pn.type)
+                       exploded = ctx.synthesize(param.type)
 
-                   return Element.Class(exploded ?: return null)
-                       .also { ctx.scopeTransition(param, it) }
+                   return exploded
+                       ?.also { ctx.scopeTransition(param, it) }
                }
 
                 return input.mapNotNull(::explode)
@@ -577,7 +575,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { Element.Value(it.pn.type, it) }
+                    .map { ValueNode.from(it.type, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -586,7 +584,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input
-                    .map { p -> p.into<Element.Method>().also { ctx.scopeTransition(p, it) } }
+                    .map { p -> p.owner.also { ctx.scopeTransition(p, it) } }
                     .toSet()
             }
         }
@@ -594,15 +592,15 @@ sealed class Action<IN, OUT> {
         data class FilterNth(val nth: Int) : Action<IterParameters, IterParameters>() {
             override fun id() = "filter-nth($nth)"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
-                return input.filter { it.mn.parameters?.indexOf(it.pn) == nth }
+                return input.filter { pn -> pn.owner.parameters.indexOf(pn) == nth }
             }
         }
 
-        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<Element.Parameter>() {
+        data class Filter(val regex: Regex, val invert: Boolean) : IsoAction<ParameterNode>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
                 val f = if (invert) input::filterNot else input::filter
-                return f { regex in it.pn.name }
+                return f { regex in it.name }
             }
         }
     }
@@ -622,7 +620,7 @@ sealed class Action<IN, OUT> {
                     "$tag:\n${elements.joinToString(prefix = "    ", separator = "\n    ") { it.simpleName }}"
                 LogFormat.Count ->
                     "$tag: ${elements.size} ${elements.first()::class.simpleName!!.lowercase()}" +
-                        if (elements.first() is Element.Class) "es" else "s"
+                        if (elements.first() is ClassNode) "es" else "s"
             }.let(::println)
 
             return input
@@ -637,7 +635,7 @@ sealed class Action<IN, OUT> {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
-                .filter { annotation in it.annotations() }
+                .filter { annotation in it.annotations.map(AnnotationNode::type) }
         }
     }
 
@@ -652,24 +650,15 @@ sealed class Action<IN, OUT> {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun nameOf(elem: T): String = when (elem) {
-                is Element.Method    -> elem.mn.name
-                is Element.Field     -> elem.fn.name
-                is Element.Parameter -> elem.pn.name
-                is Element.Class     -> {
-                    if (shortened) {
-                        (elem.cn.innerClasses ?: listOf())
-                            .firstOrNull { it.name == elem.cn.name }
-                            ?.innerName
-                            ?: elem.cn.type.simpleName
-                    } else {
-                        elem.cn.type.simpleName
-                    }
-                }
-                else                 -> error("$elem")
+                is MethodNode    -> elem.name
+                is FieldNode     -> elem.name
+                is ParameterNode -> elem.name
+                is ClassNode     -> elem.innerName?.takeIf { shortened } ?: elem.simpleName
+                else             -> error("$elem")
             }
 
             return input
-                .map { Element.Value(nameOf(it), it) }
+                .map { ValueNode.from(nameOf(it), it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
     }
@@ -677,11 +666,11 @@ sealed class Action<IN, OUT> {
     data class ReadAnnotation<T: Element>(val annotation: Type, val field: String) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
-            fun readAnnotation(input: T): Element.Value? {
-                return input.annotations()
+            fun readAnnotation(input: T): ValueNode? {
+                return input.annotations
                     .find { an -> an.type == annotation }
-                    ?.let { an -> readFieldAny(field)(an) }
-                    ?.let { Element.Value(it, input) }
+                    ?.let { an -> an[field]!! }
+                    ?.let { ValueNode.from(it, input) }
                     ?.also { ctx.scopeTransition(input, it) }
             }
             return input.mapNotNull(::readAnnotation)
@@ -693,7 +682,7 @@ sealed class Action<IN, OUT> {
         override fun id() = "with-value($value)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             return input
-                .map { Element.Value(value, it) }
+                .map { ValueNode.from(value, it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
     }
@@ -753,7 +742,6 @@ sealed class Action<IN, OUT> {
         override fun id() = "register-entity-synthesized($id, ${type.simpleName})"
         override fun execute(ctx: Context, input: Unit) {
             ctx.synthesize(type)
-                .let(Element::Class)
                 .let { elem -> ctx.register(Entity(id, "N/A"), elem, labelFormatter) }
 
             return input
@@ -801,7 +789,7 @@ sealed class Action<IN, OUT> {
         val parentType: Entity.Type,
         val key: String,
         val childResolver: EntityResolver,
-    ) : IsoAction<Element.Method>() {
+    ) : IsoAction<MethodNode>() {
         override fun id() = "register-children($parentType, ${childResolver.type}.${childResolver.id})"
         override fun execute(ctx: Context, input: IterMethods): IterMethods {
             if (input.toList().isEmpty())
@@ -820,7 +808,7 @@ sealed class Action<IN, OUT> {
         val key: String,
         /** if null: resolves [Entity.Type] from currently referenced element */
         val entity: Entity.Type? = null
-    ) : IsoAction<Element.Value>() {
+    ) : IsoAction<ValueNode>() {
         override fun id() = "update-property($key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {
@@ -869,7 +857,6 @@ sealed class Action<IN, OUT> {
 
 fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
 
-private val InnerClassNode.outerType: Type
-    get() = Type.getType("L${outerName};")
+
 
 var debugLog = false

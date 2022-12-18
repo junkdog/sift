@@ -6,7 +6,7 @@ import org.objectweb.asm.signature.SignatureVisitor
 
 class TypeArgumentVisitor(
     val onTypeArgument: (TypeSignature) -> Unit,
-    val formalTypeParameters: (String) -> FormalTypeParameter,
+    val formalTypeParameters: (String) -> FormalTypeParameter?,
     val arrayDepth: Int = 0,
     api: Int = Opcodes.ASM9,
     signatureVisitor: SignatureVisitor? = null,
@@ -31,7 +31,7 @@ class TypeArgumentVisitor(
     override fun visitTypeVariable(name: String) {
         require(arg == null)
 
-        val param = formalTypeParameters(name)
+        val param = formalTypeParameters(name) ?: return
         arg = TypeSignature(ArgType.Var(param), arrayDepth, MetaType.GenericType)
             .also(onTypeArgument)
 
@@ -52,7 +52,7 @@ class TypeArgumentVisitor(
         require(arg == null)
 
         return TypeArgumentVisitor(
-            onTypeArgument = onTypeArgument, // FIXME: don't ignore arrays
+            onTypeArgument = onTypeArgument,
             formalTypeParameters = formalTypeParameters,
             arrayDepth = arrayDepth + 1,
             api = api,

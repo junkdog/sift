@@ -1,7 +1,7 @@
 package sift.core
 
 import sift.core.api.Action
-import sift.core.api.Element
+import sift.core.element.Element
 import sift.core.entity.Entity
 import java.lang.RuntimeException
 

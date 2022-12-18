@@ -1,14 +1,13 @@
 package sift.core.api
 
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
 import sift.core.*
 import sift.core.api.Action.DebugLog.LogFormat
 import sift.core.api.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.asm.type
+import sift.core.element.*
 import sift.core.jackson.NoArgConstructor
 import java.util.*
 import kotlin.reflect.KProperty1
@@ -62,9 +61,6 @@ object Dsl {
 
     @SiftTemplateDsl
     abstract class Core<ELEMENT : Element> {
-
-        // hack: FIXME
-        internal var currentProperty: Property<Element>? = null
 
         internal abstract var action: Action.Chain<Iter<ELEMENT>>
 
@@ -249,28 +245,6 @@ object Dsl {
         ): Property<ELEMENT> {
             return Property(tag, extract andThen Action.UpdateEntityProperty(tag))
         }
-
-        internal inline fun <reified S: Core<T>, reified T : Element> scopedProperty(
-            tag: String,
-            scope: S,
-            f: S.() -> Unit
-        ): Property<T> {
-            if (scope.currentProperty != null)
-                Throw.publishOutsideOfProperty(action)
-
-            // f() populates currentProperty.actioni
-            scope.currentProperty  = Property(tag, null)
-            scope.also(f)
-
-            // dependent on executedScope; it is expected to publish() a value action
-            val property = scope.currentProperty as Property<T>
-            property.action ?: Throw.publishNeverCalled(tag)
-
-            // clean up
-            scope.currentProperty = null
-
-            return property
-        }
     }
 
     @SiftTemplateDsl
@@ -347,7 +321,6 @@ object Dsl {
                 .let { it andThen Action.Class.ToInstrumenterScope }
         }
 
-        // TOOD: document ignoreOthers
         /** iterates class elements of registered [entity] type */
         fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
             val classes = Action.Instrumenter.ClassesOf(entity)
@@ -370,7 +343,7 @@ object Dsl {
         var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
     ) {
         fun readName(): Action<IterSignatures, IterValues> {
-            val forkTo = Action.Signature.ReadSignature()
+            val forkTo = Action.Signature.ReadSignature
                 .let { Action.Fork(it) }
 
             action +=  forkTo
@@ -408,8 +381,8 @@ object Dsl {
 
     class Classes(
         override var action: Action.Chain<IterClasses> = chainFrom(Action.Class.ClassScope)
-    ) : Core<Element.Class>(), CommonOperations<Element.Class, Classes>,
-        ParentOperations<Element.Class, Classes>
+    ) : Core<ClassNode>(), CommonOperations<ClassNode, Classes>,
+        ParentOperations<ClassNode, Classes>
     {
         // utility
 
@@ -431,7 +404,7 @@ object Dsl {
             annotation: Type,
             field: String
         ): Action<IterClasses, IterValues> {
-            val forkTo = Action.ReadAnnotation<Element.Class>(annotation, field)
+            val forkTo = Action.ReadAnnotation<ClassNode>(annotation, field)
                 .let { Action.Fork(it) }
 
             action +=  forkTo
@@ -504,10 +477,10 @@ object Dsl {
     }
 
     class Methods(
-        methods: Action<Iter<Element.Method>, Iter<Element.Method>> = Action.Method.MethodScope
-    ) : Core<Element.Method>(),
-        CommonOperations<Element.Method, Methods>,
-        ParentOperations<Element.Class, Classes>
+        methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope
+    ) : Core<MethodNode>(),
+        CommonOperations<MethodNode, Methods>,
+        ParentOperations<ClassNode, Classes>
     {
 
         override var action: Action.Chain<IterMethods> = chainFrom(methods)
@@ -574,7 +547,7 @@ object Dsl {
             annotation: Type,
             field: String
         ): Action<IterMethods, IterValues> {
-            val forkTo = Action.ReadAnnotation<Element.Method>(annotation, field)
+            val forkTo = Action.ReadAnnotation<MethodNode>(annotation, field)
                 .let { Action.Fork(it) }
 
             action += forkTo
@@ -634,16 +607,23 @@ object Dsl {
     }
 
     class Parameters(
-        parameters: Action<Iter<Element.Parameter>, Iter<Element.Parameter>> = Action.Parameter.ParameterScope
-    ) : Core<Element.Parameter>(),
-        CommonOperations<Element.Parameter, Parameters>,
-        ParentOperations<Element.Method, Methods>
+        parameters: Action<Iter<ParameterNode>, Iter<ParameterNode>> = Action.Parameter.ParameterScope
+    ) : Core<ParameterNode>(),
+        CommonOperations<ParameterNode, Parameters>,
+        ParentOperations<MethodNode, Methods>
     {
 
         override var action: Action.Chain<IterParameters> = chainFrom(parameters)
 
         fun parameter(nth: Int) {
             action += Action.Parameter.FilterNth(nth)
+        }
+
+        fun signature(f: Signature.() -> Unit) {
+            val forkTo = Signature().also(f).action
+                .let { signatureScope -> Action.Parameter.IntoSignature andThen signatureScope }
+
+            action += Action.Fork(forkTo)
         }
 
         override fun scope(
@@ -685,7 +665,7 @@ object Dsl {
             annotation: Type,
             field: String
         ): Action<IterParameters, IterValues> {
-            val forkTo = Action.ReadAnnotation<Element.Parameter>(annotation, field)
+            val forkTo = Action.ReadAnnotation<ParameterNode>(annotation, field)
                 .let { Action.Fork(it) }
 
             action += forkTo
@@ -716,10 +696,10 @@ object Dsl {
     }
 
     class Fields(
-        fields: Action<Iter<Element.Field>, Iter<Element.Field>> = Action.Field.FieldScope
-    ) : Core<Element.Field>(),
-        CommonOperations<Element.Field, Fields>,
-        ParentOperations<Element.Class, Classes>
+        fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope
+    ) : Core<FieldNode>(),
+        CommonOperations<FieldNode, Fields>,
+        ParentOperations<ClassNode, Classes>
     {
 
         override var action: Action.Chain<IterFields> = chainFrom(fields)
@@ -768,7 +748,7 @@ object Dsl {
             annotation: Type,
             field: String
         ): Action<IterFields, IterValues> {
-            val forkTo = Action.ReadAnnotation<Element.Field>(annotation, field)
+            val forkTo = Action.ReadAnnotation<FieldNode>(annotation, field)
                 .let { Action.Fork(it) }
 
             action += forkTo
@@ -800,16 +780,16 @@ sealed interface EntityResolver {
 
         override fun resolve(
             ctx: Context,
-            elements: Iter<Element.Method>
+            elements: Iter<MethodNode>
         ) {
-            val matched: IdentityHashMap<MethodNode, Entity> = ctx.coercedMethodsOf(type)
+            val matched: Map<MethodNode, Entity> = ctx.coercedMethodsOf(type)
 
-            fun registerChildren(elem: Element.Method) {
+            fun registerChildren(elem: MethodNode) {
                 val parent = ctx.entityService[elem]!!
-                ctx.methodsInvokedBy(elem.mn)
+                ctx.methodsInvokedBy(elem)
                     .filter { mn -> mn in matched }
-                    .filter { mn -> elem.mn !== mn }
-                    .map { ctx.entityService[matched[it]!!] as Element.Method }
+                    .filter { mn -> elem != mn }
+                    .map { ctx.entityService[matched[it]!!] as MethodNode }
                     .mapNotNull { ctx.entityService[it] }
                     .onEach { child -> parent.addChild(key, child) }
                     .onEach { child -> child.addChild("backtrack", parent) }
@@ -828,20 +808,19 @@ sealed interface EntityResolver {
 
         override fun resolve(
             ctx: Context,
-            elements: Iter<Element.Method>
+            elements: Iter<MethodNode>
         ) {
             val types = ctx.entityService[type]
-                    .map { (elem, _) -> elem as Element.Class } // FIXME: throw
-                    .map(Element.Class::cn)
+                    .map { (elem, _) -> elem as ClassNode } // FIXME: throw
                     .map(ClassNode::type)
 
-            fun registerChildren(elem: Element.Method) {
+            fun registerChildren(elem: MethodNode) {
                 val parent = ctx.entityService[elem]!!
-                ctx.methodsInvokedBy(elem.mn)
+                ctx.methodsInvokedBy(elem)
                     .asSequence()
                     .flatMap { mn -> instantiations(mn, types) }
                     .distinct()
-                    .map { type -> Element.Class(ctx.classByType[type]!!) }
+                    .map { type -> ctx.classByType[type]!! }
                     .mapNotNull { ctx.entityService[it] }
                     .onEach { child -> parent.addChild(key, child) }
                     .forEach { child -> child.addChild("backtrack", parent) }
@@ -859,13 +838,13 @@ sealed interface EntityResolver {
     fun resolve(ctx: Context, elements: IterMethods)
 }
 
-fun Context.coercedMethodsOf(type: Entity.Type): IdentityHashMap<MethodNode, Entity> {
+fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
     fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
         return when (elem) {
-            is Element.Class -> elem.cn.methods.map { mn -> mn to e }
-            is Element.Method -> listOf(elem.mn to e)
-            is Element.Parameter -> listOf(elem.mn to e)
-            is Element.Value -> toMethodNodes(elem.reference, e)
+            is ClassNode -> elem.methods.map { mn -> mn to e }
+            is MethodNode -> listOf(elem to e)
+            is ParameterNode -> listOf(elem.owner to e)
+            is ValueNode -> toMethodNodes(elem.reference, e)
             else -> error("unable to extract methods from $elem")
         }
     }
@@ -873,7 +852,6 @@ fun Context.coercedMethodsOf(type: Entity.Type): IdentityHashMap<MethodNode, Ent
     return entityService[type]
         .flatMap { (elem, e) -> toMethodNodes(elem, e) } // FIXME: throw
         .toMap()
-        .let(::IdentityHashMap)
 }
 
 sealed interface EntityResolution {
