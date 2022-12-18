@@ -35,9 +35,15 @@ fun MethodNode.signature(
 ): MethodSignatureNode? {
     signature ?: return null
 
-    return SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
-        .also { SignatureReader(signature).accept(it) }
-        .asMethodSignatureNode
+    return try {
+        SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
+            .also { SignatureReader(signature).accept(it) }
+            .asMethodSignatureNode
+    } catch (e: SignatureParsingException) {
+        // FIXME: callsite-aware signatures not handled at the moment
+        // currently ignored
+        null
+    }
 }
 
 

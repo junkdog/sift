@@ -619,6 +619,13 @@ object Dsl {
             action += Action.Parameter.FilterNth(nth)
         }
 
+        fun signature(f: Signature.() -> Unit) {
+            val forkTo = Signature().also(f).action
+                .let { signatureScope -> Action.Parameter.IntoSignature andThen signatureScope }
+
+            action += Action.Fork(forkTo)
+        }
+
         override fun scope(
             @Suppress("UNUSED_PARAMETER") label: String,
             f: Parameters.() -> Unit

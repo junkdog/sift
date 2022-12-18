@@ -3,6 +3,8 @@ package sift.core.element
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.LocalVariableNode
 import sift.core.AsmNodeHashcoder.hash
+import sift.core.asm.signature.TypeSignature
+import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 
 class ParameterNode private constructor(
@@ -10,7 +12,7 @@ class ParameterNode private constructor(
     private val mn: MethodNode,
     val name: String,
     val type: AsmType,
-//    val signature: SignatureNode?,
+    val signature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
 ) : Element {
@@ -51,6 +53,8 @@ class ParameterNode private constructor(
                 }
             }
 
+            val signatures = asmMn.signature(mn.formalTypeParameters)?.methodParameters
+
             return when {
                 // no parameters to resolve
                 argumentTypes.isEmpty() -> listOf()
@@ -63,6 +67,7 @@ class ParameterNode private constructor(
                         mn,
                         asmMn.parameters[idx].name,
                         type,
+                        signatures?.get(idx),
                         anno.map(AnnotationNode::from),
                         Source.Parameter
                     ) }
@@ -78,6 +83,7 @@ class ParameterNode private constructor(
                         mn,
                         localVar.name,
                         argumentTypes[idx],
+                        signatures?.get(idx),
                         anno.map(AnnotationNode::from),
                         Source.LocalVariable
                     ) }
@@ -90,6 +96,7 @@ class ParameterNode private constructor(
                         mn,
                         "${type.simpleName.camelCase}$idx",
                         type,
+                        signatures?.get(idx),
                         ans.map(AnnotationNode::from),
                         Source.NoDebugInfo
                     ) }

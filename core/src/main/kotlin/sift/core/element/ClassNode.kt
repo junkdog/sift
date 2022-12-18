@@ -5,6 +5,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.ClassSignatureNode
+import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
@@ -40,6 +41,9 @@ class ClassNode private constructor(
 
     val type: AsmType
         get() = cn.type
+
+    val formalTypeParameters: List<FormalTypeParameter>
+        get() = signature?.formalParameters ?: listOf()
 
     val qualifiedName: String
         get() = type.className

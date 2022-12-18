@@ -540,6 +540,20 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterParameters): IterParameters = input
         }
 
+        object IntoSignature : Action<IterParameters, IterSignatures>() {
+            override fun id() = "parameter-into-signature"
+            override fun execute(ctx: Context, input: IterParameters): IterSignatures {
+                fun signatureOf(elem: ParameterNode): SignatureNode? {
+                    return elem.signature
+                        ?.let { SignatureNode.from(it, elem) }
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input
+                    .mapNotNull(::signatureOf)
+            }
+        }
+
         class ExplodeType(val synthesize: Boolean = false): Action<IterParameters, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterClasses {
