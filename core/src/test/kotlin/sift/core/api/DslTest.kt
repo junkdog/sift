@@ -166,9 +166,43 @@ class DslTest {
         }
     }
 
-    @Test @Disabled
+    @Test
     fun `generic method parameters`() {
-        TODO("impl when asm's node classes are wrapped")
+        val cns = listOf(classNode(ClassWithGenericMethodParameters::class))
+        val payload = Entity.Type("payload")
+        val method = Entity.Type("method")
+
+        classes {
+            methods {
+                parameters {
+                    parameter(0)
+                    outerScope("register method") {
+                        entity(method, label("\${name}"), property("name", readName()))
+                    }
+
+                    signature {
+                        typeArguments {
+                            filter(Regex("Payload"))
+                            explodeType(synthesize = true) {
+                                entity(payload)
+                                method["payload"] = payload
+                            }
+                        }
+                    }
+                }
+            }
+        }.execute(cns) { es ->
+            val payloads = es[payload].values.toList()
+            assertThat(payloads).hasSize(1)
+            assertThat(payloads.first().label).isEqualTo("Payload")
+
+            val methods = es[method].values.associateBy(Entity::label)
+            assertThat(methods).hasSize(2)
+
+            assertThat(methods["payloads"]!!.children("payload").map(Entity::label)).containsExactly("Payload")
+            assertThat(methods["complexParameters"]!!.children("payload")).isEmpty()
+        }
+
     }
 
     @Test @Disabled

@@ -1,22 +1,15 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.filterBy
-import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
-import sift.core.asm.asSequence
 import sift.core.asm.ownerType
-import sift.core.asm.type
-
-/** extended class type, returns `null` for `java.lang.Object` */
-internal val ClassNode.superType: Type?
-    get() = superName
-        ?.takeUnless { "java/lang/Object" in it }
-        ?.let { Type.getType("L${it};") }
+import sift.core.element.ClassNode
+import sift.core.element.MethodNode
 
 internal fun instantiations(mn: MethodNode): List<Type> {
-    return mn.asSequence()
+    return mn.instructions()
         .mapNotNull { it as? MethodInsnNode }
         .filter(AbstractInsnNode::isCallingConstructor)
         .map(MethodInsnNode::ownerType)
@@ -32,7 +25,7 @@ internal fun methodsInvokedBy(
         known += current
 
         // java's lambda/functional interfaces
-        current.asSequence()
+        current.instructions()
             .mapNotNull { it as? InvokeDynamicInsnNode }
             .flatMap { ins -> ins.bsmArgs.mapNotNull { it as? Handle } }
             .mapNotNull(cns::findMethod)
@@ -40,14 +33,14 @@ internal fun methodsInvokedBy(
             .forEach { recurse(it, known) }
 
         // normal method invocation, kotlin lambdas
-        current.asSequence()
+        current.instructions()
             .mapNotNull { it as? MethodInsnNode }
             .mapNotNull(cns::findMethod)
             .filter { it !in known }
             .forEach { recurse(it, known) }
 
         // kotlin noinline lambdas
-        current.asSequence()
+        current.instructions()
             .kotlinNoinlineLambdas(current.name)
             .forEach { type ->
                 cns[type]!!
@@ -78,32 +71,16 @@ private fun Sequence<AbstractInsnNode>.kotlinNoinlineLambdas(callee: String): Li
     return singleton + dynamic
 }
 
-internal fun interfacesOf(cn: ClassNode): List<Type> {
-    return (cn.interfaces ?: listOf())
-        .map { Type.getType("L${it};") }
-}
 
-internal fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
-    return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
-        .drop(1)
-        .toList()
-}
-
-internal fun Map<Type, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
-    return generateSequence(cn) { get(it.superType) }
-        .drop(1)
-        .toList()
-}
-
-internal fun Map<Type, ClassNode>.findMethod(ins: MethodInsnNode): MethodNode? {
+private fun Map<Type, ClassNode>.findMethod(ins: MethodInsnNode): MethodNode? {
     return findMethod(ins.ownerType, ins.name, ins.desc)
 }
 
-internal fun Map<Type, ClassNode>.findMethod(handle: Handle): MethodNode? {
+private fun Map<Type, ClassNode>.findMethod(handle: Handle): MethodNode? {
     return findMethod(handle.ownerType, handle.name, handle.desc)
 }
 
-internal fun Map<Type, ClassNode>.findMethod(
+private fun Map<Type, ClassNode>.findMethod(
     owner: Type,
     name: String,
     desc: String,

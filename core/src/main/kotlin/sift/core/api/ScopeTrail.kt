@@ -1,6 +1,8 @@
 package sift.core.api
 
-class ElementTrail : Sequence<Element> {
+import sift.core.element.Element
+
+class ScopeTrail : Sequence<Element> {
     constructor(input: Element) : this(listOf(input))
 
     private constructor(input: List<Element>) {
@@ -9,8 +11,8 @@ class ElementTrail : Sequence<Element> {
 
     private val elements: MutableList<Element> = mutableListOf()
 
-    operator fun plus(element: Element): ElementTrail {
-        return ElementTrail(elements + element)
+    operator fun plus(element: Element): ScopeTrail {
+        return ScopeTrail(elements + element)
     }
 
     override fun iterator(): Iterator<Element> {

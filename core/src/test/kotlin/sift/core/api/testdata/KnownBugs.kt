@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
 import sift.core.api.Dsl.classes
+import sift.core.api.Dsl.instrumenter
 import sift.core.api.testdata.set1.Payload
 import sift.core.api.testdata.set2.HandlerFn
 import sift.core.api.testdata.set2.HandlerOfFns

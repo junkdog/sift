@@ -1,6 +1,6 @@
 package sift.core.asm.signature
 
-import net.onedaybeard.collectionsby.firstBy
+import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.signature.SignatureVisitor
 
 /**
@@ -97,4 +97,9 @@ class SignatureParser(
 
 internal fun MutableList<FormalTypeParameter>.firstByName(
     name: String
-) = firstBy(FormalTypeParameter::name, name)
+): FormalTypeParameter {
+    return findBy(FormalTypeParameter::name, name)
+        ?: throw SignatureParsingException("'$name' not found among formal parameters")
+}
+
+class SignatureParsingException(message: String) : IllegalStateException(message)

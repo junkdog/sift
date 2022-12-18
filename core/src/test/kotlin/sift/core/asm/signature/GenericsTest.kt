@@ -139,7 +139,7 @@ class GenericsTest {
                     .isEqualTo(expected)
             } ?: run { assertThat(signature.methodParameters).isEmpty() }
 
-            assertThat(signature.returnType.toString())
+            assertThat(signature.returns.toString())
                 .isEqualTo(returnType)
         }
     }

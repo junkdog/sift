@@ -33,7 +33,7 @@ sealed interface LabelFormatter : Entity.LabelFormatter {
 
     object FromElement : LabelFormatter {
         override fun format(entity: Entity, service: EntityService): String {
-            return service[entity].simpleName
+            return service[entity].toString()
         }
     }
 }

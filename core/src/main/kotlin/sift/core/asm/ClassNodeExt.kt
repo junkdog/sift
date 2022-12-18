@@ -10,6 +10,12 @@ import sift.core.combine
 val ClassNode.qualifiedName: String
     get() = type.className
 
+/** extended class type, returns `null` for `java.lang.Object` */
+val ClassNode.superType: Type?
+    get() = superName
+        ?.takeUnless { "java/lang/Object" in it }
+        ?.let { Type.getType("L${it};") }
+
 val ClassNode.shortName: String
     get() = qualifiedName.substringAfterLast(".")
 

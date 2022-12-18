@@ -1,11 +1,13 @@
 package sift.core.api
 
-typealias IterClasses    = Iterable<Element.Class>
-typealias IterSignatures = Iterable<Element.Signature>
-typealias IterMethods    = Iterable<Element.Method>
-typealias IterFields     = Iterable<Element.Field>
-typealias IterParameters = Iterable<Element.Parameter>
-typealias IterValues     = Iterable<Element.Value>
+import sift.core.element.*
+
+typealias IterClasses    = Iterable<ClassNode>
+typealias IterSignatures = Iterable<SignatureNode>
+typealias IterMethods    = Iterable<MethodNode>
+typealias IterFields     = Iterable<FieldNode>
+typealias IterParameters = Iterable<ParameterNode>
+typealias IterValues     = Iterable<ValueNode>
 typealias Iter<T>        = Iterable<T>
 
 typealias IsoAction<T>   = Action<Iter<T>, Iter<T>>

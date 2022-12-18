@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer
 import com.fasterxml.jackson.databind.node.ObjectNode
 import sift.core.api.Action
-import sift.core.api.Element
+import sift.core.element.ValueNode
 import sift.core.entity.Entity
 
 object WithValueSerializer {
@@ -67,7 +67,7 @@ object WithValueSerializer {
                 }
             }
 
-            return Action.WithValue<Element.Value>(v) as Action.WithValue<*>
+            return Action.WithValue<ValueNode>(v) as Action.WithValue<*>
         }
     }
 }

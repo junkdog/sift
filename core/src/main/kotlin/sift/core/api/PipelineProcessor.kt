@@ -6,7 +6,7 @@ import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
 
 class PipelineProcessor(classNodes: Iterable<ClassNode>) {
-    private val context: Context = Context(classNodes.toMutableList())
+    private val context: Context = Context(classNodes)
 
     internal fun processPipeline(action: Action<Unit, Unit>, profile: Boolean): Context {
         val start = System.nanoTime()

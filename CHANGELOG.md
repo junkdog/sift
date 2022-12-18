@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### New
+- DSL.Parameter: generic `signature {}` scope.
+
 
 ## sift-0.4.0 2022-12-07
 

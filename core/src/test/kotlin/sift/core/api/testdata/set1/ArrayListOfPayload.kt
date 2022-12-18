@@ -11,6 +11,13 @@ class ClassWithGenericElements {
     fun complexReturn(): Map<String, List<Pair<Payload, Int>>> = mapOf()
 }
 
+class ClassWithGenericMethodParameters {
+    fun payloads(payloadas: List<Payload>) = Unit
+    fun complexParameters(map: Map<String, List<Pair<Payload, Int>>>) = Unit
+
+    fun thisShouldNotBreakStuff(): String = "Hello World"
+
+}
 
 abstract class ClassExtendingMapOfOmgPayload() : HashMap<Omg, Payload>()
 
