@@ -4,7 +4,7 @@
 - DSL.Parameter: generic `signature {}` scope.
 
 
-## sift-0.3.0 2022-12-07
+## sift-0.4.0 2022-12-07
 
 ### New
 **Signature Scope**: Limited DSL support for exploring generics/type signatures, e.g. `Foo` inside `List<Foo>`.
