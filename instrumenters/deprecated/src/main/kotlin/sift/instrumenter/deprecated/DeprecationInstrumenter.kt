@@ -10,11 +10,12 @@ import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style
+import sift.instrumenter.spi.InstrumenterServiceProvider
 
 typealias JavaDeprecated = java.lang.Deprecated
 
 @Suppress("unused")
-class DeprecationInstrumenter : InstrumenterService {
+class DeprecationInstrumenter : InstrumenterService, InstrumenterServiceProvider {
     val klazz = Entity.Type("classes")
     val referencing = Entity.Type("classes with deprecations")
     val method = Entity.Type("methods")

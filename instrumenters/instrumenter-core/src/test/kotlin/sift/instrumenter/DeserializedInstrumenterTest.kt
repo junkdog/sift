@@ -37,6 +37,4 @@ class SomeInstrumenterPipeline : InstrumenterService {
     }
 
     override fun theme(): Map<Entity.Type, Style> = mapOf()
-    override fun create() = this
-
 }

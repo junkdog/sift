@@ -7,13 +7,14 @@ import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style
+import sift.instrumenter.spi.InstrumenterServiceProvider
 
 typealias E = JpaInstrumenter.EntityTypes
 typealias A = JpaInstrumenter.Annotations
 typealias T = JpaInstrumenter.AsmTypes
 
 @Suppress("unused")
-class JpaInstrumenter : InstrumenterService {
+class JpaInstrumenter : InstrumenterService, InstrumenterServiceProvider {
     override val entityTypes: Iterable<Entity.Type> = listOf(E.jpaMethod, E.jpaRepository)
     override val defaultType: Entity.Type = entityTypes.first()
 
