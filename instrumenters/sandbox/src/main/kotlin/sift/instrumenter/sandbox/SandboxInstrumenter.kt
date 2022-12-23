@@ -5,6 +5,7 @@ import sift.core.entity.Entity
 import sift.core.api.Dsl.instrumenter
 import sift.core.terminal.Style
 import sift.instrumenter.InstrumenterService
+import sift.instrumenter.spi.InstrumenterServiceProvider
 
 typealias E = SandboxInstrumenter.EntityTypes
 typealias A = SandboxInstrumenter.Annotations
@@ -34,7 +35,6 @@ class SandboxInstrumenter : InstrumenterService {
         val jpaMethod = "jpa".type
     }
 
-    override fun create() = this
     override val name: String
         get() = "sanbox"
 

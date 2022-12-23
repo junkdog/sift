@@ -30,7 +30,6 @@ internal class DeserializedInstrumenter(
 
     override fun pipeline() = pipeline
     override fun theme() = theme
-    override fun create(): InstrumenterService = this
 }
 
 

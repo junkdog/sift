@@ -8,9 +8,8 @@ import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.dsl.buildTree
-import sift.instrumenter.spi.InstrumenterServiceProvider
 
-interface InstrumenterService : InstrumenterServiceProvider {
+interface InstrumenterService {
     val name: String
     val defaultType: Entity.Type
     val entityTypes: Iterable<Entity.Type>

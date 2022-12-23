@@ -20,12 +20,13 @@ import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
 import sift.instrumenter.dsl.registerInstantiationsOf
+import sift.instrumenter.spi.InstrumenterServiceProvider
 
 typealias A = SpringBootAxonCqrsInstrumenter.Annotation
 typealias E = SpringBootAxonCqrsInstrumenter.EntityType
 
 @Suppress("unused")
-class SpringBootAxonCqrsInstrumenter : InstrumenterService {
+class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceProvider {
 
     object Annotation {
         private val String.type

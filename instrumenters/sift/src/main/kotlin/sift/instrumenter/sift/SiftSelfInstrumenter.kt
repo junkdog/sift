@@ -15,13 +15,14 @@ import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.plain
+import sift.instrumenter.spi.InstrumenterServiceProvider
 import java.util.regex.Pattern
 
 typealias E = SiftSelfInstrumenter.EntityTypes
 typealias T = SiftSelfInstrumenter.AsmTypes
 
 @Suppress("unused")
-class SiftSelfInstrumenter : InstrumenterService {
+class SiftSelfInstrumenter : InstrumenterService, InstrumenterServiceProvider {
     override val entityTypes: Iterable<Entity.Type> = listOf(E.scope, E.dsl, E.action, E.element)
     override val defaultType: Entity.Type = entityTypes.first()
 

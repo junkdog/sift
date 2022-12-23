@@ -11,13 +11,14 @@ import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style
+import sift.instrumenter.spi.InstrumenterServiceProvider
 
 typealias E = Jdbi3Instrumenter.EntityTypes
 typealias A = Jdbi3Instrumenter.Annotations
 typealias T = Jdbi3Instrumenter.AsmTypes
 
 @Suppress("unused")
-class Jdbi3Instrumenter : InstrumenterService {
+class Jdbi3Instrumenter : InstrumenterService, InstrumenterServiceProvider {
 
     override val entityTypes: Iterable<Entity.Type> = listOf(E.sqlQuery, E.sqlUpdate)
     override val defaultType: Entity.Type = entityTypes.first()
