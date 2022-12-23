@@ -20,7 +20,7 @@ import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
-import sift.instrumenter.graphviz.DiagramGenerator
+import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State

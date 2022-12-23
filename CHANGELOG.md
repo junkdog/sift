@@ -4,7 +4,8 @@
 - DSL.Parameter: generic `signature {}` scope.
 
 ### Breaking
-- Gruxbox and Style moved to `sift.core.terminal` from `sift.instrumenter`.
+- `Gruxbox` and `Style` moved to `sift.core.terminal` from `sift.instrumenter`.
+- `sift.core.graphviz.Dot` relocated from `sift.instrumenter.graphviz`. 
 
 ## sift-0.4.0 2022-12-07
 
