@@ -2,11 +2,11 @@ package sift.core.api
 
 import sift.core.element.Element
 
-class ScopeTrail : Sequence<Element> {
-    constructor(input: Element) : this(listOf(input))
+internal class ScopeTrail : Sequence<Element> {
+    constructor(visited: Element) : this(listOf(visited))
 
-    private constructor(input: List<Element>) {
-        elements += input
+    private constructor(visited: List<Element>) {
+        elements += visited
     }
 
     private val elements: MutableList<Element> = mutableListOf()
@@ -20,6 +20,6 @@ class ScopeTrail : Sequence<Element> {
     }
 
     override fun toString(): String {
-        return "ElementTrail(${joinToString(separator = " <- ") { it.simpleName }})"
+        return "ScopeTrail(${joinToString(separator = " <- ") { it.simpleName }})"
     }
 }

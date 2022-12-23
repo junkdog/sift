@@ -1,4 +1,4 @@
-package sift.instrumenter
+package sift.core.terminal
 
 import com.github.ajalt.colormath.Color
 import com.github.ajalt.colormath.parse

@@ -3,6 +3,8 @@
 ### New
 - DSL.Parameter: generic `signature {}` scope.
 
+### Breaking
+- Gruxbox and Style moved to `sift.core.terminal` from `sift.instrumenter`.
 
 ## sift-0.4.0 2022-12-07
 
@@ -34,7 +36,8 @@ be mangled.
 - DSL.Signature: `typeArguments {}` - iterate nested type arguments.
 - DSL: `readName(shorten=true)` shortens names of inner classes.
 - Dot entity property `dot-shape` accepts valid graphviz shapes
-- Entity labels: extract all property values by prefixing the property name with  `+`. E.g. `${+property}`.
+- Entity labels: extract all
+- property values by prefixing the property name with  `+`. E.g. `${+property}`.
 
 ### Fixes
 - DOT: illegal node ids containing `.` and `$`.  

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.module.kotlin.*
 import sift.core.api.Action
 import sift.core.entity.Entity
 import sift.core.jackson.*
+import sift.core.terminal.Style
 
 @NoArgConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

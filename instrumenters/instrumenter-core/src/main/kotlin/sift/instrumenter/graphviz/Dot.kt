@@ -9,7 +9,7 @@ import sift.core.graphviz.Dot
 import sift.core.pop
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
-import sift.instrumenter.Gruvbox
+import sift.core.terminal.Gruvbox
 
 /*
 

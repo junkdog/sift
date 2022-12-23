@@ -3,10 +3,10 @@ package sift.instrumenter.jpa
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Dsl.instrumenter
-import sift.instrumenter.Gruvbox.orange1
-import sift.instrumenter.Gruvbox.orange2
+import sift.core.terminal.Gruvbox.orange1
+import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style
+import sift.core.terminal.Style
 
 typealias E = JpaInstrumenter.EntityTypes
 typealias A = JpaInstrumenter.Annotations

@@ -10,15 +10,15 @@ import sift.core.api.Dsl.instrumenter
 import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
 import sift.core.product
-import sift.instrumenter.Gruvbox.aqua2
-import sift.instrumenter.Gruvbox.blue2
-import sift.instrumenter.Gruvbox.green2
-import sift.instrumenter.Gruvbox.light2
-import sift.instrumenter.Gruvbox.purple2
-import sift.instrumenter.Gruvbox.yellow2
+import sift.core.terminal.Gruvbox.aqua2
+import sift.core.terminal.Gruvbox.blue2
+import sift.core.terminal.Gruvbox.green2
+import sift.core.terminal.Gruvbox.light2
+import sift.core.terminal.Gruvbox.purple2
+import sift.core.terminal.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style.Companion.fromProperty
-import sift.instrumenter.Style.Companion.plain
+import sift.core.terminal.Style.Companion.fromProperty
+import sift.core.terminal.Style.Companion.plain
 import sift.instrumenter.dsl.registerInstantiationsOf
 
 typealias A = SpringBootAxonCqrsInstrumenter.Annotation
