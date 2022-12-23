@@ -8,13 +8,13 @@ import sift.core.api.Dsl.instrumenter
 import sift.core.api.SiftTemplateDsl
 import sift.core.asm.type
 import sift.core.entity.Entity
-import sift.instrumenter.Gruvbox.blue1
-import sift.instrumenter.Gruvbox.blue2
-import sift.instrumenter.Gruvbox.orange1
-import sift.instrumenter.Gruvbox.orange2
+import sift.core.terminal.Gruvbox.blue1
+import sift.core.terminal.Gruvbox.blue2
+import sift.core.terminal.Gruvbox.orange1
+import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style
-import sift.instrumenter.Style.Companion.plain
+import sift.core.terminal.Style
+import sift.core.terminal.Style.Companion.plain
 import java.util.regex.Pattern
 
 typealias E = SiftSelfInstrumenter.EntityTypes

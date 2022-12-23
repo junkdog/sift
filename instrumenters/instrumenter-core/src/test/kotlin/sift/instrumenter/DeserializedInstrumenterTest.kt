@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.core.api.Dsl.instrumenter
 import sift.core.entity.Entity
+import sift.core.terminal.Style
 
 class DeserializedInstrumenterTest {
     @Test

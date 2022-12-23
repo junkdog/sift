@@ -36,7 +36,6 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -73,6 +72,14 @@
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
 
+
+        <!-- terminal -->
+        <dependency>
+            <groupId>com.github.ajalt.mordant</groupId>
+            <artifactId>mordant-jvm</artifactId>
+        </dependency>
+
+        <!-- test -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>

@@ -7,10 +7,10 @@ import sift.core.api.Dsl.instrumenter
 import sift.core.entity.Entity
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
-import sift.instrumenter.Gruvbox.orange1
-import sift.instrumenter.Gruvbox.orange2
+import sift.core.terminal.Gruvbox.orange1
+import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style
+import sift.core.terminal.Style
 
 typealias E = Jdbi3Instrumenter.EntityTypes
 typealias A = Jdbi3Instrumenter.Annotations

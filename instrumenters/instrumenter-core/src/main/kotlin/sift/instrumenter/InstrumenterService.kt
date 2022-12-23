@@ -3,6 +3,7 @@ package sift.instrumenter
 import sift.core.api.Action
 import sift.core.api.SystemModel
 import sift.core.entity.Entity
+import sift.core.terminal.Style
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree

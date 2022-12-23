@@ -9,7 +9,7 @@ import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.instrumenter.InstrumenterService
-import sift.instrumenter.Style
+import sift.core.terminal.Style
 
 typealias JavaDeprecated = java.lang.Deprecated
 

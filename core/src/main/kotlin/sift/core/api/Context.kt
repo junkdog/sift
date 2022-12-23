@@ -30,7 +30,7 @@ data class Context(
         .let(::IdentityHashMap)
 
     internal val entityService: EntityService = EntityService()
-    var trails: MutableMap<Element, MutableList<ScopeTrail>> = mutableMapOf()
+    internal var trails: MutableMap<Element, MutableList<ScopeTrail>> = mutableMapOf()
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
@@ -129,7 +129,7 @@ data class Context(
         labelFormatters[entity] = formatter
     }
 
-    fun trailsOf(element: Element): MutableList<ScopeTrail> {
+    internal fun trailsOf(element: Element): MutableList<ScopeTrail> {
         return trails.getOrPut(element) { mutableListOf(ScopeTrail(element)) }
     }
 
