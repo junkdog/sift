@@ -26,6 +26,8 @@ class SignatureNode private constructor(
 
     override fun hashCode(): Int = hash(signature, reference)
 
+    override fun toString(): String = signature.toString()
+
     companion object {
         fun from(signature: TypeSignature, reference: Element): SignatureNode {
             return SignatureNode(signature, reference)

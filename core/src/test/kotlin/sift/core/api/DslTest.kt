@@ -652,6 +652,11 @@ class DslTest {
         TODO()
     }
 
+    @Test @Disabled
+    fun `read annotation from method parameter`() {
+        TODO()
+    }
+
 
     @Test @Disabled
     fun `treat constructor properties as fields`() {
@@ -1027,6 +1032,84 @@ class DslTest {
                 .hasSize(1)
                 .first()
                 .isEqualTo(payload)
+        }
+    }
+
+    @Test
+    fun `child assignment using dot-invocations-by`() {
+        val cns = listOf(
+            classNode<Payload>(),
+            classNode<SomeFactory>(),
+            classNode<HandlerOfFns>(),
+        )
+
+        val method = Entity.Type("handler")
+        val factory = Entity.Type("factory")
+
+        classes {
+            scope("factory") {
+                filter(Regex("SomeFactory"))
+                methods {
+                    filter(Regex("create"))
+                    entity(factory)
+                }
+            }
+            methods {
+                filter(Regex("HandlerOfFns\$"))
+                entity(method)
+
+                factory.invocations["invocations-by"] = method
+            }
+        }.execute(cns) { es ->
+            val methods = es[method].values.toList()
+            assertThat(methods).hasSize(5)
+
+            fun er(s: String): Entity = methods.first { s in it.label }
+
+            assertThat(es[factory].values.first().children("invocations-by"))
+                .hasSize(2)
+                .containsExactly(
+                    er("HandlerOfFns::boo"),
+                    er("HandlerOfFns::invoker"),
+                )
+        }
+    }
+
+    @Test
+    fun `child assignment using dot-instantiations-by`() {
+        val cns = listOf(
+            classNode<HandlerFn>(),
+            classNode<Payload>(),
+            classNode<HandlerOfFns>(),
+        )
+
+        val handler = Entity.Type("handler")
+        val data = Entity.Type("data")
+
+        classes {
+            methods {
+                annotatedBy<HandlerFn>()
+                entity(handler)
+
+                parameters {
+                    parameter(0)
+                    explodeType {
+                        entity(data)
+                    }
+                }
+
+                data.instantiations["instantiations-by"] = handler
+            }
+        }.execute(cns) { es ->
+            val handlers = es[handler].values.toList()
+            assertThat(handlers).hasSize(2)
+            assertThat(es[data].values.toList()).hasSize(1)
+
+            val instantiatedBy = es[data].values.toList().first()
+                .children("instantiations-by")
+
+            assertThat(instantiatedBy)
+                .hasSize(1)
         }
     }
 
@@ -1458,7 +1541,7 @@ class DslTest {
         block: (EntityService) -> Unit
     ) {
         PipelineProcessor(cns)
-            .processPipeline(this, false)
+            .processPipeline(this, false) { it.debugTrails() }
             .entityService
             .also(block)
     }

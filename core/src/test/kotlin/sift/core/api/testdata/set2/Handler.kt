@@ -4,6 +4,10 @@ import sift.core.api.testdata.set1.Payload
 
 annotation class HandlerFn
 
+class SomeFactory {
+    fun create(): String = "hi"
+}
+
 class HandlerOfFns {
 
     @HandlerFn
@@ -14,6 +18,7 @@ class HandlerOfFns {
     @HandlerFn
     fun boo(payload: Payload) {
         Payload('w')
+        SomeFactory().create()
     }
 
     fun dummy() {

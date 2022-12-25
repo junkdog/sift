@@ -77,3 +77,6 @@ internal class IllegalEntityAssignmentException(
     message: String
 ) : SiftModelException(message)
 
+internal class RhsEntityResolutionException(
+    message: String
+) : SiftModelException(message)

@@ -1,6 +1,6 @@
 package sift.core.api
 
-import sift.core.element.Element
+import sift.core.element.*
 
 internal class ScopeTrail : Sequence<Element> {
     constructor(visited: Element) : this(listOf(visited))
@@ -17,6 +17,10 @@ internal class ScopeTrail : Sequence<Element> {
 
     override fun iterator(): Iterator<Element> {
         return elements.reversed().iterator()
+    }
+
+    operator fun contains(other: ScopeTrail): Boolean {
+        return other.elements.containsAll(elements)
     }
 
     override fun toString(): String {

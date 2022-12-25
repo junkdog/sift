@@ -8,7 +8,6 @@ import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.asm.type
 import sift.core.element.*
-import sift.core.jackson.NoArgConstructor
 import java.util.*
 import kotlin.reflect.KProperty1
 
@@ -322,7 +321,8 @@ object Dsl {
         }
 
         /** iterates class elements of registered [entity] type */
-        fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
+        fun
+            classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
             val classes = Action.Instrumenter.ClassesOf(entity)
             val forkTo = Classes().also(f).action
 
@@ -487,14 +487,26 @@ object Dsl {
 
         operator fun Entity.Type.set(
             key: String,
-            children: EntityResolution
+            rhs: EntityResolution
         ) {
-            val resolver = when (children) {
-                is EntityResolution.Instantiations -> EntityResolver.FromInstantiationsOf(key, children.type)
-                is EntityResolution.Invocations -> EntityResolver.FromInvocationsOf(key, children.type)
+            val resolver = when (rhs) {
+                is EntityResolution.Instantiations -> EntityAssignmentResolver.FromInstantiationsOf(key, rhs.type)
+                is EntityResolution.Invocations    -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
             }
 
             action += Action.RegisterChildrenFromResolver(this, key, resolver)
+        }
+
+        operator fun EntityResolution.set(
+            key: String,
+            rhs: Entity.Type
+        ) {
+            val resolver = when (this) {
+                is EntityResolution.Instantiations -> EntityAssignmentResolver.FromInstantiationsBy(key, type, rhs)
+                is EntityResolution.Invocations    -> EntityAssignmentResolver.FromInvocationsBy(key, type, rhs)
+            }
+
+            action += Action.RegisterChildrenFromResolver(rhs, key, resolver)
         }
 
         override fun scope(
@@ -565,6 +577,10 @@ object Dsl {
             action += Action.Fork(
                 Action.Method.IntoParameters andThen forkTo
             )
+        }
+
+        operator fun Entity.Type.get(key: String) {
+
         }
 
         fun instantiationsOf(type: Entity.Type, f: Classes.() -> Unit) {
@@ -767,85 +783,15 @@ object Dsl {
     }
 }
 
-sealed interface EntityResolver {
-    val type: Entity.Type
-    val id: String
-
-    @NoArgConstructor
-    class FromInvocationsOf(
-        val key: String,
-        override val type: Entity.Type
-    ) : EntityResolver {
-        override val id: String = "invocations"
-
-        override fun resolve(
-            ctx: Context,
-            elements: Iter<MethodNode>
-        ) {
-            val matched: Map<MethodNode, Entity> = ctx.coercedMethodsOf(type)
-
-            fun registerChildren(elem: MethodNode) {
-                val parent = ctx.entityService[elem]!!
-                ctx.methodsInvokedBy(elem)
-                    .filter { mn -> mn in matched }
-                    .filter { mn -> elem != mn }
-                    .map { ctx.entityService[matched[it]!!] as MethodNode }
-                    .mapNotNull { ctx.entityService[it] }
-                    .onEach { child -> parent.addChild(key, child) }
-                    .onEach { child -> child.addChild("backtrack", parent) }
-            }
-
-            elements.forEach(::registerChildren)
-        }
-    }
-
-    @NoArgConstructor
-    class FromInstantiationsOf(
-        val key: String,
-        override val type: Entity.Type
-    ) : EntityResolver {
-        override val id: String = "instantiations"
-
-        override fun resolve(
-            ctx: Context,
-            elements: Iter<MethodNode>
-        ) {
-            val types = ctx.entityService[type]
-                    .map { (elem, _) -> elem as ClassNode } // FIXME: throw
-                    .map(ClassNode::type)
-
-            fun registerChildren(elem: MethodNode) {
-                val parent = ctx.entityService[elem]!!
-                ctx.methodsInvokedBy(elem)
-                    .asSequence()
-                    .flatMap { mn -> instantiations(mn, types) }
-                    .distinct()
-                    .map { type -> ctx.classByType[type]!! }
-                    .mapNotNull { ctx.entityService[it] }
-                    .onEach { child -> parent.addChild(key, child) }
-                    .forEach { child -> child.addChild("backtrack", parent) }
-            }
-
-            elements
-                .forEach(::registerChildren)
-        }
-
-        private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
-            return instantiations(mn).filter(types::contains)
-        }
-    }
-
-    fun resolve(ctx: Context, elements: IterMethods)
-}
 
 fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
     fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
         return when (elem) {
-            is ClassNode -> elem.methods.map { mn -> mn to e }
-            is MethodNode -> listOf(elem to e)
+            is ClassNode     -> elem.methods.map { mn -> mn to e }
+            is MethodNode    -> listOf(elem to e)
             is ParameterNode -> listOf(elem.owner to e)
-            is ValueNode -> toMethodNodes(elem.reference, e)
-            else -> error("unable to extract methods from $elem")
+            is ValueNode     -> toMethodNodes(elem.reference, e)
+            else             -> error("unable to extract methods from $elem")
         }
     }
 

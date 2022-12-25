@@ -8,11 +8,17 @@ import kotlin.time.Duration.Companion.nanoseconds
 class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     private val context: Context = Context(classNodes)
 
-    internal fun processPipeline(action: Action<Unit, Unit>, profile: Boolean): Context {
+    internal fun processPipeline(
+        action: Action<Unit, Unit>,
+        profile: Boolean,
+        onComplete: (Context) -> Unit = {}
+    ): Context {
         val start = System.nanoTime()
         action(context, Unit)
         context.updateEntityLabels()
         val end = System.nanoTime()
+
+        onComplete(context)
 
         if (profile) {
             // tag scopes
