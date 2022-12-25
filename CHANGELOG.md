@@ -1,6 +1,8 @@
 ## Upcoming release
 
 
+### Reverse registrations 
+
 "Reverse registration" of invocations and instantiations of entities is now possible. This means that,
 in addition to `foo["a"] = bar.instantations` and `foo["b"] = bar.invocations`, we can now also register
 instances of foo that are invoked or instantiated by bar.  
@@ -13,15 +15,23 @@ methods {
 }
 ```
 
+### Elements: Scope-erased scope
+
+The `Elements` context is a type-erased scope that only provides methods defined by `Core` scope class.
+This new scope adds a layer of abstraction to the DSL, making it easier to reuse code and update properties
+in a more flexible way.
+
 ### New
 - DSL.Parameter: generic `signature {}` scope.
-- DSL.Method: Reverse association with `foo.instantiations["created-by] = bar` and `foo.invocations["called-by] = bar` 
+- DSL.Method: Reverse association with `foo.nstantiations["created-by] = bar` and `foo.invocations["called-by] = bar` 
+- DSL.Instrumenter: `elementsOf(e) {}` iterate over all entities without element-specific methods. Useful for property tagging. 
 
 ### Breaking
 - `Gruxbox` and `Style` moved to `sift.core.terminal` from `sift.instrumenter`.
 - `sift.core.graphviz.Dot` relocated from `sift.instrumenter.graphviz`.
 - SPI: `InstrumenterServiceProvider` is now optional when implementing `InstrumenterService` since json
   serialization is typically more convenient. 
+
 
 ## sift-0.4.0 2022-12-07
 

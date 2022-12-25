@@ -122,6 +122,15 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        data class ElementsOf(
+            val entity: Entity.Type,
+        ) : Action<Unit, Iter<Element>>() {
+            override fun id() = "elements-of($entity)"
+            override fun execute(ctx: Context, input: Unit): Iter<Element> {
+                return ctx.entityService[entity].map { (elem, _) -> elem }
+            }
+        }
+
         data class MethodsOf(
             val entity: Entity.Type,
             ) : Action<Unit, IterMethods>() {
@@ -142,6 +151,13 @@ sealed class Action<IN, OUT> {
             }
         }
 
+    }
+
+    object Elements {
+        object ElementScope : Action<Iter<Element>, Iter<Element>>() {
+            override fun id() = "element-scope"
+            override fun execute(ctx: Context, input: Iter<Element>): Iter<Element> = input
+        }
     }
 
     object Signature {
@@ -349,8 +365,6 @@ sealed class Action<IN, OUT> {
         data class Filter(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-//                val f = if (invert) input::filterNot else input::filter
-//                return f { regex in it.mn.name || regex in it.cn.qualifiedName }
                 return input.filter { (regex in it.name || regex in it.owner.qualifiedName) xor invert }
             }
         }
