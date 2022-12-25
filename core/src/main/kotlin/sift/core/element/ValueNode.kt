@@ -22,6 +22,8 @@ class ValueNode private constructor(
         return hash(data, reference)
     }
 
+    override fun toString(): String = "<<$data>>"
+
     companion object {
         fun from(value: Any, reference: Element): ValueNode {
             return ValueNode(value, reference)

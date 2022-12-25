@@ -788,7 +788,7 @@ sealed class Action<IN, OUT> {
     data class RegisterChildrenFromResolver(
         val parentType: Entity.Type,
         val key: String,
-        val childResolver: EntityResolver,
+        val childResolver: EntityAssignmentResolver<MethodNode>,
     ) : IsoAction<MethodNode>() {
         override fun id() = "register-children($parentType, ${childResolver.type}.${childResolver.id})"
         override fun execute(ctx: Context, input: IterMethods): IterMethods {

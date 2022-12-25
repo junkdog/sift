@@ -1,5 +1,8 @@
 package sift.core.api
 
+import com.github.ajalt.mordant.rendering.TextStyles
+import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.ajalt.mordant.rendering.TextStyles.underline
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
@@ -10,6 +13,7 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
+import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.IdentityHashMap
 import kotlin.time.Duration
@@ -111,7 +115,12 @@ data class Context(
     }
 
     fun scopeTransition(input: Element, output: Element) {
-        trailsOf(output) += trailsOf(input).map { it + output }
+        val transitions = trailsOf(input).map { it + output }
+
+        // TODO: profile/optimize
+        trailsOf(output)
+            .also { trails -> trails.removeAll { o -> transitions.any { it in o } } }
+            .addAll(transitions)
     }
 
     fun allInterfacesOf(cn: ClassNode): List<Type> {
@@ -223,4 +232,44 @@ private fun EntityService.filter(
     entity: Entity.Type
 ): Entity? = trail
     .mapNotNull { this[it] }
-    .find { it.type == entity }
+    .findBy(Entity::type, entity)
+
+internal fun Context.debugTrails() {
+    val colWidth = trails.flatMap { (_, trails) -> trails }
+        .flatMap(ScopeTrail::toList)
+        .map(Element::toString)
+        .map(String::length)
+        .maxOrNull() ?: 0
+
+    trails.flatMap { (_, trails) -> trails }
+        .map { it.debugString(this, colWidth) }
+        .forEach(::println)
+}
+
+private fun ScopeTrail.debugString(
+    context: Context,
+    colWidth: Int = 20
+): String {
+    return joinToString(" ") { e ->
+        if (e in context.entityService ) {
+            TextStyles.inverse(e.stylized(colWidth))
+        } else {
+            e.stylized(colWidth)
+        }
+    }
+}
+
+private fun Element.stylized(width: Int): String {
+    val s = toString()
+    val lastIndex = minOf(width - 1, s.lastIndex)
+
+    return (when (this) {
+        is AnnotationNode -> Gruvbox.aqua2
+        is ClassNode -> Gruvbox.yellow2
+        is FieldNode -> Gruvbox.purple2
+        is MethodNode -> Gruvbox.green2
+        is ParameterNode -> Gruvbox.orange2
+        is SignatureNode -> Gruvbox.blue2
+        is ValueNode -> Gruvbox.gray245
+    } + bold)(s.substring(0..lastIndex).padEnd(width))
+}
