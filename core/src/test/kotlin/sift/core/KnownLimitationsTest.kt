@@ -45,10 +45,7 @@ class KnownLimitationsTest {
                     }
 
 //                     works; reverse lookup via "backtrack" children
-//                    handler["sends"] = data.instantiations
-
-
-                    data.instantiations["sent-by"] = handler
+//                    data.instantiations["sent-by"] = handler
 
                     instantiationsOf(data) {
                         data["sent-by"] = handler
