@@ -266,6 +266,74 @@ private fun edgeColors() = listOf(
 private val TextStyle.hexColor
     get() = color!!.toSRGB().toHex()
 
+@Suppress("EnumEntryName")
 enum class Dot {
     edge, node
+}
+
+enum class Style {
+    dashed, dotted, bold, filled, rounded
+}
+
+@Suppress("EnumEntryName")
+enum class Shape {
+    assembly,
+    box,
+    box3d,
+    cds,
+    circle,
+    component,
+    cylinder,
+    diamond,
+    doublecircle,
+    doubleoctagon,
+    egg,
+    ellipse,
+    fivepoverhang,
+    folder,
+    hexagon,
+    house,
+    insulator,
+    invhouse,
+    invtrapezium,
+    invtriangle,
+    larrow,
+    lpromoter,
+    Mcircle,
+    Mdiamond,
+    Msquare,
+    none,
+    note,
+    noverhang,
+    octagon,
+    oval,
+    parallelogram,
+    pentagon,
+    plain,
+    plaintext,
+    point,
+    polygon,
+    primersite,
+    promoter,
+    proteasesite,
+    proteinstab,
+    rarrow,
+    rect,
+    rectangle,
+    restrictionsite,
+    ribosite,
+    rnastab,
+    rpromoter,
+    septagon,
+    signature,
+    square,
+    star,
+    tab,
+    terminator,
+    threepoverhang,
+    trapezium,
+    triangle,
+    tripleoctagon,
+    underline,
+    utr,
 }

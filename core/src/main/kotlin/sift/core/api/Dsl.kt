@@ -321,8 +321,7 @@ object Dsl {
         }
 
         /** iterates class elements of registered [entity] type */
-        fun
-            classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
+        fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
             val classes = Action.Instrumenter.ClassesOf(entity)
             val forkTo = Classes().also(f).action
 
@@ -335,6 +334,14 @@ object Dsl {
             val forkTo = Methods().also(f).action
 
             action += Action.Fork(methods andThen forkTo)
+        }
+
+        /** iterates "scope-erased" elements, useful for property tagging entities. */
+        fun elementsOf(entity: Entity.Type, f: Elements.() -> Unit) {
+            val elements = Action.Instrumenter.ElementsOf(entity)
+            val forkTo = Elements().also(f).action
+
+            action += Action.Fork(elements andThen forkTo)
         }
     }
 
@@ -474,6 +481,12 @@ object Dsl {
 
             action += Action.Fork(forkTo)
         }
+    }
+
+    class Elements(
+        elements: Action<Iter<Element>, Iter<Element>> = Action.Elements.ElementScope
+    ) : Core<Element>() {
+        override var action: Action.Chain<Iter<Element>> = chainFrom(elements)
     }
 
     class Methods(

@@ -9,6 +9,8 @@ import sift.core.api.Dsl
 import sift.core.api.Dsl.instrumenter
 import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
+import sift.core.graphviz.Shape
+import sift.core.graphviz.Style
 import sift.core.product
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue2
@@ -19,6 +21,7 @@ import sift.core.terminal.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
+import sift.instrumenter.dsl.graphviz
 import sift.instrumenter.dsl.registerInstantiationsOf
 import sift.instrumenter.spi.InstrumenterServiceProvider
 
@@ -97,7 +100,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
         ) {
             annotatedBy(handlerAnnotation)
             entity(handler,
-                property("dot-id", withValue(ownerType)),
+                property("dot-id-as", withValue(ownerType)),
             )
 
             parameters {
@@ -228,57 +231,40 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
             }
 
             scope("dot graph property configuration") {
-                fun rankCn(e: Entity.Type, rank: Int) {
-                    classesOf(e) {
-                        property(e, "dot-rank", withValue(rank))
-                        property(e, "dot-type", withValue(Dot.node))
-                    }
-                }
-                fun rankMn(e: Entity.Type, rank: Int) {
-                    methodsOf(e) {
-                        property(e, "dot-rank", withValue(rank))
-                        property(e, "dot-type", withValue(Dot.node))
-                    }
-                }
+                graphviz(E.endpoint,
+                    rank = 0,
+                    type = Dot.node,
+                )
 
-                fun stripSuffixCn(e: Entity.Type, suffix: String) {
-                    classesOf(e) {
-                        property(e, "dot-label-strip", withValue(suffix))
-                    }
-                }
-                fun stripSuffixMn(e: Entity.Type, suffix: String) {
-                    methodsOf(e) {
-                        property(e, "dot-label-strip", withValue(suffix))
-                    }
-                }
+                graphviz(E.aggregate,
+                    rank = 1,
+                    type = Dot.node,
+                    stripLabelSuffix = "Aggregate",
+                    shape = Shape.component
+                )
 
-                fun shapeCn(e: Entity.Type, shape: String) {
-                    classesOf(e) {
-                        property(e, "dot-shape", withValue(shape))
-                    }
-                }
+                graphviz(E.aggregateMember,
+                    rank = 1,
+                    type = Dot.node,
+                    stripLabelSuffix = "Aggregate",
+                    shape = Shape.component
+                )
 
-                rankMn(E.endpoint, 0)
-                rankCn(E.aggregate, 1)
-                rankCn(E.aggregateMember, 1)
-                rankCn(E.event, 2)
-                rankCn(E.projection, 3)
+                graphviz(E.event,
+                    rank = 2,
+                    type = Dot.node,
+                    stripLabelSuffix = "Event",
+                    shape = Shape.folder
+                )
 
-                stripSuffixCn(E.command, "Command")
-                stripSuffixCn(E.event, "Event")
-                stripSuffixCn(E.query, "Query")
-                stripSuffixCn(E.aggregate, "Aggregate")
-                stripSuffixCn(E.projection, "Projection")
+                graphviz(E.projection,
+                    rank = 3,
+                    type = Dot.node,
+                    stripLabelSuffix = "Projection",
+                    shape = Shape.box3d
+                )
 
-                shapeCn(E.aggregate, "component")
-                shapeCn(E.aggregateMember, "component")
-                shapeCn(E.event, "folder")
-                shapeCn(E.projection, "box3d")
-
-                classesOf(E.query) {
-                    property(E.query, "dot-arrowhead", withValue("onormal"))
-                    property(E.query, "dot-style", withValue("dashed"))
-                }
+                graphviz(E.query, arrowheadShape = "onormal", style = Style.dashed)
             }
         }
     }
