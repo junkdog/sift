@@ -387,6 +387,16 @@
   "queryAllDeclaredMethods":true
 },
 {
+  "name":"sift.core.api.Action$Elements"
+},
+{
+  "name":"sift.core.api.Action$Elements$ElementScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.Action$EntityFilter",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -456,6 +466,13 @@
 },
 {
   "name":"sift.core.api.Action$Instrumenter$ClassesOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Instrumenter$ElementsOf",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -578,6 +595,9 @@
 },
 {
   "name":"sift.core.api.Action$Parameter$IntoParents"
+},
+{
+  "name":"sift.core.api.Action$Parameter$IntoSignature"
 },
 {
   "name":"sift.core.api.Action$Parameter$ParameterScope",
@@ -712,6 +732,30 @@
   "name":"sift.core.api.Element$Value"
 },
 {
+  "name":"sift.core.api.EntityAssignmentResolver",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsBy"
+},
+{
+  "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsBy"
+},
+{
+  "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.EntityResolver",
   "queryAllDeclaredMethods":true
 },
@@ -728,6 +772,27 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.element.ClassNode"
+},
+{
+  "name":"sift.core.element.Element"
+},
+{
+  "name":"sift.core.element.FieldNode"
+},
+{
+  "name":"sift.core.element.MethodNode"
+},
+{
+  "name":"sift.core.element.ParameterNode"
+},
+{
+  "name":"sift.core.element.SignatureNode"
+},
+{
+  "name":"sift.core.element.ValueNode"
 },
 {
   "name":"sift.core.entity.Entity"
@@ -775,6 +840,31 @@
 {
   "name":"sift.core.jackson.SystemModelSerializer$Serializer",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.terminal.Style",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"sift.core.terminal.Style$FromEntityRef",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","sift.core.terminal.Style"] }]
+},
+{
+  "name":"sift.core.terminal.Style$FromProperty",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sift.core.terminal.Style$Plain",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }]
 },
 {
   "name":"sift.core.tree.EntityNode"
