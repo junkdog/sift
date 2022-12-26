@@ -204,7 +204,7 @@ private data class Relation(
 private fun Tree<EntityNode>.validEntity(): Boolean {
     val e = entity ?: return false
     return e["dot-type"] != null
-        || e["dot-id"] != null
+        || e["dot-id-as"] != null
         || e["dot-ignore"]?.firstOrNull() == true // not rendered
 }
 
@@ -271,11 +271,12 @@ enum class Dot {
     edge, node
 }
 
+@Suppress("EnumEntryName", "unused")
 enum class Style {
     dashed, dotted, bold, filled, rounded
 }
 
-@Suppress("EnumEntryName")
+@Suppress("EnumEntryName", "unused")
 enum class Shape {
     assembly,
     box,

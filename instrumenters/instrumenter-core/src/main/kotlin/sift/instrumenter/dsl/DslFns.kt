@@ -11,6 +11,22 @@ import sift.core.graphviz.Shape
 import sift.core.graphviz.Style
 import sift.core.tree.TreeDsl
 
+fun Dsl.Instrumenter.graphviz(
+    entities: Iterable<Entity.Type>,
+    identifyAs: Entity.Type? = null,
+    rank: Int? = null,
+    type: Dot? = null,
+    shape: Shape? = null,
+    stripLabelSuffix: String? = null,
+    style: Style? = null,
+    arrowheadShape: String? = null,
+    edgeLabel: Action<Iter<Element>, IterValues>? = null
+) {
+    entities.forEach { e ->
+        graphviz(e, identifyAs, rank, type, shape, stripLabelSuffix, style, arrowheadShape, edgeLabel)
+    }
+}
+
 /**
  * Provides graphviz configuration for [e]. All optional parameters
  * have no effect unless specified. Some parameters are mutually
