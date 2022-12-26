@@ -1,5 +1,6 @@
 package sift.instrumenter.sift
 
+import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
@@ -15,8 +16,9 @@ import sift.core.terminal.Gruvbox.orange2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.plain
+import sift.core.tree.EntityNode
+import sift.core.tree.Tree
 import sift.instrumenter.spi.InstrumenterServiceProvider
-import java.util.regex.Pattern
 
 typealias E = SiftSelfInstrumenter.EntityTypes
 typealias T = SiftSelfInstrumenter.AsmTypes
@@ -48,6 +50,8 @@ class SiftSelfInstrumenter : InstrumenterService, InstrumenterServiceProvider {
     override fun pipeline() = instrumenter {
         scope("register actions") {
             classes {
+                filter("sift.core.api")
+
                 implements(type<Action<*, *>>())
                 filter(Regex("SimpleAction"), invert = true)
                 entity(E.action )
@@ -61,7 +65,7 @@ class SiftSelfInstrumenter : InstrumenterService, InstrumenterServiceProvider {
 
         scope("register dsl") {
             classes {
-                filter(Pattern.quote("sift.core.api.Dsl").toRegex())
+                filter("sift.core.api.Dsl")
 
                 scope("scopes from annotated classes") {
                     annotatedBy<SiftTemplateDsl>()
@@ -80,7 +84,7 @@ class SiftSelfInstrumenter : InstrumenterService, InstrumenterServiceProvider {
                 methods {
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
-                    filter(Pattern.quote("\$default").toRegex(), invert = true)
+                    filter("\$default", invert = true)
                     entity(E.dsl, label("\${name}(\${+params:})"),
                         property("name", readName()))
 
@@ -99,8 +103,21 @@ class SiftSelfInstrumenter : InstrumenterService, InstrumenterServiceProvider {
 
     override fun theme() = mapOf<Entity.Type, Style>(
         E.scope     to plain(orange1 + bold),
-        E.dsl       to plain(orange2 + bold),
+        E.dsl       to DslStyle(orange2 + bold, blue2),
         E.element   to plain(blue1),
         E.action    to plain(blue2),
     )
+}
+
+private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Style {
+
+    override fun format(
+        e: Tree<EntityNode>,
+        theme: Map<Entity.Type, Style>
+    ): String {
+        val fn = (e.value as EntityNode.Entity).entity
+        val name = fn["name"]?.first()?.let { fnStyle(it.toString().substringBefore("-")) } ?:  ""
+        val params = fn["params"]?.joinToString(fnStyle(", ")) { paramStyle(it.toString()) }  ?: ""
+        return "$name${fnStyle("(")}$params${fnStyle(")")}"
+    }
 }
