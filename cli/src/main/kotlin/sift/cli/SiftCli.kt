@@ -15,13 +15,16 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.*
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
+import sift.core.terminal.Gruvbox.aqua1
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
@@ -29,6 +32,7 @@ import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
 import sift.instrumenter.*
 import sift.core.terminal.Gruvbox.aqua2
+import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.dark2
 import sift.core.terminal.Gruvbox.dark4
@@ -547,6 +551,7 @@ object SiftCli : CliktCommand(
             MeasurementScope.Parameter    -> purple2
             MeasurementScope.FromContext  -> red2 // shouldn't happen often
             MeasurementScope.Signature    -> orange2
+            MeasurementScope.TypeErased   -> blue1 + bold
         }
 
         val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)

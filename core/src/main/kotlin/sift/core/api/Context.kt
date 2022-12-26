@@ -238,6 +238,7 @@ enum class MeasurementScope(val id: String) {
     Field("field-scope"),
     Method("method-scope"),
     Parameter("parameter-scope"),
+    TypeErased("element-scope"),
     FromContext("")
 }
 
