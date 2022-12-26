@@ -1076,6 +1076,61 @@ class DslTest {
     }
 
     @Test
+    fun `update properties on multiple entity types with elementsOf`() {
+        val cns = listOf(
+            classNode<SomethingAnnotated>(),
+        )
+
+        val cls = Entity.Type("class")
+        val method = Entity.Type("method")
+        val field = Entity.Type("field")
+        val param = Entity.Type("param")
+
+        instrumenter {
+            classes {
+                entity(cls, label("\${v}"))
+
+                fields {
+                    filter(Regex("otherField"))
+                    entity(field, label("\${v}"))
+                }
+
+                methods {
+                    filter(Regex("foo"))
+                    entity(method, label("\${v}"))
+
+                    parameters {
+                        parameter(0)
+                        entity(param, label("\${v}"))
+                    }
+                }
+            }
+
+            listOf(cls, method, field, param).forEach { e ->
+                elementsOf(e) {
+                    property(e, "v", withValue(e.id))
+                }
+            }
+
+        }.execute(cns) { es ->
+            fun validate(type: Entity.Type) {
+                val entities = es[type].values.toList()
+                assertThat(entities)
+                    .hasSize(1)
+
+                assertThat(entities.first().properties)
+                    .containsKey("v")
+                    .containsEntry("v", mutableListOf(type.id))
+            }
+
+            validate(cls)
+            validate(method)
+            validate(field)
+            validate(param)
+        }
+    }
+
+    @Test
     fun `child assignment using dot-instantiations-by`() {
         val cns = listOf(
             classNode<HandlerFn>(),
