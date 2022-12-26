@@ -270,10 +270,10 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
     }
 
     override fun theme() = mapOf(
-        E.commandHandler       to fromProperty("dot-id"),
-        E.eventHandler         to fromProperty("dot-id"),
-        E.eventSourcingHandler to fromProperty("dot-id"),
-        E.queryHandler         to fromProperty("dot-id"),
+        E.commandHandler       to fromProperty("dot-id-as"),
+        E.eventHandler         to fromProperty("dot-id-as"),
+        E.eventSourcingHandler to fromProperty("dot-id-as"),
+        E.queryHandler         to fromProperty("dot-id-as"),
         E.aggregate            to plain(purple2),
         E.aggregateMember      to plain(purple2),
         E.command              to plain(yellow2 + bold),
