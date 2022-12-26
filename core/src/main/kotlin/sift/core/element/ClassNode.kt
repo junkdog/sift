@@ -17,6 +17,8 @@ class ClassNode private constructor(
     override val annotations: List<AnnotationNode>
 ) : Element {
 
+    internal val signature: ClassSignatureNode? = cn.signature()
+
     val outerType: AsmType?
         get() = cn.innerClasses
             ?.findBy(InnerClassNode::name, cn.name)
@@ -34,7 +36,6 @@ class ClassNode private constructor(
         .map { mn -> MethodNode.from(this, mn) }
         .toMutableList()
 
-    internal val signature: ClassSignatureNode? = cn.signature()
 
     val extends: TypeSignature?
         get() = signature?.extends

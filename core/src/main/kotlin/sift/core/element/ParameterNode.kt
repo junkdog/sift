@@ -67,7 +67,7 @@ class ParameterNode private constructor(
                         mn,
                         asmMn.parameters[idx].name,
                         type,
-                        signatures?.get(idx),
+                        signatures?.getOrNull(idx),
                         anno.map(AnnotationNode::from),
                         Source.Parameter
                     ) }
@@ -83,7 +83,7 @@ class ParameterNode private constructor(
                         mn,
                         localVar.name,
                         argumentTypes[idx],
-                        signatures?.get(idx),
+                        signatures?.getOrNull(idx),
                         anno.map(AnnotationNode::from),
                         Source.LocalVariable
                     ) }
@@ -96,7 +96,7 @@ class ParameterNode private constructor(
                         mn,
                         "${type.simpleName.camelCase}$idx",
                         type,
-                        signatures?.get(idx),
+                        signatures?.getOrNull(idx),
                         ans.map(AnnotationNode::from),
                         Source.NoDebugInfo
                     ) }

@@ -686,13 +686,12 @@ sealed class Action<IN, OUT> {
             fun readAnnotation(input: T): ValueNode? {
                 return input.annotations
                     .find { an -> an.type == annotation }
-                    ?.let { an -> an[field]!! }
+                    ?.let { an -> an[field] }
                     ?.let { ValueNode.from(it, input) }
                     ?.also { ctx.scopeTransition(input, it) }
             }
             return input.mapNotNull(::readAnnotation)
         }
-
     }
 
     class WithValue<T : Element>(val value: Any) : Action<Iter<T>, IterValues>() {

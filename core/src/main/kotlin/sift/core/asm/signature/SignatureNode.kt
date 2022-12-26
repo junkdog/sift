@@ -5,7 +5,7 @@ import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.signature.SignatureVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
-import org.objectweb.asm.tree.MethodNode
+import sift.core.element.AsmMethodNode
 
 
 // todo; param signature node
@@ -29,7 +29,7 @@ fun FieldNode.signature(
         .asFieldSignatureNode
 }
 
-fun MethodNode.signature(
+fun AsmMethodNode.signature(
     formalTypeParams: List<FormalTypeParameter>,
     wrap: SignatureVisitor? = null,
 ): MethodSignatureNode? {
@@ -44,13 +44,6 @@ fun MethodNode.signature(
         // currently ignored
         null
     }
-}
-
-
-class SignatureAdapterNode(
-    val extends: TypeSignature
-) {
-
 }
 
 data class ClassSignatureNode(
