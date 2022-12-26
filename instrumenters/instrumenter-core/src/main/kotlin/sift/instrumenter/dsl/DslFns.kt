@@ -11,15 +11,41 @@ import sift.core.graphviz.Shape
 import sift.core.graphviz.Style
 import sift.core.tree.TreeDsl
 
+/**
+ * Provides graphviz configuration for [e]. All optional parameters
+ * have no effect unless specified. Some parameters are mutually
+ * dependent or exclusive; this function does not validate the set
+ * of specified parameters.
+ */
 fun Dsl.Instrumenter.graphviz(
+    /** Entity type to be configured. */
     e: Entity.Type,
+
+    /** Represents an entity to be used as the identifier in place for [e]. */
     identifyAs: Entity.Type? = null,
+
+    /**
+     * The rank of [e] in the dot file. Ranks are used to specify the horizontal ordering of nodes,
+     * with lower ranks appearing to the left of higher ranks.
+     */
     rank: Int? = null,
+
+    /** One of either [Dot.node] or [Dot.edge]. */
     type: Dot? = null,
+
+    /** The shape of nodes. */
     shape: Shape? = null,
+
+    /** The shape for [Dot.node]. */
     stripLabelSuffix: String? = null,
+
+    /** The style of edges or nodes. E.g. [Style.dashed]. */
     style: Style? = null,
+
+    /** Override shape of arrowhead, refer to https://graphviz.org/doc/info/arrows.html for values. */
     arrowheadShape: String? = null,
+
+    /** ... */
     edgeLabel: Action<Iter<Element>, IterValues>? = null
 ) {
     elementsOf(e) {
