@@ -72,7 +72,6 @@ open class BaseSignatureVisitor(
     }
 
     override fun visitEnd() {
-        log("visitEnd()")
         sv?.visitEnd()
     }
 
