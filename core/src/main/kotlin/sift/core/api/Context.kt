@@ -2,7 +2,6 @@ package sift.core.api
 
 import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.underline
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
@@ -13,7 +12,6 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
-import sift.core.product
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.IdentityHashMap
@@ -35,7 +33,7 @@ data class Context(
         .let(::IdentityHashMap)
 
     internal val entityService: EntityService = EntityService()
-    internal var trails: MutableMap<Element, MutableList<ScopeTrail>> = mutableMapOf()
+    internal var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = mutableMapOf()
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
@@ -116,10 +114,10 @@ data class Context(
     }
 
     fun scopeTransition(input: Element, output: Element) {
-        val transitions = trailsOf(input).map { it + output }
+        val transitions = tracesOf(input).map { it + output }
 
         // TODO: profile/optimize
-        trailsOf(output)
+        tracesOf(output)
             .also { trails -> trails.removeAll { o -> transitions.any { it in o } } }
             .addAll(transitions)
     }
@@ -133,20 +131,20 @@ data class Context(
         //     DslTest.`explode Payload in List field and associate property from the main class`
         val input = if (input is ValueNode) input.reference else input
 
+        // the most immediate path back to the root element
+        val plain = tracesOf(input)
+            .mapNotNull { entityService.filter(it, entity) }
+            .toSet()
+
         // check if input element is contained in the trails of eligible entities
         val reverse = entityService[entity]
-            .map { (elem, e) -> e to trailsOf(elem) }
+            .map { (elem, e) -> e to tracesOf(elem) }
             .flatMap { (e, trails) -> trails.map { e to it } }
             .filter { (_, trail) -> input in trail}
             .map { (e, _) -> e }
             .toSet()
 
-        // the most immediate path back to the root element
-        val plain = trailsOf(input)
-            .mapNotNull { entityService.filter(it, entity) }
-            .toSet()
-
-        return reverse + plain
+        return plain + reverse
     }
 
     fun register(entity: Entity, element: Element, formatter: LabelFormatter) {
@@ -154,8 +152,8 @@ data class Context(
         labelFormatters[entity] = formatter
     }
 
-    internal fun trailsOf(element: Element): MutableList<ScopeTrail> {
-        return trails.getOrPut(element) { mutableListOf(ScopeTrail(element)) }
+    internal fun tracesOf(element: Element): MutableList<ElementTrace> {
+        return elementTraces.getOrPut(element) { mutableListOf(ElementTrace(element)) }
     }
 
     fun updateEntityLabels() {
@@ -244,25 +242,25 @@ enum class MeasurementScope(val id: String) {
 }
 
 private fun EntityService.filter(
-    trail: ScopeTrail,
+    trail: ElementTrace,
     entity: Entity.Type
 ): Entity? = trail
     .mapNotNull { this[it] }
     .findBy(Entity::type, entity)
 
 internal fun Context.debugTrails() {
-    val colWidth = trails.flatMap { (_, trails) -> trails }
-        .flatMap(ScopeTrail::toList)
+    val colWidth = elementTraces.flatMap { (_, trails) -> trails }
+        .flatMap(ElementTrace::toList)
         .map(Element::toString)
         .map(String::length)
         .maxOrNull() ?: 0
 
-    trails.flatMap { (_, trails) -> trails }
+    elementTraces.flatMap { (_, trails) -> trails }
         .map { it.debugString(this, colWidth) }
         .forEach(::println)
 }
 
-private fun ScopeTrail.debugString(
+private fun ElementTrace.debugString(
     context: Context,
     colWidth: Int = 20
 ): String {

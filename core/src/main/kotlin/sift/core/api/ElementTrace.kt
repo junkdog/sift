@@ -2,7 +2,7 @@ package sift.core.api
 
 import sift.core.element.*
 
-internal class ScopeTrail : Sequence<Element> {
+internal class ElementTrace : Sequence<Element> {
     constructor(visited: Element) : this(listOf(visited))
 
     private constructor(visited: List<Element>) {
@@ -11,19 +11,19 @@ internal class ScopeTrail : Sequence<Element> {
 
     private val elements: MutableList<Element> = mutableListOf()
 
-    fun intersects(other: ScopeTrail): Boolean {
+    fun intersects(other: ElementTrace): Boolean {
         return elements.intersect(other.elements.toSet()).isNotEmpty()
     }
 
-    operator fun plus(element: Element): ScopeTrail {
-        return ScopeTrail(elements + element)
+    operator fun plus(element: Element): ElementTrace {
+        return ElementTrace(elements + element)
     }
 
     override fun iterator(): Iterator<Element> {
         return elements.reversed().iterator()
     }
 
-    operator fun contains(other: ScopeTrail): Boolean {
+    operator fun contains(other: ElementTrace): Boolean {
         return other.elements.containsAll(elements)
     }
 
