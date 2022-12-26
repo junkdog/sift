@@ -236,25 +236,22 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                     type = Dot.node,
                 )
 
-                graphviz(E.aggregate,
+                graphviz(listOf(E.aggregate, E.aggregateMember),
                     rank = 1,
                     type = Dot.node,
                     stripLabelSuffix = "Aggregate",
                     shape = Shape.component
                 )
 
-                graphviz(E.aggregateMember,
-                    rank = 1,
-                    type = Dot.node,
-                    stripLabelSuffix = "Aggregate",
-                    shape = Shape.component
+                graphviz(E.command,
+                    stripLabelSuffix = "Command",
                 )
 
                 graphviz(E.event,
                     rank = 2,
-                    type = Dot.node,
                     stripLabelSuffix = "Event",
-                    shape = Shape.folder
+                    shape = Shape.folder,
+                    type = Dot.node
                 )
 
                 graphviz(E.projection,
@@ -264,7 +261,10 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                     shape = Shape.box3d
                 )
 
-                graphviz(E.query, arrowheadShape = "onormal", style = Style.dashed)
+                graphviz(E.query,
+                    style = Style.dashed,
+                    arrowheadShape = "onormal",
+                )
             }
         }
     }

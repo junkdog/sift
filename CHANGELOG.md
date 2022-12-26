@@ -25,6 +25,7 @@ in a more flexible way.
 - DSL.Parameter: generic `signature {}` scope.
 - DSL.Method: Reverse association with `foo.nstantiations["created-by] = bar` and `foo.invocations["called-by] = bar` 
 - DSL.Instrumenter: `elementsOf(e) {}` iterate over all entities without element-specific methods. Useful for property tagging. 
+- DSL.Instrumenter: `graphviz(e, ...)` which allows setting graphviz properties such as identifier, rank, type, shape, style, etc.
 
 ### Breaking
 - `Gruxbox` and `Style` moved to `sift.core.terminal` from `sift.instrumenter`.
