@@ -9,6 +9,7 @@ import sift.core.entity.LabelFormatter
 import sift.core.asm.type
 import sift.core.element.*
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.reflect.KProperty1
 
 
@@ -24,6 +25,10 @@ object Dsl {
 
     interface CommonOperations<T : Element, SCOPE : Core<T>> {
         fun filter(regex: Regex, invert: Boolean = false)
+
+        fun filter(string: String, invert: Boolean = false) {
+            filter(Regex.fromLiteral(string), invert)
+        }
 
         /**
          * Filter elements that are decorated by [annotation]
