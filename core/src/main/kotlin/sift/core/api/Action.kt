@@ -16,6 +16,7 @@ import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
+import javax.script.SimpleBindings
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
@@ -671,6 +672,7 @@ sealed class Action<IN, OUT> {
                 is FieldNode     -> elem.name
                 is ParameterNode -> elem.name
                 is ClassNode     -> elem.innerName?.takeIf { shortened } ?: elem.simpleName
+                is SignatureNode -> elem.simpleName
                 else             -> error("$elem")
             }
 
@@ -786,12 +788,8 @@ sealed class Action<IN, OUT> {
                 return related.filter { ctx.entityService[elem] != it }.toSet()
             }
 
-            val a = ctx.entityService[parentType]
+            ctx.entityService[parentType]
                 .flatMap { (elem, parent) -> relations(elem, childType).map { parent to it } }
-            val b = ctx.entityService[childType]
-                .flatMap { (elem, child) -> relations(elem, parentType).map { it to child } }
-
-            (a + b)
                 .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
                 ?.onEach { (parent, child) -> parent.addChild(key, child) }
                 ?.onEach { (parent, child) -> child.addChild("backtrack", parent) }

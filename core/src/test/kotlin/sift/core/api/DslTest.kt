@@ -87,6 +87,34 @@ class DslTest {
         }
     }
 
+
+    @Test
+    fun `explode Payload in List field and associate property from the main class`() {
+
+        val payload = Entity.Type("payload")
+
+        classes {
+            filter("FieldClass")
+            fields {
+                signature {
+                    typeArguments {
+                        explodeType(synthesize = true) {
+                            entity(payload)
+                        }
+                    }
+                }
+            }
+            property(payload, "field-owner", readName())
+        }.execute(listOf(classNode(FieldClass::class))) { es ->
+            val entities = es[payload].values
+            assertThat(entities).hasSize(1)
+
+            entities.first().let { e ->
+                assertThat(e["field-owner"]).isEqualTo(listOf("FieldClass"))
+            }
+        }
+    }
+
     @Test
     fun `explode generic parameter type of field`() {
         val cns = listOf(classNode(ClassWithGenericElements::class))
@@ -1607,3 +1635,9 @@ fun Iterable<Entity>.prettyPrint(): List<String> {
         .joinToString("\n")
         .lines()
 }
+
+private class FieldClass {
+    val payloads: List<PayLoad> = listOf()
+}
+
+private class PayLoad
