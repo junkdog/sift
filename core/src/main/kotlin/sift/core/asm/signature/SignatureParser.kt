@@ -99,7 +99,7 @@ internal fun MutableList<FormalTypeParameter>.firstByName(
     name: String
 ): FormalTypeParameter {
     return findBy(FormalTypeParameter::name, name)
-        ?: throw SignatureParsingException("'$name' not found among formal parameters")
+        ?: FormalTypeParameter(name) // can be null; see GenerticsTest#problematic signature of reified function
 }
 
 class SignatureParsingException(message: String) : IllegalStateException(message)

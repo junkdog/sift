@@ -28,6 +28,10 @@ class TypeArgumentVisitor(
         )
     }
 
+    override fun visitTypeArgument() {
+        // fixme: look into whether we need to act on <*> or somethong
+    }
+
     override fun visitTypeVariable(name: String) {
         require(arg == null)
 

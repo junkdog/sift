@@ -4,12 +4,23 @@ import net.onedaybeard.collectionsby.firstBy
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import sift.core.asm.*
 import kotlin.reflect.KClass
 
 class GenericsTest {
+
+    @Test
+    fun `problematic signature of reified function`() {
+        val signature = "Lkotlin/jvm/internal/Lambda;Lkotlin/jvm/functions/Function1<TT;Ljava/lang/Boolean;>;"
+
+        SignatureParser(Opcodes.ASM9, LoggingSignatureVisitor())
+            .also { SignatureReader(signature).accept(it) }
+            .asClassSignatureNode
+    }
 
     @Nested
     inner class ClassSignature {
