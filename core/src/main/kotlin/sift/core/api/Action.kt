@@ -23,12 +23,15 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Instrumenter.InstrumentClasses::class, name = "classes"),
     JsonSubTypes.Type(value = Action.Instrumenter.ClassesOf::class, name = "classes-of"),
     JsonSubTypes.Type(value = Action.Instrumenter.MethodsOf::class, name = "methods-of"),
+    JsonSubTypes.Type(value = Action.Instrumenter.ElementsOf::class, name = "elements-of"),
 
     JsonSubTypes.Type(value = Action.Signature.ExplodeType::class, name = "signature-explode-type"),
     JsonSubTypes.Type(value = Action.Signature.Filter::class, name = "filter-signature"),
     JsonSubTypes.Type(value = Action.Signature.FilterNth::class, name = "signature-filter-nth"),
     JsonSubTypes.Type(value = Action.Signature.InnerTypeArguments::class, name = "type-arguments"),
     JsonSubTypes.Type(value = Action.Signature.SignatureScope::class, name = "signature-scope"),
+
+    JsonSubTypes.Type(value = Action.Elements.ElementScope::class, name = "elements-scope"),
 
     JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
