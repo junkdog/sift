@@ -13,6 +13,7 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
+import sift.core.product
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.IdentityHashMap
@@ -128,9 +129,24 @@ data class Context(
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
-        return trailsOf(input)
+        // unpacking for property() elements; ref test for edge case:
+        //     DslTest.`explode Payload in List field and associate property from the main class`
+        val input = if (input is ValueNode) input.reference else input
+
+        // check if input element is contained in the trails of eligible entities
+        val reverse = entityService[entity]
+            .map { (elem, e) -> e to trailsOf(elem) }
+            .flatMap { (e, trails) -> trails.map { e to it } }
+            .filter { (_, trail) -> input in trail}
+            .map { (e, _) -> e }
+            .toSet()
+
+        // the most immediate path back to the root element
+        val plain = trailsOf(input)
             .mapNotNull { entityService.filter(it, entity) }
             .toSet()
+
+        return reverse + plain
     }
 
     fun register(entity: Entity, element: Element, formatter: LabelFormatter) {

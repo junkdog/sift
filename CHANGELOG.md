@@ -35,6 +35,10 @@ in a more flexible way.
   serialization is typically more convenient. 
 
 
+### Fixes
+- Entities were sometimes not relatable when calling `property()` from a scope not directly related to the scope
+  which registered the entity. 
+
 ## sift-0.4.0 2022-12-07
 
 ### New
