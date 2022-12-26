@@ -26,7 +26,6 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
                 .walk()
                 .filter { "-scope" in it.value.action }
                 .forEach { node ->
-                    println(node.value.action)
                     enumValues<MeasurementScope>()
                         .firstBy(MeasurementScope::id, node.value.action)
                         .let { scope -> node.value.scopeIn = scope }
