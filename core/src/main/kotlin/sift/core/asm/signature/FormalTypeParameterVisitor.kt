@@ -27,6 +27,6 @@ class FormalTypeParameterVisitor(
     }
 
     override fun visitTypeArgument() {
-        // do nothing
+        sv?.visitTypeArgument()
     }
 }
