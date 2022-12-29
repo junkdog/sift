@@ -17,7 +17,7 @@ methods {
 
 ### Elements: Scope-erased scope
 
-The `Elements` context is a type-erased scope that only provides methods defined by `Core` scope class.
+The `Elements` context is a type-erased scope that only provides methods defined by the `Core` scope class.
 This new scope adds a layer of abstraction to the DSL, making it easier to reuse code and update properties
 in a more flexible way.
 
@@ -33,7 +33,7 @@ in a more flexible way.
 - `sift.core.graphviz.Dot` relocated from `sift.instrumenter.graphviz`.
 - SPI: `InstrumenterServiceProvider` is now optional when implementing `InstrumenterService` since json
   serialization is typically more convenient. 
-
+- Due to some internal renaming, any custom pipelines need to be recompiled/resaved to work with the new version.
 
 ### Fixes
 - Entities were sometimes not relatable when calling `property()` from a scope not directly related to the scope
