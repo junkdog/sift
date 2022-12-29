@@ -351,13 +351,6 @@
   "name":"sift.core.api.Action$Class$IntoSuperclassSignature"
 },
 {
-  "name":"sift.core.api.Action$Class$ReadName",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"sift.core.api.Action$Class$ReadType"
 },
 {
@@ -421,13 +414,6 @@
 },
 {
   "name":"sift.core.api.Action$Field$IntoOuterScope",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sift.core.api.Action$Field$IntoParents",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -541,13 +527,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sift.core.api.Action$Method$IntoParents",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"sift.core.api.Action$Method$IntoReturnSignature"
 },
 {
@@ -592,9 +571,6 @@
 },
 {
   "name":"sift.core.api.Action$Parameter$IntoOuterScope"
-},
-{
-  "name":"sift.core.api.Action$Parameter$IntoParents"
 },
 {
   "name":"sift.core.api.Action$Parameter$IntoSignature"
@@ -711,27 +687,6 @@
   "name":"sift.core.api.Context"
 },
 {
-  "name":"sift.core.api.Element"
-},
-{
-  "name":"sift.core.api.Element$Class"
-},
-{
-  "name":"sift.core.api.Element$Field"
-},
-{
-  "name":"sift.core.api.Element$Method"
-},
-{
-  "name":"sift.core.api.Element$Parameter"
-},
-{
-  "name":"sift.core.api.Element$Signature"
-},
-{
-  "name":"sift.core.api.Element$Value"
-},
-{
   "name":"sift.core.api.EntityAssignmentResolver",
   "queryAllDeclaredMethods":true
 },
@@ -739,35 +694,10 @@
   "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsBy"
 },
 {
-  "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsBy"
 },
 {
   "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sift.core.api.EntityResolver",
-  "queryAllDeclaredMethods":true
-},
-{
-  "name":"sift.core.api.EntityResolver$FromInstantiationsOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sift.core.api.EntityResolver$FromInvocationsOf",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -871,36 +801,6 @@
 },
 {
   "name":"sift.core.tree.Tree"
-},
-{
-  "name":"sift.instrumenter.Style",
-  "queryAllDeclaredMethods":true
-},
-{
-  "name":"sift.instrumenter.Style$FromEntityRef",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","sift.instrumenter.Style"] }]
-},
-{
-  "name":"sift.instrumenter.Style$FromProperty",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"sift.instrumenter.Style$Plain",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }]
-},
-{
-  "name":"sift.instrumenter.graphviz.Dot",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true
 },
 {
   "name":"sift.instrumenter.jdbi.SqlStyle",
