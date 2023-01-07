@@ -1,8 +1,10 @@
 package sift.core.entity
 
+import sift.core.terminal.TextTransformer
+
 sealed interface LabelFormatter : Entity.LabelFormatter {
 
-    class FromPattern(val pattern: String) : LabelFormatter {
+    class FromPattern(val pattern: String, val ops: List<TextTransformer>) : LabelFormatter {
 
         override fun format(entity: Entity, service: EntityService): String {
             return replaceRegex
@@ -21,8 +23,7 @@ sealed interface LabelFormatter : Entity.LabelFormatter {
                     } else {
                         entity[key]?.first()?.toString() ?: defaultValue
                     }
-
-                }
+                }.let { ops.fold(it) { acc, op -> op(acc) } }
         }
 
         companion object {

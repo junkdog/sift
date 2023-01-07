@@ -21,6 +21,7 @@ import sift.core.terminal.Gruvbox.yellow2
 import sift.instrumenter.InstrumenterService
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
+import sift.core.terminal.TextTransformer.Companion.dedupe
 import sift.instrumenter.dsl.graphviz
 import sift.instrumenter.dsl.registerInstantiationsOf
 import sift.instrumenter.spi.InstrumenterServiceProvider
@@ -120,7 +121,8 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
         fun Dsl.Methods.registerEndpoints(method: String, httpMethod: Type) {
             scope(method) {
                 annotatedBy(httpMethod)
-                entity(E.endpoint, label("$method /\${base-path:}\${path:}"),
+                entity(E.endpoint,
+                    label("$method /\${base-path:}\${path:}", dedupe('/')),
                     property("path", readAnnotation(httpMethod, "value"))
                 )
 
@@ -278,7 +280,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
         E.aggregateMember      to plain(purple2),
         E.command              to plain(yellow2 + bold),
         E.controller           to plain(light2 + inverse),
-        E.endpoint             to plain(light2 + bold, '/'),
+        E.endpoint             to plain(light2 + bold),
         E.event                to plain(aqua2 + bold),
         E.projection           to plain(green2),
         E.query                to plain(blue2),

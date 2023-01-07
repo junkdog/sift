@@ -16,7 +16,6 @@ import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
-import javax.script.SimpleBindings
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(

@@ -11,22 +11,12 @@ private val Tree<EntityNode>.entity
     get() = (value as EntityNode.Entity).entity
 
 interface Style {
-    class Plain(val styling: TextStyle, val dedupe: Char? = null) : Style {
+    class Plain(val styling: TextStyle) : Style {
         override fun format(
             e: Tree<EntityNode>,
             theme: Map<Entity.Type, Style>
         ): String {
-            var text = e.value.label
-            if (dedupe != null) {
-                val strip = Regex("$dedupe+")
-                text = text.replace(strip, "$dedupe")
-
-                // todo: consider moving out of styling
-                // updated label on entity used by graphviz
-                e.value.label = text
-                (e.value as? EntityNode.Entity)?.entity?.label = text
-            }
-            return styling(text)
+            return styling(e.value.label)
         }
     }
 
@@ -86,7 +76,7 @@ interface Style {
     fun format(e: Tree<EntityNode>, theme: Map<Entity.Type, Style>): String
 
     companion object {
-        fun plain(textStyle: TextStyle, dedupe: Char? = null) = Plain(textStyle, dedupe)
+        fun plain(textStyle: TextStyle) = Plain(textStyle)
         fun entityRef(key: String = "@style-as", fallback: Style) = FromEntityRef(key, fallback)
         fun diff(wrap: Style) = Diff(wrap)
         fun fromParent() = FromParent
