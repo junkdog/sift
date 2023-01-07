@@ -20,6 +20,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
+// todo: should be internal
 data class Context(
     val allClasses: MutableList<ClassNode>
 ) {

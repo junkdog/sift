@@ -5,7 +5,7 @@
 
 "Reverse registration" of invocations and instantiations of entities is now possible. This means that,
 in addition to `foo["a"] = bar.instantations` and `foo["b"] = bar.invocations`, we can now also register
-instances of foo that are invoked or instantiated by bar.  
+instances of foo that are invoked or instantiated by bar:  
 
 ```kotlin
 methods {
@@ -13,6 +13,26 @@ methods {
     foo.invocations["invoked-by"] = bar
     payload.instantations["created-by"] = bar
 }
+```
+
+### Customizing entity labels with TextTransformers
+
+The TextTransformer interface provides static functions for updating entity labels:
+
+- `dedupe`: removes duplicate instances of a specified character.
+- `replace`: replaces all occurrences of a specified string or regular expression with a given replacement string.
+- `idSequence`: replaces matches of a given regular expression with sequentially assigned values, starting at 1.
+- `uuidSequence`: replaces UUID:s with sequentially assigned values, starting at 1.
+
+The `label` function has been updated to take TextTransformers as a vararg parameter, and applies them in order:
+
+```kotlin
+entity(E.endpoint,
+    label("$method /\${base-path:}\${path:}",
+        dedupe('/'),                 // drop repeating '/'
+        replace(COMMON_PREFIX, "")), // shorten URL
+    property("path", readAnnotation(httpMethod, "value"))
+)
 ```
 
 ### Elements: Scope-erased scope
@@ -34,6 +54,7 @@ in a more flexible way.
 - SPI: `InstrumenterServiceProvider` is now optional when implementing `InstrumenterService` since json
   serialization is typically more convenient. 
 - Due to some internal renaming, any custom pipelines need to be recompiled/resaved to work with the new version.
+- `Style.plain()` no longer accepts optional `dedupe` argument as that functionality is now taken care of by TextTransformers.
 
 ### Fixes
 - Entities were sometimes not relatable when calling `property()` from a scope not directly related to the scope

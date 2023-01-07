@@ -8,8 +8,8 @@ import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.asm.type
 import sift.core.element.*
+import sift.core.terminal.TextTransformer
 import java.util.*
-import java.util.regex.Pattern
 import kotlin.reflect.KProperty1
 
 
@@ -92,7 +92,10 @@ object Dsl {
          * }
          * ```
          */
-        fun label(pattern: String) = LabelFormatter.FromPattern(pattern)
+        fun label(
+            pattern: String,
+            vararg ops: TextTransformer
+        ) = LabelFormatter.FromPattern(pattern, ops.toList())
 
 
         fun filter(entity: Entity.Type) {
@@ -281,7 +284,10 @@ object Dsl {
          * }
          * ```
          */
-        fun label(pattern: String) = LabelFormatter.FromPattern(pattern)
+        fun label(
+            pattern: String,
+            vararg ops: TextTransformer
+        ) = LabelFormatter.FromPattern(pattern, ops.toList())
     }
 
     @SiftTemplateDsl
@@ -388,6 +394,10 @@ object Dsl {
             val forkTo = Classes().also(f).action
 
             action += Action.Fork(explodeType andThen forkTo)
+        }
+
+        fun explodeTypeT(signature: String = "_<T>", synthesize: Boolean = false, f: Classes.() -> Unit) {
+            TODO("implement")
         }
     }
 

@@ -42,15 +42,6 @@ class Entity(
         return id.hashCode()
     }
 
-    @JvmInline
-    value class Type(val id: String) {
-        override fun toString() = id
-    }
-
-    interface LabelFormatter {
-        fun format(entity: Entity, service: EntityService): String
-    }
-
     override fun toString(): String {
         val properties = listOf("type=$type") + properties
             .filterKeys { !it.startsWith("_") }
@@ -70,6 +61,15 @@ class Entity(
 
     fun children(key: String): List<Entity> = (children[key] ?: listOf()).toList()
     fun children(): List<String> = children.keys.toList()
+
+    @JvmInline
+    value class Type(val id: String) {
+        override fun toString() = id
+    }
+
+    interface LabelFormatter {
+        fun format(entity: Entity, service: EntityService): String
+    }
 }
 
 fun Entity.toTree(): Tree<EntityNode> {
