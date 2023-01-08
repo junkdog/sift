@@ -44,6 +44,7 @@ in a more flexible way.
 ### New
 - DSL.Parameter: generic `signature {}` scope.
 - DSL.Method: Reverse association with `foo.instantiations["created-by] = bar` and `foo.invocations["called-by] = bar` 
+- DSL.Signature: `explodeTypeT(signature) {}` extracts type `T` from signature pattern, e.g. `Map<String, List<T>>`. `_` matches any type. 
 - DSL.Instrumenter: `elementsOf(e) {}` iterate over all entities without element-specific methods. Useful for property tagging. 
 - DSL.Instrumenter: `graphviz(e, ...)` which allows setting graphviz properties such as identifier, rank, type, shape, style, etc.
 - DSL: `filter(string)` is a short-hand for `filter(Regex.fromLiteral(string))`

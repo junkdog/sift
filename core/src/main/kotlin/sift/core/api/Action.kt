@@ -195,10 +195,12 @@ sealed class Action<IN, OUT> {
         }
 
         data class Filter(val regex: Regex, val invert: Boolean) : Action<IterSignatures, IterSignatures>() {
-            override fun id() = "filter-signature"
+            override fun id() = "filter-signature($regex${" invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
                 fun classNameOf(elem: SignatureNode): String? =
                     (elem.argType as? ArgType.Plain)?.type?.className
+                fun simpleNameOf(elem: SignatureNode): String? =
+                    (elem.argType as? ArgType.Plain)?.type?.simpleName
 
                 return input
                     .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }
