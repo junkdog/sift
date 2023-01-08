@@ -22,6 +22,8 @@ import sift.core.asm.classNode
 import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.tree.debugTree
+import sift.core.tree.toTree
 import java.io.InputStream
 import kotlin.test.assertTrue
 
@@ -173,12 +175,42 @@ class DslTest {
         val cns = listOf(classNode(ClassWithGenericElements::class))
         val payload = Entity.Type("payload")
 
-        // Map<String, List<Pair<Payload, Int>>>
+        fun validate(pipeline: Action<Unit, Unit>) {
+            pipeline.execute(cns) { es ->
+                val entities = es[payload].values.toList()
+                assertThat(entities).hasSize(1)
+            }
+        }
+
+        val pipeline = classes {
+            methods {
+                returns {
+                    explodeTypeT("Map<String, List<Pair<T, _>>>", synthesize = true) {
+                        entity(payload)
+                    }
+                }
+            }
+        }.also(::validate)
+
+        // making sure unspecified types are ok too
         classes {
             methods {
                 returns {
-                    typeArgument(1) { // List<Pair<Payload, Int>>
-                        typeArguments { // Pair<Payload, Int>
+                    explodeTypeT("_<_, _<_<T, _>>>", synthesize = true) {
+                        entity(payload)
+                    }
+                }
+            }
+        }.also(::validate)
+
+        val expected = classes {
+            methods {
+                returns {
+                    filter(Regex("^.+\\.Map\$"))
+                    typeArgument(1) { //  List<Pair<Payload, Int>>
+                        filter(Regex("^.+\\.List\$"))
+                        typeArgument(0) { // Pair<Payload, Int>
+                            filter(Regex("^.+\\.Pair\$"))
                             typeArgument(0) { // Payload
                                 explodeType(synthesize = true) {
                                     entity(payload)
@@ -188,10 +220,10 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(1)
-        }
+        }.also(::validate)
+
+        assertThat(pipeline.debugTree())
+            .isEqualTo(expected.debugTree())
     }
 
     @Test
