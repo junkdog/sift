@@ -32,7 +32,9 @@ if (( ${+SIFT_DEBUG} )) ; then
 fi
 
 function _sift() {
-    if [[ -x $SIFT_BIN ]]; then
+    if [[ $SIFT_FORCE_JAR ]]; then
+        java -jar $SIFT_JAR $SIFT_ARGS $*
+    elif [[ -x $SIFT_BIN ]]; then
         $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $*
     elif [[ -f $SIFT_JAR ]]; then
         java -jar $SIFT_JAR $SIFT_ARGS $*
