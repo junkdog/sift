@@ -20,13 +20,13 @@
     </licenses>
 
     <properties>
-        <kotlin.version>1.7.22</kotlin.version>
+        <kotlin.version>1.8.0</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <dokka.version>1.7.20</dokka.version>
+        <dokka.version>1.8.0</dokka.version>
         <dokka.skip>true</dokka.skip>
         <dokka.format>html</dokka.format>
     </properties>
