@@ -13,8 +13,8 @@ sealed interface LabelFormatter : Entity.LabelFormatter {
 
                     val split = token.split(":")
                     val (key, defaultValue) = when (split.size) {
-                        2 -> split
-                        1 -> listOf(split.first(), "\${${split.first()}}")
+                        2    -> split
+                        1    -> listOf(split.first(), "\${${split.first()}}")
                         else -> error("':' can only occur once and is not escapable atm")
                     }
 

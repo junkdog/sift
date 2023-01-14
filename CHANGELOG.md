@@ -50,8 +50,8 @@ in a more flexible way.
 - DSL: `filter(string)` is a short-hand for `filter(Regex.fromLiteral(string))`
 
 ### Breaking
+- Multiple classes changed packages and visibility; ongoing.
 - `Gruxbox` and `Style` moved to `sift.core.terminal` from `sift.instrumenter`.
-- `sift.core.graphviz.Dot` relocated from `sift.instrumenter.graphviz`.
 - SPI: `InstrumenterServiceProvider` is now optional when implementing `InstrumenterService` since json
   serialization is typically more convenient. 
 - Due to some internal renaming, any custom pipelines need to be recompiled/resaved to work with the new version.
@@ -60,6 +60,7 @@ in a more flexible way.
 ### Fixes
 - Entities were sometimes not relatable when calling `property()` from a scope not directly related to the scope
   which registered the entity. 
+
 
 ## sift-0.4.0 2022-12-07
 

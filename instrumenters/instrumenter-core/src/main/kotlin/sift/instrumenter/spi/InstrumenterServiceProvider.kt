@@ -1,6 +1,6 @@
 package sift.instrumenter.spi
 
-import sift.instrumenter.InstrumenterService
+import sift.core.instrumenter.InstrumenterService
 
 interface InstrumenterServiceProvider {
     fun create(): InstrumenterService

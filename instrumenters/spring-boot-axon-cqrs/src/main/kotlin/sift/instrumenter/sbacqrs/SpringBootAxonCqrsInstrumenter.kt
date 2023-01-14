@@ -18,7 +18,7 @@ import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Gruvbox.purple2
 import sift.core.terminal.Gruvbox.yellow2
-import sift.instrumenter.InstrumenterService
+import sift.core.instrumenter.InstrumenterService
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
 import sift.core.terminal.TextTransformer.Companion.dedupe
@@ -49,6 +49,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
         val queryHandler = "org.axonframework.queryhandling.QueryHandler".type
 
         // spring
+        val controller = "org.springframework.stereotype.Controller".type
         val deleteMapping = "org.springframework.web.bind.annotation.DeleteMapping".type
         val getMapping = "org.springframework.web.bind.annotation.GetMapping".type
         val patchMapping = "org.springframework.web.bind.annotation.PatchMapping".type
@@ -159,23 +160,28 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
 
         return instrumenter {
             classes {
-                scope("register controllers") {
-                    annotatedBy(A.restController)
-                    entity(E.controller,
-                         // when --render: prevents children from being deleted
-                        property("dot-ignore", withValue(true)))
+                fun registerController(controller: Type) {
+                    scope("register controllers") {
+                        annotatedBy(controller)
+                        entity(E.controller,
+                             // when --render: prevents children from being deleted
+                            property("dot-ignore", withValue(true)))
 
-                    methods {
-                        // maps to EntityType.endpoint
-                        registerEndpoints("DELETE", A.deleteMapping)
-                        registerEndpoints("GET",    A.getMapping)
-                        registerEndpoints("PATCH",  A.patchMapping)
-                        registerEndpoints("POST",   A.postMapping)
-                        registerEndpoints("PUT",    A.putMapping)
+                        methods {
+                            // maps to EntityType.endpoint
+                            registerEndpoints("DELETE", A.deleteMapping)
+                            registerEndpoints("GET",    A.getMapping)
+                            registerEndpoints("PATCH",  A.patchMapping)
+                            registerEndpoints("POST",   A.postMapping)
+                            registerEndpoints("PUT",    A.putMapping)
 
-                        E.controller["endpoints"] = E.endpoint
+                            E.controller["endpoints"] = E.endpoint
+                        }
                     }
                 }
+
+                registerController(A.controller)
+                registerController(A.restController)
 
                 scope("register aggregates") {
                     annotatedBy(A.aggregate)

@@ -19,6 +19,7 @@
         <module>deprecated</module>
         <module>spring-boot-axon-cqrs</module>
         <module>jpa</module>
+        <module>spring-crud</module>
         <module>jdbi</module>
         <module>sift</module>
     </modules>

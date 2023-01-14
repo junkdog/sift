@@ -170,6 +170,9 @@
   "queriedMethods":[{"name":"getPermittedSubclasses","parameterTypes":[] }]
 },
 {
+  "name":"java.lang.ClassValue"
+},
+{
   "name":"java.lang.Comparable",
   "allDeclaredFields":true,
   "allDeclaredClasses":true,
@@ -238,10 +241,20 @@
   "name":"java.util.ArrayList"
 },
 {
-  "name":"java.util.List"
+  "name":"java.util.Collections$SingletonList",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.util.List",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"java.util.Optional"
+},
+{
+  "name":"java.util.RandomAccess",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"jdk.internal.ValueBased"
@@ -270,7 +283,21 @@
   "name":"kotlin.Unit"
 },
 {
+  "name":"kotlin.collections.EmptyList",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"kotlin.enums.EnumEntries"
+},
+{
   "name":"kotlin.jvm.internal.DefaultConstructorMarker"
+},
+{
+  "name":"kotlin.jvm.internal.markers.KMappedMarker",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"kotlin.reflect.jvm.internal.ReflectionFactoryImpl",
@@ -694,6 +721,13 @@
   "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsBy"
 },
 {
+  "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsBy"
 },
 {
@@ -755,7 +789,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["java.lang.String"] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.util.List"] }
+  ]
 },
 {
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
@@ -770,6 +807,19 @@
 {
   "name":"sift.core.jackson.SystemModelSerializer$Serializer",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.terminal.Deduplicate",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["char"] }]
+},
+{
+  "name":"sift.core.terminal.IdSequencer"
+},
+{
+  "name":"sift.core.terminal.Replace"
 },
 {
   "name":"sift.core.terminal.Style",
@@ -794,7 +844,14 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle"] }, 
+    {"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }
+  ]
+},
+{
+  "name":"sift.core.terminal.TextTransformer",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"sift.core.tree.EntityNode"

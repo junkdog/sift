@@ -1,4 +1,4 @@
-package sift.instrumenter
+package sift.core.instrumenter
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
@@ -34,7 +34,7 @@ internal class DeserializedInstrumenter(
 
 
 private fun mapper() : ObjectMapper {
-    return ObjectMapper().apply {
+    return jacksonObjectMapper().apply {
             registerModule(
                 KotlinModule.Builder()
                     .withReflectionCacheSize(512)

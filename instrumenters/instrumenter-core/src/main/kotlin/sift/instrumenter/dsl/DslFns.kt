@@ -95,17 +95,3 @@ fun Dsl.Instrumenter.registerInvocationsOf(
         source[outLabel] = methodType.invocations
     }
 }
-
-fun TreeDsl.buildTree(
-    e: Entity,
-    vararg exceptChildren: String = arrayOf("sent-by", "backtrack")
-) {
-    (e.children() - exceptChildren.toSet()).forEach { key ->
-        e.children(key).forEach { child: Entity ->
-            // FIXME: selfReferential is a bug in establishing relations
-            if (!selfReferential(child)) {
-                add(child) { buildTree(child) }
-            }
-        }
-    }
-}

@@ -4,8 +4,7 @@ import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Dsl.instrumenter
 import sift.core.terminal.Style
-import sift.instrumenter.InstrumenterService
-import sift.instrumenter.spi.InstrumenterServiceProvider
+import sift.core.instrumenter.InstrumenterService
 
 typealias E = SandboxInstrumenter.EntityTypes
 typealias A = SandboxInstrumenter.Annotations

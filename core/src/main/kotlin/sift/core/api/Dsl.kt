@@ -402,7 +402,7 @@ object Dsl {
 
         /**
          * Iterates over all classes given a generic type signature, e.g.
-         * `Map<_ List<T>>`. The signature parameter describes the generic
+         * `Map<_, List<T>>`. The signature parameter describes the generic
          * type to search for. It must contain a `T` token, which will be
          * replaced with each declaration during iteration.  The `_` symbol
          * can be used to match any class.
@@ -413,10 +413,20 @@ object Dsl {
          * evaluated.
          *
          * This function can greatly reduce the boilerplate associated with manually
-         * unpacking type signataures. The following two pipelines are equivalent:
+         * unpacking type signatures. The following two pipelines are equivalent:
          *
          * ```kotlin
          * val a = classes {
+         *     methods {
+         *         returns {
+         *             explodeTypeT("Map<_, List<Pair<T, _>>>", synthesize = true) {
+         *                 entity(payload)
+         *             }
+         *         }
+         *     }
+         * }
+         *
+         * val b = classes {
          *     methods {
          *         returns {
          *             filter(Regex("^.+\\.Map\$"))
@@ -435,16 +445,6 @@ object Dsl {
          *     }
          * }
          *
-         * val b = classes {
-         *     methods {
-         *         returns {
-         *             explodeTypeT("Map<_, List<Pair<T, _>>>", synthesize = true) {
-         *                 entity(payload)
-         *             }
-         *         }
-         *     }
-         * }
-         *
          * assert(a == b) { "expecting a and b to have the same underlying representation" }
          * ```
          */
@@ -457,7 +457,7 @@ object Dsl {
         }
 
         /**
-         * When `--debug` is past to the CLI, prints [tag] and all elements
+         * When `--debug` is passed to the CLI, prints [tag] and all elements
          * currently in scope.
          *
          * Note that for most use-cases, `--profile` yields better results
@@ -468,7 +468,7 @@ object Dsl {
         }
 
         /**
-         * When `--debug` is past to the CLI, prints [tag] and the count
+         * When `--debug` is passed to the CLI, prints [tag] and the count
          * of elements currently in scope.
          *
          * Note that for most use-cases, `--profile` yields better results

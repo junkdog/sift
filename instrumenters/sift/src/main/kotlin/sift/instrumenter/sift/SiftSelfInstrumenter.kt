@@ -13,7 +13,7 @@ import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
-import sift.instrumenter.InstrumenterService
+import sift.core.instrumenter.InstrumenterService
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.plain
 import sift.core.tree.EntityNode

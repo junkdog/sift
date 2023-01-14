@@ -48,9 +48,7 @@ internal fun explodeTypeFromSignature(
 
 private fun parseGenericType(
     signature: String
-): GenericType {
-    return GenericsParser(signature).parseType(0)
-}
+): GenericType = GenericsParser(signature).parseType(0)
 
 private sealed interface TypeName {
     data class SimpleName(val name: String) : TypeName {
@@ -67,8 +65,8 @@ private sealed interface TypeName {
 
     companion object {
         fun from(s: String): TypeName = when (s) {
-            "_" -> Any
-            "T" -> TypeT
+            "_"  -> Any
+            "T"  -> TypeT
             else -> SimpleName(s)
         }
     }

@@ -9,7 +9,7 @@ import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
-import sift.instrumenter.InstrumenterService
+import sift.core.instrumenter.InstrumenterService
 import sift.core.terminal.Style
 import sift.instrumenter.spi.InstrumenterServiceProvider
 

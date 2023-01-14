@@ -8,7 +8,7 @@ import sift.core.api.SystemModel
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
-import sift.instrumenter.InstrumenterService
+import sift.core.instrumenter.InstrumenterService
 import sift.core.terminal.Style
 import sift.instrumenter.spi.InstrumenterServiceProvider
 

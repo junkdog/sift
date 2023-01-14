@@ -1,4 +1,4 @@
-package sift.instrumenter
+package sift.core.instrumenter
 
 import sift.core.api.Action
 import sift.core.api.SystemModel
@@ -7,7 +7,7 @@ import sift.core.terminal.Style
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
-import sift.instrumenter.dsl.buildTree
+import sift.core.tree.buildTree
 
 interface InstrumenterService {
     val name: String
