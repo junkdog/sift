@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE", "unused")
+
 package sift.core.api.testdata.set1
 
 class MethodWithParam {

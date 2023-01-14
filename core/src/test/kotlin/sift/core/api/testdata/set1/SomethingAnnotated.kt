@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.api.testdata.set1
 
 @AnnoPrimitives(true, 3, 4.toChar(), 5, 6, 7L, 3f, 4.0)

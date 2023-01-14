@@ -29,7 +29,7 @@ class TypeArgumentVisitor(
     }
 
     override fun visitTypeArgument() {
-        // fixme: look into whether we need to act on <*> or somethong
+        // ignored
     }
 
     override fun visitTypeVariable(name: String) {

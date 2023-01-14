@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.firstBy
@@ -248,9 +250,9 @@ private class GenericFields2<T> where T : Number, T : Comparator<Key> {
 }
 
 private class GenericMethods {
-    fun returnListOfString(): List<String> = TODO()
-    fun returnArrayofString(): List<Array<String>> = TODO()
-    fun <T : Number> paramListOfNumber(yolo: Int, p: List<T>): T = TODO()
+    fun returnListOfString(): List<String> = listOf()
+    fun returnArrayofString(): List<Array<String>> = listOf()
+    fun <T : Number> paramListOfNumber(yolo: Int, p: List<T>): T = error("")
     fun <K : CharSequence, V> paramMapOfKeyToValue(m : Map<K, V>) = Unit
 }
 

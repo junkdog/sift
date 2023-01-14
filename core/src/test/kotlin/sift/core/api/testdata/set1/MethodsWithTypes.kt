@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.api.testdata.set1
 
 class MethodsWithTypes {

@@ -1028,7 +1028,6 @@ class DslTest {
         )
 
         val method = Entity.Type("handler")
-        val data = Entity.Type("data")
 
         classes {
             methods {

@@ -19,16 +19,16 @@ class TestEntity(
 
     constructor(entry: Map.Entry<Element, Entity>) : this(entry.value)
 
-    override fun equals(rhs: Any?): Boolean {
-        return when (rhs) {
-            is Entity -> type == rhs.type
-                && label == rhs.label
-                && data == rhs.properties
-                && children == rhs.children
-            is TestEntity -> type == rhs.type
-                && label == rhs.label
-                && data == rhs.data
-                && children == rhs.children
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Entity -> type == other.type
+                && label == other.label
+                && data == other.properties
+                && children == other.children
+            is TestEntity -> type == other.type
+                && label == other.label
+                && data == other.data
+                && children == other.children
             else -> false
         }
     }
@@ -50,6 +50,7 @@ class TestEntity(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun e(
     type: Entity.Type,
     label: String,

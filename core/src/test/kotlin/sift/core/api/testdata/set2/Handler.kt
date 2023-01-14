@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.api.testdata.set2
 
 import sift.core.api.testdata.set1.Payload

@@ -244,7 +244,7 @@ sealed class Action<IN, OUT> {
         data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
             override fun id() = "implements(${type.simpleName})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                return input.filter { elem -> type in ctx.allInterfacesOf(elem) } // TODO: refactor; away w context
+                return input.filter { elem -> type in ctx.allInterfacesOf(elem) }
             }
         }
 

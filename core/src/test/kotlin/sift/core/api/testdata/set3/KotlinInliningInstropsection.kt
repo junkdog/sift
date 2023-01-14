@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package sift.core.api.testdata.set3
 
 annotation class InlineMarker

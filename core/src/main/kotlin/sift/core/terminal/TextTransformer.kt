@@ -1,8 +1,6 @@
 package sift.core.terminal
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
-import sift.core.terminal.TextTransformer.Companion.idSequence
-import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import java.util.UUID
 import java.util.regex.Pattern
 

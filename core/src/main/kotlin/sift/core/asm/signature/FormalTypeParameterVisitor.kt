@@ -6,7 +6,7 @@ import org.objectweb.asm.signature.SignatureVisitor
 
 class FormalTypeParameterVisitor(
     val parameter: FormalTypeParameter,
-    val lookup: (String) -> FormalTypeParameter, // fixme: nullability
+    val lookup: (String) -> FormalTypeParameter,
     api: Int = Opcodes.ASM9,
     signatureVisitor: SignatureVisitor? = null,
 ) : BaseSignatureVisitor(api, signatureVisitor) {
