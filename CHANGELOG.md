@@ -1,6 +1,8 @@
 ## Upcoming release
 
 
+## sift-0.5.0 2023-01-14
+
 ### Reverse registrations 
 
 "Reverse registration" of invocations and instantiations of entities is now possible. This means that,

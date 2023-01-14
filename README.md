@@ -1,5 +1,7 @@
 # sift
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
+
 Sift is a tool that allows you to model and analyze the design of systems from Java class
 files. With Sift, you can build, query, and diff system models using the command-line interface.
 
