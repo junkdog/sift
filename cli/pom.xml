@@ -48,6 +48,11 @@
         </dependency>
         <dependency>
             <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <artifactId>spring-crud</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.onedaybeard.sift.instrumenter</groupId>
             <artifactId>jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
