@@ -9,7 +9,6 @@ import sift.core.entity.Entity
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
 import sift.core.graphviz.Style
-import sift.core.tree.TreeDsl
 
 fun Dsl.Instrumenter.graphviz(
     entities: Iterable<Entity.Type>,
@@ -17,13 +16,13 @@ fun Dsl.Instrumenter.graphviz(
     rank: Int? = null,
     type: Dot? = null,
     shape: Shape? = null,
-    stripLabelSuffix: String? = null,
+    removeSuffix: String? = null,
     style: Style? = null,
     arrowheadShape: String? = null,
     edgeLabel: Action<Iter<Element>, IterValues>? = null
 ) {
     entities.forEach { e ->
-        graphviz(e, identifyAs, rank, type, shape, stripLabelSuffix, style, arrowheadShape, edgeLabel)
+        graphviz(e, identifyAs, rank, type, shape, removeSuffix, style, arrowheadShape, edgeLabel)
     }
 }
 
@@ -53,7 +52,7 @@ fun Dsl.Instrumenter.graphviz(
     shape: Shape? = null,
 
     /** The shape for [Dot.node]. */
-    stripLabelSuffix: String? = null,
+    removeSuffix: String? = null,
 
     /** The style of edges or nodes. E.g. [Style.dashed]. */
     style: Style? = null,
@@ -65,14 +64,14 @@ fun Dsl.Instrumenter.graphviz(
     edgeLabel: Action<Iter<Element>, IterValues>? = null
 ) {
     elementsOf(e) {
-        rank?.let {             property(e, "dot-rank", withValue(it)) }
-        identifyAs?.let {       property(e, "dot-id-as", withValue(it)) }
-        type?.let {             property(e, "dot-type", withValue(it)) }
-        shape?.let {            property(e, "dot-shape", withValue(it.name)) }
-        stripLabelSuffix?.let { property(e, "dot-label-strip", withValue(it)) }
-        style?.let {            property(e, "dot-style", withValue(it.name)) }
-        arrowheadShape?.let {   property(e, "dot-arrowhead", withValue(it)) }
-        edgeLabel?.let {        property(e, "dot-edge-label", it) }
+        rank?.let {           property(e, "dot-rank", withValue(it)) }
+        identifyAs?.let {     property(e, "dot-id-as", withValue(it)) }
+        type?.let {           property(e, "dot-type", withValue(it)) }
+        shape?.let {          property(e, "dot-shape", withValue(it.name)) }
+        removeSuffix?.let {   property(e, "dot-label-strip", withValue(it)) }
+        style?.let {          property(e, "dot-style", withValue(it.name)) }
+        arrowheadShape?.let { property(e, "dot-arrowhead", withValue(it)) }
+        edgeLabel?.let {      property(e, "dot-edge-label", it) }
     }
 }
 

@@ -179,9 +179,11 @@ class DslTest {
             pipeline.execute(cns) { es ->
                 val entities = es[payload].values.toList()
                 assertThat(entities).hasSize(1)
+                assertThat(entities.first().label).isEqualTo("Payload")
             }
         }
 
+        // fun complexReturn(): Map<String, List<Pair<Payload, Int>>>
         val pipeline = classes {
             methods {
                 returns {
@@ -192,26 +194,15 @@ class DslTest {
             }
         }.also(::validate)
 
-        // making sure unspecified types are ok too
-        classes {
-            methods {
-                returns {
-                    explodeTypeT("_<_, _<_<T, _>>>", synthesize = true) {
-                        entity(payload)
-                    }
-                }
-            }
-        }.also(::validate)
-
         val expected = classes {
             methods {
                 returns {
                     filter(Regex("^.+\\.Map\$"))
-                    typeArgument(1) { //  List<Pair<Payload, Int>>
+                    typeArgument(1) {                  //  List<Pair<Payload, Int>>
                         filter(Regex("^.+\\.List\$"))
-                        typeArgument(0) { // Pair<Payload, Int>
+                        typeArgument(0) {              // Pair<Payload, Int>
                             filter(Regex("^.+\\.Pair\$"))
-                            typeArgument(0) { // Payload
+                            typeArgument(0) {          // Payload
                                 explodeType(synthesize = true) {
                                     entity(payload)
                                 }
@@ -224,6 +215,17 @@ class DslTest {
 
         assertThat(pipeline.debugTree())
             .isEqualTo(expected.debugTree())
+
+        // making sure unspecified types are ok too
+        classes {
+            methods {
+                returns {
+                    explodeTypeT("_<_, _<_<T, _>>>", synthesize = true) {
+                        entity(payload)
+                    }
+                }
+            }
+        }.also(::validate)
     }
 
     @Test
@@ -268,40 +270,6 @@ class DslTest {
     @Test @Disabled
     fun `read class and enum from annotation`() {
         TODO()
-    }
-
-    @Test
-    fun `turn into first cli`() {
-        val klazz = Entity.Type("class")
-        val method = Entity.Type("method")
-        val field = Entity.Type("field")
-
-        classes {
-            scope("deprecated java classes") {
-                annotatedBy<JavaDeprecated>()
-                entity(klazz)
-            }
-            scope("deprecated kotlin classes") {
-                annotatedBy<Deprecated>()
-                entity(klazz)
-            }
-            methods {
-                annotatedBy<JavaDeprecated>()
-                entity(method)
-            }
-            methods {
-                annotatedBy<Deprecated>()
-                entity(method)
-            }
-            fields {
-                annotatedBy<JavaDeprecated>()
-                entity(field)
-            }
-            fields {
-                annotatedBy<Deprecated>()
-                entity(field)
-            }
-        }.execute {}
     }
 
     @Test
@@ -544,37 +512,6 @@ class DslTest {
 
             assertThat(entities.values.first().properties["a-parameter-type"])
                 .isEqualTo(listOf(type<String>()))
-        }
-    }
-
-    @Test
-    fun `read type of class and parameters`() {
-        val cns: List<ClassNode> = listOf(
-            classNode<MethodsWithTypes>(),
-        )
-
-        val et = Entity.Type("class")
-
-        classes {
-            entity(et, property("type", readType()))
-            methods {
-                filter(Regex("mixedTypes"))
-                parameters {
-                    entity(et, property("type", readType()))
-                }
-            }
-        }.execute(cns) { es ->
-            val entities = es[et]
-            assertThat(entities)
-                .hasSize(3)
-
-            val readTypes = entities.flatMap { (_, v) -> v.properties["type"]!! }
-            assertThat(readTypes)
-                .containsAll(listOf(
-                    type<MethodsWithTypes>(),
-                    type<MethodsWithTypes.Foo>(),
-                    type<String>(),
-                ))
         }
     }
 
@@ -1606,6 +1543,39 @@ class DslTest {
 
     @Nested
     inner class NegativeTests {
+
+    @Test
+    fun `entity types can only belong to one type of element`() {
+        val cns: List<ClassNode> = listOf(
+            classNode<MethodsWithTypes>(),
+        )
+
+        val et = Entity.Type("class")
+
+        // works
+        classes {
+            // entity(et, property("type", readType()))
+            methods {
+                filter(Regex("mixedTypes"))
+                parameters {
+                    entity(et, property("type", readType()))
+                }
+            }
+        }.execute(cns) {}
+
+        assertThrows<IllegalEntityAssignmentException> {
+            classes {
+                entity(et, property("type", readType()))
+                methods {
+                    filter(Regex("mixedTypes"))
+                    parameters {
+                        entity(et, property("type", readType()))
+                    }
+                }
+            }.execute(cns) {}
+        }
+    }
+
         @Test
         fun `element must not belong to multiple entities`() {
             // entities of the same type can however be assigned

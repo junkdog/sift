@@ -90,11 +90,11 @@ sealed class Action<IN, OUT> {
 
 
     abstract fun id(): String
-    abstract fun execute(ctx: Context, input: IN): OUT
+    internal abstract fun execute(ctx: Context, input: IN): OUT
 
     infix fun <T> andThen(action: Action<OUT, T>): Action<IN, T> = Compose(this, action)
 
-    operator fun invoke(ctx: Context, input: IN): OUT {
+    internal operator fun invoke(ctx: Context, input: IN): OUT {
         return ctx.measure(ctx, input, this)
     }
 
@@ -855,7 +855,7 @@ sealed class Action<IN, OUT> {
             return input.mapNotNull { t -> invoke(ctx, t) }
         }
 
-        abstract fun invoke(ctx: Context, input: T): T?
+        internal abstract fun invoke(ctx: Context, input: T): T?
     }
 
     data class Chain<T>(val actions: MutableList<Action<T, T>>) : Action<T, T>() {
@@ -870,7 +870,7 @@ sealed class Action<IN, OUT> {
     }
 }
 
-fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
+internal fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
 
 
 

@@ -1,13 +1,19 @@
 ## Upcoming release
 
 
+### Breaking changes
+- `DSL.Instrumenter.graphviz()`: parameter `stripLabelSuffix` renamed to `removeSuffix`.
+- Entity Types can can only be associated with a single element type (class, method, etc). 
+- Internal visibility on many classes previously marked as public.
+
+
 ## sift-0.5.0 2023-01-14
 
 ### Reverse registrations 
 
 "Reverse registration" of invocations and instantiations of entities is now possible. This means that,
 in addition to `foo["a"] = bar.instantations` and `foo["b"] = bar.invocations`, we can now also register
-instances of foo that are invoked or instantiated by bar:  
+instances of `foo` that are invoked or instantiated by `bar`:  
 
 ```kotlin
 methods {

@@ -8,18 +8,18 @@ import sift.core.element.MethodNode
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
 
-sealed interface EntityAssignmentResolver<T: Element> {
-    val type: Entity.Type
-    val id: String
+sealed class EntityAssignmentResolver<T: Element> {
+    abstract val type: Entity.Type
+    abstract val id: String
 
-    fun resolve(ctx: Context, elements: Iter<T>)
+    internal abstract fun resolve(ctx: Context, elements: Iter<T>)
 
     @NoArgConstructor
     class FromInstantiationsBy(
         val key: String,
         override val type: Entity.Type,
         val instantiater: Entity.Type,
-    ) : EntityAssignmentResolver<MethodNode> {
+    ) : EntityAssignmentResolver<MethodNode>() {
         override val id: String = "instantiated-by"
 
         override fun resolve(
@@ -41,7 +41,7 @@ sealed interface EntityAssignmentResolver<T: Element> {
         val key: String,
         override val type: Entity.Type,
         val invoker: Entity.Type,
-    ) : EntityAssignmentResolver<MethodNode> {
+    ) : EntityAssignmentResolver<MethodNode>() {
         override val id: String = "invoked-by"
 
         override fun resolve(
@@ -58,7 +58,7 @@ sealed interface EntityAssignmentResolver<T: Element> {
     class FromInvocationsOf(
         val key: String,
         override val type: Entity.Type
-    ) : EntityAssignmentResolver<MethodNode> {
+    ) : EntityAssignmentResolver<MethodNode>() {
         override val id: String = "invocations"
 
         override fun resolve(
@@ -75,7 +75,7 @@ sealed interface EntityAssignmentResolver<T: Element> {
     class FromInstantiationsOf(
         val key: String,
         override val type: Entity.Type
-    ) : EntityAssignmentResolver<MethodNode> {
+    ) : EntityAssignmentResolver<MethodNode>() {
         override val id: String = "instantiations"
 
         override fun resolve(

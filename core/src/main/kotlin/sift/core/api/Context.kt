@@ -6,6 +6,7 @@ import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
 import sift.core.SynthesisTemplate
+import sift.core.Throw.entityTypeAlreadyBoundToElementType
 import sift.core.api.MeasurementScope.Instrumenter
 import sift.core.asm.classNode
 import sift.core.element.*
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
 // todo: should be internal
-data class Context(
+internal data class Context(
     val allClasses: MutableList<ClassNode>
 ) {
     constructor(
@@ -33,8 +34,8 @@ data class Context(
         .toMap()
         .let(::IdentityHashMap)
 
-    internal val entityService: EntityService = EntityService()
-    internal var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = mutableMapOf()
+    val entityService: EntityService = EntityService()
+    var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = mutableMapOf()
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
@@ -149,11 +150,24 @@ data class Context(
     }
 
     fun register(entity: Entity, element: Element, formatter: LabelFormatter) {
+        // if entity type is already registered, ensure its element type is the same
+        if (entity.type in entityService) {
+            val elementType = entityService[entity.type]
+                .asSequence()
+                .first()
+                .key::class
+
+            if (element::class != elementType) {
+                entityTypeAlreadyBoundToElementType(entity.type, elementType, element::class)
+            }
+        }
+
+
         entityService.register(entity, element)
         labelFormatters[entity] = formatter
     }
 
-    internal fun tracesOf(element: Element): MutableList<ElementTrace> {
+    fun tracesOf(element: Element): MutableList<ElementTrace> {
         return elementTraces.getOrPut(element) { mutableListOf(ElementTrace(element)) }
     }
 
@@ -163,7 +177,7 @@ data class Context(
         }
     }
 
-    internal fun <IN, OUT> measure(ctx: Context, input: IN, action: Action<IN, OUT>): OUT {
+    fun <IN, OUT> measure(ctx: Context, input: IN, action: Action<IN, OUT>): OUT {
 
         fun <T> sizeOf(any: T): Int = when (any) {
             is Iterable<*> -> any.toList().size
@@ -194,7 +208,7 @@ data class Context(
         }
 
         val start = System.nanoTime().nanoseconds
-        val out = action.execute(ctx, input)
+        val out = action.execute(ctx, input) // TODO: measureTimedValue
         val end = System.nanoTime().nanoseconds
         measurement.output = sizeOf(out)
         measurement.execution = end - start
@@ -202,11 +216,11 @@ data class Context(
         return out
     }
 
-    internal fun pushMeasurementScope() {
+    fun pushMeasurementScope() {
         pushScopes++
     }
 
-    internal fun popMeasurementScope() {
+    fun popMeasurementScope() {
         measurementStack.removeLast()
     }
 }
@@ -267,7 +281,7 @@ private fun ElementTrace.debugString(
     colWidth: Int = 20
 ): String {
     return joinToString(" ") { e ->
-        if (e in context.entityService ) {
+        if (e in context.entityService) {
             TextStyles.inverse(e.stylized(colWidth))
         } else {
             e.stylized(colWidth)
@@ -281,11 +295,11 @@ private fun Element.stylized(width: Int): String {
 
     return (when (this) {
         is AnnotationNode -> Gruvbox.aqua2
-        is ClassNode -> Gruvbox.yellow2
-        is FieldNode -> Gruvbox.purple2
-        is MethodNode -> Gruvbox.green2
-        is ParameterNode -> Gruvbox.orange2
-        is SignatureNode -> Gruvbox.blue2
-        is ValueNode -> Gruvbox.gray245
+        is ClassNode      -> Gruvbox.yellow2
+        is FieldNode      -> Gruvbox.purple2
+        is MethodNode     -> Gruvbox.green2
+        is ParameterNode  -> Gruvbox.orange2
+        is SignatureNode  -> Gruvbox.blue2
+        is ValueNode      -> Gruvbox.gray245
     } + bold)(s.substring(0..lastIndex).padEnd(width))
 }

@@ -4,6 +4,7 @@ import sift.core.api.Action
 import sift.core.element.Element
 import sift.core.entity.Entity
 import java.lang.RuntimeException
+import kotlin.reflect.KClass
 
 
 object Throw {
@@ -40,6 +41,17 @@ object Throw {
     fun unableToResolveParentRelation(parentType: Entity.Type, childType: Entity.Type): Nothing {
         throw "Unable to establish relation between '$parentType' and '$childType'"
             .let(::FailedToResolveParentException)
+    }
+    
+    fun entityTypeAlreadyBoundToElementType(
+        type: Entity.Type,
+        registered: KClass<out Element>,
+        requested: KClass<out Element>
+    ): Nothing {
+        val a = registered.simpleName
+        val b = requested.simpleName
+        throw "Entity Type '$type' is already associated with $a elements, it cannot be registered to $b at the same time."
+            .let(::IllegalEntityAssignmentException)
     }
 }
 

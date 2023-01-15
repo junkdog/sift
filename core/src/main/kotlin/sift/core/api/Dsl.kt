@@ -890,7 +890,7 @@ object Dsl {
 }
 
 
-fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
+internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
     fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
         return when (elem) {
             is ClassNode     -> elem.methods.map { mn -> mn to e }

@@ -190,12 +190,11 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                     scope("register member aggregates") {
                         fields {
                             annotatedBy(A.aggregateMember)
-                            signature {            // List<MemberAggregate>
-                                typeArguments {    // MemberAggregate
-                                    explodeType {  // class
-                                        registerAggregate(E.aggregateMember) // label("\${aggregate}[\${member}]"))
-                                        property(E.aggregateMember, "member", readName())
-                                    }
+                            signature { // List<MemberAggregate>
+                                explodeTypeT("_<T>") {
+                                    registerAggregate(E.aggregateMember) // label("\${aggregate}[\${member}]"))
+                                    property(E.aggregateMember, "member", readName())
+
                                 }
                             }
                         }
@@ -239,6 +238,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
             }
 
             scope("dot graph property configuration") {
+                // nodes
                 graphviz(E.endpoint,
                     rank = 0,
                     type = Dot.node,
@@ -247,17 +247,13 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                 graphviz(listOf(E.aggregate, E.aggregateMember),
                     rank = 1,
                     type = Dot.node,
-                    stripLabelSuffix = "Aggregate",
+                    removeSuffix = "Aggregate",
                     shape = Shape.component
-                )
-
-                graphviz(E.command,
-                    stripLabelSuffix = "Command",
                 )
 
                 graphviz(E.event,
                     rank = 2,
-                    stripLabelSuffix = "Event",
+                    removeSuffix = "Event",
                     shape = Shape.folder,
                     type = Dot.node
                 )
@@ -265,11 +261,18 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                 graphviz(E.projection,
                     rank = 3,
                     type = Dot.node,
-                    stripLabelSuffix = "Projection",
+                    removeSuffix = "Projection",
                     shape = Shape.box3d
                 )
 
+                // edges
+                graphviz(E.command,
+                    type = Dot.edge,
+                    removeSuffix = "Command"
+                )
+
                 graphviz(E.query,
+                    type= Dot.edge,
                     style = Style.dashed,
                     arrowheadShape = "onormal",
                 )

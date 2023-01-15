@@ -56,6 +56,6 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     }
 
     fun execute(action: Action<Unit, Unit>, profile: Boolean): SystemModel {
-        return processPipeline(action, profile).let { ctx -> SystemModel(ctx, ctx.measurements) }
+        return processPipeline(action, profile).let(::SystemModel)
     }
 }

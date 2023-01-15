@@ -17,11 +17,10 @@ data class SystemModel(
     val measurements: Tree<Measurement>,
 ) {
     internal constructor(
-        context: Context,
-        measurements: Tree<Measurement>
+        context: Context
     ) : this(
         context.entityService.entitiesByType.map { (type, v) -> type to v.values.toList() }.toMap(),
-        measurements,
+        context.measurements,
     )
 
     operator fun get(type: Entity.Type): List<Entity> = entitiesByType[type] ?: listOf()
