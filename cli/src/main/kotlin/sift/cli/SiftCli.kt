@@ -16,6 +16,7 @@ import com.github.ajalt.clikt.parameters.types.*
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
@@ -181,6 +182,11 @@ object SiftCli : CliktCommand(
         debugLog = debug
 
         val terminal = Terminal(ansi)
+        Thread.setDefaultUncaughtExceptionHandler { _, e ->
+            val err = red2 + inverse + bold
+            terminal.println("${(err)("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
+            terminal.println(fg("exiting..."))
+        }
 
         when {
             version -> {
