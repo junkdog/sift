@@ -66,7 +66,7 @@ class KnownLimitationsTest {
         block: (EntityService) -> Unit
     ) {
         PipelineProcessor(cns)
-            .processPipeline(this, false) { it.debugTrails() }
+            .processPipeline(this, false, Context::debugTrails)
             .entityService
             .also(block)
     }

@@ -18,7 +18,6 @@ class TypeArgumentVisitor(
     override fun visitTypeArgument(wildcard: Char): SignatureVisitor {
         requireNotNull(arg)
 
-
         return TypeArgumentVisitor(
             arg!!.args::add,
             formalTypeParameters,

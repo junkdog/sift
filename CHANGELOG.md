@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### New
+- dot: Remove need for specifying `"dot-ignore"` property.
+
 
 ### Breaking changes
 - `DSL.Instrumenter.graphviz()`: parameter `stripLabelSuffix` renamed to `removeSuffix`.

@@ -22,8 +22,6 @@ dot-arrowhead       onormal|..
 dot-style           dashed|..
 
 dot-shape           folder|box3d|cylinder|component|..
-
-
  */
 
 
@@ -36,33 +34,21 @@ class DiagramGenerator(
         .flatten()
         .filterBy(Entity::dotType, Dot.node)
 
-    init {
-        // move lingering dot-id to dot-id-as (todo: remove)
-        sm.entitiesByType
-            .values
-            .flatten()
-            .forEach { e -> e["dot-id"]?.firstOrNull()?.let { e["dot-id-as"] = it }  }
-    }
-
     private val Entity.color: String
         get() = colorLookup(type)
 
     fun build(tree: Tree<EntityNode>): String {
 
-        // filter only dot nodes and edges
-        tree.walk()
-            .filterNot(Tree<EntityNode>::validEntity)
-            .forEach(Tree<EntityNode>::delete)
-
-
         // we always want to render the --root entity type as nodes,
         // even if they are marked as Dot.edge
         val rootEntities = tree.children()
+            .filter(Tree<EntityNode>::validNode)
             .mapNotNull(Tree<EntityNode>::entity)
             .filter { e -> e["dot-type"]?.firstOrNull() == Dot.edge }
             .toSet()
 
         val includedNodes = tree.walk()
+            .filter(Tree<EntityNode>::validNode)
             .mapNotNull(Tree<EntityNode>::entity)
             .map(Entity::nodeId)
             .toSet()
@@ -123,7 +109,9 @@ private fun graph(tree: Tree<EntityNode>): String {
         .filter { it.children().isEmpty() }
         .map { leaf -> listOf(leaf) + leaf.parents() }
         .toList()
-        .map { path -> path.filterNot { it.entity == null || "dot-ignore" in it.entity!!.properties() } }
+        .map { path -> path.filter(Tree<EntityNode>::validNode) }
+//            path.filterNot { it.entity == null || "dot-ignore" in it.entity!!.properties() }
+//        }
 
     val colors = edgeColors()
     val edges = paths
@@ -201,11 +189,10 @@ private data class Relation(
     var color: String
 )
 
-private fun Tree<EntityNode>.validEntity(): Boolean {
+private fun Tree<EntityNode>.validNode(): Boolean {
     val e = entity ?: return false
     return e["dot-type"] != null
         || e["dot-id-as"] != null
-        || e["dot-ignore"]?.firstOrNull() == true // not rendered
 }
 
 private operator fun java.lang.StringBuilder.plusAssign(s: String) {
