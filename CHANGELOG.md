@@ -2,7 +2,7 @@
 
 ### New
 - dot: Remove need for specifying `"dot-ignore"` property.
-
+- CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`. 
 
 ### Breaking changes
 - `DSL.Instrumenter.graphviz()`: parameter `stripLabelSuffix` renamed to `removeSuffix`.

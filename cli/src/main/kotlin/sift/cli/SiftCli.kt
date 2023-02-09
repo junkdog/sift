@@ -22,6 +22,7 @@ import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
+import sift.core.graphviz.EdgeLayout
 import sift.core.instrumenter.InstrumenterService
 import sift.core.instrumenter.deserialize
 import sift.core.jackson.*
@@ -98,6 +99,11 @@ object SiftCli : CliktCommand(
     val render: Boolean by option("-R", "--render",
         help = "render entities in graphviz's DOT language")
     .flag()
+
+    val edgeLayout: EdgeLayout by option("--edge-layout",
+            help = "sets the layout for the  lines between nodes")
+        .enum<EdgeLayout>()
+        .default(EdgeLayout.spline)
 
     val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
         help = "print all entities along with their properties and metadata")
@@ -237,7 +243,7 @@ object SiftCli : CliktCommand(
 
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = DiagramGenerator(sm, lookup)
+                val graph = DiagramGenerator(sm, edgeLayout, lookup)
                 val dot = graph.build(tree)
                 noAnsi.println(dot)
             }

@@ -25,8 +25,14 @@ dot-shape           folder|box3d|cylinder|component|..
  */
 
 
+@Suppress("EnumEntryName", "unused")
+enum class EdgeLayout {
+    spline, polyline, ortho
+}
+
 class DiagramGenerator(
     sm: SystemModel,
+    val edgeSplines: EdgeLayout,
     val colorLookup: (Entity.Type) -> String
 ) {
     private val nodes: List<Entity> = sm.entitiesByType
@@ -57,7 +63,7 @@ class DiagramGenerator(
             .toSet()
             .filter { it.nodeId in includedNodes }
 
-        val ortho = "" // " splines=ortho,"
+        val ortho = " splines=${edgeSplines.name},"
         return """
             |digraph {
             |    // setup
@@ -82,7 +88,7 @@ class DiagramGenerator(
             |    ${ranks(nodes)}
             |    
             |    // graph
-            |    ${graph(tree)}
+            |    ${graph(tree, edgeSplines)}
             |}
         """.trimMargin()
     }
@@ -104,14 +110,12 @@ private fun ranks(entities: List<Entity>): String {
         .joinToString("\n    ")
 }
 
-private fun graph(tree: Tree<EntityNode>): String {
+private fun graph(tree: Tree<EntityNode>, edgeSplines: EdgeLayout): String {
     val paths = tree.walk()
         .filter { it.children().isEmpty() }
         .map { leaf -> listOf(leaf) + leaf.parents() }
         .toList()
         .map { path -> path.filter(Tree<EntityNode>::validNode) }
-//            path.filterNot { it.entity == null || "dot-ignore" in it.entity!!.properties() }
-//        }
 
     val colors = edgeColors()
     val edges = paths
@@ -123,7 +127,7 @@ private fun graph(tree: Tree<EntityNode>): String {
 
     return paths
         .flatMap { path -> graph(path, colorOf(path)) }
-        .map { relation -> toDotString(relation) }
+        .map { relation -> toDotString(relation, edgeSplines) }
         .toSet()
         .joinToString("\n    ")
 }
@@ -159,13 +163,21 @@ private fun graph(
     return relations
 }
 
-private fun toDotString(relation: Relation): String {
+private fun toDotString(relation: Relation, edgeSplines: EdgeLayout): String {
+    val labelType = if (edgeSplines == EdgeLayout.ortho) "xlabel" else "label"
+
     val label = (relation.transit
         .map(Entity::dotLabel)
         .joinToString("\\n")
         .takeIf(String::isNotEmpty)
         ?: relation.to!!.dotEdgeLabel
-    )?.let { """label="$it"""" }
+    )
+    // reserve some space for labels and min spacing
+    val minlen = "minlen="
+        .takeIf { edgeSplines == EdgeLayout.ortho }
+        ?.takeIf { label != null }
+        ?.let { it + (label!!.length / 3 + 2) }
+        ?: "minlen=2"
 
     val arrowhead = relation.transit
         .map(Entity::dotArrowhead)
@@ -177,7 +189,12 @@ private fun toDotString(relation: Relation): String {
         .firstOrNull()
         ?.let { "style=$it" }
 
-    val attributes = listOfNotNull(label, arrowhead, style).joinToString("") { "$it," }
+    val attributes = listOfNotNull(
+        label?.let { """$labelType="$it"""" },
+        minlen,
+        arrowhead,
+        style
+    ).joinToString("") { "$it," }
 
     return "${relation.from!!.nodeId} -> ${relation.to!!.nodeId}[${attributes}color=\"${relation.color}\"];"
 }
