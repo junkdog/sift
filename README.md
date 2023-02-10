@@ -31,27 +31,32 @@ Usage: sift [OPTIONS]
 
   A tool to model and analyze the design of systems from bytecode.
 
+Entity tree options:
+  -L, --max-depth INT             Max display depth of the tree
+  -F, --filter REGEX              filters nodes by label. can occur multiple times
+  -S, --filter-context REGEX      filters nodes by label, while also including sibling nodes. can occur
+                                  multiple times
+  -e, --exclude REGEX             excludes nodes when label matches REGEX; can occur multiple times
+  -E, --exclude-type ENTITY-TYPE  excludes entity types from tree; can occur multiple times
+  -T, --tree-root ENTITY-TYPE     tree built around requested entity type
+
+Graphviz options:
+  -R, --render                           render entities in graphviz's DOT language
+  --edge-layout [spline|polyline|ortho]  sets the layout for the lines between nodes (default: spline)
+
+Serialization options:
+  -s, --save FILE_JSON  save the resulting system model as json; for later use by --diff or --load
+  --load FILE_JSON      load a previously saved system model
+  -d, --diff FILE_JSON  diff view against a previously saved system model
+
 Options:
   -f, --class-dir PATH                        jar or directory with classes
   -l, --list-instrumenters                    print all instrumenters detected on the current classpath
   -i, --instrumenter INSTRUMENTER             the instrumenter pipeline performing the scan
-  -R, --render                                render entities in graphviz's DOT language
   -X, --dump-system-model                     print all entities along with their properties and metadata
   --profile                                   print execution times and input/output for the executed
                                               pipeline
-  -T, --tree-root ENTITY-TYPE                 tree built around requested entity type
   -t, --list-entity-types                     lists entity types defined by instrumenter
-  -L, --max-depth INT                         Max display depth of the tree
-  -F, --filter REGEX                          filters nodes by label. can occur multiple times
-  -S, --filter-context REGEX                  filters nodes by label, while also including sibling nodes.
-                                              can occur multiple times
-  -e, --exclude REGEX                         excludes nodes when label matches REGEX; can occur multiple
-                                              times
-  -E, --exclude-type ENTITY-TYPE              excludes entity types from tree; can occur multiple times
-  -s, --save FILE_JSON                        save the resulting system model as json; for later use by
-                                              --diff or --load
-  --load FILE_JSON                            load a previously saved system model
-  -d, --diff FILE_JSON                        load a previously saved system model
   -a, --ansi [none|ansi16|ansi256|truecolor]  override automatically detected ANSI support
   --version                                   print version and release date
   --debug                                     prints log/logCount statements from the executed pipeline

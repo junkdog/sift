@@ -11,6 +11,8 @@ import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.*
+import com.github.ajalt.clikt.parameters.groups.OptionGroup
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.*
 import com.github.ajalt.mordant.rendering.AnsiLevel
@@ -64,38 +66,8 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.ExperimentalTime
 
-object SiftCli : CliktCommand(
-    name = "sift",
-    help = """
-        A tool to model and analyze the design of systems from bytecode.
-    """.trimIndent()
-) {
-    init {
-        context { helpFormatter = CliktHelpFormatter(
-            showDefaultValues = true,
-            maxWidth = 105)
-        }
-    }
 
-    val path: Path? by option("-f", "--class-dir",
-            metavar = "PATH",
-            help = "Path to directory structure containing classes or path to .jar",
-            completionCandidates = CompletionCandidates.Path
-        )
-        .path(mustExist = true)
-        .help("jar or directory with classes")
-        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
-
-    val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
-            help = "print all instrumenters detected on the current classpath")
-        .flag()
-
-    val instrumenter by option("-i", "--instrumenter",
-            metavar = "INSTRUMENTER",
-            help = "the instrumenter pipeline performing the scan",
-            completionCandidates = CompletionCandidates.Fixed(instrumenterNames().toSet()))
-        .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
-
+class GraphvizOptions : OptionGroup(name = "Graphviz options") {
     val render: Boolean by option("-R", "--render",
         help = "render entities in graphviz's DOT language")
     .flag()
@@ -104,24 +76,29 @@ object SiftCli : CliktCommand(
             help = "sets the layout for the  lines between nodes")
         .enum<EdgeLayout>()
         .default(EdgeLayout.spline)
+}
 
-    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
-        help = "print all entities along with their properties and metadata")
-    .flag()
+class SerializationOptions : OptionGroup(name = "Serialization options") {
+    val save: File? by option("-s", "--save",
+            metavar = "FILE_JSON",
+            help = "save the resulting system model as json; for later use by --diff or --load",
+            completionCandidates = CompletionCandidates.Path)
+        .file(canBeDir = false)
 
-    val profile: Boolean by option("--profile",
-        help = "print execution times and input/output for the executed pipeline")
-    .flag()
+    val load: File? by option("--load",
+            metavar = "FILE_JSON",
+            help = "load a previously saved system model",
+            completionCandidates = CompletionCandidates.Path)
+        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
 
-    val treeRoot: Entity.Type? by option("-T", "--tree-root",
-            metavar = "ENTITY-TYPE",
-            help = "tree built around requested entity type")
-        .convert { Entity.Type(it) }
+    val diff: File? by option("-d", "--diff",
+            metavar = "FILE_JSON",
+            help = "diff view against a previously saved system model",
+            completionCandidates = CompletionCandidates.Path)
+        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+}
 
-    val listEntityTypes: Boolean by option("-t", "--list-entity-types",
-            help = "lists entity types defined by instrumenter")
-        .flag()
-
+class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
     val maxDepth: Int? by option("-L", "--max-depth",
         help = "Max display depth of the tree")
         .int()
@@ -152,23 +129,59 @@ object SiftCli : CliktCommand(
         .convert { Entity.Type(it) }
         .multiple()
 
-    val save: File? by option("-s", "--save",
-            metavar = "FILE_JSON",
-            help = "save the resulting system model as json; for later use by --diff or --load",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false)
+    val treeRoot: Entity.Type? by option("-T", "--tree-root",
+            metavar = "ENTITY-TYPE",
+            help = "tree built around requested entity type")
+        .convert { Entity.Type(it) }
+}
 
-    val load: File? by option("--load",
-            metavar = "FILE_JSON",
-            help = "load a previously saved system model",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+object SiftCli : CliktCommand(
+    name = "sift",
+    help = """
+        A tool to model and analyze the design of systems from bytecode.
+    """.trimIndent()
+) {
+    init {
+        context { helpFormatter = CliktHelpFormatter(
+            showDefaultValues = true,
+            maxWidth = 105)
+        }
+    }
 
-    val diff: File? by option("-d", "--diff",
-            metavar = "FILE_JSON",
-            help = "load a previously saved system model",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+    val tree by EntityTreeOptions()
+    val graphviz by GraphvizOptions()
+    val serialization by SerializationOptions()
+
+    val path: Path? by option("-f", "--class-dir",
+            metavar = "PATH",
+            help = "Path to directory structure containing classes or path to .jar",
+            completionCandidates = CompletionCandidates.Path
+        )
+        .path(mustExist = true)
+        .help("jar or directory with classes")
+        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
+
+    val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
+            help = "print all instrumenters detected on the current classpath")
+        .flag()
+
+    val instrumenter by option("-i", "--instrumenter",
+            metavar = "INSTRUMENTER",
+            help = "the instrumenter pipeline performing the scan",
+            completionCandidates = CompletionCandidates.Fixed(instrumenterNames().toSet()))
+        .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
+
+    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
+        help = "print all entities along with their properties and metadata")
+    .flag()
+
+    val profile: Boolean by option("--profile",
+        help = "print execution times and input/output for the executed pipeline")
+    .flag()
+
+    val listEntityTypes: Boolean by option("-t", "--list-entity-types",
+            help = "lists entity types defined by instrumenter")
+        .flag()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
             help = "override automatically detected ANSI support")
@@ -217,9 +230,9 @@ object SiftCli : CliktCommand(
                 terminal.println("${orange1("Error: ")} ${fg("Must specify an instrumenter")}")
                 exitProcess(1)
             }
-            path == null && load == null -> throw PrintMessage("PATH was not specified")
-            render -> {
-                require(diff == null)
+            path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
+            graphviz.render -> {
+                require(serialization.diff == null)
                 val sm = systemModel()
 
                 fun color(style: Style): String {
@@ -237,31 +250,31 @@ object SiftCli : CliktCommand(
                     .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
 
                 // updating labels and filtering
-                val tree = buildTree(sm, treeRoot)
+                val tree = buildTree(sm, this.tree.treeRoot)
                 stylize(tree, theme)
                 filterTree(tree)
 
                 sm.entitiesByType.values.flatten().forEach { it.label = noAnsi.render(it.label) }
 
-                val graph = DiagramGenerator(sm, edgeLayout, lookup)
+                val graph = DiagramGenerator(sm, graphviz.edgeLayout, lookup)
                 val dot = graph.build(tree)
                 noAnsi.println(dot)
             }
             dumpSystemModel -> dumpEntities(terminal)
             profile -> profile(terminal)
-            diff != null -> {
-                val tree = diffHead(loadSystemModel(diff!!), treeRoot, instrumenter!!)
+            serialization.diff != null -> {
+                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, instrumenter!!)
                 terminal.printTree(tree)
             }
-            load != null -> {
-                val sm = loadSystemModel(load!!)
-                val tree = instrumenter!!.toTree(sm, treeRoot)
+            serialization.load != null -> {
+                val sm = loadSystemModel(serialization.load!!)
+                val tree = instrumenter!!.toTree(sm, this.tree.treeRoot)
 
                 terminal.printTree(tree)
             }
             else -> { // render tree from classes under path
-                val (sm, tree) = buildTree(treeRoot)
-                save?.let { out -> saveSystemModel(sm, out) }
+                val (sm, tree) = buildTree(this.tree.treeRoot)
+                serialization.save?.let { out -> saveSystemModel(sm, out) }
 
                 terminal.printTree(tree)
             }
@@ -270,8 +283,8 @@ object SiftCli : CliktCommand(
     }
 
     fun systemModel(): SystemModel {
-        return if (load != null) {
-            loadSystemModel(load!!)
+        return if (serialization.load != null) {
+            loadSystemModel(serialization.load!!)
         } else {
             PipelineProcessor(classNodes(path!!))
                 .execute(instrumenter!!.pipeline(), profile)
@@ -338,27 +351,27 @@ object SiftCli : CliktCommand(
     }
 
     fun filterTree(tree: Tree<EntityNode>) {
-        filter.applyToTree(tree) { matched ->
+        this.tree.filter.applyToTree(tree) { matched ->
             matched
                 .flatMap(Tree<EntityNode>::children)
                 .flatMap { it.walk().toList() }
         }
 
-        filterContext.applyToTree(tree) { matched ->
+        this.tree.filterContext.applyToTree(tree) { matched ->
             // filter including sibling nodes in matched set
             matched
                 .flatMap { it.parent?.children() ?: listOf(it) }
                 .flatMap { it.walk().toList() }
         }
 
-        exclude.forEach { regex ->
+        this.tree.exclude.forEach { regex ->
             tree.walk()
                 .filter { regex in noAnsi.render(it.label) }
                 .toList()
                 .forEach(Tree<EntityNode>::delete)
         }
 
-        excludeTypes.forEach { exclude ->
+        this.tree.excludeTypes.forEach { exclude ->
             tree.walk()
                 .filter { it.value is EntityNode.Entity }
                 .filter { node -> (node.value as EntityNode.Entity).entity.type == exclude }
@@ -366,7 +379,7 @@ object SiftCli : CliktCommand(
                 .forEach(Tree<EntityNode>::delete)
         }
 
-        maxDepth?.let { depth ->
+        this.tree.maxDepth?.let { depth ->
             tree.walk()
                 .filter { it.depth == depth }
                 .toList()
@@ -553,7 +566,7 @@ object SiftCli : CliktCommand(
     }
 
     private fun profile(terminal: Terminal) {
-        val (sm, _) = buildTree(treeRoot)
+        val (sm, _) = buildTree(tree.treeRoot)
         fun MeasurementScope.style(): TextStyle = when (this) {
             MeasurementScope.Instrumenter -> fg
             MeasurementScope.Class        -> aqua2
