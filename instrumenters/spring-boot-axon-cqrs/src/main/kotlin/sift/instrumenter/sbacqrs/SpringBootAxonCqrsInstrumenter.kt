@@ -22,6 +22,7 @@ import sift.core.instrumenter.InstrumenterService
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
 import sift.core.terminal.TextTransformer.Companion.dedupe
+import sift.core.terminal.TextTransformer.Companion.replace
 import sift.instrumenter.dsl.graphviz
 import sift.instrumenter.dsl.registerInstantiationsOf
 import sift.instrumenter.spi.InstrumenterServiceProvider
@@ -190,17 +191,23 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                     scope("register member aggregates") {
                         fields {
                             annotatedBy(A.aggregateMember)
-                            signature { // List<MemberAggregate>
-                                explodeTypeT("_<T>") {
-                                    registerAggregate(E.aggregateMember) // label("\${aggregate}[\${member}]"))
-                                    property(E.aggregateMember, "member", readName())
+                            signature {
+                                explodeTypeT("_<T>") { // e.g. list
+                                    registerAggregate(E.aggregateMember,
+                                        label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
 
+                                    property(E.aggregateMember, "member", readName())
+                                }
+                                explodeTypeT("Map<_, T>") {
+                                    registerAggregate(E.aggregateMember,
+                                        label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
+
+                                    property(E.aggregateMember, "member", readName())
                                 }
                             }
                         }
                     }
 
-                    // fixme; does not trace aggregate members back to aggregate
                     property(E.aggregateMember, "aggregate", readName())
                 }
 

@@ -177,7 +177,6 @@ private fun toDotString(relation: Relation, edgeSplines: EdgeLayout): String {
         .takeIf { edgeSplines == EdgeLayout.ortho }
         ?.takeIf { label != null }
         ?.let { it + (label!!.length / 2 + 2) }
-//        ?.let { it + (label!!.length * 2 / 5 + 2) }
         ?: "minlen=2"
 
     val arrowhead = relation.transit

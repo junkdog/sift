@@ -1,14 +1,17 @@
 ## Upcoming release
 
-### New
+### New/Tweaks
 - dot: Remove need for specifying `"dot-ignore"` property.
-- CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`. 
+- CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`.
+- `spring-axon`: member aggregate label changed to `$aggregate[$member]`.
 
 ### Breaking changes
 - `DSL.Instrumenter.graphviz()`: parameter `stripLabelSuffix` renamed to `removeSuffix`.
 - Entity Types can can only be associated with a single element type (class, method, etc). 
 - Internal visibility on many classes previously marked as public.
 
+### Fixes
+- `spring-axon`: fix member aggregate identification when field type is a Map. 
 
 ## sift-0.5.0 2023-01-14
 
