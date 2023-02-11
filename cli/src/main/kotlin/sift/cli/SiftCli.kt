@@ -69,11 +69,11 @@ import kotlin.time.ExperimentalTime
 
 class GraphvizOptions : OptionGroup(name = "Graphviz options") {
     val render: Boolean by option("-R", "--render",
-        help = "render entities in graphviz's DOT language")
+        help = "Render entities with graphviz's DOT language.")
     .flag()
 
     val edgeLayout: EdgeLayout by option("--edge-layout",
-            help = "sets the layout for the  lines between nodes")
+            help = "Sets the layout for the  lines between nodes.")
         .enum<EdgeLayout>()
         .default(EdgeLayout.spline)
 }
@@ -81,57 +81,57 @@ class GraphvizOptions : OptionGroup(name = "Graphviz options") {
 class SerializationOptions : OptionGroup(name = "Serialization options") {
     val save: File? by option("-s", "--save",
             metavar = "FILE_JSON",
-            help = "save the resulting system model as json; for later use by --diff or --load",
+            help = "Save the resulting system model as json.",
             completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false)
 
     val load: File? by option("--load",
             metavar = "FILE_JSON",
-            help = "load a previously saved system model",
+            help = "Load a previously saved system model.",
             completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false, mustExist = true, mustBeReadable = true)
 
     val diff: File? by option("-d", "--diff",
             metavar = "FILE_JSON",
-            help = "diff view against a previously saved system model",
+            help = "Diff view against a previously saved system model.",
             completionCandidates = CompletionCandidates.Path)
         .file(canBeDir = false, mustExist = true, mustBeReadable = true)
 }
 
 class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
     val maxDepth: Int? by option("-L", "--max-depth",
-        help = "Max display depth of the tree")
+        help = "Max display depth of the tree.")
         .int()
         .restrictTo(min = 0)
 
     val filter: List<Regex> by option("-F", "--filter",
             metavar = "REGEX",
-            help = "filters nodes by label. can occur multiple times")
+            help = "Filters nodes by label. (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val filterContext: List<Regex> by option("-S", "--filter-context",
             metavar = "REGEX",
-            help = "filters nodes by label, while also including sibling nodes." +
-                " can occur multiple times")
+            help = "Filters nodes by label, while also including sibling nodes." +
+                " (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val exclude: List<Regex> by option("-e", "--exclude",
             metavar = "REGEX",
-            help = "excludes nodes when label matches REGEX; can occur multiple times")
+            help = "Excludes nodes when label matches REGEX. (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
             metavar = "ENTITY-TYPE",
-            help = "excludes entity types from tree; can occur multiple times")
+            help = "Excludes entity types from tree. (repeatable)")
         .convert { Entity.Type(it) }
         .multiple()
 
     val treeRoot: Entity.Type? by option("-T", "--tree-root",
             metavar = "ENTITY-TYPE",
-            help = "tree built around requested entity type")
+            help = "Tree built around requested entity type.")
         .convert { Entity.Type(it) }
 }
 
@@ -144,7 +144,7 @@ object SiftCli : CliktCommand(
     init {
         context { helpFormatter = CliktHelpFormatter(
             showDefaultValues = true,
-            maxWidth = 105)
+            maxWidth = 90)
         }
     }
 
@@ -158,41 +158,41 @@ object SiftCli : CliktCommand(
             completionCandidates = CompletionCandidates.Path
         )
         .path(mustExist = true)
-        .help("jar or directory with classes")
+        .help("Jar or directory with classes.")
         .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
 
     val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
-            help = "print all instrumenters detected on the current classpath")
+            help = "Print all instrumenters detected on the current classpath.")
         .flag()
 
     val instrumenter by option("-i", "--instrumenter",
             metavar = "INSTRUMENTER",
-            help = "the instrumenter pipeline performing the scan",
+            help = "The instrumenter pipeline performing the scan.",
             completionCandidates = CompletionCandidates.Fixed(instrumenterNames().toSet()))
         .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
 
     val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
-        help = "print all entities along with their properties and metadata")
+        help = "Print all entities along with their properties and metadata.")
     .flag()
 
     val profile: Boolean by option("--profile",
-        help = "print execution times and input/output for the executed pipeline")
+        help = "Print execution times and input/output for the executed pipeline.")
     .flag()
 
     val listEntityTypes: Boolean by option("-t", "--list-entity-types",
-            help = "lists entity types defined by instrumenter")
+            help = "Lists entity types defined by instrumenter.")
         .flag()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
-            help = "override automatically detected ANSI support")
+            help = "Override automatically detected ANSI support.")
         .enum<AnsiLevel>(key = { it.name.lowercase() })
 
     val version: Boolean by option("--version",
-        help = "print version and release date")
+        help = "Print version and release date.")
     .flag()
 
     val debug: Boolean by option("--debug",
-        help = "prints log/logCount statements from the executed pipeline")
+        help = "Print log/logCount statements from the executed pipeline.")
     .flag()
 
     private val noAnsi = Terminal(AnsiLevel.NONE)

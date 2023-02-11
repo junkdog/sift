@@ -32,36 +32,42 @@ Usage: sift [OPTIONS]
   A tool to model and analyze the design of systems from bytecode.
 
 Entity tree options:
-  -L, --max-depth INT             Max display depth of the tree
-  -F, --filter REGEX              filters nodes by label. can occur multiple times
-  -S, --filter-context REGEX      filters nodes by label, while also including sibling nodes. can occur
-                                  multiple times
-  -e, --exclude REGEX             excludes nodes when label matches REGEX; can occur multiple times
-  -E, --exclude-type ENTITY-TYPE  excludes entity types from tree; can occur multiple times
-  -T, --tree-root ENTITY-TYPE     tree built around requested entity type
+  -L, --max-depth INT             Max display depth of the tree.
+  -F, --filter REGEX              Filters nodes by label. (repeatable)
+  -S, --filter-context REGEX      Filters nodes by label, while also including sibling
+                                  nodes. (repeatable)
+  -e, --exclude REGEX             Excludes nodes when label matches REGEX. (repeatable)
+  -E, --exclude-type ENTITY-TYPE  Excludes entity types from tree. (repeatable)
+  -T, --tree-root ENTITY-TYPE     Tree built around requested entity type.
 
 Graphviz options:
-  -R, --render                           render entities in graphviz's DOT language
-  --edge-layout [spline|polyline|ortho]  sets the layout for the lines between nodes (default: spline)
+  -R, --render                          Render entities with graphviz's DOT language.
+  --edge-layout [spline|polyline|ortho]
+                                        Sets the layout for the lines between nodes.
+                                        (default: spline)
 
 Serialization options:
-  -s, --save FILE_JSON  save the resulting system model as json; for later use by --diff or --load
-  --load FILE_JSON      load a previously saved system model
-  -d, --diff FILE_JSON  diff view against a previously saved system model
+  -s, --save FILE_JSON  Save the resulting system model as json.
+  --load FILE_JSON      Load a previously saved system model.
+  -d, --diff FILE_JSON  Diff view against a previously saved system model.
 
 Options:
-  -f, --class-dir PATH                        jar or directory with classes
-  -l, --list-instrumenters                    print all instrumenters detected on the current classpath
-  -i, --instrumenter INSTRUMENTER             the instrumenter pipeline performing the scan
-  -X, --dump-system-model                     print all entities along with their properties and metadata
-  --profile                                   print execution times and input/output for the executed
-                                              pipeline
-  -t, --list-entity-types                     lists entity types defined by instrumenter
-  -a, --ansi [none|ansi16|ansi256|truecolor]  override automatically detected ANSI support
-  --version                                   print version and release date
-  --debug                                     prints log/logCount statements from the executed pipeline
+  -f, --class-dir PATH                  Jar or directory with classes.
+  -l, --list-instrumenters              Print all instrumenters detected on the current
+                                        classpath.
+  -i, --instrumenter INSTRUMENTER       The instrumenter pipeline performing the scan.
+  -X, --dump-system-model               Print all entities along with their properties and
+                                        metadata.
+  --profile                             Print execution times and input/output for the
+                                        executed pipeline.
+  -t, --list-entity-types               Lists entity types defined by instrumenter.
+  -a, --ansi [none|ansi16|ansi256|truecolor]
+                                        Override automatically detected ANSI support.
+  --version                             Print version and release date.
+  --debug                               Print log/logCount statements from the executed
+                                        pipeline.
   --generate-completion [bash|zsh|fish]
-  -h, --help                                  Show this message and exit
+  -h, --help                            Show this message and exit
 ```
 
 ## Entity and Entity Type
