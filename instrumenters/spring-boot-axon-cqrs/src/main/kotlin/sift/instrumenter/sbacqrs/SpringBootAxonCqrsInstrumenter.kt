@@ -274,6 +274,7 @@ class SpringBootAxonCqrsInstrumenter : InstrumenterService, InstrumenterServiceP
                 graphviz(E.query,
                     type= Dot.edge,
                     style = Style.dashed,
+                    removeSuffix = "Query",
                     arrowheadShape = "onormal",
                 )
             }

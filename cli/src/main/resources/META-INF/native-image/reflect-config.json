@@ -163,11 +163,11 @@
 {
   "name":"java.lang.Class",
   "methods":[
+    {"name":"getPermittedSubclasses","parameterTypes":[] }, 
     {"name":"getRecordComponents","parameterTypes":[] }, 
     {"name":"isRecord","parameterTypes":[] }, 
     {"name":"isSealed","parameterTypes":[] }
-  ],
-  "queriedMethods":[{"name":"getPermittedSubclasses","parameterTypes":[] }]
+  ]
 },
 {
   "name":"java.lang.ClassValue"
@@ -182,7 +182,14 @@
   "name":"java.lang.Enum",
   "allDeclaredFields":true,
   "allDeclaredClasses":true,
-  "queryAllDeclaredMethods":true
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"clone","parameterTypes":[] }, 
+    {"name":"compareTo","parameterTypes":["java.lang.Enum"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"java.lang.Enum$EnumDesc"
@@ -192,7 +199,7 @@
 },
 {
   "name":"java.lang.Object",
-  "queriedMethods":[
+  "methods":[
     {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"hashCode","parameterTypes":[] }, 
     {"name":"toString","parameterTypes":[] }
@@ -320,7 +327,11 @@
   "name":"sift.core.api.Action",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"andThen","parameterTypes":["sift.core.api.Action"] }, 
+    {"name":"invoke$core","parameterTypes":["sift.core.api.Context","java.lang.Object"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Chain",
@@ -358,14 +369,22 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Class$IntoMethods",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Class$IntoOuterClass",
@@ -399,12 +418,16 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","sift.core.api.Action$DebugLog$LogFormat"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["java.lang.String","sift.core.api.Action$DebugLog$LogFormat"] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","sift.core.api.Action$DebugLog$LogFormat","int","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$DebugLog$LogFormat",
   "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"sift.core.api.Action$Elements"
@@ -421,7 +444,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Field"
@@ -451,7 +477,11 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Fork",
@@ -465,7 +495,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["sift.core.api.Action","java.lang.String","boolean","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$HasAnnotation",
@@ -482,14 +515,20 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Instrumenter$ElementsOf",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Instrumenter$InstrumentClasses",
@@ -510,7 +549,17 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"copy-GXXKanY","parameterTypes":["java.lang.String"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","kotlin.Unit"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Method"
@@ -551,7 +600,11 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Method$IntoReturnSignature"
@@ -561,7 +614,18 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","boolean","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"component2","parameterTypes":[] }, 
+    {"name":"copy-1cOvV9g","parameterTypes":["java.lang.String","boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Method$InvocationsOf$Invocation"
@@ -584,7 +648,12 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["boolean"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"<init>","parameterTypes":["boolean","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Parameter$Filter"
@@ -621,7 +690,17 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"component2","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$ReadName",
@@ -631,7 +710,9 @@
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"<init>","parameterTypes":["boolean"] }, 
-    {"name":"<init>","parameterTypes":["boolean","int","kotlin.jvm.internal.DefaultConstructorMarker"] }
+    {"name":"<init>","parameterTypes":["boolean","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
   ]
 },
 {
@@ -639,28 +720,49 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"component2","parameterTypes":[] }, 
+    {"name":"component3-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"copy-LWmz1K8","parameterTypes":["java.lang.String","java.lang.String","java.lang.String"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$RegisterChildrenFromResolver",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","sift.core.api.EntityAssignmentResolver","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$RegisterEntity",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","boolean","sift.core.entity.LabelFormatter","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$RegisterSynthesizedEntity",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","org.objectweb.asm.Type","sift.core.entity.LabelFormatter","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Signature"
@@ -670,13 +772,35 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["boolean"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Signature$Filter"
 },
 {
-  "name":"sift.core.api.Action$Signature$FilterNth"
+  "name":"sift.core.api.Action$Signature$FilterNth",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["int"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["int"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Signature$InnerTypeArguments",
@@ -705,7 +829,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$WithValue"
@@ -715,7 +842,9 @@
 },
 {
   "name":"sift.core.api.EntityAssignmentResolver",
-  "queryAllDeclaredMethods":true
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
 },
 {
   "name":"sift.core.api.EntityAssignmentResolver$FromInstantiationsBy"
@@ -725,7 +854,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.api.EntityAssignmentResolver$FromInvocationsBy"
@@ -735,7 +867,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.element.ClassNode"
@@ -767,8 +902,10 @@
 },
 {
   "name":"sift.core.entity.Entity$Type",
-  "methods":[{"name":"unbox-impl","parameterTypes":[] }],
-  "queriedMethods":[{"name":"box-impl","parameterTypes":["java.lang.String"] }]
+  "methods":[
+    {"name":"box-impl","parameterTypes":["java.lang.String"] }, 
+    {"name":"unbox-impl","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.entity.EntityService"
@@ -830,7 +967,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","sift.core.terminal.Style"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["java.lang.String","sift.core.terminal.Style"] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","sift.core.terminal.Style","int","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
 },
 {
   "name":"sift.core.terminal.Style$FromProperty",
