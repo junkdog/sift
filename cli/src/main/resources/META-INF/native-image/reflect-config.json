@@ -586,7 +586,18 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"copy-GXXKanY","parameterTypes":["java.lang.String"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"instantiations","parameterTypes":["sift.core.element.MethodNode","java.lang.Iterable"] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Method$IntoOuterScope",
