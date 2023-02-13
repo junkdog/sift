@@ -17,8 +17,7 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.*
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyle
-import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.inverse
+import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
 import sift.core.asm.classNodes
@@ -66,8 +65,7 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.ExperimentalTime
 
-
-class GraphvizOptions : OptionGroup(name = "Graphviz options") {
+class VisualizationOptions : OptionGroup(name = "Visualization options") {
     val render: Boolean by option("-R", "--render",
         help = "Render entities with graphviz's DOT language.")
     .flag()
@@ -149,7 +147,7 @@ object SiftCli : CliktCommand(
     }
 
     val tree by EntityTreeOptions()
-    val graphviz by GraphvizOptions()
+    val graphviz by VisualizationOptions()
     val serialization by SerializationOptions()
 
     val path: Path? by option("-f", "--class-dir",
