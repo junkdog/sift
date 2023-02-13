@@ -19,11 +19,11 @@ import sift.core.jackson.NoArgConstructor
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = Action.Instrumenter.InstrumenterScope::class, name = "instrumenter-scope"),
-    JsonSubTypes.Type(value = Action.Instrumenter.InstrumentClasses::class, name = "classes"),
-    JsonSubTypes.Type(value = Action.Instrumenter.ClassesOf::class, name = "classes-of"),
-    JsonSubTypes.Type(value = Action.Instrumenter.MethodsOf::class, name = "methods-of"),
-    JsonSubTypes.Type(value = Action.Instrumenter.ElementsOf::class, name = "elements-of"),
+    JsonSubTypes.Type(value = Action.Template.TemplateScope::class, name = "template-scope"),
+    JsonSubTypes.Type(value = Action.Template.InstrumentClasses::class, name = "classes"),
+    JsonSubTypes.Type(value = Action.Template.ClassesOf::class, name = "classes-of"),
+    JsonSubTypes.Type(value = Action.Template.MethodsOf::class, name = "methods-of"),
+    JsonSubTypes.Type(value = Action.Template.ElementsOf::class, name = "elements-of"),
 
     JsonSubTypes.Type(value = Action.Signature.ExplodeType::class, name = "signature-explode-type"),
     JsonSubTypes.Type(value = Action.Signature.Filter::class, name = "filter-signature"),
@@ -36,7 +36,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
     JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
-    JsonSubTypes.Type(value = Action.Class.ToInstrumenterScope::class, name = "to-instrumenter-scope"),
+    JsonSubTypes.Type(value = Action.Class.ToTemplateScope::class, name = "to-template-scope"),
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
@@ -98,9 +98,9 @@ sealed class Action<IN, OUT> {
         return ctx.measure(ctx, input, this)
     }
 
-    object Instrumenter {
-        object InstrumenterScope : Action<Unit, Unit>() {
-            override fun id() = "instrumenter-scope"
+    object Template {
+        object TemplateScope : Action<Unit, Unit>() {
+            override fun id() = "template-scope"
             override fun execute(ctx: Context, input: Unit): Unit = input
         }
 
@@ -266,10 +266,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        object ToInstrumenterScope : Action<IterClasses, Unit>() {
-            override fun id() = "instrumenter-scope"
+        object ToTemplateScope : Action<IterClasses, Unit>() {
+            override fun id() = "template-scope"
             override fun execute(ctx: Context, input: IterClasses) {
-                return Instrumenter.InstrumenterScope.invoke(ctx, Unit)
+                return Template.TemplateScope.invoke(ctx, Unit)
             }
         }
 

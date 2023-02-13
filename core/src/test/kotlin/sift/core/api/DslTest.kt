@@ -12,7 +12,7 @@ import sift.core.*
 import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.api.Dsl.classes
-import sift.core.api.Dsl.instrumenter
+import sift.core.api.Dsl.template
 import sift.core.api.ScopeEntityPredicate.ifExists
 import sift.core.api.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
@@ -23,7 +23,6 @@ import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.tree.debugTree
-import sift.core.tree.toTree
 import java.io.InputStream
 import kotlin.test.assertTrue
 
@@ -460,7 +459,7 @@ class DslTest {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
 
-        instrumenter {
+        template {
             classes {
                 methods {
                     annotatedBy<Endpoint>()
@@ -766,7 +765,7 @@ class DslTest {
     fun `read endpoint and construct label`() {
         val endpoint = Entity.Type("endpoint")
 
-        instrumenter {
+        template {
             classes {
                 filter(Regex("^sift\\.core\\.api\\.testdata"))
 
@@ -823,7 +822,7 @@ class DslTest {
         }
 
         // synthesize scope
-        instrumenter {
+        template {
 
             synthesize {
                 entity(data, type<Payload>())
@@ -847,7 +846,7 @@ class DslTest {
         }.execute(cns, ::validate)
 
         // inline synthesize
-        instrumenter {
+        template {
             classes {
                 methods {
                     annotatedBy<HandlerFn>()
@@ -925,7 +924,7 @@ class DslTest {
         val repo = Entity.Type("repo")
         val fn = Entity.Type("repo-method")
 
-        instrumenter {
+        template {
             classes {
                 implements(type<Repo>())
                 log("repository")
@@ -1082,7 +1081,7 @@ class DslTest {
         val field = Entity.Type("field")
         val param = Entity.Type("param")
 
-        instrumenter {
+        template {
             classes {
                 entity(cls, label("\${v}"))
 
@@ -1169,7 +1168,7 @@ class DslTest {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
 
-        instrumenter {
+        template {
             classes {
                 filter(Regex("^sift\\.core\\.api\\.testdata"))
                 annotatedBy<RestController>()
@@ -1290,7 +1289,7 @@ class DslTest {
             entity(controller)
         }
 
-        val pipelineB = instrumenter {
+        val pipelineB = template {
             methodsOf(controller) {
                 annotatedBy<Endpoint>()
                 entity(endpoint, label("\${http-method} \${path}"),
@@ -1302,7 +1301,7 @@ class DslTest {
             }
         }
 
-        instrumenter {
+        template {
             include(pipelineA)
             include(pipelineB)
         }.execute { entityService ->
@@ -1412,7 +1411,7 @@ class DslTest {
         val foo = Entity.Type("foo")
         val bar = Entity.Type("bar")
 
-        instrumenter {
+        template {
             synthesize {
                 entity(bar, type<Payload>())
             }

@@ -7,7 +7,7 @@ import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Type
 import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
-import sift.core.api.MeasurementScope.Instrumenter
+import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
 import sift.core.element.*
 import sift.core.entity.Entity
@@ -69,7 +69,7 @@ internal data class Context(
         .toMutableMap()
 
 
-    val measurements: Tree<Measurement> = Tree(Measurement(".", Instrumenter, Instrumenter, 0, 0, 0.milliseconds))
+    val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0.milliseconds))
     private var measurementStack: MutableList<Tree<Measurement>> = mutableListOf(measurements)
     private var pushScopes: Int = 0
 
@@ -246,7 +246,7 @@ data class Measurement(
 )
 
 enum class MeasurementScope(val id: String) {
-    Instrumenter("instrumenter-scope"),
+    Template("template-scope"),
     Signature("signature-scope"),
     Class("class-scope"),
     Field("field-scope"),

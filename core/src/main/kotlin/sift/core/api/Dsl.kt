@@ -47,20 +47,20 @@ object Dsl {
         fun property(tag: String, extract: Action<Iter<T>, IterValues>): Core.Property<T>
     }
 
-    /** Define a new Instrumenter Pipeline */
-    fun instrumenter(f: Instrumenter.() -> Unit): Action<Unit, Unit> {
-        return Instrumenter()
+    /** Define a new template */
+    fun template(f: Template.() -> Unit): Action<Unit, Unit> {
+        return Template()
             .also(f)
             .action
     }
 
-    /** Define a new Instrumenter Pipeline */
+    /** Define a new template */
     fun classes(f: Classes.() -> Unit): Action<Unit, Unit> {
         return Classes()
             .also(f)
             .action
-            .let(Action.Instrumenter.InstrumentClasses::andThen)
-            .let { it andThen Action.Class.ToInstrumenterScope }
+            .let(Action.Template.InstrumentClasses::andThen)
+            .let { it andThen Action.Class.ToTemplateScope }
     }
 
     @SiftTemplateDsl
@@ -256,7 +256,7 @@ object Dsl {
 
     @SiftTemplateDsl
     class Synthesize(
-        var action: Action.Chain<Unit> = chainFrom(Action.Instrumenter.InstrumenterScope)
+        var action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
     ) {
         /** Stub missing class node for [type] and register it to an entity */
         fun entity(
@@ -291,8 +291,8 @@ object Dsl {
     }
 
     @SiftTemplateDsl
-    class Instrumenter(
-        var action: Action.Chain<Unit> = chainFrom(Action.Instrumenter.InstrumenterScope)
+    class Template(
+        var action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
     ) {
 
         /**
@@ -303,23 +303,23 @@ object Dsl {
         }
 
         /**
-         * Includes another instrumenter's pipeline by copying it into this pipeline.
+         * Includes another template by copying it into this pipeline.
          */
         fun include(pipeline: Action<Unit, Unit>) {
             action += pipeline
         }
 
-        fun scope(label: String, f: Instrumenter.() -> Unit) {
-            action += Instrumenter().also(f).action
+        fun scope(label: String, f: Template.() -> Unit) {
+            action += Template().also(f).action
         }
 
         fun scope(
             label: String,
             op: ScopeEntityPredicate,
             entity: Entity.Type,
-            f: Instrumenter.() -> Unit
+            f: Template.() -> Unit
         ) {
-            val forkTo = Instrumenter().also(f).action
+            val forkTo = Template().also(f).action
             action += Action.ForkOnEntityExistence(forkTo, entity, op == ifExistsNot)
         }
 
@@ -327,13 +327,13 @@ object Dsl {
             action += Classes()
                 .also(f)
                 .action
-                .let(Action.Instrumenter.InstrumentClasses::andThen)
-                .let { it andThen Action.Class.ToInstrumenterScope }
+                .let(Action.Template.InstrumentClasses::andThen)
+                .let { it andThen Action.Class.ToTemplateScope }
         }
 
         /** iterates class elements of registered [entity] type */
         fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
-            val classes = Action.Instrumenter.ClassesOf(entity)
+            val classes = Action.Template.ClassesOf(entity)
             val forkTo = Classes().also(f).action
 
             action += Action.Fork(classes andThen forkTo)
@@ -341,7 +341,7 @@ object Dsl {
 
         /** iterates method elements of registered [entity] type */
         fun methodsOf(entity: Entity.Type, f: Methods.() -> Unit) {
-            val methods = Action.Instrumenter.MethodsOf(entity)
+            val methods = Action.Template.MethodsOf(entity)
             val forkTo = Methods().also(f).action
 
             action += Action.Fork(methods andThen forkTo)
@@ -349,7 +349,7 @@ object Dsl {
 
         /** iterates "scope-erased" elements, useful for property tagging entities. */
         fun elementsOf(entity: Entity.Type, f: Elements.() -> Unit) {
-            val elements = Action.Instrumenter.ElementsOf(entity)
+            val elements = Action.Template.ElementsOf(entity)
             val forkTo = Elements().also(f).action
 
             action += Action.Fork(elements andThen forkTo)

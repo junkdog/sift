@@ -6,6 +6,9 @@
 - `spring-axon`: member aggregate label changed to `$aggregate[$member]`.
 
 ### Breaking changes
+- Instrumenter Service renamed to System Model Template:
+  - pipeline() is now template()
+  - `instrumenter {}` is now `template {}`
 - `DSL.Instrumenter.graphviz()`: parameter `stripLabelSuffix` renamed to `removeSuffix`.
 - Entity Types can can only be associated with a single element type (class, method, etc). 
 - Internal visibility on many classes previously marked as public.

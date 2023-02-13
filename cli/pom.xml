@@ -37,32 +37,32 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>deprecated</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>spring-boot-axon-cqrs</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>spring-crud</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>jdbi</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.onedaybeard.sift.instrumenter</groupId>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>sift</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -199,10 +199,10 @@
                                 --no-fallback
                                 -H:GenerateDebugInfo=1
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/jpa/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/jdbi/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/instrumenter-core/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../instrumenters/spring-boot-axon-cqrs/src/main/kotlin
+                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/jpa/src/main/kotlin
+                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/jdbi/src/main/kotlin
+                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/instrumenter-core/src/main/kotlin
+                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/spring-boot-axon-cqrs/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../core/src/main/kotlin
                             </buildArgs>
                         </configuration>

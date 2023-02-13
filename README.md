@@ -8,18 +8,18 @@ files. With Sift, you can build, query, and diff system models using the command
 ## Features
 - CLI tool for building, querying, and [diff-ing][diff] system models from parsed .class files.
 - System Models consist of Entities and are produced by Instrumenter Pipelines.
-- Instrumenter Pipelines provide knowledge about technology stacks for static bytecode analysis.
-- Declarative DSL for user-defined pipelines.
-- JSON serialization of pipelines for easy reuse and sharing.
+- System Model Templates provide knowledge about technology stacks for static bytecode analysis.
+- Declarative DSL for user-defined templates.
+- JSON serialization of templates for easy reuse and sharing.
 - Inline rendering of system representations using Graphviz.
 
 ![sift spring-boot axon framework][sift-render]
 
-_Spring-Boot with Axon Framework [instrumenter][spring-axon] in action; filtering on shipped and confirmed orders
+_Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on shipped and confirmed orders
 in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
 straight into the terminal.)_
 
- [spring-axon]: instrumenters/spring-boot-axon-cqrs/src/main/kotlin/sift/instrumenter/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
@@ -38,9 +38,9 @@ Entity tree options:
                                   nodes. (repeatable)
   -e, --exclude REGEX             Excludes nodes when label matches REGEX. (repeatable)
   -E, --exclude-type ENTITY-TYPE  Excludes entity types from tree. (repeatable)
-  -T, --tree-root ENTITY-TYPE     Tree built around requested entity type.
+  -b, --tree-root ENTITY-TYPE     Tree built around requested entity type.
 
-Graphviz options:
+Visualization options:
   -R, --render                          Render entities with graphviz's DOT language.
   --edge-layout [spline|polyline|ortho]
                                         Sets the layout for the lines between nodes.
@@ -53,14 +53,14 @@ Serialization options:
 
 Options:
   -f, --class-dir PATH                  Jar or directory with classes.
-  -l, --list-instrumenters              Print all instrumenters detected on the current
+  -l, --list-templates                  Print all templates detected on the current
                                         classpath.
-  -i, --instrumenter INSTRUMENTER       The instrumenter pipeline performing the scan.
+  -t, --template TEMPLATE               The template producing the system model.
   -X, --dump-system-model               Print all entities along with their properties and
                                         metadata.
   --profile                             Print execution times and input/output for the
-                                        executed pipeline.
-  -t, --list-entity-types               Lists entity types defined by instrumenter.
+                                        executed template.
+  -T, --list-entity-types               Lists entity types defined by template.
   -a, --ansi [none|ansi16|ansi256|truecolor]
                                         Override automatically detected ANSI support.
   --version                             Print version and release date.
@@ -81,7 +81,7 @@ system. For example, types can include REST controllers, HTTP endpoints, inbound
 messages, RDS, and more.
 
 ```bash
-$ sift --instrumenter spring-axon --list-entity-types target/classes
+$ sift --template spring-axon --list-entity-types target/classes
 entity types of spring-axon
   1 aggregate
   2 aggregate-ctor
@@ -97,25 +97,25 @@ entity types of spring-axon
   3 query
   4 query-handler
 ```
-## Instrumenter pipelines
+## System Model Templates
 
 The system model describes the structure and relationships of entities within a system.
 An entity is a unique object within the system, identified by a class, method, field, or
 parameter.
 
-Instrumenter Pipelines provide knowledge about a technology stack and/or project-specific
-constructs. These pipelines are written in a declarative DSL and are used to produce the
+System Model Templates describe how entities are identified within a given technology stack and/or project-specific
+constructs. The templates are written in a declarative DSL and are used to produce the
 system model from input classes. The DSL provides high-level abstractions for identifying
 and interrelating entities from class structure or usage.
 
-The code below shows a simple Instrumenter Pipeline that identifies REST controllers and
+The code below shows a simple System Model Template that identifies REST controllers and
 HTTP endpoints within a system and associates the two entities.
 
 ```kotlin
 val controller = Entity.Type("controller")
 val endpoint = Entity.Type("endpoint")
 
-instrumenter {
+template {
     // iterate over all input classes
     classes {                                                      
         annotatedBy<RestController>() // filter classes 
@@ -131,15 +131,15 @@ instrumenter {
 }
 ```
 Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
-The execution of an Instrumenter Pipeline can be visualized with the `--profile` option.
+The execution of a System Model Template can be introspected with the `--profile` option.
 
-A typical Instrumenter Pipeline can be expressed in about 100 lines of code. Some pipelines,
-such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined pipelines
-can include multiple existing pipelines to better describe the underlying system while also
-keeping the resulting pipeline DSL concise.
+A typical template can be expressed in about 100 lines of code. Some templates,
+such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined templates
+can include multiple existing templates to better describe the underlying system while also
+keeping the resulting DSL concise.
 
- [jpa]: instrumenters/jpa/src/main/kotlin/sift/instrumenter/jpa/JpaInstrumenter.kt#L48:L73
- [jdbi]: instrumenters/jdbi/src/main/kotlin/sift/instrumenter/jdbi/Jdbi3Instrumenter.kt#L54:L67
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaInstrumenter.kt#L48:L73
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Instrumenter.kt#L54:L67
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 
@@ -152,7 +152,7 @@ maven profile: `mvn clean install -P native-image`. The resulting binary will be
 is available, otherwise it tries to run the jar.
 
 The native binary is considerably faster than the jar, but it can cause issues if it needs
-to deserialize a system model (via `--load` or `--diff`) or instrumenter pipeline containing
+to deserialize a system model (via `--load` or `--diff`) or system model template containing
 unknown types (e.g. from `withValue()`).
 
 

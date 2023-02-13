@@ -24,15 +24,15 @@ import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.graphviz.EdgeLayout
-import sift.core.instrumenter.InstrumenterService
-import sift.core.instrumenter.deserialize
+import sift.core.template.SystemModelTemplate
+import sift.core.template.deserialize
 import sift.core.jackson.*
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
-import sift.instrumenter.*
+import sift.template.*
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -52,7 +52,7 @@ import sift.core.terminal.Gruvbox.yellow1
 import sift.core.terminal.Gruvbox.yellow2
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
-import sift.instrumenter.spi.InstrumenterServiceProvider
+import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
 import java.nio.file.Path
 import java.util.Properties
@@ -127,7 +127,7 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
         .convert { Entity.Type(it) }
         .multiple()
 
-    val treeRoot: Entity.Type? by option("-T", "--tree-root",
+    val treeRoot: Entity.Type? by option("-b", "--tree-root",
             metavar = "ENTITY-TYPE",
             help = "Tree built around requested entity type.")
         .convert { Entity.Type(it) }
@@ -159,26 +159,26 @@ object SiftCli : CliktCommand(
         .help("Jar or directory with classes.")
         .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
 
-    val listInstrumenters: Boolean by option("-l", "--list-instrumenters",
-            help = "Print all instrumenters detected on the current classpath.")
+    val listTemplates: Boolean by option("-l", "--list-templates",
+            help = "Print all templates detected on the current classpath.")
         .flag()
 
-    val instrumenter by option("-i", "--instrumenter",
-            metavar = "INSTRUMENTER",
-            help = "The instrumenter pipeline performing the scan.",
-            completionCandidates = CompletionCandidates.Fixed(instrumenterNames().toSet()))
-        .convert { instrumenters()[it]?.invoke() ?: fail("'$it' is not a valid instrumenter") }
+    val template by option("-t", "--template",
+            metavar = "TEMPLATE",
+            help = "The template producing the system model.",
+            completionCandidates = CompletionCandidates.Fixed(templateNames().toSet()))
+        .convert { templates()[it]?.invoke() ?: fail("'$it' is not a valid template") }
 
     val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
         help = "Print all entities along with their properties and metadata.")
     .flag()
 
     val profile: Boolean by option("--profile",
-        help = "Print execution times and input/output for the executed pipeline.")
+        help = "Print execution times and input/output for the executed template.")
     .flag()
 
-    val listEntityTypes: Boolean by option("-t", "--list-entity-types",
-            help = "Lists entity types defined by instrumenter.")
+    val listEntityTypes: Boolean by option("-T", "--list-entity-types",
+            help = "Lists entity types defined by template.")
         .flag()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
@@ -215,17 +215,17 @@ object SiftCli : CliktCommand(
                 val timestamp = props.getProperty("timestamp")
                 terminal.println("${light0("sift-$version")} (${fg(timestamp)})")
             }
-            listInstrumenters -> {
-                instrumenters()
+            listTemplates -> {
+                templates()
                     .map { (_, v) -> fg(v().name) }
                     .joinToString(separator = "\n")
                     .let(terminal::println)
             }
-            listEntityTypes && instrumenter != null -> {
-                buildTree().let { (pr, _) -> terminal.println(toString(instrumenter!!, pr)) }
+            listEntityTypes && template != null -> {
+                buildTree().let { (pr, _) -> terminal.println(toString(template!!, pr)) }
             }
-            instrumenter == null -> {
-                terminal.println("${orange1("Error: ")} ${fg("Must specify an instrumenter")}")
+            template == null -> {
+                terminal.println("${orange1("Error: ")} ${fg("Must specify a template")}")
                 exitProcess(1)
             }
             path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
@@ -241,7 +241,7 @@ object SiftCli : CliktCommand(
                     }
                 }
 
-                val theme = instrumenter!!.theme()
+                val theme = template!!.theme()
                 val lookup = theme
                     .map { (type, style) -> type to color(style) }
                     .toMap()
@@ -261,12 +261,12 @@ object SiftCli : CliktCommand(
             dumpSystemModel -> dumpEntities(terminal)
             profile -> profile(terminal)
             serialization.diff != null -> {
-                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, instrumenter!!)
+                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, template!!)
                 terminal.printTree(tree)
             }
             serialization.load != null -> {
                 val sm = loadSystemModel(serialization.load!!)
-                val tree = instrumenter!!.toTree(sm, this.tree.treeRoot)
+                val tree = template!!.toTree(sm, this.tree.treeRoot)
 
                 terminal.printTree(tree)
             }
@@ -285,17 +285,17 @@ object SiftCli : CliktCommand(
             loadSystemModel(serialization.load!!)
         } else {
             PipelineProcessor(classNodes(path!!))
-                .execute(instrumenter!!.pipeline(), profile)
+                .execute(template!!.template(), profile)
         }
     }
 
     fun diffHead(
         deserializedResult: SystemModel,
         root: Entity.Type?,
-        instrumenterService: InstrumenterService
+        template: SystemModelTemplate
     ): Tree<DiffNode> {
         val (_, new) = buildTree(root)
-        val old = instrumenterService.toTree(deserializedResult, root)
+        val old = template.toTree(deserializedResult, root)
 
         require(old.label == new.label)
         return Tree(DiffNode(Unchanged, new.value)).apply {
@@ -306,7 +306,7 @@ object SiftCli : CliktCommand(
     private fun Terminal.printTree(
         tree: Tree<EntityNode>,
     ) {
-        val theme = instrumenter!!.theme()
+        val theme = template!!.theme()
         stylize(tree, theme)
         filterTree(tree)
         backtrackStyling(tree, theme)
@@ -328,7 +328,7 @@ object SiftCli : CliktCommand(
             }
         }
 
-        val theme = instrumenter!!.theme()
+        val theme = template!!.theme()
             .map { (type, style) -> type to diff(style) }
             .toMap()
 
@@ -464,40 +464,40 @@ object SiftCli : CliktCommand(
     }
 
     private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
-        val instrumenter = this.instrumenter!!
+        val template = this.template!!
 
         val sm: SystemModel = PipelineProcessor(classNodes(path!!))
-            .execute(instrumenter.pipeline(), profile)
+            .execute(template.template(), profile)
 
-        return sm to instrumenter.toTree(sm, forType)
+        return sm to template.toTree(sm, forType)
     }
 
     private fun buildTree(sm: SystemModel, forType: Entity.Type? = null): Tree<EntityNode> {
-        return instrumenter!!.toTree(sm, forType)
+        return template!!.toTree(sm, forType)
     }
 
-    fun toString(instrumenter: InstrumenterService): String {
-        val types = stylizedEntityTypes(instrumenter)
-        return "${fg("entity types of ")}${(fg + bold)(instrumenter.name)}\n" + types.values
+    fun toString(template: SystemModelTemplate): String {
+        val types = stylizedEntityTypes(template)
+        return "${fg("entity types of ")}${(fg + bold)(template.name)}\n" + types.values
             .joinToString(separator = "\n") { label -> "${fg("-")} $label" }
     }
 
-    fun toString(instrumenter: InstrumenterService, pr: SystemModel): String {
-        val types = stylizedEntityTypes(instrumenter)
-        return "${fg("entity types of ")}${(fg + bold)(instrumenter.name)}\n" + types
+    fun toString(template: SystemModelTemplate, pr: SystemModel): String {
+        val types = stylizedEntityTypes(template)
+        return "${fg("entity types of ")}${(fg + bold)(template.name)}\n" + types
             .map { (type, label) -> pr[type].size.toString().padStart(3) to label }
             .joinToString(separator = "\n") { (count, id) -> "${(fg + bold)(count)} $id" }
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun stylizedEntityTypes(instrumenter: InstrumenterService): Map<Entity.Type, String> {
+    private fun stylizedEntityTypes(template: SystemModelTemplate): Map<Entity.Type, String> {
         return tree("") {
-            instrumenter
+            template
                 .entityTypes
                 .sortedBy(Entity.Type::id)
                 .map { Entity(it, it.id) }
                 .forEach(::add)
-        }.also { stylize(it, instrumenter.theme()) }
+        }.also { stylize(it, template.theme()) }
             .children()
             .map { it as Tree<EntityNode.Entity> }
             .map { it.value.entity.type to it.value.label }
@@ -566,14 +566,14 @@ object SiftCli : CliktCommand(
     private fun profile(terminal: Terminal) {
         val (sm, _) = buildTree(tree.treeRoot)
         fun MeasurementScope.style(): TextStyle = when (this) {
-            MeasurementScope.Instrumenter -> fg
-            MeasurementScope.Class        -> aqua2
-            MeasurementScope.Field        -> blue2
-            MeasurementScope.Method       -> green2
-            MeasurementScope.Parameter    -> purple2
-            MeasurementScope.FromContext  -> red2 // shouldn't happen often
-            MeasurementScope.Signature    -> orange2
-            MeasurementScope.TypeErased   -> blue1 + bold
+            MeasurementScope.Template    -> fg
+            MeasurementScope.Class       -> aqua2
+            MeasurementScope.Field       -> blue2
+            MeasurementScope.Method      -> green2
+            MeasurementScope.Parameter   -> purple2
+            MeasurementScope.FromContext -> red2 // shouldn't happen often
+            MeasurementScope.Signature   -> orange2
+            MeasurementScope.TypeErased  -> blue1 + bold
         }
 
         val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)
@@ -617,21 +617,21 @@ fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
         .toList()
 }
 
-fun instrumenterNames() = instrumenters().map { (name, _)  -> name }
+fun templateNames() = templates().map { (name, _)  -> name }
 
-fun instrumenters(): Map<String, () -> InstrumenterService> {
+fun templates(): Map<String, () -> SystemModelTemplate> {
     val fromSpi = ServiceLoader
-        .load(InstrumenterServiceProvider::class.java)
-        .map(InstrumenterServiceProvider::create)
+        .load(SystemModelTemplateServiceProvider::class.java)
+        .map(SystemModelTemplateServiceProvider::create)
         .map { it.name to { it } }
         .toMap()
 
     // FIXME: windows paths
-    val fromUserLocal = File("${System.getProperty("user.home")}/.local/share/sift/instrumenters")
+    val fromUserLocal = File("${System.getProperty("user.home")}/.local/share/sift/templates")
         .also(File::mkdirs)
         .listFiles()!!
         .filter { it.extension == "json" }
-        .map { file -> file.nameWithoutExtension to { InstrumenterService.deserialize(file.readText()) } }
+        .map { file -> file.nameWithoutExtension to { SystemModelTemplate.deserialize(file.readText()) } }
 
     return (fromSpi + fromUserLocal).toSortedMap()
 }

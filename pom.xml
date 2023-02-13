@@ -33,7 +33,7 @@
 
     <modules>
         <module>core</module>
-        <module>instrumenters</module>
+        <module>templates</module>
         <module>cli</module>
     </modules>
 
