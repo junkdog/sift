@@ -4,7 +4,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
 
-class FormalTypeParameterVisitor(
+internal class FormalTypeParameterVisitor(
     val parameter: FormalTypeParameter,
     val lookup: (String) -> FormalTypeParameter,
     api: Int = Opcodes.ASM9,

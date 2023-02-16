@@ -7,7 +7,7 @@ import java.lang.RuntimeException
 import kotlin.reflect.KClass
 
 
-object Throw {
+internal object Throw {
     fun entityAlreadyExists(new: Entity, old: Entity, element: Element): Nothing {
         throw "unable to associate '${new.type}' type to ${element.simpleName} as it is already registered to '${old.type}'"
             .let(::UniqueElementPerEntityViolation)

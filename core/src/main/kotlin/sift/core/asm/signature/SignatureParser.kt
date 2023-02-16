@@ -6,7 +6,7 @@ import org.objectweb.asm.signature.SignatureVisitor
 /**
  * Parses a generic signature string into a [TypeSignature] object.
  */
-class SignatureParser(
+internal class SignatureParser(
     typeParams: List<FormalTypeParameter>,
     api: Int,
     sv: SignatureVisitor? = null
@@ -102,4 +102,4 @@ internal fun MutableList<FormalTypeParameter>.firstByName(
         ?: FormalTypeParameter(name) // can be null; see GenerticsTest#problematic signature of reified function
 }
 
-class SignatureParsingException(message: String) : IllegalStateException(message)
+internal class SignatureParsingException(message: String) : IllegalStateException(message)

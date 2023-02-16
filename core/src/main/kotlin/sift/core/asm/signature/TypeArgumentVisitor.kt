@@ -4,7 +4,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
 
-class TypeArgumentVisitor(
+internal class TypeArgumentVisitor(
     val onTypeArgument: (TypeSignature) -> Unit,
     val formalTypeParameters: (String) -> FormalTypeParameter?,
     val arrayDepth: Int = 0,
