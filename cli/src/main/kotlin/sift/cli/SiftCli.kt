@@ -70,7 +70,7 @@ object SiftCli : CliktCommand(
     """.trimIndent(),
     epilog = """
         ```
-        Examples:
+        ${(fg + bold)("Examples:")}
           ${fg("sift --template spring-axon -f my-spring-project")}
           Model the system using the "spring-axon" template on the classes in the  
           "my-spring-project" directory.
@@ -93,9 +93,13 @@ object SiftCli : CliktCommand(
     """.trimIndent()
 ) {
     init {
-        context { helpFormatter = CliktHelpFormatter(
-            showDefaultValues = true,
-            maxWidth = 90)
+        context {
+            helpFormatter = object : CliktHelpFormatter(
+                showDefaultValues = true,
+                maxWidth = 90
+            ) {
+                override fun renderSectionTitle(title: String): String = (fg + bold)(title)
+            }
         }
     }
 
