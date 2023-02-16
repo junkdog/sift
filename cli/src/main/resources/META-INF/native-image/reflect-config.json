@@ -128,6 +128,10 @@
   "name":"com.github.ajalt.colormath.model.XYZ"
 },
 {
+  "name":"com.github.ajalt.mordant.internal.PosixLibC$winsize",
+  "allDeclaredFields":true
+},
+{
   "name":"com.github.ajalt.mordant.rendering.TextStyle",
   "queryAllDeclaredMethods":true
 },
@@ -140,6 +144,10 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.colormath.Color","com.github.ajalt.colormath.Color","boolean","boolean","boolean","boolean","boolean","boolean","java.lang.String","java.lang.String"] }]
+},
+{
+  "name":"com.sun.jna.CallbackProxy",
+  "methods":[{"name":"callback","parameterTypes":["java.lang.Object[]"] }]
 },
 {
   "name":"float",
@@ -209,6 +217,10 @@
   "name":"java.lang.String"
 },
 {
+  "name":"java.lang.Throwable",
+  "methods":[{"name":"addSuppressed","parameterTypes":["java.lang.Throwable"] }]
+},
+{
   "name":"java.lang.annotation.Retention",
   "queryAllDeclaredMethods":true,
   "methods":[{"name":"value","parameterTypes":[] }]
@@ -231,15 +243,48 @@
   "name":"java.lang.constant.DynamicConstantDesc"
 },
 {
+  "name":"java.lang.invoke.MethodHandle",
+  "methods":[
+    {"name":"bindTo","parameterTypes":["java.lang.Object"] }, 
+    {"name":"invokeWithArguments","parameterTypes":["java.lang.Object[]"] }
+  ]
+},
+{
+  "name":"java.lang.invoke.MethodHandles",
+  "methods":[
+    {"name":"lookup","parameterTypes":[] }, 
+    {"name":"privateLookupIn","parameterTypes":["java.lang.Class","java.lang.invoke.MethodHandles$Lookup"] }
+  ]
+},
+{
+  "name":"java.lang.invoke.MethodHandles$Lookup",
+  "methods":[
+    {"name":"findSpecial","parameterTypes":["java.lang.Class","java.lang.String","java.lang.invoke.MethodType","java.lang.Class"] }, 
+    {"name":"in","parameterTypes":["java.lang.Class"] }, 
+    {"name":"unreflectSpecial","parameterTypes":["java.lang.reflect.Method","java.lang.Class"] }
+  ]
+},
+{
+  "name":"java.lang.invoke.MethodType",
+  "methods":[{"name":"methodType","parameterTypes":["java.lang.Class","java.lang.Class[]"] }]
+},
+{
   "name":"java.lang.reflect.Executable",
   "methods":[{"name":"getParameters","parameterTypes":[] }]
 },
 {
-  "name":"java.lang.reflect.Method"
+  "name":"java.lang.reflect.Method",
+  "methods":[
+    {"name":"isDefault","parameterTypes":[] }, 
+    {"name":"isVarArgs","parameterTypes":[] }
+  ]
 },
 {
   "name":"java.lang.reflect.Parameter",
   "methods":[{"name":"getName","parameterTypes":[] }]
+},
+{
+  "name":"java.nio.Buffer"
 },
 {
   "name":"java.security.SecureRandomParameters"
@@ -400,7 +445,7 @@
   "name":"sift.core.api.Action$Class$ReadType"
 },
 {
-  "name":"sift.core.api.Action$Class$ToInstrumenterScope",
+  "name":"sift.core.api.Action$Class$ToTemplateScope",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -506,60 +551,6 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }]
-},
-{
-  "name":"sift.core.api.Action$Instrumenter"
-},
-{
-  "name":"sift.core.api.Action$Instrumenter$ClassesOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[
-    {"name":"<init>","parameterTypes":[] }, 
-    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
-  ]
-},
-{
-  "name":"sift.core.api.Action$Instrumenter$ElementsOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[
-    {"name":"<init>","parameterTypes":[] }, 
-    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
-  ]
-},
-{
-  "name":"sift.core.api.Action$Instrumenter$InstrumentClasses",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sift.core.api.Action$Instrumenter$InstrumenterScope",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sift.core.api.Action$Instrumenter$MethodsOf",
-  "allDeclaredFields":true,
-  "queryAllDeclaredMethods":true,
-  "queryAllDeclaredConstructors":true,
-  "methods":[
-    {"name":"<init>","parameterTypes":[] }, 
-    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
-    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
-    {"name":"copy-GXXKanY","parameterTypes":["java.lang.String"] }, 
-    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
-    {"name":"execute$core","parameterTypes":["sift.core.api.Context","kotlin.Unit"] }, 
-    {"name":"hashCode","parameterTypes":[] }, 
-    {"name":"id","parameterTypes":[] }, 
-    {"name":"toString","parameterTypes":[] }
-  ]
 },
 {
   "name":"sift.core.api.Action$Method"
@@ -836,6 +827,60 @@
   "queryAllDeclaredMethods":true
 },
 {
+  "name":"sift.core.api.Action$Template"
+},
+{
+  "name":"sift.core.api.Action$Template$ClassesOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
+},
+{
+  "name":"sift.core.api.Action$Template$ElementsOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
+  ]
+},
+{
+  "name":"sift.core.api.Action$Template$InstrumentClasses",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.api.Action$Template$MethodsOf",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"component1-f7BBXPQ","parameterTypes":[] }, 
+    {"name":"copy-GXXKanY","parameterTypes":["java.lang.String"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","kotlin.Unit"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
+},
+{
+  "name":"sift.core.api.Action$Template$TemplateScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sift.core.api.Action$UpdateEntityProperty",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -937,10 +982,7 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[
-    {"name":"<init>","parameterTypes":["java.lang.String"] }, 
-    {"name":"<init>","parameterTypes":["java.lang.String","java.util.List"] }
-  ]
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.util.List"] }]
 },
 {
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
@@ -995,10 +1037,7 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[
-    {"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle"] }, 
-    {"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle","java.lang.Character"] }
-  ]
+  "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle"] }]
 },
 {
   "name":"sift.core.terminal.TextTransformer",
@@ -1011,7 +1050,7 @@
   "name":"sift.core.tree.Tree"
 },
 {
-  "name":"sift.instrumenter.jdbi.SqlStyle",
+  "name":"sift.template.jdbi.SqlStyle",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,

@@ -11,6 +11,12 @@
       "pattern":"\\QMETA-INF/services/sift.instrumenter.spi.InstrumenterServiceProvider\\E"
     }, 
     {
+      "pattern":"\\QMETA-INF/services/sift.template.spi.SystemModelTemplateServiceProvider\\E"
+    }, 
+    {
+      "pattern":"\\Qcom/sun/jna/linux-x86-64/libjnidispatch.so\\E"
+    }, 
+    {
       "pattern":"\\Qkotlin/annotation/annotation.kotlin_builtins\\E"
     }, 
     {
