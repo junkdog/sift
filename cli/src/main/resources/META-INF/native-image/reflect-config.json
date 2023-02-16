@@ -786,7 +786,21 @@
   ]
 },
 {
-  "name":"sift.core.api.Action$Signature$Filter"
+  "name":"sift.core.api.Action$Signature$Filter",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["kotlin.text.Regex","boolean"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"component2","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["kotlin.text.Regex","boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Signature$FilterNth",
@@ -1009,7 +1023,11 @@
   "name":"sift.core.terminal.IdSequencer"
 },
 {
-  "name":"sift.core.terminal.Replace"
+  "name":"sift.core.terminal.Replace",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["kotlin.text.Regex","java.lang.String"] }]
 },
 {
   "name":"sift.core.terminal.Style",
