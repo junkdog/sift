@@ -31,6 +31,15 @@ Usage: sift [OPTIONS]
 
   A tool to model and analyze the design of systems from bytecode.
 
+Template options:
+  -t, --template TEMPLATE  The template producing the system model.
+  -l, --list-templates     Print all templates detected on the current classpath.
+  -T, --list-entity-types  Lists entity types defined by template.
+  -f, --class-dir PATH     Jar or root directory with classes to analyze.
+  --profile                Print execution times and input/output for the executed
+                           template.
+  -X, --dump-system-model  Print all entities along with their properties and metadata.
+
 Entity tree options:
   -L, --max-depth INT             Max display depth of the tree.
   -F, --filter REGEX              Filters nodes by label. (repeatable)
@@ -51,16 +60,7 @@ Serialization options:
   --load FILE_JSON      Load a previously saved system model.
   -d, --diff FILE_JSON  Diff view against a previously saved system model.
 
-Options:
-  -f, --class-dir PATH                  Jar or directory with classes.
-  -l, --list-templates                  Print all templates detected on the current
-                                        classpath.
-  -t, --template TEMPLATE               The template producing the system model.
-  -X, --dump-system-model               Print all entities along with their properties and
-                                        metadata.
-  --profile                             Print execution times and input/output for the
-                                        executed template.
-  -T, --list-entity-types               Lists entity types defined by template.
+Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
                                         Override automatically detected ANSI support.
   --version                             Print version and release date.
@@ -76,7 +76,7 @@ Examples:
 
   sift -t spring-axon -f . -F "Order(Created|Shipped)" --save feature-01.json
   Model the system using the "spring-axon" template on the current directory's
-  classes, filter nodes matching the regular expression "Order(Created|Shipped)",
+  classes, filter nodes containing the regular expression "Order(Created|Shipped)",
   and save the system model to "feature-01.json".
 
   sift -t spring-axon -f . --diff feature-01.json
@@ -86,7 +86,7 @@ Examples:
 
   sift -t spring-axon -f . -F "Product" --render
   Model the system using the "spring-axon" template on the current directory's
-  classes, filter the graph to show only nodes matching "Product", and render
+  classes, filter the graph to show only nodes containing "Product", and render
   the result using graphviz's DOT language.
 ```
 

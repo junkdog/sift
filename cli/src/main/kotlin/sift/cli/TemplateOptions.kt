@@ -17,13 +17,6 @@ class TemplateOptions : OptionGroup(name = "Template options") {
             completionCandidates = CompletionCandidates.Fixed(templateNames().toSet()))
         .convert { templates()[it]?.invoke() ?: fail("'$it' is not a valid template") }
 
-    val path: Path? by option("-f", "--class-dir",
-            metavar = "PATH",
-            help = "Path to directory structure containing classes or path to .jar",
-            completionCandidates = CompletionCandidates.Path)
-        .path(mustExist = true)
-        .help("Jar or directory with classes.")
-        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
 
     val listTemplates: Boolean by option("-l", "--list-templates",
             help = "Print all templates detected on the current classpath.")
@@ -32,6 +25,14 @@ class TemplateOptions : OptionGroup(name = "Template options") {
     val listEntityTypes: Boolean by option("-T", "--list-entity-types",
             help = "Lists entity types defined by template.")
         .flag()
+
+    val path: Path? by option("-f", "--class-dir",
+            metavar = "PATH",
+            help = "Path to directory structure containing classes or path to .jar",
+            completionCandidates = CompletionCandidates.Path)
+        .path(mustExist = true)
+        .help("Jar or root directory with classes to analyze.")
+        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
 
     val profile: Boolean by option("--profile",
             help = "Print execution times and input/output for the executed template.")
