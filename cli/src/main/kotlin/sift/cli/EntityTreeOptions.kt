@@ -10,7 +10,7 @@ import sift.core.entity.Entity
 
 class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
     val maxDepth: Int? by option("-L", "--max-depth",
-        help = "Max display depth of the tree.")
+            help = "Max display depth of the tree.")
         .int()
         .restrictTo(min = 0)
 

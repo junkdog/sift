@@ -77,7 +77,7 @@ object SiftCli : CliktCommand(
         
           ${fg("sift -t spring-axon -f . -F \"Order(Created|Shipped)\" --save feature-01.json")}
           Model the system using the "spring-axon" template on the current directory's
-          classes, filter nodes matching the regular expression "Order(Created|Shipped)",
+          classes, filter nodes containing the regular expression "Order(Created|Shipped)",
           and save the system model to "feature-01.json".
         
           ${fg("sift -t spring-axon -f . --diff feature-01.json")}
@@ -87,7 +87,7 @@ object SiftCli : CliktCommand(
           
           ${fg("sift -t spring-axon -f . -F \"Product\" --render")}
           Model the system using the "spring-axon" template on the current directory's 
-          classes, filter the graph to show only nodes matching "Product", and render
+          classes, filter the graph to show only nodes containing "Product", and render
           the result using graphviz's DOT language.
         ```
     """.trimIndent()
@@ -98,45 +98,18 @@ object SiftCli : CliktCommand(
                 showDefaultValues = true,
                 maxWidth = 90
             ) {
-                override fun renderSectionTitle(title: String): String = (fg + bold)(title)
+                override fun renderSectionTitle(title: String): String = when(title) {
+                    "Options:" -> "Miscellaneous options:"
+                    else -> title
+                }.let((fg + bold)::invoke)
             }
         }
     }
 
+    val template by TemplateOptions()
     val tree by EntityTreeOptions()
     val graphviz by VisualizationOptions()
     val serialization by SerializationOptions()
-
-    val path: Path? by option("-f", "--class-dir",
-            metavar = "PATH",
-            help = "Path to directory structure containing classes or path to .jar",
-            completionCandidates = CompletionCandidates.Path
-        )
-        .path(mustExist = true)
-        .help("Jar or directory with classes.")
-        .convert { p -> p.resolve("target/classes").takeIf(Path::exists) ?: p }
-
-    val listTemplates: Boolean by option("-l", "--list-templates",
-            help = "Print all templates detected on the current classpath.")
-        .flag()
-
-    val template by option("-t", "--template",
-            metavar = "TEMPLATE",
-            help = "The template producing the system model.",
-            completionCandidates = CompletionCandidates.Fixed(templateNames().toSet()))
-        .convert { templates()[it]?.invoke() ?: fail("'$it' is not a valid template") }
-
-    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
-        help = "Print all entities along with their properties and metadata.")
-    .flag()
-
-    val profile: Boolean by option("--profile",
-        help = "Print execution times and input/output for the executed template.")
-    .flag()
-
-    val listEntityTypes: Boolean by option("-T", "--list-entity-types",
-            help = "Lists entity types defined by template.")
-        .flag()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
             help = "Override automatically detected ANSI support.")
@@ -170,20 +143,20 @@ object SiftCli : CliktCommand(
                 val timestamp = metadata("timestamp")
                 terminal.println("${light0("sift-$version")} (${fg(timestamp)})")
             }
-            listTemplates -> {
+            template.listTemplates -> {
                 templates()
                     .map { (_, v) -> fg(v().name) }
                     .joinToString(separator = "\n")
                     .let(terminal::println)
             }
-            listEntityTypes && template != null -> {
-                buildTree().let { (pr, _) -> terminal.println(toString(template!!, pr)) }
+            template.listEntityTypes && template.template != null -> {
+                buildTree().let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
             }
-            template == null -> {
+            template.template == null -> {
                 terminal.println("${orange1("Error: ")} ${fg("Must specify a template")}")
                 exitProcess(1)
             }
-            path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
+            template.path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
             graphviz.render -> {
                 require(serialization.diff == null)
                 val sm = systemModel()
@@ -196,7 +169,7 @@ object SiftCli : CliktCommand(
                     }
                 }
 
-                val theme = template!!.theme()
+                val theme = template.template!!.theme()
                 val lookup = theme
                     .map { (type, style) -> type to color(style) }
                     .toMap()
@@ -213,15 +186,15 @@ object SiftCli : CliktCommand(
                 val dot = graph.build(tree)
                 noAnsi.println(dot)
             }
-            dumpSystemModel -> dumpEntities(terminal)
-            profile -> profile(terminal)
+            template.dumpSystemModel -> dumpEntities(terminal)
+            template.profile -> profile(terminal)
             serialization.diff != null -> {
-                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, template!!)
+                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, template.template!!)
                 terminal.printTree(tree)
             }
             serialization.load != null -> {
                 val sm = loadSystemModel(serialization.load!!)
-                val tree = template!!.toTree(sm, this.tree.treeRoot)
+                val tree = template.template!!.toTree(sm, this.tree.treeRoot)
 
                 terminal.printTree(tree)
             }
@@ -239,8 +212,8 @@ object SiftCli : CliktCommand(
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            PipelineProcessor(classNodes(path!!))
-                .execute(template!!.template(), profile)
+            PipelineProcessor(classNodes(template.path!!))
+                .execute(template.template!!.template(), template.profile)
         }
     }
 
@@ -261,7 +234,7 @@ object SiftCli : CliktCommand(
     private fun Terminal.printTree(
         tree: Tree<EntityNode>,
     ) {
-        val theme = template!!.theme()
+        val theme = template.template!!.theme()
         stylize(tree, theme)
         filterTree(tree)
         backtrackStyling(tree, theme)
@@ -283,7 +256,7 @@ object SiftCli : CliktCommand(
             }
         }
 
-        val theme = template!!.theme()
+        val theme = template.template!!.theme()
             .map { (type, style) -> type to diff(style) }
             .toMap()
 
@@ -419,16 +392,16 @@ object SiftCli : CliktCommand(
     }
 
     private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
-        val template = this.template!!
+        val template = this.template.template!!
 
-        val sm: SystemModel = PipelineProcessor(classNodes(path!!))
-            .execute(template.template(), profile)
+        val sm: SystemModel = PipelineProcessor(classNodes(this.template.path!!))
+            .execute(template.template(), this.template.profile)
 
         return sm to template.toTree(sm, forType)
     }
 
     private fun buildTree(sm: SystemModel, forType: Entity.Type? = null): Tree<EntityNode> {
-        return template!!.toTree(sm, forType)
+        return template.template!!.toTree(sm, forType)
     }
 
     fun toString(template: SystemModelTemplate): String {
