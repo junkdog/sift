@@ -7,7 +7,7 @@ files. With Sift, you can build, query, and diff system models using the command
 
 ## Features
 - CLI tool for building, querying, and [diff-ing][diff] system models from parsed .class files.
-- System Models consist of Entities and are produced by Instrumenter Pipelines.
+- System Models consist of Entities and are produced by System Model Templates.
 - System Model Templates provide knowledge about technology stacks for static bytecode analysis.
 - Declarative DSL for user-defined templates.
 - JSON serialization of templates for easy reuse and sharing.
@@ -19,7 +19,7 @@ _Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on
 in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
 straight into the terminal.)_
 
- [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsInstrumenter.kt#L150:L220
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
@@ -68,6 +68,26 @@ Options:
                                         pipeline.
   --generate-completion [bash|zsh|fish]
   -h, --help                            Show this message and exit
+
+Examples:
+  sift --template spring-axon -f my-spring-project
+  Model the system using the "spring-axon" template on the classes in the
+  "my-spring-project" directory.
+
+  sift -t spring-axon -f . -F "Order(Created|Shipped)" --save feature-01.json
+  Model the system using the "spring-axon" template on the current directory's
+  classes, filter nodes matching the regular expression "Order(Created|Shipped)",
+  and save the system model to "feature-01.json".
+
+  sift -t spring-axon -f . --diff feature-01.json
+  Compare the current design of the system using the "spring-axon" template on
+  the classes in the current directory against a previously saved system model
+  from "feature-01.json" and show the differences.
+
+  sift -t spring-axon -f . -F "Product" --render
+  Model the system using the "spring-axon" template on the current directory's
+  classes, filter the graph to show only nodes matching "Product", and render
+  the result using graphviz's DOT language.
 ```
 
 ## Entity and Entity Type
@@ -81,7 +101,7 @@ system. For example, types can include REST controllers, HTTP endpoints, inbound
 messages, RDS, and more.
 
 ```bash
-$ sift --template spring-axon --list-entity-types target/classes
+$ sift --template spring-axon -f target/classes --list-entity-types 
 entity types of spring-axon
   1 aggregate
   2 aggregate-ctor
@@ -138,8 +158,8 @@ such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
 
- [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaInstrumenter.kt#L48:L73
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Instrumenter.kt#L54:L67
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L48:L73
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L54:L67
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 

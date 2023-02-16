@@ -11,7 +11,6 @@ import com.github.ajalt.clikt.core.PrintMessage
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.*
-import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.*
@@ -23,7 +22,6 @@ import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
-import sift.core.graphviz.EdgeLayout
 import sift.core.template.SystemModelTemplate
 import sift.core.template.deserialize
 import sift.core.jackson.*
@@ -65,78 +63,33 @@ import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.ExperimentalTime
 
-class VisualizationOptions : OptionGroup(name = "Visualization options") {
-    val render: Boolean by option("-R", "--render",
-        help = "Render entities with graphviz's DOT language.")
-    .flag()
-
-    val edgeLayout: EdgeLayout by option("--edge-layout",
-            help = "Sets the layout for the  lines between nodes.")
-        .enum<EdgeLayout>()
-        .default(EdgeLayout.spline)
-}
-
-class SerializationOptions : OptionGroup(name = "Serialization options") {
-    val save: File? by option("-s", "--save",
-            metavar = "FILE_JSON",
-            help = "Save the resulting system model as json.",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false)
-
-    val load: File? by option("--load",
-            metavar = "FILE_JSON",
-            help = "Load a previously saved system model.",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
-
-    val diff: File? by option("-d", "--diff",
-            metavar = "FILE_JSON",
-            help = "Diff view against a previously saved system model.",
-            completionCandidates = CompletionCandidates.Path)
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
-}
-
-class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
-    val maxDepth: Int? by option("-L", "--max-depth",
-        help = "Max display depth of the tree.")
-        .int()
-        .restrictTo(min = 0)
-
-    val filter: List<Regex> by option("-F", "--filter",
-            metavar = "REGEX",
-            help = "Filters nodes by label. (repeatable)")
-        .convert { Regex(it) }
-        .multiple()
-
-    val filterContext: List<Regex> by option("-S", "--filter-context",
-            metavar = "REGEX",
-            help = "Filters nodes by label, while also including sibling nodes." +
-                " (repeatable)")
-        .convert { Regex(it) }
-        .multiple()
-
-    val exclude: List<Regex> by option("-e", "--exclude",
-            metavar = "REGEX",
-            help = "Excludes nodes when label matches REGEX. (repeatable)")
-        .convert { Regex(it) }
-        .multiple()
-
-    val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
-            metavar = "ENTITY-TYPE",
-            help = "Excludes entity types from tree. (repeatable)")
-        .convert { Entity.Type(it) }
-        .multiple()
-
-    val treeRoot: Entity.Type? by option("-b", "--tree-root",
-            metavar = "ENTITY-TYPE",
-            help = "Tree built around requested entity type.")
-        .convert { Entity.Type(it) }
-}
-
 object SiftCli : CliktCommand(
     name = "sift",
     help = """
         A tool to model and analyze the design of systems from bytecode.
+    """.trimIndent(),
+    epilog = """
+        ```
+        Examples:
+          ${fg("sift --template spring-axon -f my-spring-project")}
+          Model the system using the "spring-axon" template on the classes in the  
+          "my-spring-project" directory.
+        
+          ${fg("sift -t spring-axon -f . -F \"Order(Created|Shipped)\" --save feature-01.json")}
+          Model the system using the "spring-axon" template on the current directory's
+          classes, filter nodes matching the regular expression "Order(Created|Shipped)",
+          and save the system model to "feature-01.json".
+        
+          ${fg("sift -t spring-axon -f . --diff feature-01.json")}
+          Compare the current design of the system using the "spring-axon" template on
+          the classes in the current directory against a previously saved system model
+          from "feature-01.json" and show the differences.
+          
+          ${fg("sift -t spring-axon -f . -F \"Product\" --render")}
+          Model the system using the "spring-axon" template on the current directory's 
+          classes, filter the graph to show only nodes matching "Product", and render
+          the result using graphviz's DOT language.
+        ```
     """.trimIndent()
 ) {
     init {
@@ -207,12 +160,10 @@ object SiftCli : CliktCommand(
 
         when {
             version -> {
-                val props = Properties()
-                SiftCli::class.java.getResourceAsStream("/sift-metadata.properties")
-                    .use(props::load)
+                val metadata = loadMetadata()
 
-                val version = props.getProperty("version")
-                val timestamp = props.getProperty("timestamp")
+                val version = metadata("version")
+                val timestamp = metadata("timestamp")
                 terminal.println("${light0("sift-$version")} (${fg(timestamp)})")
             }
             listTemplates -> {
@@ -610,11 +561,13 @@ object SiftCli : CliktCommand(
     }
 }
 
-fun <T, R> Iterable<T>.pFlatMap(transform: (T) -> Iterable<R>): List<R> {
-    return toList()
-        .parallelStream()
-        .flatMap { transform(it).toList().stream() }
-        .toList()
+private fun loadMetadata(): (String) -> String {
+    val props = Properties()
+    SiftCli::class.java
+        .getResourceAsStream("/sift-metadata.properties")
+        .use(props::load)
+
+    return props::getProperty
 }
 
 fun templateNames() = templates().map { (name, _)  -> name }
