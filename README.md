@@ -2,8 +2,11 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
 
-Sift is a tool that allows you to model and analyze the design of systems from Java class
-files. With Sift, you can build, query, and diff system models using the command-line interface.
+Sift is a tool for modeling and analyzing the design of software systems from JVM bytecode. 
+It processes .class files using templates, in order to generate a system model that describes
+the structure and behavior of the system.
+
+Additional 
 
 ## Features
 - CLI tool for building, querying, and [diff-ing][diff] system models from parsed .class files.

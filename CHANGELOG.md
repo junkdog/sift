@@ -1,6 +1,8 @@
 ## Upcoming release
 
 ### New/Tweaks
+- DSL.Parameter: `filterType()` of parameters. 
+- DSL.Parameter: `filterType()` of fields. 
 - dot: Remove need for specifying `"dot-ignore"` property.
 - CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`.
 - `spring-axon`: member aggregate label changed to `$aggregate[$member]`.

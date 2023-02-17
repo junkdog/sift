@@ -88,6 +88,32 @@ class DslTest {
         }
     }
 
+    @Test
+    fun `filter parameter and fields by type`() {
+        val f = Entity.Type("field")
+        val p = Entity.Type("param")
+
+        classes {
+            fields {
+                filterType(type<String>())
+                entity(f)
+            }
+
+            methods {
+                filter("fn")
+                parameters {
+                    filterType(type<String>())
+                    entity(p)
+                }
+            }
+        }.execute(listOf(classNode(MethodWithParam::class))) { es ->
+            val eF = es[f].values.toList()
+            val pF = es[p].values.toList()
+
+            assertThat(eF).hasSize(1)
+            assertThat(pF).hasSize(1)
+        }
+    }
 
     @Test
     fun `explode Payload in List field and associate property from the main class`() {
@@ -500,7 +526,6 @@ class DslTest {
                 filter(Regex("mixedTypes"))
                 parameters {
                     parameter(1)
-                    log("after")
                     property(et, "a-parameter-type", readType())
                 }
             }

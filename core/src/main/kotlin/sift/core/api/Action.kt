@@ -55,6 +55,7 @@ import sift.core.jackson.NoArgConstructor
 
     JsonSubTypes.Type(value = Action.Field.FieldScope::class, name = "field-scope"),
     JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
+    JsonSubTypes.Type(value = Action.Field.FilterType::class, name = "filter-type-field"),
     JsonSubTypes.Type(value = Action.Field.ExplodeType::class, name = "field-explode-type"),
     JsonSubTypes.Type(value = Action.Field.IntoOuterScope::class, name = "field-parents"),
     JsonSubTypes.Type(value = Action.Field.IntoSignature::class, name = "field-signature"),
@@ -66,6 +67,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Parameter.IntoSignature::class, name = "parameter-signature"),
     JsonSubTypes.Type(value = Action.Parameter.FilterNth::class, name = "parameter-nth"),
     JsonSubTypes.Type(value = Action.Parameter.Filter::class, name = "filter-parameter"),
+    JsonSubTypes.Type(value = Action.Parameter.FilterType::class, name = "filter-type-parameter"),
 
     JsonSubTypes.Type(value = Action.DebugLog::class, name = "log"),
     JsonSubTypes.Type(value = Action.HasAnnotation::class, name = "has-annotation"),
@@ -536,6 +538,13 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        data class FilterType(val type: AsmType) : IsoAction<FieldNode>() {
+            override fun id() = "filter-type(${type.simpleName})"
+            override fun execute(ctx: Context, input: IterFields): IterFields {
+                return input.filterBy(FieldNode::type, type)
+            }
+        }
+
         class ExplodeType(val synthesize: Boolean = false): Action<IterFields, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
@@ -570,6 +579,13 @@ sealed class Action<IN, OUT> {
 
                 return input
                     .mapNotNull(::signatureOf)
+            }
+        }
+
+        data class FilterType(val type: AsmType) : IsoAction<ParameterNode>() {
+            override fun id() = "filter-type(${type.simpleName})"
+            override fun execute(ctx: Context, input: IterParameters): IterParameters {
+                return input.filterBy(ParameterNode::type, type)
             }
         }
 

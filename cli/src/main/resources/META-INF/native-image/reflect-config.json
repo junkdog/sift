@@ -511,6 +511,13 @@
   "name":"sift.core.api.Action$Field$Filter"
 },
 {
+  "name":"sift.core.api.Action$Field$FilterType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }]
+},
+{
   "name":"sift.core.api.Action$Field$IntoOuterScope",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -666,6 +673,9 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["int"] }]
+},
+{
+  "name":"sift.core.api.Action$Parameter$FilterType"
 },
 {
   "name":"sift.core.api.Action$Parameter$IntoOuterScope"

@@ -685,9 +685,9 @@ object Dsl {
             )
         }
 
-        operator fun Entity.Type.get(key: String) {
-
-        }
+//        operator fun Entity.Type.get(key: String) {
+//
+//        }
 
         fun instantiationsOf(type: Entity.Type, f: Classes.() -> Unit) {
             val classScope = Classes().also(f).action
@@ -746,6 +746,13 @@ object Dsl {
                 .let { signatureScope -> Action.Parameter.IntoSignature andThen signatureScope }
 
             action += Action.Fork(forkTo)
+        }
+
+        /**
+         * Filters fields to include only those with a type matching type.
+         */
+        fun filterType(type: AsmType) {
+            action += Action.Parameter.FilterType(type)
         }
 
         override fun scope(
@@ -851,6 +858,13 @@ object Dsl {
 
         override fun filter(regex: Regex, invert: Boolean) {
             action += Action.Field.Filter(regex, invert)
+        }
+
+        /**
+         * Filters fields to include only those with a type matching type.
+         */
+        fun filterType(type: AsmType) {
+            action += Action.Field.FilterType(type)
         }
 
         fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {

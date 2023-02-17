@@ -66,7 +66,8 @@ import kotlin.time.ExperimentalTime
 object SiftCli : CliktCommand(
     name = "sift",
     help = """
-        A tool to model and analyze the design of systems from bytecode.
+        Sift is a tool for modeling and analyzing the design of software systems from JVM
+        bytecode.
     """.trimIndent(),
     epilog = """
         ```

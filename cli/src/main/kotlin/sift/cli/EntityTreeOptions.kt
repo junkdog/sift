@@ -34,13 +34,13 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
         .multiple()
 
     val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
-            metavar = "ENTITY-TYPE",
+            metavar = "ENTITY_TYPE",
             help = "Excludes entity types from tree. (repeatable)")
         .convert { Entity.Type(it) }
         .multiple()
 
     val treeRoot: Entity.Type? by option("-b", "--tree-root",
-            metavar = "ENTITY-TYPE",
+            metavar = "ENTITY_TYPE",
             help = "Tree built around requested entity type.")
         .convert { Entity.Type(it) }
 }

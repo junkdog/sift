@@ -60,7 +60,6 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
                 // the library repo classes are passed to the pipeline.
                 invocationsOf(E.jpaRepository, synthesize = true) {
                     entity(E.jpaMethod)
-                    log("jpa methods")
                     outerScope("repository classes") {
                         E.jpaRepository["methods"] = E.jpaMethod
                     }
