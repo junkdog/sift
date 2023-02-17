@@ -421,6 +421,23 @@
   ]
 },
 {
+  "name":"sift.core.api.Action$Class$IntoInterfaces",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["boolean","boolean"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"component2","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["boolean","boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
+},
+{
   "name":"sift.core.api.Action$Class$IntoMethods",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

@@ -89,6 +89,89 @@ class DslTest {
     }
 
     @Test
+    fun `exploring interfaces`() {
+        val cns = listOf(
+            classNode(Interfaces::class),
+            classNode(Interfaces.B::class),
+            classNode(Interfaces.C::class),
+            classNode(Interfaces.D::class),
+            classNode(Interfaces.E::class),
+
+            classNode(Interfaces.ImplAx::class),
+            classNode(Interfaces.ImplBx::class),
+            classNode(Interfaces.ImplCx::class),
+            classNode(Interfaces.ImplDx::class),
+        )
+
+        val e = Entity.Type("interfaces")
+
+        fun EntityService.verify(
+            matched: List<String>,
+        ) {
+            val entities = this[e].values.toList()
+            assertThat(entities).hasSize(matched.size)
+            assertThat(entities.map(Entity::label))
+                .containsAll(matched.map { "Interfaces.$it" })
+        }
+
+        classes {
+            filter(Regex("D\$"))
+            interfaces(recursive = true) {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            // A is not synthesized
+            es.verify(listOf("B", "C"))
+        }
+
+        classes {
+            filter(Regex("D\$"))
+            interfaces(recursive = true, synthesize = true) {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            es.verify(listOf("A", "B", "C"))
+        }
+
+        classes {
+            filter(Regex("D\$"))
+            interfaces {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            es.verify(listOf("C"))
+        }
+
+        classes {
+            filter(Regex("ImplDx\$"))
+            interfaces {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            es.verify(listOf("C", "D"))
+        }
+
+        classes {
+            filter(Regex("ImplDx\$"))
+            interfaces(recursive = true) {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            es.verify(listOf("B", "C", "D"))
+        }
+
+        classes {
+            filter(Regex("ImplDx\$"))
+            interfaces(recursive = true, synthesize = true) {
+                entity(e)
+            }
+        }.execute(cns) { es ->
+            // A is not synthesized
+            es.verify(listOf("A", "B", "C", "D"))
+        }
+    }
+
+    @Test
     fun `filter parameter and fields by type`() {
         val f = Entity.Type("field")
         val p = Entity.Type("param")

@@ -1,6 +1,7 @@
 ## Upcoming release
 
 ### New/Tweaks
+- DSL.Class: `interfaces(recurisve, synthesize)` iterates interfaces of inspected class nodes. 
 - DSL.Parameter: `filterType()` of parameters. 
 - DSL.Parameter: `filterType()` of fields. 
 - dot: Remove need for specifying `"dot-ignore"` property.

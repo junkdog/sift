@@ -123,8 +123,17 @@ internal data class Context(
             .addAll(transitions)
     }
 
-    fun allInterfacesOf(cn: ClassNode): List<Type> {
-        return implementedInterfaces[cn] ?: listOf()
+    fun allInterfacesOf(cn: ClassNode, includeParents: Boolean = true): List<Type> {
+        val allImplemented = implementedInterfaces[cn] ?: listOf()
+
+        return when {
+            includeParents -> allImplemented
+            else -> {
+                val parents = (parents[cn] ?: listOf()).map(ClassNode::type)
+                allImplemented - parents
+            }
+
+        }
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {

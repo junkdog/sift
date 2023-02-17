@@ -496,8 +496,20 @@ object Dsl {
             action += Action.Class.Filter(regex, invert)
         }
 
-        fun implements(type: Type) {
+        /** Filters the currently inspected class nodes by checking if they implement a particular type. */
+        fun implements(type: AsmType) {
             action += Action.Class.FilterImplemented(type)
+        }
+
+        /**
+         * Iterates the interfaces of current class nodes. Includes interfaces of super class.
+         * Includes interfaces from all ancestors if [recursive] is `true`.
+         */
+        fun interfaces(recursive: Boolean = false, synthesize: Boolean = false, f: Classes.() -> Unit) {
+            val scope = Classes().also(f).action
+                .let { scope -> Action.Class.IntoInterfaces(recursive, synthesize) andThen scope }
+
+            action += Action.Fork(scope)
         }
 
         override fun readAnnotation(

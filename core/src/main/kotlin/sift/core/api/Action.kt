@@ -40,6 +40,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
+    JsonSubTypes.Type(value = Action.Class.IntoInterfaces::class, name = "into-interfaces"),
     JsonSubTypes.Type(value = Action.Class.IntoSuperclassSignature::class, name = "superclass"),
     JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
 
@@ -240,6 +241,54 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
                 val f = if (invert) input::filterNot else input::filter
                 return f { cn -> regex in cn.qualifiedName }
+            }
+        }
+
+        data class IntoInterfaces(
+            val recursive: Boolean,
+            val synthesize: Boolean
+        ) : Action<IterClasses, IterClasses>() {
+
+            override fun id(): String {
+                val params = listOfNotNull(
+                    "recursive".takeIf { recursive },
+                    "synthesize".takeIf { synthesize },
+                )
+                return "into-interfaces(${params.joinToString(separator = " ")})"
+            }
+
+            override fun execute(ctx: Context, input: IterClasses): IterClasses {
+                val resolveClassNode: (AsmType) -> ClassNode? = when {
+                    synthesize -> { type -> ctx.synthesize(type) }
+                    else       -> { type -> ctx.classByType[type] }
+                }
+
+                fun allInterfacesOf(elem: ClassNode): Iterable<ClassNode> {
+                    val parentInterfaces = ctx.parents[elem]!!
+                        .flatMap(ClassNode::interfaces)
+
+                    return (parentInterfaces + ctx.allInterfacesOf(elem, false))
+                        .toSet()
+                        .mapNotNull(resolveClassNode)
+                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                fun interfacesOf(elem: ClassNode): Iterable<ClassNode> {
+                    val parentInterfaces = elem.superType
+                        ?.let(ctx.classByType::get)
+                        ?.interfaces
+                        ?: listOf()
+
+                    return (parentInterfaces + elem.interfaces)
+                        .toSet()
+                        .mapNotNull(resolveClassNode)
+                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return when {
+                    recursive -> input.flatMap(::allInterfacesOf)
+                    else      -> input.flatMap(::interfacesOf)
+                }
             }
         }
 
