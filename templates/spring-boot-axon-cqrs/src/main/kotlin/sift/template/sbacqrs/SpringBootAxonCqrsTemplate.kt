@@ -211,20 +211,39 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     property(E.aggregateMember, "aggregate", readName())
                 }
 
+                // expecting -Projection suffix, and QueryHandler|EventHandler methods
                 scope("register projections") {
-                    annotatedBy(A.processingGroup)
-                    entity(E.projection)
+                    fun Dsl.Classes.registerProjections(handler: Type) {
+                        methods {
+                            annotatedBy(handler)
+                            outerScope("identified projection") {
+                                entity(E.projection)
 
-                    methods {
-                        scope("register event handlers with aggregate") {
-                            registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler, Dot.node)
-                            E.projection["events"] = E.eventHandler
-                        }
+                                methods {
+                                    scope("register event handlers with projection") {
+                                        registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler, Dot.node)
+                                        E.projection["events"] = E.eventHandler
+                                    }
 
-                        scope("register event sourcing handlers with aggregate") {
-                            registerAxonHandlers(E.projection, A.queryHandler, E.query, E.queryHandler)
-                            E.projection["queries"] = E.queryHandler
+                                    scope("register event sourcing handlers with project") {
+                                        registerAxonHandlers(E.projection, A.queryHandler, E.query, E.queryHandler)
+                                        E.projection["queries"] = E.queryHandler
+                                    }
+                                }
+                            }
                         }
+                    }
+
+                    scope("scan suspect classes") {
+                        filter("Projection")
+                        registerProjections(A.eventHandler)
+                        registerProjections(A.queryHandler)
+                    }
+
+                    scope("id by @ProcessingGroup") {
+                        annotatedBy(A.processingGroup)
+                        registerProjections(A.eventHandler)
+                        registerProjections(A.queryHandler)
                     }
                 }
             }

@@ -11,20 +11,20 @@ class EntityService {
     internal fun register(entity: Entity, element: Element): Entity {
 
         val existing = elementToEntity[element]
-        return when {
+        when {
             existing == null -> {
                 entityToElement[entity] = element
                 elementToEntity[element] = entity
                 entitiesByType.getOrPut(entity.type, ::mutableMapOf)[element] = entity
-                entity
             }
             existing.type == entity.type -> {
                 existing.label = entity.label
                 existing.properties += entity.properties
-                existing
             }
             else -> Throw.entityAlreadyExists(entity, existing, element)
         }
+
+        return existing ?: entity
     }
 
     fun allEntities(): Set<Entity> = entityToElement.keys.toSet()

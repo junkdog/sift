@@ -19,6 +19,7 @@
 
 ### Fixes
 - `spring-axon`: fix member aggregate identification when field type is a Map. 
+- `spring-axon`: improved identification of projections. 
 
 ## sift-0.5.0 2023-01-14
 
