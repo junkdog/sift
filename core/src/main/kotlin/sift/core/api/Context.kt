@@ -172,7 +172,8 @@ internal data class Context(
 
 
         entityService.register(entity, element)
-        labelFormatters[entity] = formatter
+            .let { labelFormatters[it] = formatter } // updates label is entity is new
+
     }
 
     fun tracesOf(element: Element): MutableList<ElementTrace> {

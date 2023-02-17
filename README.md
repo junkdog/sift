@@ -32,7 +32,8 @@ straight into the terminal.)_
 ```
 Usage: sift [OPTIONS]
 
-  A tool to model and analyze the design of systems from bytecode.
+  Sift is a tool for modeling and analyzing the design of software systems from JVM
+  bytecode.
 
 Template options:
   -t, --template TEMPLATE  The template producing the system model.
@@ -49,8 +50,8 @@ Entity tree options:
   -S, --filter-context REGEX      Filters nodes by label, while also including sibling
                                   nodes. (repeatable)
   -e, --exclude REGEX             Excludes nodes when label matches REGEX. (repeatable)
-  -E, --exclude-type ENTITY-TYPE  Excludes entity types from tree. (repeatable)
-  -b, --tree-root ENTITY-TYPE     Tree built around requested entity type.
+  -E, --exclude-type ENTITY_TYPE  Excludes entity types from tree. (repeatable)
+  -b, --tree-root ENTITY_TYPE     Tree built around requested entity type.
 
 Visualization options:
   -R, --render                          Render entities with graphviz's DOT language.

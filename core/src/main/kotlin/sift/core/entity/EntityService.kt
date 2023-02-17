@@ -8,19 +8,22 @@ class EntityService {
     private val elementToEntity: MutableMap<Element, Entity> = mutableMapOf()
     internal val entitiesByType: MutableMap<Entity.Type, MutableMap<Element, Entity>> = mutableMapOf()
 
-    fun register(entity: Entity, element: Element) {
+    internal fun register(entity: Entity, element: Element): Entity {
 
-        val old = elementToEntity[element]
-        when {
-            old == null -> {
+        val existing = elementToEntity[element]
+        return when {
+            existing == null -> {
                 entityToElement[entity] = element
                 elementToEntity[element] = entity
                 entitiesByType.getOrPut(entity.type, ::mutableMapOf)[element] = entity
+                entity
             }
-            old.type == entity.type -> {
-                old.properties += entity.properties
+            existing.type == entity.type -> {
+                existing.label = entity.label
+                existing.properties += entity.properties
+                existing
             }
-            else -> Throw.entityAlreadyExists(entity, old, element)
+            else -> Throw.entityAlreadyExists(entity, existing, element)
         }
     }
 
