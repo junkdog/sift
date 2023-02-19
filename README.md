@@ -66,13 +66,13 @@ Template options:
                            template.
   -X, --dump-system-model  Print all entities along with their properties and metadata.
 
-Entity tree options:
+Entity tree/graph options:
   -L, --max-depth INT             Max display depth of the tree.
-  -F, --filter REGEX              Filters nodes by label. (repeatable)
-  -S, --filter-context REGEX      Filters nodes by label, while also including sibling
+  -F, --filter REGEX              Filter nodes by label. (repeatable)
+  -S, --filter-context REGEX      Filter nodes by label, while also including sibling
                                   nodes. (repeatable)
-  -e, --exclude REGEX             Excludes nodes when label matches REGEX. (repeatable)
-  -E, --exclude-type ENTITY_TYPE  Excludes entity types from tree. (repeatable)
+  -e, --exclude REGEX             Exclude nodes when label matches REGEX. (repeatable)
+  -E, --exclude-type ENTITY_TYPE  Exclude entity types from tree. (repeatable)
   -b, --tree-root ENTITY_TYPE     Tree built around requested entity type.
 
 Visualization options:
@@ -84,7 +84,7 @@ Visualization options:
 Serialization options:
   -s, --save FILE_JSON  Save the resulting system model as json.
   --load FILE_JSON      Load a previously saved system model.
-  -d, --diff FILE_JSON  Diff view against a previously saved system model.
+  -d, --diff FILE_JSON  Compare against a previously saved system model.
 
 Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
