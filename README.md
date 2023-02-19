@@ -12,19 +12,20 @@ The resulting system model is composed of entities that describe the system's st
 
 ## Features
 - CLI tool for building, querying, and [comparing][diff] system models from parsed .class files.
-- Declarative DSL for user-defined templates.
+- Declarative DSL for writing user-defined templates, optionally extending or combining existing templates.
 - JSON serialization of templates for easy reuse and sharing.
-- Render system representations using Graphviz.
+- Render system representations using Graphviz. Inline rendering for [kitty][kitty] supported via sift.sh|zsh.
 - Optionally built as a native binary using graalvm's native-image. This allows for much faster execution times.
 
 ![sift spring-boot axon framework][orders-graph]
 
 
 _Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on shipped and confirmed orders
-in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
-straight into the terminal.)_
+in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty][kitty] to render straight to the terminal.)_
 
 [![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][profile-t]][profile]
+
+ [kitty]: https://sw.kovidgoyal.net/kitty/
 
  [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
@@ -122,9 +123,9 @@ In a system model, entities are the individual components that make up the syste
 such as classes, methods, fields, and parameters. Each entity is uniquely identified
 by one of these elements and cannot be associated with more than one entity.
 
-Each entity is mapped to a specific type, which represents any notable part of the
+Each entity is mapped to a specific type, which represents any noteworthy part of the
 system. For example, types can include REST controllers, HTTP endpoints, inbound/outbound
-messages, RDS, and more.
+messages, RDS, repositories and more.
 
 ```bash
 $ sift --template spring-axon -f target/classes --list-entity-types 
@@ -190,10 +191,26 @@ keeping the resulting DSL concise.
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 
 
-## Building a native binary on linux using graalvm
+## Installation
+
+Sift requires a java 17 or later runtime.
+
+For window users, it is recommended to to run sift under WSL, until proper windows
+paths are in place.
+
+The easiest way to install sift is to clone the repository and run `mvn install`, and
+then copy sift.zsh|sh to a location on the `$PATH`, e.g.:
+
+- `mvn install` from project root. This installs sift to `~/.local/share/sift/bin`
+- copy either `sift.zsh` or `sift.sh` to `~/.local/bin/sift`
+
+The `main` branch always points to the latest release commit.
+
+
+### Building a native binary on linux using graalvm
 
 If graalvm and native-image is installed, a native binary can be built with the `native-image`
-maven profile: `mvn clean install -P native-image`. The resulting binary will be located in
+maven profile: `mvn install -P native-image`. The resulting binary will be located in
 `~/.local/share/sift/bin/sift`. `sift.zsh` and `sift.sh` first checks if the native binary
 is available, otherwise it tries to run the jar.
 
