@@ -27,7 +27,7 @@ in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty][kitty] to 
 
  [kitty]: https://sw.kovidgoyal.net/kitty/
 
- [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L150:L220
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L158:L300
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
@@ -185,8 +185,8 @@ such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
 
- [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L48:L73
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L54:L67
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L45:L69
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L52:L69
 
 ![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 
