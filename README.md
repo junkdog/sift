@@ -2,30 +2,52 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
 
-Sift is a tool for modeling and analyzing the design of software systems from JVM bytecode. 
-It processes .class files using templates, in order to generate a system model that describes
-the structure and behavior of the system.
+Sift is a command-line tool for modeling and analyzing the design of software systems from JVM
+bytecode. It operates by processing .class or .jar files using predefined templates
+known as System Model Templates. These templates provide knowledge about technology stacks or
+project-specific constructs, which enables the tool to generate a comprehensive model of the system.
 
-Additional 
+The resulting system model is composed of entities that describe the system's structure and behavior.
+
 
 ## Features
-- CLI tool for building, querying, and [diff-ing][diff] system models from parsed .class files.
-- System Models consist of Entities and are produced by System Model Templates.
-- System Model Templates provide knowledge about technology stacks for static bytecode analysis.
+- CLI tool for building, querying, and [comparing][diff] system models from parsed .class files.
 - Declarative DSL for user-defined templates.
 - JSON serialization of templates for easy reuse and sharing.
-- Inline rendering of system representations using Graphviz.
+- Render system representations using Graphviz.
+- Optionally built as a native binary using graalvm's native-image. This allows for much faster execution times.
 
-![sift spring-boot axon framework][sift-render]
+![sift spring-boot axon framework][orders-graph]
+
 
 _Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on shipped and confirmed orders
 in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
 straight into the terminal.)_
 
+[![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][profile-t]][profile] [![][sift-dsl-t]][sift-dsl]
+
  [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
+
+ [orders]: docs/images/sift-spring-axon-orders.png
+ [orders-t]: docs/images/sift-spring-axon-orders_thumbnail.png
+
+ [orders-graph]: docs/images/sift-spring-axon-orders-render.png
+ [orders-graph-t]: docs/images/sift-spring-axon-orders-render_thumbnail.png
+
+ [system-render]: docs/images/sift-spring-axon-render.png
+ [system-render-t]: docs/images/sift-spring-axon-render_thumbnail.png
+
+ [profile]: docs/images/sift-spring-axon-profile-template.png
+ [profile-t]: docs/images/sift-spring-axon-profile-template_thumbnail.png
+
+ [dump-sm]: docs/images/sift-spring-axon-dump-system-model.png
+ [dump-sm-t]: docs/images/sift-spring-axon-dump-system-model_thumbnail.png
+
+ [sift-dsl]: docs/images/sift-template-sift.png
+ [sift-dsl-t]: docs/images/sift-template-sift_thumbnail.png
 
 ## CLI options
 
@@ -183,3 +205,5 @@ unknown types (e.g. from `withValue()`).
 ## Caveats and limitations
 - no flow analysis making precise entity identification difficult for e.g. dispatcher-like 
   methods dealing with multiple entity types.
+- Class signatures can not yet be registered as entities. This means that e.g. `Repository<Order>`
+  is not a valid entity; only the raw `Repository` type can be registered. 
