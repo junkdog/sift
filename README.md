@@ -24,29 +24,29 @@ _Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on
 in https://github.com/eugenp/tutorials/tree/master/axon. (Use [kitty](https://sw.kovidgoyal.net/kitty/) to render 
 straight into the terminal.)_
 
-[![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][profile-t]][profile] [![][sift-dsl-t]][sift-dsl]
+[![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][profile-t]][profile]
 
  [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L150:L220
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
 
- [orders]: docs/images/sift-spring-axon-orders.png
+ [orders]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-orders.png
  [orders-t]: docs/images/sift-spring-axon-orders_thumbnail.png
 
  [orders-graph]: docs/images/sift-spring-axon-orders-render.png
  [orders-graph-t]: docs/images/sift-spring-axon-orders-render_thumbnail.png
 
- [system-render]: docs/images/sift-spring-axon-render.png
+ [system-render]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-render.png
  [system-render-t]: docs/images/sift-spring-axon-render_thumbnail.png
 
- [profile]: docs/images/sift-spring-axon-profile-template.png
+ [profile]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-profile-template.png
  [profile-t]: docs/images/sift-spring-axon-profile-template_thumbnail.png
 
- [dump-sm]: docs/images/sift-spring-axon-dump-system-model.png
+ [dump-sm]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-dump-system-model.png
  [dump-sm-t]: docs/images/sift-spring-axon-dump-system-model_thumbnail.png
 
- [sift-dsl]: docs/images/sift-template-sift.png
+ [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-template-sift.png
  [sift-dsl-t]: docs/images/sift-template-sift_thumbnail.png
 
 ## CLI options
