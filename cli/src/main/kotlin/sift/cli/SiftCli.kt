@@ -132,8 +132,10 @@ object SiftCli : CliktCommand(
         val terminal = Terminal(ansi)
         Thread.setDefaultUncaughtExceptionHandler { _, e ->
             val err = red2 + inverse + bold
-            terminal.println("${(err)("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
-            terminal.println(fg("exiting..."))
+            terminal.forStdErr().apply {
+                println("${(err)("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
+                println(fg("exiting..."))
+            }
         }
 
         when {
@@ -308,7 +310,7 @@ object SiftCli : CliktCommand(
 
         this.tree.maxDepth?.let { depth ->
             tree.walk()
-                .filter { it.depth == depth }
+                .filter { it.depth == depth + 1 }
                 .toList()
                 .forEach(Tree<EntityNode>::delete)
         }

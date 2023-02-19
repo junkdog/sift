@@ -99,7 +99,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
             handlerAnnotation: Type, // @(Command|Event|Query)Handler
             handledType: Entity.Type,
             handler: Entity.Type,
-            handledDotType: Dot = Dot.edge
         ) {
             annotatedBy(handlerAnnotation)
             entity(handler,
@@ -112,9 +111,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
 
                 // (re-)register command|event|query entity
                 explodeType(synthesize = true) { // class scope of parameter
-                    entity(handledType,
-                        property("dot-type", withValue(handledDotType))
-                    )
+                    entity(handledType)
                     handledType["received-by"] = handler
                 }
             }
@@ -143,8 +140,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
             aggregate: Entity.Type,
             label: LabelFormatter = LabelFormatter.FromElement
         ) {
-            entity(aggregate, label,
-                property("dot-type", withValue(Dot.node)))
+            entity(aggregate, label)
 
             methods {
                 scope("register command handlers with aggregate") {
@@ -153,7 +149,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 }
 
                 scope("register event sourcing handlers with aggregate") {
-                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler, Dot.node)
+                    registerAxonHandlers(aggregate, A.eventSourcingHandler, E.event, E.eventSourcingHandler)
                     aggregate["events"] = E.eventSourcingHandler
                 }
             }
@@ -164,9 +160,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 fun registerController(controller: Type) {
                     scope("register controllers") {
                         annotatedBy(controller)
-                        entity(E.controller,
-                            // when --render: prevents children from being deleted
-                            property("dot-ignore", withValue(true)))
+                        entity(E.controller)
 
                         methods {
                             // maps to EntityType.endpoint
@@ -211,7 +205,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     property(E.aggregateMember, "aggregate", readName())
                 }
 
-                // expecting -Projection suffix, and QueryHandler|EventHandler methods
                 scope("register projections") {
                     fun Dsl.Classes.registerProjections(handler: Type) {
                         methods {
@@ -221,7 +214,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
 
                                 methods {
                                     scope("register event handlers with projection") {
-                                        registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler, Dot.node)
+                                        registerAxonHandlers(E.projection, A.eventHandler, E.event, E.eventHandler)
                                         E.projection["events"] = E.eventHandler
                                     }
 
@@ -298,7 +291,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 )
 
                 graphviz(E.query,
-                    type= Dot.edge,
+                    type = Dot.edge,
                     style = Style.dashed,
                     removeSuffix = "Query",
                     arrowheadShape = "onormal",

@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import sift.core.entity.Entity
 
-class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
+class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
     val maxDepth: Int? by option("-L", "--max-depth",
             help = "Max display depth of the tree.")
         .int()
@@ -16,26 +16,26 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree options") {
 
     val filter: List<Regex> by option("-F", "--filter",
             metavar = "REGEX",
-            help = "Filters nodes by label. (repeatable)")
+            help = "Filter nodes by label. (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val filterContext: List<Regex> by option("-S", "--filter-context",
             metavar = "REGEX",
-            help = "Filters nodes by label, while also including sibling nodes." +
+            help = "Filter nodes by label, while also including sibling nodes." +
                 " (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val exclude: List<Regex> by option("-e", "--exclude",
             metavar = "REGEX",
-            help = "Excludes nodes when label matches REGEX. (repeatable)")
+            help = "Exclude nodes when label matches REGEX. (repeatable)")
         .convert { Regex(it) }
         .multiple()
 
     val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",
             metavar = "ENTITY_TYPE",
-            help = "Excludes entity types from tree. (repeatable)")
+            help = "Exclude entity types from tree. (repeatable)")
         .convert { Entity.Type(it) }
         .multiple()
 

@@ -11,20 +11,17 @@ class SerializationOptions : OptionGroup(name = "Serialization options") {
             metavar = "FILE_JSON",
             help = "Save the resulting system model as json.",
             completionCandidates = CompletionCandidates.Path
-    )
-        .file(canBeDir = false)
+    ).file(canBeDir = false)
 
     val load: File? by option("--load",
             metavar = "FILE_JSON",
             help = "Load a previously saved system model.",
             completionCandidates = CompletionCandidates.Path
-    )
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+    ).file(canBeDir = false, mustExist = true, mustBeReadable = true)
 
     val diff: File? by option("-d", "--diff",
             metavar = "FILE_JSON",
-            help = "Diff view against a previously saved system model.",
+            help = "Compare against a previously saved system model.",
             completionCandidates = CompletionCandidates.Path
-    )
-        .file(canBeDir = false, mustExist = true, mustBeReadable = true)
+    ).file(canBeDir = false, mustExist = true, mustBeReadable = true)
 }
