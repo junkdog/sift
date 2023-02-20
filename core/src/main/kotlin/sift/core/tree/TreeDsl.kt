@@ -23,10 +23,12 @@ class TreeDsl(private val hosted: Tree<EntityNode>) {
     }
 
     fun selfReferential(entity: Entity): Boolean {
+        val refId = listOfNotNull((hosted.parent?.value as? EntityNode.Entity)?.entity, entity)
         return hosted.parents()
             .mapNotNull { it.value as? EntityNode.Entity }
             .map(EntityNode.Entity::entity)
-            .let { parents -> entity in parents }
+            .windowed(2)
+            .any { parentPair -> parentPair == refId }
     }
 
     companion object  {
@@ -59,7 +61,6 @@ fun TreeDsl.buildTree(
 ) {
     (e.children() - exceptChildren.toSet()).forEach { key ->
         e.children(key).forEach { child: Entity ->
-            // FIXME: selfReferential is a bug in establishing relations
             if (!selfReferential(child)) {
                 add(child) { buildTree(child) }
             }
