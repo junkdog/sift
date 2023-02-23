@@ -48,7 +48,7 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
 
             context.measurements.value.let { root ->
                 root.execution = (end - start).nanoseconds
-                root.action = "pipeline"
+                root.action = "template"
             }
         }
 

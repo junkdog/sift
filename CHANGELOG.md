@@ -8,6 +8,7 @@
 - DSL: re-registering the same entity using `entity(entitty, label...)` will now update the entity label.
 - CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`.
 - `spring-axon`: member aggregate label changed to `$aggregate[$member]`.
+- `spring-boot`: base template, extended by `spring-axon`.
 
 ### Breaking changes
 - Instrumenter Service renamed to System Model Template:

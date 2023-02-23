@@ -53,6 +53,11 @@
         </dependency>
         <dependency>
             <groupId>net.onedaybeard.sift.template</groupId>
+            <artifactId>spring-boot</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.onedaybeard.sift.template</groupId>
             <artifactId>jpa</artifactId>
             <version>${project.version}</version>
         </dependency>

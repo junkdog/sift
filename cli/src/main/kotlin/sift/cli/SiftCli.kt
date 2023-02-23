@@ -121,7 +121,7 @@ object SiftCli : CliktCommand(
     .flag()
 
     val debug: Boolean by option("--debug",
-        help = "Print log/logCount statements from the executed pipeline.")
+        help = "Print log/logCount statements from the executed template.")
     .flag()
 
     private val noAnsi = Terminal(AnsiLevel.NONE)

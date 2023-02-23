@@ -26,6 +26,11 @@ import sift.core.terminal.TextTransformer.Companion.replace
 import sift.template.dsl.graphviz
 import sift.template.dsl.registerInstantiationsOf
 import sift.template.spi.SystemModelTemplateServiceProvider
+import sift.template.springboot.SpringBootTemplate
+
+
+typealias SBA = SpringBootTemplate.Annotation
+typealias SBE = SpringBootTemplate.EntityType
 
 typealias A = SpringBootAxonCqrsTemplate.Annotation
 typealias E = SpringBootAxonCqrsTemplate.EntityType
@@ -48,17 +53,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         val eventSourcingHandler = "org.axonframework.eventsourcing.EventSourcingHandler".type
         val processingGroup = "org.axonframework.config.ProcessingGroup".type
         val queryHandler = "org.axonframework.queryhandling.QueryHandler".type
-
-        // spring
-        val controller = "org.springframework.stereotype.Controller".type
-        val deleteMapping = "org.springframework.web.bind.annotation.DeleteMapping".type
-        val getMapping = "org.springframework.web.bind.annotation.GetMapping".type
-        val patchMapping = "org.springframework.web.bind.annotation.PatchMapping".type
-        val postMapping = "org.springframework.web.bind.annotation.PostMapping".type
-        val putMapping = "org.springframework.web.bind.annotation.PutMapping".type
-        val requestBody = "org.springframework.web.bind.annotation.RequestBody".type
-        val requestMapping = "org.springframework.web.bind.annotation.RequestMapping".type
-        val restController = "org.springframework.web.bind.annotation.RestController".type
     }
 
     object EntityType {
@@ -78,14 +72,12 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         val eventSourcingHandler = "event-sourcing-handler".type
         val eventHandler = "event-handler".type
         val projection = "projection".type
-
-        // spring
-        val controller = "controller".type
-        val endpoint = "endpoint".type
     }
 
-    override val defaultType: Entity.Type = E.controller
-    override val entityTypes: Iterable<Entity.Type> = E.types
+    val springBoot = SpringBootTemplate()
+
+    override val defaultType: Entity.Type = SBE.controller
+    override val entityTypes: Iterable<Entity.Type> = springBoot.entityTypes + E.types
 
     override fun create() = this
     override val name: String
@@ -117,25 +109,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
             }
         }
 
-        fun Dsl.Methods.registerEndpoints(method: String, httpMethod: Type) {
-            scope(method) {
-                annotatedBy(httpMethod)
-                entity(E.endpoint,
-                    label("$method /\${base-path:}\${path:}", dedupe('/')),
-                    property("path", readAnnotation(httpMethod, "value"))
-                )
-
-                outerScope("read base path from @RequestMapping") {
-                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
-                }
-
-                parameters {
-                    annotatedBy(A.requestBody)
-                    property(E.endpoint, "request-object", readType())
-                }
-            }
-        }
-
         fun Dsl.Classes.registerAggregate(
             aggregate: Entity.Type,
             label: LabelFormatter = LabelFormatter.FromElement
@@ -156,28 +129,9 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         }
 
         return template {
+            include(springBoot.template())
+
             classes {
-                fun registerController(controller: Type) {
-                    scope("register controllers") {
-                        annotatedBy(controller)
-                        entity(E.controller)
-
-                        methods {
-                            // maps to EntityType.endpoint
-                            registerEndpoints("DELETE", A.deleteMapping)
-                            registerEndpoints("GET",    A.getMapping)
-                            registerEndpoints("PATCH",  A.patchMapping)
-                            registerEndpoints("POST",   A.postMapping)
-                            registerEndpoints("PUT",    A.putMapping)
-
-                            E.controller["endpoints"] = E.endpoint
-                        }
-                    }
-                }
-
-                registerController(A.controller)
-                registerController(A.restController)
-
                 scope("register aggregates") {
                     annotatedBy(A.aggregate)
                     registerAggregate(E.aggregate)
@@ -246,7 +200,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 val soughtTypes = listOf(E.command, E.event, E.query)
                 val methodsToScan = listOf(
                     E.commandHandler,
-                    E.endpoint,
+                    SBE.endpoint,
                     E.eventHandler,
                     E.eventSourcingHandler,
                     E.queryHandler,
@@ -257,14 +211,8 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
             }
 
             scope("dot graph property configuration") {
-                // nodes
-                graphviz(E.endpoint,
-                    rank = 0,
-                    type = Dot.node,
-                )
-
                 graphviz(listOf(E.aggregate, E.aggregateMember),
-                    rank = 1,
+                    rank = 1, // endpoints @ rank = 0
                     type = Dot.node,
                     removeSuffix = "Aggregate",
                     shape = Shape.component
@@ -300,7 +248,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         }
     }
 
-    override fun theme() = mapOf(
+    override fun theme() = springBoot.theme() + mapOf(
         E.commandHandler       to fromProperty("dot-id-as"),
         E.eventHandler         to fromProperty("dot-id-as"),
         E.eventSourcingHandler to fromProperty("dot-id-as"),
@@ -308,8 +256,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         E.aggregate            to plain(purple2),
         E.aggregateMember      to plain(purple2),
         E.command              to plain(yellow2 + bold),
-        E.controller           to plain(light2 + inverse),
-        E.endpoint             to plain(light2 + bold),
         E.event                to plain(aqua2 + bold),
         E.projection           to plain(green2),
         E.query                to plain(blue2),

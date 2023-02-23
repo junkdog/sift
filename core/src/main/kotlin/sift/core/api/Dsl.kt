@@ -161,7 +161,7 @@ object Dsl {
          * currently in scope.
          *
          * Note that for most use-cases, `--profile` yields better results
-         * without having to modify the pipeline.
+         * without having to modify the template.
          **/
         fun log(tag: String) {
             action += Action.DebugLog(tag)
@@ -172,7 +172,7 @@ object Dsl {
          * of elements currently in scope.
          *
          * Note that for most use-cases, `--profile` yields better results
-         * without having to modify the pipeline.
+         * without having to modify the template.
          **/
         fun logCount(tag: String) {
             action += Action.DebugLog(tag, format = LogFormat.Count)
@@ -303,10 +303,10 @@ object Dsl {
         }
 
         /**
-         * Includes another template by copying it into this pipeline.
+         * Includes another template by copying it into this template.
          */
-        fun include(pipeline: Action<Unit, Unit>) {
-            action += pipeline
+        fun include(template: Action<Unit, Unit>) {
+            action += template
         }
 
         fun scope(label: String, f: Template.() -> Unit) {
@@ -413,7 +413,7 @@ object Dsl {
          * evaluated.
          *
          * This function can greatly reduce the boilerplate associated with manually
-         * unpacking type signatures. The following two pipelines are equivalent:
+         * unpacking type signatures. The following two templates are equivalent:
          *
          * ```kotlin
          * val a = classes {
@@ -472,7 +472,7 @@ object Dsl {
          * of elements currently in scope.
          *
          * Note that for most use-cases, `--profile` yields better results
-         * without having to modify the pipeline.
+         * without having to modify the template.
          **/
         fun logCount(tag: String) {
             action += Action.DebugLog(tag, format = LogFormat.Count)

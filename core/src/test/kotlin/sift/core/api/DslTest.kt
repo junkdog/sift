@@ -283,8 +283,8 @@ class DslTest {
         val cns = listOf(classNode(ClassWithGenericElements::class))
         val payload = Entity.Type("payload")
 
-        fun validate(pipeline: Action<Unit, Unit>) {
-            pipeline.execute(cns) { es ->
+        fun validate(template: Action<Unit, Unit>) {
+            template.execute(cns) { es ->
                 val entities = es[payload].values.toList()
                 assertThat(entities).hasSize(1)
                 assertThat(entities.first().label).isEqualTo("Payload")
@@ -292,7 +292,7 @@ class DslTest {
         }
 
         // fun complexReturn(): Map<String, List<Pair<Payload, Int>>>
-        val pipeline = classes {
+        val template = classes {
             methods {
                 returns {
                     explodeTypeT("Map<String, List<Pair<T, _>>>", synthesize = true) {
@@ -321,7 +321,7 @@ class DslTest {
             }
         }.also(::validate)
 
-        assertThat(pipeline.debugTree())
+        assertThat(template.debugTree())
             .isEqualTo(expected.debugTree())
 
         // making sure unspecified types are ok too
@@ -1387,17 +1387,17 @@ class DslTest {
     }
 
     @Test
-    fun `mix and match pipelines`() {
+    fun `mix and match templates`() {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
 
-        val pipelineA = classes {
+        val templateA = classes {
             filter(Regex("^sift\\.core\\.api\\.testdata"))
             annotatedBy<RestController>()
             entity(controller)
         }
 
-        val pipelineB = template {
+        val templateB = template {
             methodsOf(controller) {
                 annotatedBy<Endpoint>()
                 entity(endpoint, label("\${http-method} \${path}"),
@@ -1410,8 +1410,8 @@ class DslTest {
         }
 
         template {
-            include(pipelineA)
-            include(pipelineB)
+            include(templateA)
+            include(templateB)
         }.execute { entityService ->
             assertThat(entityService[controller].map(::TestEntity))
                 .hasSize(1)
