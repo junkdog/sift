@@ -116,6 +116,7 @@ private fun graph(tree: Tree<EntityNode>, edgeSplines: EdgeLayout): String {
         .map { leaf -> listOf(leaf) + leaf.parents() }
         .toList()
         .map { path -> path.filter(Tree<EntityNode>::validNode) }
+        .filter { it.size > 1 }
 
     val colors = edgeColors()
     val edges = paths
