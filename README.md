@@ -15,7 +15,8 @@ The resulting system model is composed of entities that describe the system's st
 - Declarative DSL for writing user-defined templates, optionally extending or combining existing templates.
 - JSON serialization of templates for easy reuse and sharing.
 - Render system representations using Graphviz. Inline rendering for [kitty][kitty] supported via sift.sh|zsh.
-- Optionally built as a native binary using graalvm's native-image. This allows for much faster execution times.
+- Optionally built as a native binary using GraalVM's native-image, allowing for much faster execution times.
+  This means that Sift can typically scan most microservice-sized projects in under 0.5 seconds.
 
 ![sift spring-boot axon framework][orders-graph]
 
@@ -207,9 +208,9 @@ then copy sift.zsh|sh to a location on the `$PATH`, e.g.:
 The `main` branch always points to the latest release commit.
 
 
-### Building a native binary on linux using graalvm
+### Building a native binary on linux using GraalVM
 
-If graalvm and native-image is installed, a native binary can be built with the `native-image`
+If GraalVM and native-image is installed, a native binary can be built with the `native-image`
 maven profile: `mvn install -P native-image`. The resulting binary will be located in
 `~/.local/share/sift/bin/sift`. `sift.zsh` and `sift.sh` first checks if the native binary
 is available, otherwise it tries to run the jar.
