@@ -332,32 +332,33 @@ object Dsl {
         }
 
         /** iterates class elements of registered [entity] type */
-        fun classesOf(entity: Entity.Type, f: Classes.() -> Unit) {
+        fun classesOf(entity: Entity.Type, f: Classes.(Entity.Type) -> Unit) {
             val classes = Action.Template.ClassesOf(entity)
-            val forkTo = Classes().also(f).action
+            val forkTo = Classes().apply { f(entity) }.action
 
             action += Action.Fork(classes andThen forkTo)
         }
 
         /** iterates method elements of registered [entity] type */
-        fun methodsOf(entity: Entity.Type, f: Methods.() -> Unit) {
+        fun methodsOf(entity: Entity.Type, f: Methods.(Entity.Type) -> Unit) {
             val methods = Action.Template.MethodsOf(entity)
-            val forkTo = Methods().also(f).action
+            val forkTo = Methods().apply { f(entity) }.action
 
             action += Action.Fork(methods andThen forkTo)
         }
 
-        fun fieldsOf(entity: Entity.Type, f: Fields.() -> Unit) {
+        /** iterates field elements of registered [entity] type */
+        fun fieldsOf(entity: Entity.Type, f: Fields.(Entity.Type) -> Unit) {
             val fields = Action.Template.FieldsOf(entity)
-            val forkTo = Fields().also(f).action
+            val forkTo = Fields().apply { f(entity) }.action
 
             action += Action.Fork(fields andThen forkTo)
         }
 
         /** iterates "scope-erased" elements, useful for property tagging entities. */
-        fun elementsOf(entity: Entity.Type, f: Elements.() -> Unit) {
+        fun elementsOf(entity: Entity.Type, f: Elements.(Entity.Type) -> Unit) {
             val elements = Action.Template.ElementsOf(entity)
-            val forkTo = Elements().also(f).action
+            val forkTo = Elements().apply { f(entity) }.action
 
             action += Action.Fork(elements andThen forkTo)
         }
@@ -973,23 +974,6 @@ object Dsl {
             action += Action.Fork(Action.Field.IntoSignature andThen forkTo)
         }
     }
-}
-
-
-internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
-    fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
-        return when (elem) {
-            is ClassNode     -> elem.methods.map { mn -> mn to e }
-            is MethodNode    -> listOf(elem to e)
-            is ParameterNode -> listOf(elem.owner to e)
-            is ValueNode     -> toMethodNodes(elem.reference, e)
-            else             -> error("unable to extract methods from $elem")
-        }
-    }
-
-    return entityService[type]
-        .flatMap { (elem, e) -> toMethodNodes(elem, e) } // FIXME: throw
-        .toMap()
 }
 
 sealed interface EntityResolution {

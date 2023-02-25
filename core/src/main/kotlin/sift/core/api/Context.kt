@@ -132,14 +132,13 @@ internal data class Context(
                 val parents = (parents[cn] ?: listOf()).map(ClassNode::type)
                 allImplemented - parents
             }
-
         }
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
         // unpacking for property() elements; ref test for edge case:
         //     DslTest.`explode Payload in List field and associate property from the main class`
-        val input = if (input is ValueNode) input.reference else input
+        val input = (input as? ValueNode)?.reference ?: input
 
         // the most immediate path back to the root element
         val plain = tracesOf(input)
@@ -231,6 +230,22 @@ internal data class Context(
     fun popMeasurementScope() {
         measurementStack.removeLast()
     }
+}
+
+internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
+    fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
+        return when (elem) {
+            is ClassNode     -> elem.methods.map { mn -> mn to e }
+            is MethodNode    -> listOf(elem to e)
+            is ParameterNode -> listOf(elem.owner to e)
+            is ValueNode     -> toMethodNodes(elem.reference, e)
+            else             -> error("unable to extract methods from $elem")
+        }
+    }
+
+    return entityService[type]
+        .flatMap { (elem, e) -> toMethodNodes(elem, e) } // FIXME: throw
+        .toMap()
 }
 
 private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {

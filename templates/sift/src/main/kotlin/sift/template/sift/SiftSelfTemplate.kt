@@ -80,7 +80,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 }
             }
 
-            classesOf(E.scope) {
+            classesOf(E.scope) { e ->
                 methods {
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
@@ -92,16 +92,16 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                         property(E.dsl, "params", readName(shorten = true))
                     }
                 }
-                E.scope["fns"] = E.dsl
+                e["fns"] = E.dsl
             }
 
-            methodsOf(E.dsl) {
-                E.dsl["actions"] = E.action.instantiations
+            methodsOf(E.dsl) { e ->
+                e["actions"] = E.action.instantiations
             }
         }
     }
 
-    override fun theme() = mapOf<Entity.Type, Style>(
+    override fun theme() = mapOf(
         E.scope     to plain(orange1 + bold),
         E.dsl       to DslStyle(orange2 + bold, blue2),
         E.element   to plain(blue1),

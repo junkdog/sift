@@ -1,6 +1,7 @@
 ## Upcoming release
 
 ### New/Tweaks
+- DSL.Template: classesOf/methodsOf/fieldsOf now passes along the Entity.Type as a lambda parameter. 
 - DSL.Class: `interfaces(recurisve, synthesize)` iterates interfaces of inspected class nodes. 
 - DSL.Parameter: `filterType()` of parameters. 
 - DSL.Field: `filterType()` of fields. 
