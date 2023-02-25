@@ -249,6 +249,38 @@ class DslTest {
     }
 
     @Test
+    fun `register enum values as entities and find invocations`() {
+        val cns = listOf(classNode(Bob::class), classNode(Bobber::class))
+
+        val bobber = Entity.Type("bob")
+        val bobEnum = Entity.Type("enum")
+
+        classes {
+            scope("enum registration") {
+                filter("Bob")
+                enums {
+                    entity(bobEnum)
+                }
+            }
+
+            scope("enum usage") {
+                filter("Bobber")
+                methods {
+                    filter("<init>", invert = true)
+                    entity(bobber)
+
+                    bobber["references"] = bobEnum.invocations
+                }
+            }
+        }.execute(cns) { es ->
+            val bobbers = es[bobber].values.toList()
+            val enums = es[bobEnum].values.toList()
+
+            assertThat(enums).hasSize(1)
+        }
+    }
+
+    @Test
     fun `internal scope in signature scope`() {
         val cns = listOf(classNode(ClassExtendingMapOfOmgPayload::class))
 

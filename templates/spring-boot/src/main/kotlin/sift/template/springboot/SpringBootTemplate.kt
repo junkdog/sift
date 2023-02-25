@@ -100,17 +100,6 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
 
                 registerController(A.controller)
                 registerController(A.restController)
-
-                scope("scan for sent commands, events and queries") {
-//                val soughtTypes = listOf(E.command, E.event, E.query)
-//                val methodsToScan = listOf(
-//                    E.endpoint,
-//                )
-//
-//                soughtTypes.product(methodsToScan)
-//                    .forEach { (type, methods) -> registerInstantiationsOf(type, methods) }
-                }
-
             }
 
             scope("dot graph property configuration") {
@@ -120,7 +109,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
     }
 
     override fun theme() = mapOf(
-        E.controller           to plain(light2 + inverse),
-        E.endpoint             to plain(light2 + bold),
+        E.controller to plain(light2 + inverse),
+        E.endpoint   to plain(light2 + bold),
     )
 }

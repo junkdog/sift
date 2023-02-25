@@ -22,6 +22,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Template.TemplateScope::class, name = "template-scope"),
     JsonSubTypes.Type(value = Action.Template.InstrumentClasses::class, name = "classes"),
     JsonSubTypes.Type(value = Action.Template.ClassesOf::class, name = "classes-of"),
+    JsonSubTypes.Type(value = Action.Template.FieldsOf::class, name = "fields-of"),
     JsonSubTypes.Type(value = Action.Template.MethodsOf::class, name = "methods-of"),
     JsonSubTypes.Type(value = Action.Template.ElementsOf::class, name = "elements-of"),
 
@@ -37,6 +38,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
     JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
     JsonSubTypes.Type(value = Action.Class.ToTemplateScope::class, name = "to-template-scope"),
+    JsonSubTypes.Type(value = Action.Class.IntoEnumValues::class, name = "into-enum-values"),
     JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
     JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
@@ -91,7 +93,6 @@ import sift.core.jackson.NoArgConstructor
 @NoArgConstructor
 sealed class Action<IN, OUT> {
 
-
     abstract fun id(): String
     internal abstract fun execute(ctx: Context, input: IN): OUT
 
@@ -137,9 +138,23 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        data class FieldsOf(
+            val entity: Entity.Type,
+        ) : Action<Unit, IterFields>() {
+            override fun id() = "fields-of($entity)"
+            override fun execute(ctx: Context, input: Unit): IterFields {
+                return ctx.entityService[entity].map { (elem, _) ->
+                    when (elem) {
+                        is FieldNode -> elem
+                        else ->  error("cannot iterate fields of ${elem::class.simpleName}: $elem")
+                    }
+                }
+            }
+        }
+
         data class MethodsOf(
             val entity: Entity.Type,
-            ) : Action<Unit, IterMethods>() {
+        ) : Action<Unit, IterMethods>() {
             override fun id() = "methods-of($entity)"
             override fun execute(ctx: Context, input: Unit): IterMethods {
                 fun methodsOf(elem: ClassNode): Iterable<MethodNode> {
@@ -314,6 +329,23 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input.mapNotNull(::signatureOf)
+            }
+        }
+
+        object IntoEnumValues : Action<IterClasses, IterFields>() {
+            override fun id() = "into-enum-values"
+            override fun execute(ctx: Context, input: IterClasses): IterFields {
+                fun enumValuesOf(elem: ClassNode): List<FieldNode> {
+                    return elem.fields
+                        .filter { it.isStatic && it.isFinal && it.isEnum }
+//                        .map { it.type }
+//                        .mapNotNull(ctx.classByType::get)
+                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                }
+
+                return input
+                    .filter(ClassNode::isEnum)
+                    .flatMap(::enumValuesOf)
             }
         }
 
@@ -730,6 +762,23 @@ sealed class Action<IN, OUT> {
         }
     }
 
+    data class FilterModifiers<T : Element>(
+        val modifiers: Int,
+        val invert: Boolean,
+    ) : IsoAction<T>() {
+        override fun id() = "filter-modifiers(${"!".takeIf { invert } ?: ""}0x${modifiers.hex(2)}"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.filter { elem ->
+                when (elem) {
+                    is ClassNode  -> elem.access
+                    is FieldNode  -> elem.access
+                    is MethodNode -> elem.access
+                    else -> error("No access modifiers possible for: ${elem::class.simpleName}")
+                }.let { access -> (access and modifiers == modifiers) xor invert }
+            }
+        }
+    }
+
     class ReadName<T : Element>(val shortened: Boolean = false) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
@@ -934,6 +983,8 @@ sealed class Action<IN, OUT> {
         }
     }
 }
+
+private fun Int.hex(bytes: Int): String = toUInt().toString(16).padStart(bytes * 2, '0')
 
 internal fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
 

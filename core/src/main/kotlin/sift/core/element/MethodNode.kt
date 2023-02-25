@@ -34,6 +34,9 @@ class MethodNode(
 
     val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn)
 
+    val access: Int
+        get() = mn.access
+
     fun returns(): SignatureNode? {
         return signature?.returns
             ?.let { ts -> SignatureNode.from(ts, this) }

@@ -347,6 +347,13 @@ object Dsl {
             action += Action.Fork(methods andThen forkTo)
         }
 
+        fun fieldsOf(entity: Entity.Type, f: Fields.() -> Unit) {
+            val fields = Action.Template.FieldsOf(entity)
+            val forkTo = Fields().also(f).action
+
+            action += Action.Fork(fields andThen forkTo)
+        }
+
         /** iterates "scope-erased" elements, useful for property tagging entities. */
         fun elementsOf(entity: Entity.Type, f: Elements.() -> Unit) {
             val elements = Action.Template.ElementsOf(entity)
@@ -501,6 +508,12 @@ object Dsl {
             action += Action.Class.FilterImplemented(type)
         }
 
+        fun enums(f: Fields.() -> Unit) {
+            action += Action.Fork(
+                Action.Class.IntoEnumValues andThen Fields().also(f).action
+            )
+        }
+
         /**
          * Iterates the interfaces of current class nodes. Includes interfaces of super class.
          * Includes interfaces from all ancestors if [recursive] is `true`.
@@ -510,6 +523,23 @@ object Dsl {
                 .let { scope -> Action.Class.IntoInterfaces(recursive, synthesize) andThen scope }
 
             action += Action.Fork(scope)
+        }
+
+        /** filter elements by access modifiers */
+        fun filter(
+            vararg modifiers: Modifiers,
+            invert: Boolean = false
+        ) {
+            filter(modifiers.toList(), invert)
+        }
+
+
+        /** filter elements by access modifiers */
+        fun filter(
+            modifiers: List<Modifiers>,
+            invert: Boolean = false
+        ) {
+            action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
         }
 
         override fun readAnnotation(
@@ -689,6 +719,23 @@ object Dsl {
             field: KProperty1<T, *>
         ): Action<IterMethods, IterValues> = readAnnotation(type<T>(), field.name)
 
+        /** filter elements by access modifiers */
+        fun filter(
+            vararg modifiers: Modifiers,
+            invert: Boolean = false
+        ) {
+            filter(modifiers.toList(), invert)
+        }
+
+
+        /** filter elements by access modifiers */
+        fun filter(
+            modifiers: List<Modifiers>,
+            invert: Boolean = false
+        ) {
+            action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
+        }
+
         fun parameters(f: Parameters.() -> Unit) {
             val forkTo = Parameters().also(f).action
 
@@ -696,10 +743,6 @@ object Dsl {
                 Action.Method.IntoParameters andThen forkTo
             )
         }
-
-//        operator fun Entity.Type.get(key: String) {
-//
-//        }
 
         fun instantiationsOf(type: Entity.Type, f: Classes.() -> Unit) {
             val classScope = Classes().also(f).action
@@ -866,6 +909,23 @@ object Dsl {
         override fun outerScope(label: String, f: Classes.() -> Unit) {
             val forkTo = Action.Field.IntoOuterScope andThen Classes().also(f).action
             action += Action.Fork(forkTo)
+        }
+
+        /** filter elements by access modifiers */
+        fun filter(
+            vararg modifiers: Modifiers,
+            invert: Boolean = false
+        ) {
+            filter(modifiers.toList(), invert)
+        }
+
+
+        /** filter elements by access modifiers */
+        fun filter(
+            modifiers: List<Modifiers>,
+            invert: Boolean = false
+        ) {
+            action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
         }
 
         override fun filter(regex: Regex, invert: Boolean) {

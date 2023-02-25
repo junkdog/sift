@@ -1,5 +1,6 @@
 package sift.core.element
 
+import org.objectweb.asm.Opcodes.*
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.FieldSignatureNode
@@ -23,6 +24,18 @@ class FieldNode private constructor(
 
     val type: AsmType
         get() = fn.type
+
+    val isStatic: Boolean
+        get() = (fn.access and ACC_STATIC) == ACC_STATIC
+
+    val isFinal: Boolean
+        get() = (fn.access and ACC_FINAL) == ACC_FINAL
+
+    val isEnum: Boolean
+        get() = (fn.access and ACC_ENUM) == ACC_ENUM
+
+    val access: Int
+        get() = fn.access
 
     override fun equals(other: Any?): Boolean {
         return other is FieldNode

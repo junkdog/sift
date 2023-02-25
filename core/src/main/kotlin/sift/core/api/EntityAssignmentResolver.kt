@@ -1,10 +1,7 @@
 package sift.core.api
 
 import org.objectweb.asm.Type
-import sift.core.element.AsmType
-import sift.core.element.ClassNode
-import sift.core.element.Element
-import sift.core.element.MethodNode
+import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
 
@@ -91,6 +88,27 @@ sealed class EntityAssignmentResolver<T: Element> {
                 .forEach { registerInstantiations(ctx, it, types, key, "backtrack") }
         }
     }
+
+//    @NoArgConstructor
+//    class FromEnumerationsOf(
+//        val key: String,
+//        override val type: Entity.Type
+//    ) : EntityAssignmentResolver<FieldNode>() {
+//        override val id: String = "enumerations"
+//
+//        override fun resolve(
+//            ctx: Context,
+//            elements: Iter<MethodNode>
+//        ) {
+//            val types = ctx.entityService[type]
+//                .map { (elem, _) -> elem as ClassNode }
+//                .map(ClassNode::type)
+//                .toSet()
+//
+//            elements
+//                .forEach { registerEnumAccess(ctx, it, types, key, "backtrack") }
+//        }
+//    }
 }
 
 private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
@@ -113,6 +131,18 @@ private fun registerInstantiations(
         .mapNotNull { ctx.entityService[it] }
         .onEach { child -> parent.addChild(parentKey, child) }
         .forEach { child -> child.addChild(childKey, parent) }
+}
+
+private fun registerEnumAccess(
+    ctx: Context,
+    elem: MethodNode,
+    enumeration: Entity.Type,
+    parentKey: String,
+    childKey: String
+) {
+    ctx.entityService[enumeration]
+        .asSequence()
+        .map { (elem, e) -> (elem as FieldNode) to e }
 }
 
 private fun registerInvocations(
