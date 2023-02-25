@@ -124,7 +124,7 @@ The system model describes the structure and relationships of entities within a 
 An entity is an object or component within the system, uniquely identified by a class,
 method, field, or parameter. 
 
-Entities are categorized by their `Entity.Type`. An entity type which represents any
+Entities are categorized by their `Entity.Type`. An entity type represents any
 noteworthy part of the system. For example, types can include REST controllers, HTTP
 endpoints, inbound/outbound messages, RDS, repositories and more.
 
