@@ -32,22 +32,22 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
 
- [orders]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-orders.png
+ [orders]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-spring-axon-orders.png
  [orders-t]: docs/images/sift-spring-axon-orders_thumbnail.png
 
  [orders-graph]: docs/images/sift-spring-axon-orders-render.png
  [orders-graph-t]: docs/images/sift-spring-axon-orders-render_thumbnail.png
 
- [system-render]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-render.png
+ [system-render]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-spring-axon-render.png
  [system-render-t]: docs/images/sift-spring-axon-render_thumbnail.png
 
- [profile]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-profile-template.png
+ [profile]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-spring-axon-profile-template.png
  [profile-t]: docs/images/sift-spring-axon-profile-template_thumbnail.png
 
- [dump-sm]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-spring-axon-dump-system-model.png
+ [dump-sm]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-spring-axon-dump-system-model.png
  [dump-sm-t]: docs/images/sift-spring-axon-dump-system-model_thumbnail.png
 
- [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev-0.6/docs/images/sift-template-sift.png
+ [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-template-sift.png
  [sift-dsl-t]: docs/images/sift-template-sift_thumbnail.png
 
 ## CLI options
