@@ -118,15 +118,15 @@ Examples:
   the result using graphviz's DOT language.
 ```
 
-## Entity and Entity Type
+## System Model Templates and Entities
 
-In a system model, entities are the individual components that make up the system, 
-such as classes, methods, fields, and parameters. Each entity is uniquely identified
-by one of these elements and cannot be associated with more than one entity.
+The system model describes the structure and relationships of entities within a system.
+An entity is an object or component within the system, uniquely identified by a class,
+method, field, or parameter. 
 
-Each entity is mapped to a specific type, which represents any noteworthy part of the
-system. For example, types can include REST controllers, HTTP endpoints, inbound/outbound
-messages, RDS, repositories and more.
+Entities are categorized by their Entity.Type. An entity type which represents any noteworthy
+part of the system. For example, types can include REST controllers, HTTP endpoints,
+inbound/outbound messages, RDS, repositories and more.
 
 ```bash
 $ sift --template spring-axon -f target/classes --list-entity-types 
@@ -144,17 +144,11 @@ entity types of spring-axon
   1 projection
   3 query
   4 query-handler
-```
-## System Model Templates
-
-The system model describes the structure and relationships of entities within a system.
-An entity is a unique object within the system, identified by a class, method, field, or
-parameter.
-
-System Model Templates describe how entities are identified within a given technology stack and/or project-specific
-constructs. The templates are written in a declarative DSL and are used to produce the
-system model from input classes. The DSL provides high-level abstractions for identifying
-and interrelating entities from class structure or usage.
+ ```
+System Model Templates describe how entities are identified within a given technology stack
+and/or project-specific constructs. The templates are written in a declarative DSL and are
+used to produce the system model from input classes. The DSL provides high-level abstractions
+for identifying and interrelating entities from class structure or usage.
 
 The code below shows a simple System Model Template that identifies REST controllers and
 HTTP endpoints within a system and associates the two entities.
@@ -181,7 +175,7 @@ template {
 Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
 The execution of a System Model Template can be introspected with the `--profile` option.
 
-A typical template can be expressed in about 100 lines of code. Some templates,
+A typical template can be expressed in about 100-200 lines of code. Some templates,
 such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined templates
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
