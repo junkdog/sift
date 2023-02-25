@@ -28,7 +28,7 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
 
  [kitty]: https://sw.kovidgoyal.net/kitty/
 
- [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L158:L300
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L131:L249
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
