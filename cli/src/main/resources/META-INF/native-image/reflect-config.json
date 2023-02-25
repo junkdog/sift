@@ -410,6 +410,9 @@
   "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }]
 },
 {
+  "name":"sift.core.api.Action$Class$IntoEnumValues"
+},
+{
   "name":"sift.core.api.Action$Class$IntoFields",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -551,6 +554,9 @@
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
     {"name":"id","parameterTypes":[] }
   ]
+},
+{
+  "name":"sift.core.api.Action$FilterModifiers"
 },
 {
   "name":"sift.core.api.Action$Fork",
@@ -889,6 +895,9 @@
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"<init>","parameterTypes":["java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
   ]
+},
+{
+  "name":"sift.core.api.Action$Template$FieldsOf"
 },
 {
   "name":"sift.core.api.Action$Template$InstrumentClasses",
