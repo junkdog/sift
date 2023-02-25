@@ -16,7 +16,7 @@ The resulting system model is composed of entities that describe the system's st
 - JSON serialization of templates for easy reuse and sharing.
 - Render system representations using Graphviz. Inline rendering for [kitty][kitty] supported via sift.sh|zsh.
 - Optionally built as a native binary using GraalVM's native-image, allowing for much faster execution times.
-  This means that Sift can typically scan most microservice-sized projects in under 0.5 seconds.
+  This means that Sift can typically analyze most microservice-sized projects in under 0.5 seconds.
 
 ![sift spring-boot axon framework][orders-graph]
 
