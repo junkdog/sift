@@ -1,7 +1,6 @@
 package sift.template.sbacqrs
 
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
@@ -15,16 +14,13 @@ import sift.core.product
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.green2
-import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Gruvbox.purple2
 import sift.core.terminal.Gruvbox.yellow2
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style.Companion.fromProperty
 import sift.core.terminal.Style.Companion.plain
-import sift.core.terminal.TextTransformer.Companion.dedupe
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.template.dsl.graphviz
-import sift.template.dsl.registerInstantiationsOf
 import sift.template.spi.SystemModelTemplateServiceProvider
 import sift.template.springboot.SpringBootTemplate
 
@@ -195,7 +191,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 }
             }
 
-            scope("scan for sent commands, events and queries") {
+            scope("wire commands, events and queries") {
 
                 val soughtTypes = listOf(E.command, E.event, E.query)
                 val methodsToScan = listOf(
@@ -206,8 +202,8 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     E.queryHandler,
                 )
 
-                soughtTypes.product(methodsToScan)
-                    .forEach { (type, methods) -> registerInstantiationsOf(type, methods) }
+                methodsToScan.product(soughtTypes)
+                    .forEach { (method, type) -> method["instantiates"] = type.instantiations }
             }
 
             scope("dot graph property configuration") {

@@ -2,6 +2,7 @@
 
 ### New/Tweaks
 - DSL.Template: `classesOf()`/`methodsOf()`/`fieldsOf()` now passes along the Entity.Type as a lambda parameter. 
+- DSL.Template: `entity[key] = foo.(instantations|invocation|fieldAccess`, replacing `registerInvocationsOf` and `registerInstantiationsOf`. 
 - DSL.Class: `interfaces(recurisve, synthesize)` iterates interfaces of inspected class nodes. 
 - DSL.Class: `filter(Modifiers..., invert)` iterates classes with matching modifiers. 
 - DSL.Class: `enums {}` opens a field scope iterating all enum values (as static final fields). 

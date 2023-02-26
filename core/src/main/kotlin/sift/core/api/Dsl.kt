@@ -362,6 +362,23 @@ object Dsl {
 
             action += Action.Fork(elements andThen forkTo)
         }
+
+        /** associates all entities with [rhs] */
+        operator fun Entity.Type.set(
+            key: String,
+            rhs: EntityResolution
+        ) {
+            methodsOf(this) { e ->
+                e[key] = rhs
+            }
+        }
+
+        val Entity.Type.instantiations
+            get() = EntityResolution.Instantiations(this)
+        val Entity.Type.invocations
+            get() = EntityResolution.Invocations(this)
+        val Entity.Type.fieldAccess
+            get() = EntityResolution.FieldAccess(this)
     }
 
     @SiftTemplateDsl

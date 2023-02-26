@@ -75,6 +75,7 @@ fun Dsl.Template.graphviz(
     }
 }
 
+@Deprecated("use Entity.Type.set() from Template scope instead")
 fun Dsl.Template.registerInstantiationsOf(
     methodType: Entity.Type,
     source: Entity.Type,
@@ -85,6 +86,7 @@ fun Dsl.Template.registerInstantiationsOf(
     }
 }
 
+@Deprecated("use Entity.Type.set() from Template scope instead")
 fun Dsl.Template.registerInvocationsOf(
     methodType: Entity.Type,
     source: Entity.Type,
