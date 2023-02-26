@@ -19,7 +19,7 @@ class TemplateOptions : OptionGroup(name = "Template options") {
 
 
     val listTemplates: Boolean by option("-l", "--list-templates",
-            help = "Print all templates detected on the current classpath.")
+            help = "Print all installed templates.")
         .flag()
 
     val listEntityTypes: Boolean by option("-T", "--list-entity-types",
