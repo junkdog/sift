@@ -1,5 +1,7 @@
 ## Upcoming release
 
+## sift-0.6.0 2023-02-26
+
 ### New/Tweaks
 - DSL.Template: `classesOf()`/`methodsOf()`/`fieldsOf()` now passes along the Entity.Type as a lambda parameter. 
 - DSL.Template: `entity[key] = foo.(instantations|invocation|fieldAccess)`, replacing `registerInvocationsOf` and `registerInstantiationsOf`. 
