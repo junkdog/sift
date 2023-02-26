@@ -2,20 +2,33 @@ package sift.core.api
 
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
+import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import sift.core.asm.ownerType
 import sift.core.element.ClassNode
+import sift.core.element.FieldNode
 import sift.core.element.MethodNode
 
-internal fun instantiations(mn: MethodNode): List<Type> {
-    return mn.instructions()
-        .mapNotNull { it as? MethodInsnNode }
-        .filter(AbstractInsnNode::isCallingConstructor)
-        .map(MethodInsnNode::ownerType)
-        .distinct()
-        .toList()
-}
+internal fun instantiations(
+    mn: MethodNode
+): List<Type> = mn
+    .instructions()
+    .mapNotNull { it as? MethodInsnNode }
+    .filter(AbstractInsnNode::isCallingConstructor)
+    .map(MethodInsnNode::ownerType)
+    .distinct()
+    .toList()
+
+internal fun fieldAccessBy(
+    mns: Iterable<MethodNode>, // actually, 1 mn resolved by methodsInvokedBy
+    cns: Map<Type, ClassNode>
+): List<FieldNode> = mns
+    .flatMap(MethodNode::instructions)
+    .mapNotNull { it as? FieldInsnNode }
+    .filter { it.opcode == Opcodes.GETSTATIC || it.opcode == Opcodes.GETFIELD }
+    .mapNotNull(cns::findField)
+    .toList()
 
 internal fun methodsInvokedBy(
     mn: MethodNode,
@@ -71,6 +84,11 @@ private fun Sequence<AbstractInsnNode>.kotlinNoinlineLambdas(callee: String): Li
     return singleton + dynamic
 }
 
+
+private fun Map<Type, ClassNode>.findField(ins: FieldInsnNode): FieldNode? {
+    val cn = this[ins.ownerType] ?: return null
+    return cn.fields.find { it.name == ins.name }
+}
 
 private fun Map<Type, ClassNode>.findMethod(ins: MethodInsnNode): MethodNode? {
     return findMethod(ins.ownerType, ins.name, ins.desc)

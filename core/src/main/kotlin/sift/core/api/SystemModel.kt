@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import sift.core.entity.Entity
+import sift.core.entity.EntityService
 import sift.core.jackson.SystemModelSerializer
 import sift.core.jackson.serializationModule
+import sift.core.template.toTree
 import sift.core.tree.Tree
 import java.io.File
 
@@ -22,6 +24,10 @@ data class SystemModel(
         context.entityService.entitiesByType.map { (type, v) -> type to v.values.toList() }.toMap(),
         context.measurements,
     )
+
+    internal constructor(
+        es: EntityService
+    ) : this(es.allEntities().groupBy(Entity::type), Tree(Measurement.NONE))
 
     operator fun get(type: Entity.Type): List<Entity> = entitiesByType[type] ?: listOf()
     operator fun contains(type: Entity.Type): Boolean = type in entitiesByType

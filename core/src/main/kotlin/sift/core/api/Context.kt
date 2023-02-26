@@ -43,6 +43,7 @@ internal data class Context(
         .toMutableMap()
 
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
+    private val methodFieldAccessCache: MutableMap<MethodNode, Iterable<FieldNode>> = mutableMapOf()
 
     val parents: MutableMap<ClassNode, List<ClassNode>> = allClasses
         .associateWith(classByType::parentsOf)
@@ -87,6 +88,12 @@ internal data class Context(
 
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
         return methodInvocationsCache.getOrPut(mn) { methodsInvokedBy(mn, classByType) }
+    }
+
+    fun fieldAccessBy(mn: MethodNode): Iterable<FieldNode> {
+        return methodFieldAccessCache.getOrPut(mn) {
+            fieldAccessBy(methodsInvokedBy(mn), classByType)
+        }
     }
 
     fun synthesize(owner: AsmType, name: String, desc: String): MethodNode {
@@ -248,6 +255,20 @@ internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity
         .toMap()
 }
 
+internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
+    fun toFieldNodes(elem: Element, e: Entity): Pair<FieldNode, Entity> {
+        return when (elem) {
+            is FieldNode     ->  elem to e
+            is ValueNode     -> toFieldNodes(elem.reference, e)
+            else             -> error("unable to extract methods from $elem")
+        }
+    }
+
+    return entityService[type]
+        .map { (elem, e) -> toFieldNodes(elem, e) } // FIXME: throw
+        .toMap()
+}
+
 private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
     return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
         .drop(1)
@@ -266,8 +287,14 @@ data class Measurement(
     var scopeOut: MeasurementScope,
     var input: Int,
     var output: Int,
-    var execution: Duration,
-)
+    var execution: Duration
+) {
+    companion object {
+        val NONE: Measurement = Measurement(
+            "none", MeasurementScope.FromContext, MeasurementScope.FromContext, 0, 0, 0.seconds
+        )
+    }
+}
 
 enum class MeasurementScope(val id: String) {
     Template("template-scope"),

@@ -641,6 +641,7 @@ object Dsl {
             val resolver = when (rhs) {
                 is EntityResolution.Instantiations -> EntityAssignmentResolver.FromInstantiationsOf(key, rhs.type)
                 is EntityResolution.Invocations    -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
+                is EntityResolution.FieldAccess    -> EntityAssignmentResolver.FromFieldAccessOf(key, rhs.type)
             }
 
             action += Action.RegisterChildrenFromResolver(this, key, resolver)
@@ -651,8 +652,9 @@ object Dsl {
             rhs: Entity.Type
         ) {
             val resolver = when (this) {
-                is EntityResolution.Instantiations -> EntityAssignmentResolver.FromInstantiationsBy(key, type, rhs)
-                is EntityResolution.Invocations    -> EntityAssignmentResolver.FromInvocationsBy(key, type, rhs)
+                is EntityResolution.Instantiations -> EntityAssignmentResolver.FromInstantiationsBy(key, type)
+                is EntityResolution.Invocations    -> EntityAssignmentResolver.FromInvocationsBy(key, type)
+                is EntityResolution.FieldAccess    -> EntityAssignmentResolver.FromFieldAccessBy(key, type)
             }
 
             action += Action.RegisterChildrenFromResolver(rhs, key, resolver)
@@ -782,6 +784,8 @@ object Dsl {
             get() = EntityResolution.Instantiations(this)
         val Entity.Type.invocations
             get() = EntityResolution.Invocations(this)
+        val Entity.Type.fieldAccess
+            get() = EntityResolution.FieldAccess(this)
     }
 
     class Parameters(
@@ -979,6 +983,7 @@ object Dsl {
 sealed interface EntityResolution {
     class Instantiations(val type: Entity.Type) : EntityResolution
     class Invocations(val type: Entity.Type) : EntityResolution
+    class FieldAccess(val type: Entity.Type) : EntityResolution
 }
 
 @Suppress("EnumEntryName")

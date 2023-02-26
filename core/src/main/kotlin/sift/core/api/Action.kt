@@ -75,6 +75,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.DebugLog::class, name = "log"),
     JsonSubTypes.Type(value = Action.HasAnnotation::class, name = "has-annotation"),
     JsonSubTypes.Type(value = Action.EntityFilter::class, name = "entity-filter"),
+    JsonSubTypes.Type(value = Action.FilterModifiers::class, name = "filter-modifiers"),
     JsonSubTypes.Type(value = Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(value = Action.WithValue::class, name = "with-value"),
     JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
@@ -338,8 +339,6 @@ sealed class Action<IN, OUT> {
                 fun enumValuesOf(elem: ClassNode): List<FieldNode> {
                     return elem.fields
                         .filter { it.isStatic && it.isFinal && it.isEnum }
-//                        .map { it.type }
-//                        .mapNotNull(ctx.classByType::get)
                         .onEach { output -> ctx.scopeTransition(elem, output) }
                 }
 

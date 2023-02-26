@@ -3,8 +3,12 @@
 ### New/Tweaks
 - DSL.Template: `classesOf()`/`methodsOf()`/`fieldsOf()` now passes along the Entity.Type as a lambda parameter. 
 - DSL.Class: `interfaces(recurisve, synthesize)` iterates interfaces of inspected class nodes. 
-- DSL.Parameter: `filterType()` of parameters. 
+- DSL.Class: `filter(Modifiers..., invert)` iterates classes with matching modifiers. 
+- DSL.Class: `enums {}` opens a field scope iterating all enum values (as static final fields). 
 - DSL.Field: `filterType()` of fields. 
+- DSL.Field: `filter(Modifiers..., invert)` iterates fields with matching modifiers. 
+- DSL.Method: `filter(Modifiers..., invert)` iterates methods with matching modifiers. 
+- DSL.Parameter: `filterType()` of parameters. 
 - dot: Remove need for specifying `"dot-ignore"` property.
 - DSL: re-registering the same entity using `entity(entitty, label...)` will now update the entity label.
 - CLI: `--edge-layout=spline|polyline|ortho`, used together with `-R`/`--render`.

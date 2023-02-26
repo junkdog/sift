@@ -12,24 +12,38 @@ sealed class EntityAssignmentResolver<T: Element> {
     internal abstract fun resolve(ctx: Context, elements: Iter<T>)
 
     @NoArgConstructor
-    class FromInstantiationsBy(
+    class FromFieldAccessBy(
         val key: String,
         override val type: Entity.Type,
-        val instantiater: Entity.Type,
     ) : EntityAssignmentResolver<MethodNode>() {
-        override val id: String = "instantiated-by"
+        override val id: String = "field-access-by"
 
+        override fun resolve(
+            ctx: Context,
+            elements: Iter<MethodNode> // = rhs
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            val matched = ctx.entityService[type] as Map<FieldNode, Entity>
+            elements
+                .forEach { registerFieldAccess(ctx, it, matched, key, "backtrack") }
+        }
+    }
+
+    @NoArgConstructor
+    class FromFieldAccessOf(
+        val key: String,
+        override val type: Entity.Type
+    ) : EntityAssignmentResolver<MethodNode>() {
+        override val id: String = "field-access-of"
+
+        @Suppress("UNCHECKED_CAST")
         override fun resolve(
             ctx: Context,
             elements: Iter<MethodNode>
         ) {
-            val types = ctx.entityService[type]
-                .map { (elem, _) -> elem as ClassNode } // FIXME: throw
-                .map(ClassNode::type)
-                .toSet()
-
+            val matched = ctx.entityService[type] as Map<FieldNode, Entity>
             elements
-                .forEach { registerInstantiations(ctx, it, types, "backtrack", key) }
+                .forEach { registerFieldAccess(ctx, it, matched, key, "backtrack") }
         }
     }
 
@@ -37,7 +51,6 @@ sealed class EntityAssignmentResolver<T: Element> {
     class FromInvocationsBy(
         val key: String,
         override val type: Entity.Type,
-        val invoker: Entity.Type,
     ) : EntityAssignmentResolver<MethodNode>() {
         override val id: String = "invoked-by"
 
@@ -69,6 +82,28 @@ sealed class EntityAssignmentResolver<T: Element> {
     }
 
     @NoArgConstructor
+    class FromInstantiationsBy(
+        val key: String,
+        override val type: Entity.Type,
+    ) : EntityAssignmentResolver<MethodNode>() {
+        override val id: String = "instantiated-by"
+
+        override fun resolve(
+            ctx: Context,
+            elements: Iter<MethodNode>
+        ) {
+            val types = ctx.entityService[type]
+                .map { (elem, _) -> elem as ClassNode } // FIXME: throw
+                .map(ClassNode::type)
+                .toSet()
+
+            elements
+                .forEach { registerInstantiations(ctx, it, types, "backtrack", key) }
+        }
+    }
+
+
+    @NoArgConstructor
     class FromInstantiationsOf(
         val key: String,
         override val type: Entity.Type
@@ -88,27 +123,6 @@ sealed class EntityAssignmentResolver<T: Element> {
                 .forEach { registerInstantiations(ctx, it, types, key, "backtrack") }
         }
     }
-
-//    @NoArgConstructor
-//    class FromEnumerationsOf(
-//        val key: String,
-//        override val type: Entity.Type
-//    ) : EntityAssignmentResolver<FieldNode>() {
-//        override val id: String = "enumerations"
-//
-//        override fun resolve(
-//            ctx: Context,
-//            elements: Iter<MethodNode>
-//        ) {
-//            val types = ctx.entityService[type]
-//                .map { (elem, _) -> elem as ClassNode }
-//                .map(ClassNode::type)
-//                .toSet()
-//
-//            elements
-//                .forEach { registerEnumAccess(ctx, it, types, key, "backtrack") }
-//        }
-//    }
 }
 
 private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
@@ -133,18 +147,6 @@ private fun registerInstantiations(
         .forEach { child -> child.addChild(childKey, parent) }
 }
 
-private fun registerEnumAccess(
-    ctx: Context,
-    elem: MethodNode,
-    enumeration: Entity.Type,
-    parentKey: String,
-    childKey: String
-) {
-    ctx.entityService[enumeration]
-        .asSequence()
-        .map { (elem, e) -> (elem as FieldNode) to e }
-}
-
 private fun registerInvocations(
     ctx: Context,
     elem: MethodNode,
@@ -157,6 +159,22 @@ private fun registerInvocations(
         .filter { mn -> mn in matched }
         .filter { mn -> elem != mn }
         .map { ctx.entityService[matched[it]!!] as MethodNode }
+        .mapNotNull { ctx.entityService[it] }
+        .onEach { child -> parent.addChild(parentKey, child) }
+        .onEach { child -> child.addChild(childKey, parent) }
+}
+
+private fun registerFieldAccess(
+    ctx: Context,
+    elem: MethodNode,
+    matched: Map<FieldNode, Entity>,
+    parentKey: String,
+    childKey: String
+) {
+    val parent = ctx.entityService[elem]!!
+    ctx.fieldAccessBy(elem)
+        .filter { fn -> fn in matched }
+        .map { ctx.entityService[matched[it]!!] as FieldNode }
         .mapNotNull { ctx.entityService[it] }
         .onEach { child -> parent.addChild(parentKey, child) }
         .onEach { child -> child.addChild(childKey, parent) }

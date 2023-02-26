@@ -13,6 +13,7 @@ import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.api.Dsl.classes
 import sift.core.api.Dsl.template
+import sift.core.api.Modifiers.*
 import sift.core.api.ScopeEntityPredicate.ifExists
 import sift.core.api.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
@@ -22,6 +23,7 @@ import sift.core.asm.classNode
 import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.template.toTree
 import sift.core.tree.debugTree
 import java.io.InputStream
 import kotlin.test.assertTrue
@@ -249,16 +251,28 @@ class DslTest {
     }
 
     @Test
-    fun `register enum values as entities and find invocations`() {
+    fun `register enum values as entities and find usages`() {
         val cns = listOf(classNode(Bob::class), classNode(Bobber::class))
 
         val bobber = Entity.Type("bob")
         val bobEnum = Entity.Type("enum")
 
+        val expectedTree = """
+            |── bob
+            |   ├─ Bobber::a
+            |   │  └─ Bob.A
+            |   ├─ Bobber::b
+            |   │  └─ Bob.A
+            |   └─ Bobber::c
+            |      ├─ Bob.A
+            |      └─ Bob.B
+            |"""
+
+        // enums {} to register enum values as entities
         classes {
             scope("enum registration") {
                 filter("Bob")
-                enums {
+                enums { // faster
                     entity(bobEnum)
                 }
             }
@@ -269,15 +283,29 @@ class DslTest {
                     filter("<init>", invert = true)
                     entity(bobber)
 
-                    bobber["references"] = bobEnum.invocations
+                    bobber["references"] = bobEnum.fieldAccess                }
+            }
+        }.execute(cns, bobber, expectedTree)
+
+        // identify enums manually; functionally equivalent, but slower
+        classes {
+            scope("enum registration") {
+                filter("Bob")
+                fields {
+                    filter(acc_static, acc_final, acc_enum)
+                    entity(bobEnum)
                 }
             }
-        }.execute(cns) { es ->
-            val bobbers = es[bobber].values.toList()
-            val enums = es[bobEnum].values.toList()
 
-            assertThat(enums).hasSize(1)
-        }
+            scope("enum usage") {
+                filter("Bobber")
+                methods {
+                    filter("<init>", invert = true)
+                    entity(bobber)
+
+                    bobber["references"] = bobEnum.fieldAccess                }
+            }
+        }.execute(cns, bobber, expectedTree)
     }
 
     @Test
@@ -1768,12 +1796,27 @@ class DslTest {
             .entityService
             .also(block)
     }
+
+    private fun Action<Unit, Unit>.execute(
+        cns: List<ClassNode> = allCns,
+        root: Entity.Type,
+        expectTree: String
+    ) {
+        execute(cns) { es ->
+            assertThat(es.toTree(root))
+                .isEqualTo(expectTree.trimMargin())
+        }
+    }
 }
 
 fun Iterable<Entity>.prettyPrint(): List<String> {
     return map { e -> "Entity(${e.label}, type=${e.type})" }
         .joinToString("\n")
         .lines()
+}
+
+fun EntityService.toTree(root: Entity.Type): String {
+    return SystemModel(this).toTree(root).toString()
 }
 
 private class FieldClass {
