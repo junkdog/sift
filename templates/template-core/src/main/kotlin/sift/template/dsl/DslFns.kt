@@ -9,6 +9,33 @@ import sift.core.entity.Entity
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
 import sift.core.graphviz.Style
+import sift.core.terminal.TextTransformer
+
+
+fun Dsl.Template.graphviz(
+    e: Entity.Type,
+    identifyAs: Entity.Type? = null,
+    rank: Int? = null,
+    type: Dot? = null,
+    shape: Shape? = null,
+    style: Style? = null,
+    arrowheadShape: String? = null,
+    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    label: TextTransformer
+) {
+    graphviz(
+        e = e,
+        identifyAs = identifyAs,
+        rank = rank,
+        type = type,
+        shape = shape,
+        style = style,
+        arrowheadShape = arrowheadShape,
+        edgeLabel = edgeLabel,
+        label = arrayOf(label)
+    )
+}
+
 
 fun Dsl.Template.graphviz(
     entities: Iterable<Entity.Type>,
@@ -16,13 +43,27 @@ fun Dsl.Template.graphviz(
     rank: Int? = null,
     type: Dot? = null,
     shape: Shape? = null,
-    removeSuffix: String? = null,
     style: Style? = null,
     arrowheadShape: String? = null,
-    edgeLabel: Action<Iter<Element>, IterValues>? = null
+    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    label: TextTransformer
+) {
+    graphviz(entities, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label = arrayOf(label))
+}
+
+fun Dsl.Template.graphviz(
+    entities: Iterable<Entity.Type>,
+    identifyAs: Entity.Type? = null,
+    rank: Int? = null,
+    type: Dot? = null,
+    shape: Shape? = null,
+    style: Style? = null,
+    arrowheadShape: String? = null,
+    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    vararg label: TextTransformer
 ) {
     entities.forEach { e ->
-        graphviz(e, identifyAs, rank, type, shape, removeSuffix, style, arrowheadShape, edgeLabel)
+        graphviz(e, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, *label)
     }
 }
 
@@ -51,9 +92,6 @@ fun Dsl.Template.graphviz(
     /** The shape of nodes. */
     shape: Shape? = null,
 
-    /** The shape for [Dot.node]. */
-    removeSuffix: String? = null,
-
     /** The style of edges or nodes. E.g. [Style.dashed]. */
     style: Style? = null,
 
@@ -61,17 +99,21 @@ fun Dsl.Template.graphviz(
     arrowheadShape: String? = null,
 
     /** ... */
-    edgeLabel: Action<Iter<Element>, IterValues>? = null
+    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    vararg label: TextTransformer = arrayOf(),
 ) {
     elementsOf(e) {
         rank?.let {           property(e, "dot-rank", withValue(it)) }
         identifyAs?.let {     property(e, "dot-id-as", withValue(it)) }
         type?.let {           property(e, "dot-type", withValue(it)) }
         shape?.let {          property(e, "dot-shape", withValue(it.name)) }
-        removeSuffix?.let {   property(e, "dot-label-strip", withValue(it)) }
         style?.let {          property(e, "dot-style", withValue(it.name)) }
         arrowheadShape?.let { property(e, "dot-arrowhead", withValue(it)) }
         edgeLabel?.let {      property(e, "dot-edge-label", it) }
+
+        if (label.isNotEmpty() ) {
+            property(e, "dot-label-transform", withValue(label.toList()))
+        }
     }
 }
 

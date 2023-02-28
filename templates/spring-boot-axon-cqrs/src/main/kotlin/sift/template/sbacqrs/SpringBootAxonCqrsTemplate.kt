@@ -210,13 +210,13 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 graphviz(listOf(E.aggregate, E.aggregateMember),
                     rank = 1, // endpoints @ rank = 0
                     type = Dot.node,
-                    removeSuffix = "Aggregate",
-                    shape = Shape.component
+                    shape = Shape.component,
+                    label = replace(Regex("Aggregate\$"), ""),
                 )
 
                 graphviz(E.event,
                     rank = 2,
-                    removeSuffix = "Event",
+                    label = replace(Regex("Event\$"), ""),
                     shape = Shape.folder,
                     type = Dot.node
                 )
@@ -224,20 +224,20 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 graphviz(E.projection,
                     rank = 3,
                     type = Dot.node,
-                    removeSuffix = "Projection",
+                    label = replace(Regex("Projection\$"), ""),
                     shape = Shape.box3d
                 )
 
                 // edges
                 graphviz(E.command,
                     type = Dot.edge,
-                    removeSuffix = "Command"
+                    label = replace(Regex("Command\$"), "")
                 )
 
                 graphviz(E.query,
                     type = Dot.edge,
                     style = Style.dashed,
-                    removeSuffix = "Query",
+                    label = replace(Regex("Query\$"), ""),
                     arrowheadShape = "onormal",
                 )
             }

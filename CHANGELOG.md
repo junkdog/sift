@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### Breaking changes
+- DSL.Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
+
 ## sift-0.6.0 2023-02-26
 
 ### New/Tweaks
