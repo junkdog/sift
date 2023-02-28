@@ -9,19 +9,22 @@ import sift.core.pop
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.terminal.Gruvbox
+import sift.core.terminal.TextTransformer
 
 /*
 
-dot-id-as           entity.type
-dot-edge-label      str; for edge in conj with `dot-id-as`
-dot-label-strip     suffix
-dot-type            edge|node
-dot-ignore          true|false
-dot-rank            0..MAX
-dot-arrowhead       onormal|..
-dot-style           dashed|..
+dot-id-as            entity.type
+dot-edge-label       str; for edge in conj with `dot-id-as`
+dot-type             edge|node
+dot-ignore           true|false
+dot-rank             0..MAX
+dot-arrowhead        onormal|..
+dot-style            dashed|..
+dot-label-transform  TextTransformer..
 
-dot-shape           folder|box3d|cylinder|component|..
+dot-shape            folder|box3d|cylinder|component|..
+
+~~dot-label-strip      suffix~~
  */
 
 
@@ -230,7 +233,11 @@ private val Entity.dotRank: Int
     get() = this["dot-rank"]?.firstOrNull() as Int? ?: 0
 
 private val Entity.dotLabel: String
-    get() = label.removeSuffix((this["dot-label-strip"]?.firstOrNull() as String?) ?: "")
+    get() = dotLabelTransformers.fold(label) { s, transform -> transform(s) }
+
+@Suppress("UNCHECKED_CAST")
+private val Entity.dotLabelTransformers: List<TextTransformer>
+    get() = this["dot-label-transform"] as List<TextTransformer>? ?: listOf()
 
 private val Entity.dotArrowhead: String?
     get() = this["dot-arrowhead"]?.firstOrNull() as String?

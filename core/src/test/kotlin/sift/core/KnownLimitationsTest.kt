@@ -65,8 +65,8 @@ class KnownLimitationsTest {
         cns: List<ClassNode>,
         block: (EntityService) -> Unit
     ) {
-        PipelineProcessor(cns)
-            .processPipeline(this, false, Context::debugTrails)
+        TemplateProcessor(cns)
+            .process(this, false, Context::debugTrails)
             .entityService
             .also(block)
     }

@@ -4,7 +4,6 @@
 package sift.cli
 
 import com.fasterxml.jackson.module.kotlin.*
-import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.completion.completionOption
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.PrintMessage
@@ -34,7 +33,9 @@ import sift.template.*
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
+import sift.core.terminal.Gruvbox.dark1
 import sift.core.terminal.Gruvbox.dark2
+import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.dark4
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
@@ -52,10 +53,8 @@ import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
 import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
-import java.nio.file.Path
 import java.util.Properties
 import java.util.ServiceLoader
-import kotlin.io.path.exists
 import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
@@ -215,7 +214,7 @@ object SiftCli : CliktCommand(
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            PipelineProcessor(classNodes(template.path!!))
+            TemplateProcessor(classNodes(template.path!!))
                 .execute(template.template!!.template(), template.profile)
         }
     }
@@ -397,7 +396,7 @@ object SiftCli : CliktCommand(
     private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
-        val sm: SystemModel = PipelineProcessor(classNodes(this.template.path!!))
+        val sm: SystemModel = TemplateProcessor(classNodes(this.template.path!!))
             .execute(template.template(), this.template.profile)
 
         return sm to template.toTree(sm, forType)
@@ -509,32 +508,37 @@ object SiftCli : CliktCommand(
 
         val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)
 
+        var lastEntityCount = 0
+
         // print headers
-        terminal.println((fg + bold)("  exec   in     out"))
+        terminal.println((fg + bold)("     exec  ety#    in      out"))
         terminal.println(sm.measurements.toString(
             format = { measurement ->
                 measurement.scopeIn.style()(measurement.action)
             },
             prefix = { measurement ->
-                val ms = (measurement.execution + 500.microseconds).inWholeMilliseconds
+                val ms = measurement.execution.inWholeMicroseconds / 1000.0
                 val c = if (ms < 1) {
-                    dark2
+                    dark3
                 } else {
-                    gradient[max(0, min(gradient.lastIndex, log(ms.toDouble(), 2.5).toInt()))]
+                    gradient[max(0, min(gradient.lastIndex, log(ms, 2.5).toInt()))]
                 }
+
+                val c2 = if (measurement.entites > lastEntityCount) (fg + bold) else dark4
+                lastEntityCount = measurement.entites
 
                 val input = measurement.scopeIn.style()
                 val output = when (measurement.scopeOut) {
                     MeasurementScope.FromContext -> measurement.scopeIn
-                    else -> measurement.scopeOut
+                    else                         -> measurement.scopeOut
                 }.style()
 
                 if (measurement.execution.isPositive()) {
-                    "${c("%3d ms")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
-                        .format(ms, measurement.input, measurement.output)
+                    "${c("%6.2f ms")} ${c2("%5d")} ${input("%5d")} ${light0("->")} ${output("%5d")}  "
+                        .format(ms, measurement.entites, measurement.input, measurement.output)
                 } else {
-                    "${c("      ")} ${input("%4d")} ${light0("->")} ${output("%4d")}  "
-                        .format(measurement.input, measurement.output)
+                    "${c("         ")} ${c2("%5s")} ${input("%5d")} ${light0("->")} ${output("%5d")}  "
+                        .format("", measurement.input, measurement.output)
                 }
             }
         ))

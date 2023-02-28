@@ -70,7 +70,7 @@ internal data class Context(
         .toMutableMap()
 
 
-    val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0.milliseconds))
+    val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0, 0.milliseconds))
     private var measurementStack: MutableList<Tree<Measurement>> = mutableListOf(measurements)
     private var pushScopes: Int = 0
 
@@ -205,6 +205,7 @@ internal data class Context(
             scopeOut = MeasurementScope.FromContext,
             input = sizeOf(input),
             output = 0,
+            entites = 0,
             execution = 0.seconds
         )
         when (action) {
@@ -224,8 +225,11 @@ internal data class Context(
         val start = System.nanoTime().nanoseconds
         val out = action.execute(ctx, input) // TODO: measureTimedValue
         val end = System.nanoTime().nanoseconds
-        measurement.output = sizeOf(out)
-        measurement.execution = end - start
+        measurement.apply {
+            output = sizeOf(out)
+            execution = end - start
+            entites = ctx.entityService.allEntities().size
+        }
 
         return out
     }
@@ -287,11 +291,12 @@ data class Measurement(
     var scopeOut: MeasurementScope,
     var input: Int,
     var output: Int,
+    var entites: Int,
     var execution: Duration
 ) {
     companion object {
         val NONE: Measurement = Measurement(
-            "none", MeasurementScope.FromContext, MeasurementScope.FromContext, 0, 0, 0.seconds
+            "none", MeasurementScope.FromContext, MeasurementScope.FromContext, 0, 0, 0, 0.seconds
         )
     }
 }

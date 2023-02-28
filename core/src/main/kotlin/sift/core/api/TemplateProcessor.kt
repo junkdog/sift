@@ -5,10 +5,10 @@ import org.objectweb.asm.tree.ClassNode
 import sift.core.tree.Tree
 import kotlin.time.Duration.Companion.nanoseconds
 
-class PipelineProcessor(classNodes: Iterable<ClassNode>) {
+class TemplateProcessor(classNodes: Iterable<ClassNode>) {
     private val context: Context = Context(classNodes)
 
-    internal fun processPipeline(
+    internal fun process(
         action: Action<Unit, Unit>,
         profile: Boolean,
         onComplete: (Context) -> Unit = {}
@@ -49,6 +49,7 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
             context.measurements.value.let { root ->
                 root.execution = (end - start).nanoseconds
                 root.action = "template"
+                root.entites = context.entityService.allEntities().size
             }
         }
 
@@ -56,6 +57,6 @@ class PipelineProcessor(classNodes: Iterable<ClassNode>) {
     }
 
     fun execute(action: Action<Unit, Unit>, profile: Boolean): SystemModel {
-        return processPipeline(action, profile).let(::SystemModel)
+        return process(action, profile).let(::SystemModel)
     }
 }
