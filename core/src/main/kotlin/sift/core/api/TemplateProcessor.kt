@@ -9,12 +9,12 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
     private val context: Context = Context(classNodes)
 
     internal fun process(
-        action: Action<Unit, Unit>,
+        template: Action<Unit, Unit>,
         profile: Boolean,
         onComplete: (Context) -> Unit = {}
     ): Context {
         val start = System.nanoTime()
-        action(context, Unit)
+        template(context, Unit)
         context.updateEntityLabels()
         val end = System.nanoTime()
 
@@ -56,7 +56,7 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
         return context
     }
 
-    fun execute(action: Action<Unit, Unit>, profile: Boolean): SystemModel {
-        return process(action, profile).let(::SystemModel)
+    fun execute(template: Action<Unit, Unit>, profile: Boolean): SystemModel {
+        return process(template, profile).let(::SystemModel)
     }
 }

@@ -98,6 +98,9 @@ object Dsl {
         ) = LabelFormatter.FromPattern(pattern, ops.toList())
 
 
+        /**
+         * Filters elements that belongs to [entity].
+         */
         fun filter(entity: Entity.Type) {
             action += Action.EntityFilter(entity)
         }
@@ -184,7 +187,7 @@ object Dsl {
          * ## Example
          * ```
          * annotatedBy(A.XmlController)
-         * update(SE.controller, "@style-as", withValue(E.XmlController))
+         * property(SE.controller, "@style-as", withValue(E.XmlController))
          * ```
          */
         fun withValue(value: Any): Action<Iter<ELEMENT>, IterValues> {
