@@ -72,7 +72,7 @@ class Entity(
     }
 }
 
-fun Entity.toTree(): Tree<EntityNode> {
+internal fun Entity.toTree(): Tree<EntityNode> {
     return tree("") {
         children.forEach { (label, entities) ->
             add(label) {  entities.forEach { add(it) } }

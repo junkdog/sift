@@ -55,12 +55,12 @@ internal object Throw {
     }
 }
 
-sealed class SiftException(
+internal sealed class SiftException(
     message: String,
     cause: Throwable? = null
 ) : RuntimeException(message, cause)
 
-sealed class SiftModelException(
+internal sealed class SiftModelException(
     message: String,
     cause: Throwable? = null
 ) : SiftException(message, cause)

@@ -35,8 +35,8 @@ enum class EdgeLayout {
 
 class DiagramGenerator(
     sm: SystemModel,
-    val edgeSplines: EdgeLayout,
-    val colorLookup: (Entity.Type) -> String
+    private val edgeSplines: EdgeLayout,
+    private val colorLookup: (Entity.Type) -> String
 ) {
     private val nodes: List<Entity> = sm.entitiesByType
         .values
