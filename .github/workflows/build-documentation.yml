@@ -1,0 +1,52 @@
+name: manually build documentation with maven and publish to github pages
+on:
+  workflow_dispatch
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: 'maven'
+      - name: dokka
+        run: mvn clean && mvn -B -P dsl-docs dokka:dokka -f core
+      - id: cache-docs
+        uses: actions/cache@v3
+        with:
+          key: cache-docs
+          path: "core/target/dokka"
+
+  deploy-to-pages:
+    needs: build-docs
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write     # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
+    runs-on: ubuntu-latest
+    steps:
+      - name: restore docs cache
+        id: cache-docs
+        uses: actions/cache/restore@v3
+        with:
+          key: cache-docs
+          path: "core/target/dokka"
+      - name: package documentation
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "core/target/dokka"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
+
