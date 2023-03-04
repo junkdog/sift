@@ -564,7 +564,11 @@
   ]
 },
 {
-  "name":"sift.core.api.Action$FilterModifiers"
+  "name":"sift.core.api.Action$FilterModifiers",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["int","boolean"] }]
 },
 {
   "name":"sift.core.api.Action$Fork",
