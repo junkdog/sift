@@ -105,4 +105,44 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>dsl-docs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jetbrains.dokka</groupId>
+                        <artifactId>dokka-maven-plugin</artifactId>
+                        <version>${dokka.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>dokka</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <jdkVersion>17</jdkVersion>
+                            <skipEmptyPackages>true</skipEmptyPackages>
+                            <reportUndocumented>false</reportUndocumented>
+                            <includeNonPublic>false</includeNonPublic>
+                            <sourceDirectories>
+                                <dir>${project.basedir}/src/main/kotlin</dir>
+                            </sourceDirectories>
+                            <perPackageOptions>
+                                <packageOptions>
+                                    <matchingRegex>
+                                        sift.core(|\.(asm|collections|element|entity|jackson|graphviz|template|terminal|tree).*)
+                                    </matchingRegex>
+                                    <suppress>true</suppress>
+                                </packageOptions>
+                            </perPackageOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
