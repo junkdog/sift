@@ -23,15 +23,25 @@ typealias SCE = SpringCrudTemplate.EntityTypes
 typealias SCA = SpringCrudTemplate.Annotations
 typealias SCT = SpringCrudTemplate.AsmTypes
 
+/**
+ * A basic template for the Spring Boot Pet Clinic demo application.
+ *
+ * This template:
+ * - uses `includes(template)` for registering controller and repository entities.
+ * - defines a new entity type, `E.modelAttributes`, for @ModelAttribute methods.
+ * - wires all entity relationships together, primarily by identifying invocations.
+ * - graphviz property configuration for `--render`.
+ */
 @Suppress("unused")
 class PetClinicTemplate : SystemModelTemplate {
-    // inhering templates
+    // extending the following baseline templates; they provide entities and styling
     val springBoot = SpringBootTemplate()
     val springCrud = SpringCrudTemplate()
 
     override val entityTypes: Iterable<Entity.Type> =
         springBoot.entityTypes + springCrud.entityTypes + listOf(E.modelAttribute)
 
+    // root type to build the tree/graph from; override with --tree-root ENTITY_TYPE
     override val defaultType: Entity.Type = springBoot.defaultType
 
     // Annotations, AsmTypes and EntityTypes are just for organization
@@ -56,6 +66,7 @@ class PetClinicTemplate : SystemModelTemplate {
         get() = "petclinic"
 
 
+    // the "actual" template; defining how classes are processed and how entities are defined
     override fun template() = template {
         include(springBoot.template()) // entities: controllers, endpoints
         include(springCrud.template()) // entities: repositories
@@ -67,6 +78,11 @@ class PetClinicTemplate : SystemModelTemplate {
                 // register @ModelAttribute entities as their function name
                 entity(E.modelAttribute, label("\uD83D\uDE40 \${name}"), //
                     property("name", readName()))  // <- for \${name} in label
+
+                // prints current elements when running with `--debug`.
+                // while `--debug` has its uses, it's usually a better idea to inspect
+                // the template processing with `--profile`.
+                log("@ModelAttribute functions")
             }
         }
 
@@ -83,13 +99,15 @@ class PetClinicTemplate : SystemModelTemplate {
             // entities. Since no such association exists, sift falls back on the
             // indirect relationship established by the fact that they share the same
             // controller class.
-            elementsOf(SBE.endpoint) { e ->
+            elementsOf(SBE.endpoint) { e ->   // methodsOf(e) is also available
                 // endpoints associated with all their @ModelAttribute functions
                 e["model-attributes"] = E.modelAttribute
             }
 
 
-            // wire all endpoints to repository methods via invocations
+            // wire all endpoints to repository methods via invocations.
+            // note that .invocations/.instantatins/.fieldAccess scans callsites
+            // recursively by following the call graph.
             SBE.endpoint["invokes"] = SCE.crudMethod.invocations
 
             // same as above, but for the model attributes
@@ -100,7 +118,7 @@ class PetClinicTemplate : SystemModelTemplate {
         // SBE.endpoint is already configured by its template.
         scope("graphviz configuration") {
             graphviz(E.modelAttribute,
-                rank = 1,                   // endpoint is registered with rank 0
+                rank = 1,                     // endpoint is registered with rank 0
                 type = Dot.node
             )
 
@@ -108,7 +126,7 @@ class PetClinicTemplate : SystemModelTemplate {
             // as labels for the edges to the repository.
             graphviz(SCE.crudMethod,
                 identifyAs = SCE.crudRepository,
-                edgeLabel = { readName() }, // invoked repo method name
+                edgeLabel = { readName() },   // invoked repo method name
             )
 
             // style it more database-y
@@ -116,13 +134,8 @@ class PetClinicTemplate : SystemModelTemplate {
                 rank = 2,
                 type = Dot.node,
                 shape = Shape.cylinder,
-//                label = replace("Repository", "")
+                label = replace("Repository", "")
             )
-
-            elementsOf(SCE.crudMethod) {
-                // prints crud methods when running with --debug
-                log("crud methods")
-            }
         }
     }
 
