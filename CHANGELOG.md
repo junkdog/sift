@@ -12,6 +12,11 @@ DSL documentation published to https://junkdog.github.io/sift/
 - DSL/Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
 - All scopes (Template, Classes, Methods...) are now top-level classes.   
 
+### Fixes
+- DSL/property: Improved the `property()` method to resolve relationships via direct association 
+  first. If direct association fails for all entities, it falls back on identifying relationships
+  through shared common associations. The old behavior was to rely solely on shared common
+  associations, but this could produce false positives. 
 
 ## sift-0.6.0 2023-02-26
 

@@ -138,7 +138,11 @@ object SiftCli : CliktCommand(
             terminal.forStdErr().apply {
                 println("${err("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
                 if (stacktrace) {
-                    println(err(e.stackTraceToString()))
+                    val trace = e.stackTraceToString()
+                        .lines()
+                        .drop(1)
+                        .joinToString("\n")
+                    println(err(trace))
                 }
 
                 println(fg("exiting..."))

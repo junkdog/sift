@@ -56,55 +56,52 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
         get() = "spring-boot"
 
 
-    override fun template(): Action<Unit, Unit> {
+    override fun template(): Action<Unit, Unit> = template {
+        classes {
+            fun registerController(controller: Type) {
+                scope("register controllers") {
+                    annotatedBy(controller)
+                    entity(E.controller)
 
-        fun Methods.registerEndpoints(method: String, httpMethod: Type) {
-            scope(method) {
-                annotatedBy(httpMethod)
-                entity(
-                    E.endpoint,
-                    label("$method /\${base-path:}\${path:}", dedupe('/')),
-                    property("path", readAnnotation(httpMethod, "value"))
-                )
+                    methods {
+                        fun Methods.registerEndpoints(method: String, httpMethod: Type) {
+                            scope(method) {
+                                annotatedBy(httpMethod)
+                                entity(E.endpoint,
+                                    label("\${http-method} /\${base-path:}\${path:}", dedupe('/')),
+                                    property("http-method", withValue(method)),
+                                    property("path", readAnnotation(httpMethod, "value")),
+                                )
 
-                outerScope("read base path from @RequestMapping") {
-                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
-                }
+                                outerScope("read base path from @RequestMapping") {
+                                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
+                                }
 
-                parameters {
-                    annotatedBy(A.requestBody)
-                    property(E.endpoint, "request-object", readType())
-                }
-            }
-        }
-
-        return template {
-            classes {
-                fun registerController(controller: Type) {
-                    scope("register controllers") {
-                        annotatedBy(controller)
-                        entity(E.controller)
-
-                        methods {
-                            // maps to EntityType.endpoint
-                            registerEndpoints("DELETE", A.deleteMapping)
-                            registerEndpoints("GET", A.getMapping)
-                            registerEndpoints("PATCH", A.patchMapping)
-                            registerEndpoints("POST", A.postMapping)
-                            registerEndpoints("PUT", A.putMapping)
-
-                            E.controller["endpoints"] = E.endpoint
+                                parameters {
+                                    annotatedBy(A.requestBody)
+                                    property(E.endpoint, "request-object", readType())
+                                }
+                            }
                         }
+
+                        // maps to EntityType.endpoint
+                        registerEndpoints("DELETE", A.deleteMapping)
+                        registerEndpoints("GET", A.getMapping)
+                        registerEndpoints("PATCH", A.patchMapping)
+                        registerEndpoints("POST", A.postMapping)
+                        registerEndpoints("PUT", A.putMapping)
+
+                        E.controller["endpoints"] = E.endpoint
                     }
                 }
-
-                registerController(A.controller)
-                registerController(A.restController)
             }
 
-            scope("dot graph property configuration") {
-                graphviz(E.endpoint, rank = 0, type = Dot.node)
-            }
+            registerController(A.controller)
+            registerController(A.restController)
+        }
+
+        scope("dot graph property configuration") {
+            graphviz(E.endpoint, rank = 0, type = Dot.node)
         }
     }
 

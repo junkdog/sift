@@ -3,6 +3,7 @@ package sift.template.dsl
 import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.api.IterValues
+import sift.core.dsl.Elements
 import sift.core.dsl.Template
 import sift.core.element.Element
 import sift.core.entity.Entity
@@ -20,7 +21,7 @@ fun Template.graphviz(
     shape: Shape? = null,
     style: Style? = null,
     arrowheadShape: String? = null,
-    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
     label: TextTransformer
 ) {
     graphviz(
@@ -45,7 +46,7 @@ fun Template.graphviz(
     shape: Shape? = null,
     style: Style? = null,
     arrowheadShape: String? = null,
-    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
     label: TextTransformer
 ) {
     graphviz(entities, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label = arrayOf(label))
@@ -59,7 +60,7 @@ fun Template.graphviz(
     shape: Shape? = null,
     style: Style? = null,
     arrowheadShape: String? = null,
-    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
     vararg label: TextTransformer
 ) {
     entities.forEach { e ->
@@ -99,7 +100,7 @@ fun Template.graphviz(
     arrowheadShape: String? = null,
 
     /** ... */
-    edgeLabel: Action<Iter<Element>, IterValues>? = null,
+    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
     vararg label: TextTransformer = arrayOf(),
 ) {
     elementsOf(e) {
@@ -109,10 +110,10 @@ fun Template.graphviz(
         shape?.let {          property(e, "dot-shape", withValue(it.name)) }
         style?.let {          property(e, "dot-style", withValue(it.name)) }
         arrowheadShape?.let { property(e, "dot-arrowhead", withValue(it)) }
-        edgeLabel?.let {      property(e, "dot-edge-label", it) }
+        edgeLabel?.let {      property(e, "dot-edge-label", it()) }
 
         if (label.isNotEmpty() ) {
-            property(e, "dot-label-transform", withValue(label.toList()))
+            property(e, "dot-label-transform", withValue(label.toMutableList().toList()))
         }
     }
 }

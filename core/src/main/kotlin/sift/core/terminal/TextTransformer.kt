@@ -1,10 +1,12 @@
 package sift.core.terminal
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.util.UUID
 import java.util.regex.Pattern
 
 // applied before styling
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
     JsonSubTypes.Type(Deduplicate::class, name = "dedupe"),
     JsonSubTypes.Type(IdSequencer::class, name = "id-sequence"),
