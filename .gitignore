@@ -3,3 +3,4 @@
 *.iml
 *.class
 target/
+template-examples/spring-petclinic-template/spring-petclinic
