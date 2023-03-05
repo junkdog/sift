@@ -2,6 +2,10 @@
 
 DSL documentation published to https://junkdog.github.io/sift/ 
 
+Example template: Spring PetClinic Sample Application
+
+![petclinic](docs/images/sift-example-template-petclinic.png)
+
 ### New/Tweaks
 - `--profile` now includes `ety#` column, tracking entity registrations.
 - `--stacktrace` to print stacktrace on errors.
@@ -114,7 +118,7 @@ in a more flexible way.
 - Entities were sometimes not relatable when calling `property()` from a scope not directly related to the scope
   which registered the entity. 
 
-
+  
 ## sift-0.4.0 2022-12-07
 
 ### New

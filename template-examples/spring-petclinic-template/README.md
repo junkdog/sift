@@ -1,3 +1,5 @@
+![petclinic](../../docs/images/sift-example-template-petclinic.png)
+
 ## install template
 
 
