@@ -37,6 +37,7 @@ class Template internal constructor(
         action += Action.ForkOnEntityExistence(forkTo, entity, op == ScopeEntityPredicate.ifExistsNot)
     }
 
+    /** iterates all classes */
     fun classes(f: Classes.() -> Unit) {
         action += Classes()
             .also(f)

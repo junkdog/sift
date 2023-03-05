@@ -48,7 +48,7 @@ fun template(f: Template.() -> Unit): Action<Unit, Unit> {
 }
 
 /** Define a new template */
-fun classes(f: Classes.() -> Unit): Action<Unit, Unit> {
+internal fun classes(f: Classes.() -> Unit): Action<Unit, Unit> {
     return Classes()
         .also(f)
         .action

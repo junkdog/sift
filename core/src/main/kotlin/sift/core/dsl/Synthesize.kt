@@ -7,6 +7,10 @@ import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.terminal.TextTransformer
 
+/**
+ * This scope is used for stubbing classes not part of the input
+ * classes.
+ */
 @SiftTemplateDsl
 class Synthesize internal constructor(
     var action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)

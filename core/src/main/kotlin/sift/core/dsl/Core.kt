@@ -11,14 +11,13 @@ import sift.core.entity.LabelFormatter
 import sift.core.terminal.TextTransformer
 import kotlin.reflect.KProperty1
 
-@SiftTemplateDsl
 abstract class Core<ELEMENT : Element> {
 
     internal abstract var action: Action.Chain<Iter<ELEMENT>>
 
     data class Property<T: Element>(
         val key: String,
-        val action: Action<Iter<T>, IterValues>?,
+        internal val action: Action<Iter<T>, IterValues>?,
     )
 
     private var stack: MutableList<Action<*, *>> = mutableListOf()

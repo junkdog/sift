@@ -5,6 +5,13 @@ import sift.core.element.ClassNode
 import sift.core.element.MethodNode
 import sift.core.entity.Entity
 
+/**
+ * Methods scope.
+ *
+ * @see [Classes.methods]
+ * @see [Template.methodsOf]
+ */
+@SiftTemplateDsl
 class Methods internal constructor(
     methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope
 ) : Core<MethodNode>(),

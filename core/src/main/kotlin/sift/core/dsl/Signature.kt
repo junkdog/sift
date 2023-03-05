@@ -2,6 +2,14 @@ package sift.core.dsl
 
 import sift.core.api.*
 
+/**
+ * Signature scope for working with generics.
+ *
+ * @see [Classes.superclass]
+ * @see [Fields.signature]
+ * @see [Methods.returns]
+ * @see [Parameters.signature]
+ */
 @SiftTemplateDsl
 class Signature internal constructor(
     var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)

@@ -6,6 +6,13 @@ import sift.core.element.ClassNode
 import sift.core.element.FieldNode
 import sift.core.entity.Entity
 
+/**
+ * Fields scope.
+ *
+ * @see [Classes.fields]
+ * @see [Template.fieldsOf]
+ */
+@SiftTemplateDsl
 class Fields internal constructor(
     fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope
 ) : Core<FieldNode>(),

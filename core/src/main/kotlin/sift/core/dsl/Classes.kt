@@ -5,6 +5,13 @@ import sift.core.element.AsmType
 import sift.core.element.ClassNode
 import sift.core.entity.Entity
 
+/**
+ * Classes scope.
+ *
+ * @see [Template.classes]
+ * @see [Template.classesOf]
+ */
+@SiftTemplateDsl
 class Classes internal constructor(
     override var action: Action.Chain<IterClasses> = chainFrom(Action.Class.ClassScope)
 ) : Core<ClassNode>(), CommonOperations<ClassNode, Classes>,

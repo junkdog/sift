@@ -2,10 +2,10 @@ package sift.template.deprecated
 
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.classes
 import sift.core.api.SystemModel
 import sift.core.dsl.Fields
 import sift.core.dsl.Methods
+import sift.core.dsl.template
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
@@ -40,37 +40,38 @@ class DeprecationTemplate : SystemModelTemplate, SystemModelTemplateServiceProvi
             referencing["deprecated"] = field
         }
 
-        return classes {
+        return template {
+            classes {
+                scope("deprecated java classes") {
+                    annotatedBy<JavaDeprecated>()
+                    entity(klazz)
+                }
+                scope("deprecated kotlin classes") {
+                    annotatedBy<Deprecated>()
+                    entity(klazz)
+                }
 
-            scope("deprecated java classes") {
-                annotatedBy<JavaDeprecated>()
-                entity(klazz)
-            }
-            scope("deprecated kotlin classes") {
-                annotatedBy<Deprecated>()
-                entity(klazz)
-            }
+                fields {
+                    annotatedBy<JavaDeprecated>()
+                    entity(field)
+                    registerWithParent()
+                }
+                fields {
+                    annotatedBy<Deprecated>()
+                    entity(field)
+                    registerWithParent()
+                }
 
-            fields {
-                annotatedBy<JavaDeprecated>()
-                entity(field)
-                registerWithParent()
-            }
-            fields {
-                annotatedBy<Deprecated>()
-                entity(field)
-                registerWithParent()
-            }
-
-            methods {
-                annotatedBy<JavaDeprecated>()
-                entity(method)
-                registerWithParent()
-            }
-            methods {
-                annotatedBy<Deprecated>()
-                entity(method)
-                registerWithParent()
+                methods {
+                    annotatedBy<JavaDeprecated>()
+                    entity(method)
+                    registerWithParent()
+                }
+                methods {
+                    annotatedBy<Deprecated>()
+                    entity(method)
+                    registerWithParent()
+                }
             }
         }
     }

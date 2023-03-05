@@ -6,6 +6,12 @@ import sift.core.element.MethodNode
 import sift.core.element.ParameterNode
 import sift.core.entity.Entity
 
+/**
+ * Parameters scope.
+ *
+ * @see [Methods.parameters]
+ */
+@SiftTemplateDsl
 class Parameters internal constructor(
     parameters: Action<Iter<ParameterNode>, Iter<ParameterNode>> = Action.Parameter.ParameterScope
 ) : Core<ParameterNode>(),

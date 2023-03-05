@@ -124,6 +124,7 @@
                         </executions>
                         <configuration>
                             <jdkVersion>17</jdkVersion>
+                            <moduleName>Sift DSL ${project.version}</moduleName>
                             <skipEmptyPackages>true</skipEmptyPackages>
                             <reportUndocumented>false</reportUndocumented>
                             <includeNonPublic>false</includeNonPublic>
@@ -138,6 +139,13 @@
                                     <suppress>true</suppress>
                                 </packageOptions>
                             </perPackageOptions>
+                            <sourceLinks>
+                                <link>
+                                    <path>${project.basedir}/src/main/kotlin</path>
+                                    <url>https://github.com/junkdog/sift/blob/main/core/src/main/kotlin</url>
+                                    <lineSuffix>#L</lineSuffix>
+                                </link>
+                            </sourceLinks>
                         </configuration>
                     </plugin>
                 </plugins>
