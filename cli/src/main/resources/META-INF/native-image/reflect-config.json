@@ -513,6 +513,9 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Elements$Filter"
+},
+{
   "name":"sift.core.api.Action$EntityFilter",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
