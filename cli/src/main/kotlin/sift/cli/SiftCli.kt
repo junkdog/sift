@@ -112,8 +112,12 @@ object SiftCli : CliktCommand(
     val serialization by SerializationOptions()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
-            help = "Override automatically detected ANSI support.")
-        .enum<AnsiLevel>(key = { it.name.lowercase() })
+        help = "Override automatically detected ANSI support."
+    ).enum<AnsiLevel>(key = { it.name.lowercase() })
+
+    val stacktrace: Boolean by option("--stacktrace",
+        help = "Print stacktrace to stderr if an error occurs"
+    ).flag(default = false)
 
     val version: Boolean by option("--version",
         help = "Print version and release date.")
@@ -132,7 +136,11 @@ object SiftCli : CliktCommand(
         Thread.setDefaultUncaughtExceptionHandler { _, e ->
             val err = red2 + inverse + bold
             terminal.forStdErr().apply {
-                println("${(err)("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
+                println("${err("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
+                if (stacktrace) {
+                    println(err(e.stackTraceToString()))
+                }
+
                 println(fg("exiting..."))
             }
         }

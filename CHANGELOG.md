@@ -1,10 +1,15 @@
 ## Upcoming release
 
+DSL documentation published to https://junkdog.github.io/sift/ 
+
 ### New/Tweaks
-- `--profile` now includes `ety#` column, tracking entity registrations. 
+- `--profile` now includes `ety#` column, tracking entity registrations.
+- `--stacktrace` to print stacktrace on errors.
+- DSL/Elements: inherits from `Core`, making it a bit more useful.
 
 ### Breaking changes
-- dsl/Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
+- DSL: changed package to `sift.core.dsl` from `sift.core.api`.
+- DSL/Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
 - All scopes (Template, Classes, Methods...) are now top-level classes.   
 
 

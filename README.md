@@ -1,6 +1,7 @@
 # sift
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
+[![DSL docs](https://badgen.net/badge/docs/DSL/orange?icon=github)](https://junkdog.github.io/sift/)
 
 Sift is a command-line tool for modeling and analyzing the design of software systems from JVM
 bytecode. It operates by processing .class or .jar files using predefined templates
@@ -91,6 +92,7 @@ Serialization options:
 Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
                                         Override automatically detected ANSI support.
+  --stacktrace                          Print stacktrace to stderr if an error occurs.
   --version                             Print version and release date.
   --debug                               Print log/logCount statements from the executed
                                         template.
