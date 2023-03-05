@@ -3,7 +3,7 @@ package sift.template.jdbi
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
-import sift.core.dsl.Dsl.template
+import sift.core.dsl.template
 import sift.core.entity.Entity
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree

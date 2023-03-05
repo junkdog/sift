@@ -2,9 +2,10 @@ package sift.template.deprecated
 
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.Dsl
-import sift.core.dsl.Dsl.classes
+import sift.core.dsl.classes
 import sift.core.api.SystemModel
+import sift.core.dsl.Fields
+import sift.core.dsl.Methods
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
@@ -29,12 +30,12 @@ class DeprecationTemplate : SystemModelTemplate, SystemModelTemplateServiceProvi
         get() = "deprecations"
 
     override fun template(): Action<Unit, Unit> {
-        fun Dsl.Methods.registerWithParent() {
+        fun Methods.registerWithParent() {
             outerScope("tag class") { entity(referencing) }
             referencing["deprecated"] = method
         }
 
-        fun Dsl.Fields.registerWithParent() {
+        fun Fields.registerWithParent() {
             outerScope("tag class") { entity(referencing) }
             referencing["deprecated"] = field
         }

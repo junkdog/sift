@@ -33,6 +33,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.Signature.SignatureScope::class, name = "signature-scope"),
 
     JsonSubTypes.Type(value = Action.Elements.ElementScope::class, name = "elements-scope"),
+    JsonSubTypes.Type(value = Action.Elements.Filter::class, name = "filter-elements"),
 
     JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
@@ -179,6 +180,27 @@ sealed class Action<IN, OUT> {
         internal object ElementScope : Action<Iter<Element>, Iter<Element>>() {
             override fun id() = "element-scope"
             override fun execute(ctx: Context, input: Iter<Element>): Iter<Element> = input
+        }
+
+        internal data class Filter(
+            val regex: Regex, val invert: Boolean,
+        ) : Action<Iter<Element>, Iter<Element>>() {
+            override fun id() = "filter-elements"
+
+            @Suppress("UNCHECKED_CAST")
+            override fun execute(ctx: Context, input: Iter<Element>): Iter<Element> {
+                val elems = input.toList()
+                    .takeIf(List<Element>::isNotEmpty)
+                    ?: return input
+
+                return when (val elem = elems.first()) {
+                    is ClassNode     -> Class.Filter(regex, invert).execute(ctx, elems as IterClasses)
+                    is FieldNode     -> Field.Filter(regex, invert).execute(ctx, elems as IterFields)
+                    is MethodNode    -> Method.Filter(regex, invert).execute(ctx, elems as IterMethods)
+                    is ParameterNode -> Parameter.Filter(regex, invert).execute(ctx, elems as IterParameters)
+                    else -> error("cannot filter elements of ${elem::class.simpleName}")
+                }
+            }
         }
     }
 

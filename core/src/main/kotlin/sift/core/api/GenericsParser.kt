@@ -1,14 +1,15 @@
 package sift.core.api
 
+import sift.core.dsl.Classes
+import sift.core.dsl.Signature
 import sift.core.stringWriter
-import sift.core.dsl.Dsl
 
 
 internal fun explodeTypeFromSignature(
-    context: Dsl.Signature,
+    context: Signature,
     signature: String,
     synthesize: Boolean,
-    f: Dsl.Classes.() -> Unit
+    f: Classes.() -> Unit
 ) {
     // we'll only evaluate nodes leading to T
     fun containsT(sig: GenericType) = sig.flatten().any { it.constraint is TypeName.TypeT }
@@ -25,7 +26,7 @@ internal fun explodeTypeFromSignature(
         "Type parameter T must only occur once: $signature"
     }
 
-    fun recurse(dsl: Dsl.Signature, self: GenericType) {
+    fun recurse(dsl: Signature, self: GenericType) {
         when (self.constraint) {
             is TypeName.TypeT -> {
                 dsl.explodeType(synthesize, f)

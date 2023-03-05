@@ -133,7 +133,7 @@
                             <perPackageOptions>
                                 <packageOptions>
                                     <matchingRegex>
-                                        sift.core(|\.(asm|collections|element|entity|jackson|graphviz|template|terminal|tree).*)
+                                        sift.core(|\.(asm|api|collections|element|entity|jackson|graphviz|template|terminal|tree).*)
                                     </matchingRegex>
                                     <suppress>true</suppress>
                                 </packageOptions>

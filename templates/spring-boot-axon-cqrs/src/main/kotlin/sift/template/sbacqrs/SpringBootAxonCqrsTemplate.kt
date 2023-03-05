@@ -4,8 +4,9 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.Dsl
-import sift.core.dsl.Dsl.template
+import sift.core.dsl.Classes
+import sift.core.dsl.Methods
+import sift.core.dsl.template
 import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
@@ -82,7 +83,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
 
     override fun template(): Action<Unit, Unit> {
 
-        fun Dsl.Methods.registerAxonHandlers(
+        fun Methods.registerAxonHandlers(
             ownerType: Entity.Type,  // aggregate|projection
             handlerAnnotation: Type, // @(Command|Event|Query)Handler
             handledType: Entity.Type,
@@ -105,7 +106,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
             }
         }
 
-        fun Dsl.Classes.registerAggregate(
+        fun Classes.registerAggregate(
             aggregate: Entity.Type,
             label: LabelFormatter = LabelFormatter.FromElement
         ) {
@@ -156,7 +157,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 }
 
                 scope("register projections") {
-                    fun Dsl.Classes.registerProjections(handler: Type) {
+                    fun Classes.registerProjections(handler: Type) {
                         methods {
                             annotatedBy(handler)
                             outerScope("identified projection") {

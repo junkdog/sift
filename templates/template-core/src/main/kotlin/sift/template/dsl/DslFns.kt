@@ -1,9 +1,9 @@
 package sift.template.dsl
 
 import sift.core.api.Action
-import sift.core.dsl.Dsl
 import sift.core.api.Iter
 import sift.core.api.IterValues
+import sift.core.dsl.Template
 import sift.core.element.Element
 import sift.core.entity.Entity
 import sift.core.graphviz.Dot
@@ -12,7 +12,7 @@ import sift.core.graphviz.Style
 import sift.core.terminal.TextTransformer
 
 
-fun Dsl.Template.graphviz(
+fun Template.graphviz(
     e: Entity.Type,
     identifyAs: Entity.Type? = null,
     rank: Int? = null,
@@ -37,7 +37,7 @@ fun Dsl.Template.graphviz(
 }
 
 
-fun Dsl.Template.graphviz(
+fun Template.graphviz(
     entities: Iterable<Entity.Type>,
     identifyAs: Entity.Type? = null,
     rank: Int? = null,
@@ -51,7 +51,7 @@ fun Dsl.Template.graphviz(
     graphviz(entities, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label = arrayOf(label))
 }
 
-fun Dsl.Template.graphviz(
+fun Template.graphviz(
     entities: Iterable<Entity.Type>,
     identifyAs: Entity.Type? = null,
     rank: Int? = null,
@@ -73,7 +73,7 @@ fun Dsl.Template.graphviz(
  * dependent or exclusive; this function does not validate the set
  * of specified parameters.
  */
-fun Dsl.Template.graphviz(
+fun Template.graphviz(
     /** Entity type to be configured. */
     e: Entity.Type,
 
@@ -114,27 +114,5 @@ fun Dsl.Template.graphviz(
         if (label.isNotEmpty() ) {
             property(e, "dot-label-transform", withValue(label.toList()))
         }
-    }
-}
-
-@Deprecated("use Entity.Type.set() from Template scope instead")
-fun Dsl.Template.registerInstantiationsOf(
-    methodType: Entity.Type,
-    source: Entity.Type,
-    outLabel: String = "sends",
-) {
-    methodsOf(source) {
-        source[outLabel] = methodType.instantiations
-    }
-}
-
-@Deprecated("use Entity.Type.set() from Template scope instead")
-fun Dsl.Template.registerInvocationsOf(
-    methodType: Entity.Type,
-    source: Entity.Type,
-    outLabel: String = "sends",
-) {
-    methodsOf(source) {
-        source[outLabel] = methodType.invocations
     }
 }

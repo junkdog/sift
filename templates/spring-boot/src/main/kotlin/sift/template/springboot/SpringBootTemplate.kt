@@ -5,8 +5,8 @@ import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.Dsl
-import sift.core.dsl.Dsl.template
+import sift.core.dsl.Methods
+import sift.core.dsl.template
 import sift.core.graphviz.Dot
 import sift.core.terminal.Gruvbox.light2
 import sift.core.template.SystemModelTemplate
@@ -58,7 +58,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
 
     override fun template(): Action<Unit, Unit> {
 
-        fun Dsl.Methods.registerEndpoints(method: String, httpMethod: Type) {
+        fun Methods.registerEndpoints(method: String, httpMethod: Type) {
             scope(method) {
                 annotatedBy(httpMethod)
                 entity(

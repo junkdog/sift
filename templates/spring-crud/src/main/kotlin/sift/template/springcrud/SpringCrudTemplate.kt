@@ -2,7 +2,7 @@ package sift.template.springcrud
 
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
-import sift.core.dsl.Dsl.template
+import sift.core.dsl.template
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.template.SystemModelTemplate

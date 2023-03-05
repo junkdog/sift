@@ -9,9 +9,9 @@ import sift.core.api.testdata.set1.Payload
 import sift.core.api.testdata.set2.HandlerFn
 import sift.core.api.testdata.set2.HandlerOfFns
 import sift.core.asm.classNode
+import sift.core.dsl.classes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
-import sift.core.dsl.Dsl
 
 
 @Disabled
@@ -33,7 +33,7 @@ class KnownLimitationsTest {
         val handler = Entity.Type("handler")
         val data = Entity.Type("data")
 
-        Dsl.classes {
+        classes {
             scope("scan handler") {
                 methods {
                     annotatedBy<HandlerFn>()

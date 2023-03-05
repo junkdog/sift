@@ -4,7 +4,8 @@
 - `--profile` now includes `ety#` column, tracking entity registrations. 
 
 ### Breaking changes
-- DSL.Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
+- dsl/Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
+- All scopes (Template, Classes, Methods...) are now top-level classes.   
 
 
 ## sift-0.6.0 2023-02-26

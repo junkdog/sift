@@ -13,8 +13,6 @@ import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.api.*
 import sift.core.api.Context
-import sift.core.dsl.Dsl.classes
-import sift.core.dsl.Dsl.template
 import sift.core.api.Modifiers.*
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
@@ -751,8 +749,8 @@ class DslTest {
     @Test
     fun `recursively scan for instantiations`() {
         val cns = listOf(
-            classNode<Instantiations>(),
-            classNode<Instantiations.Yolo>(),
+            classNode<SimpleInstantiations>(),
+            classNode<SimpleInstantiations.Yolo>(),
             classNode<Payload>(),
             classNode<Instantiations2>(),
         )
@@ -786,9 +784,9 @@ class DslTest {
 
             assertThat(payloadInstantiatedBy.prettyPrint())
                 .containsExactlyInAnyOrder(
-                    "Entity(Instantiations::caseA, type=method)",
-                    "Entity(Instantiations::caseB, type=method)",
-                    "Entity(Instantiations.Yolo::hmm, type=method)",
+                    "Entity(SimpleInstantiations::caseA, type=method)",
+                    "Entity(SimpleInstantiations::caseB, type=method)",
+                    "Entity(SimpleInstantiations.Yolo::hmm, type=method)",
                     "Entity(Instantiations2::a, type=method)",
                     "Entity(Instantiations2::b, type=method)",
                     "Entity(Instantiations2::c, type=method)",
@@ -803,9 +801,9 @@ class DslTest {
 
             assertThat(payloadMethods.prettyPrint())
                 .containsExactlyInAnyOrder(
-                    "Entity(Instantiations::caseA, type=method)",
-                    "Entity(Instantiations::caseB, type=method)",
-                    "Entity(Instantiations.Yolo::hmm, type=method)",
+                    "Entity(SimpleInstantiations::caseA, type=method)",
+                    "Entity(SimpleInstantiations::caseB, type=method)",
+                    "Entity(SimpleInstantiations.Yolo::hmm, type=method)",
                     "Entity(Instantiations2::a, type=method)",
                     "Entity(Instantiations2::b, type=method)",
                     "Entity(Instantiations2::c, type=method)",

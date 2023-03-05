@@ -1,7 +1,7 @@
 package sift.core.api.testdata.set1
 
 
-class Instantiations {
+class SimpleInstantiations {
 
 
     fun caseA() {

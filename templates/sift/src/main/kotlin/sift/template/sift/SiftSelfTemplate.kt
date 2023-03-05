@@ -4,10 +4,10 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
-import sift.core.dsl.Dsl
-import sift.core.dsl.Dsl.template
+import sift.core.dsl.template
 import sift.core.dsl.SiftTemplateDsl
 import sift.core.asm.type
+import sift.core.dsl.Core
 import sift.core.entity.Entity
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -74,7 +74,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 }
 
                 scope("scopes from children of Core<Element>") {
-                    implements(type<Dsl.Core<*>>())
+                    implements(type<Core<*>>())
                     entity(E.scope, label("\${name}"),
                         property("name", readName(shorten = true)))
                 }
