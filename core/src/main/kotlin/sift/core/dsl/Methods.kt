@@ -27,8 +27,8 @@ class Methods internal constructor(
     ) {
         val resolver = when (rhs) {
             is Instantiations -> EntityAssignmentResolver.FromInstantiationsOf(key, rhs.type)
-            is Invocations    -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
-            is FieldAccess    -> EntityAssignmentResolver.FromFieldAccessOf(key, rhs.type)
+            is Invocations -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
+            is FieldAccess -> EntityAssignmentResolver.FromFieldAccessOf(key, rhs.type)
         }
 
         action += Action.RegisterChildrenFromResolver(this, key, resolver)
@@ -40,8 +40,8 @@ class Methods internal constructor(
     ) {
         val resolver = when (this) {
             is Instantiations -> EntityAssignmentResolver.FromInstantiationsBy(key, type)
-            is Invocations    -> EntityAssignmentResolver.FromInvocationsBy(key, type)
-            is FieldAccess    -> EntityAssignmentResolver.FromFieldAccessBy(key, type)
+            is Invocations -> EntityAssignmentResolver.FromInvocationsBy(key, type)
+            is FieldAccess -> EntityAssignmentResolver.FromFieldAccessBy(key, type)
         }
 
         action += Action.RegisterChildrenFromResolver(rhs, key, resolver)

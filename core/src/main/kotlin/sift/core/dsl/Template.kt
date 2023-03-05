@@ -1,6 +1,9 @@
 package sift.core.dsl
 
-import sift.core.api.Action
+import sift.core.api.*
+import sift.core.api.FieldAccess
+import sift.core.api.Instantiations
+import sift.core.api.Invocations
 import sift.core.api.chainFrom
 import sift.core.entity.Entity
 

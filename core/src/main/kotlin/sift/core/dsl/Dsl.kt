@@ -8,10 +8,6 @@ import sift.core.entity.Entity
 import java.util.*
 
 
-@DslMarker
-@Target(AnnotationTarget.CLASS)
-annotation class SiftTemplateDsl
-
 interface ParentOperations<T : Element, PARENT_SCOPE : Core<T>> {
     fun outerScope(label: String, f: PARENT_SCOPE.() -> Unit)
 }

@@ -2,6 +2,7 @@ package sift.core.dsl
 
 import org.objectweb.asm.Type
 import sift.core.api.Action
+import sift.core.api.SiftTemplateDsl
 import sift.core.api.chainFrom
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter

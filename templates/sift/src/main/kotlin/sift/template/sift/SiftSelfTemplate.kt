@@ -4,8 +4,8 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
+import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.template
-import sift.core.dsl.SiftTemplateDsl
 import sift.core.asm.type
 import sift.core.dsl.Core
 import sift.core.entity.Entity
