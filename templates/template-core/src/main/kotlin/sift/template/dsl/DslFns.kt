@@ -1,7 +1,7 @@
 package sift.template.dsl
 
 import sift.core.api.Action
-import sift.core.api.Dsl
+import sift.core.dsl.Dsl
 import sift.core.api.Iter
 import sift.core.api.IterValues
 import sift.core.element.Element

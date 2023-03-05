@@ -1,4 +1,4 @@
-package sift.core.api
+package sift.core.dsl
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -11,11 +11,13 @@ import org.reflections.Reflections
 import sift.core.*
 import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
-import sift.core.api.Dsl.classes
-import sift.core.api.Dsl.template
+import sift.core.api.*
+import sift.core.api.Context
+import sift.core.dsl.Dsl.classes
+import sift.core.dsl.Dsl.template
 import sift.core.api.Modifiers.*
-import sift.core.api.ScopeEntityPredicate.ifExists
-import sift.core.api.ScopeEntityPredicate.ifExistsNot
+import sift.core.dsl.ScopeEntityPredicate.ifExists
+import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker

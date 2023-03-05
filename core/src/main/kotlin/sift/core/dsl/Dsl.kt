@@ -1,9 +1,10 @@
-package sift.core.api
+package sift.core.dsl
 
 import org.objectweb.asm.Type
 import sift.core.*
+import sift.core.api.*
 import sift.core.api.Action.DebugLog.LogFormat
-import sift.core.api.ScopeEntityPredicate.ifExistsNot
+import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.asm.type

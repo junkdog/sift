@@ -11,6 +11,8 @@ import sift.core.api.testdata.set2.HandlerOfFns
 import sift.core.asm.classNode
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.dsl.Dsl
+
 
 @Disabled
 class KnownLimitationsTest {

@@ -1,4 +1,4 @@
-package sift.core.api.testdata
+package sift.core.dsl
 
 import org.junit.jupiter.api.Disabled
 import org.objectweb.asm.tree.ClassNode

@@ -5,8 +5,8 @@ import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.api.Dsl
-import sift.core.api.Dsl.template
+import sift.core.dsl.Dsl
+import sift.core.dsl.Dsl.template
 import sift.core.graphviz.Dot
 import sift.core.terminal.Gruvbox.light2
 import sift.core.template.SystemModelTemplate

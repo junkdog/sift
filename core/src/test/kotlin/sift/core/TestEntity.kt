@@ -1,4 +1,4 @@
-package sift.core.api
+package sift.core
 
 import sift.core.element.Element
 import sift.core.entity.Entity
