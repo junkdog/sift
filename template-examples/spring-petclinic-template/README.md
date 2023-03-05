@@ -1,6 +1,3 @@
-![petclinic](../../docs/images/sift-example-template-petclinic.png)
-
-
 A basic template for the [Spring Boot Pet Clinic][petclinic] demo application.
 
 #### This template:
@@ -8,6 +5,8 @@ A basic template for the [Spring Boot Pet Clinic][petclinic] demo application.
 - defines a new entity type, `E.modelAttributes`, for `@ModelAttribute` methods.
 - wires all entity relationships together, primarily by identifying invocations.
 - graphviz property configuration for `--render`.
+
+![petclinic](../../docs/images/sift-example-template-petclinic.png)
  
 
 ## install template
