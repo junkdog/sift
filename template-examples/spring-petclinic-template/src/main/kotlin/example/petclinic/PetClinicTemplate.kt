@@ -8,6 +8,7 @@ import sift.core.graphviz.Shape
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Gruvbox.green1
 import sift.core.terminal.Style.Companion.plain
+import sift.core.terminal.TextTransformer.Companion.replace
 import sift.template.dsl.graphviz
 import sift.template.springboot.SpringBootTemplate
 import sift.template.springcrud.SpringCrudTemplate
@@ -134,7 +135,7 @@ class PetClinicTemplate : SystemModelTemplate {
                 rank = 2,
                 type = Dot.node,
                 shape = Shape.cylinder,
-                label = replace("Repository", "")
+                label = listOf(replace("Repository", ""))
             )
         }
     }

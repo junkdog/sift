@@ -16,6 +16,7 @@ import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
+import sift.core.terminal.StringEditor
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
@@ -79,6 +80,7 @@ import sift.core.jackson.NoArgConstructor
     JsonSubTypes.Type(value = Action.FilterModifiers::class, name = "filter-modifiers"),
     JsonSubTypes.Type(value = Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(value = Action.WithValue::class, name = "with-value"),
+    JsonSubTypes.Type(value = Action.EditText::class, name = "edit-text"),
     JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(value = Action.Fork::class, name = "fork"),
     JsonSubTypes.Type(value = Action.ForkOnEntityExistence::class, name = "fork-conditional"),
@@ -839,6 +841,21 @@ sealed class Action<IN, OUT> {
                 .map { ValueNode.from(value, it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
+
+        override fun toString() = "WithValue($value)"
+    }
+
+    class EditText<T : Element> internal constructor(
+        private val editor: StringEditor
+    ) : Action<Iter<T>, IterValues>() {
+        override fun id() = "edit-text($editor)"
+        override fun execute(ctx: Context, input: Iter<T>): IterValues {
+            return input
+                .map { ValueNode.from(editor, it) }
+                .onEach { ctx.scopeTransition(it.reference, it) }
+        }
+
+        override fun toString() = "EditText($editor)"
     }
 
     internal data class Fork<T, FORK_T>(

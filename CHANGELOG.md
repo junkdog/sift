@@ -2,25 +2,37 @@
 
 DSL documentation published to https://junkdog.github.io/sift/ 
 
-Example template: Spring PetClinic Sample Application
+### Example template: Spring PetClinic Sample Application
+
+This is a short, [custom template][example-template] for the Spring Boot Pet Clinic demo
+application. It demonstrates how to combine existing templates with custom templates,
+describes relationships between entities, and configures properties for Graphviz visualization.
 
 ![petclinic](docs/images/sift-example-template-petclinic.png)
+
+ [example-template]: template-examples/spring-petclinic-template
 
 ### New/Tweaks
 - `--profile` now includes `ety#` column, tracking entity registrations.
 - `--stacktrace` to print stacktrace on errors.
+- DSL/Core: `editText(TextTransformer...)` for`property()`, currently used by `graphviz()`.
 - DSL/Elements: inherits from `Core`, making it a bit more useful.
 
 ### Breaking changes
 - DSL: changed package to `sift.core.dsl` from `sift.core.api`.
-- DSL/Template: `graphviz(label=TextTransformer...)` replaces `removeSuffix` argument.   
-- All scopes (Template, Classes, Methods...) are now top-level classes.   
+- DSL/Template: `graphviz(label=List<TextTransformer>)` replaces `removeSuffix` argument.   
+- All scopes (Template, Classes, Methods...) are now top-level classes.
+- DSL/Core: restricted value of `withValue(value)` to String, Number, Boolean, Enum. This 
+  solves a lot of issues with serialization.
+
 
 ### Fixes
 - DSL/property: Improved the `property()` method to resolve relationships via direct association 
   first. If direct association fails for all entities, it falls back on identifying relationships
   through shared common associations. The old behavior was to rely solely on shared common
   associations, but this could produce false positives. 
+- Fix NPE when `--list-entity-types` is used with no path argument.
+- `--list-entity-types` now resolves entity counts when system model is deserialized with `--load`.
 
 ## sift-0.6.0 2023-02-26
 

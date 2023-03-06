@@ -59,24 +59,15 @@ object WithValueSerializer {
                 "kotlin.Short"                 -> node["value"].asInt().toShort()
                 "kotlin.Boolean"               -> node["value"].asBoolean()
                 else -> {
-                    try {
-                        val c = when (cls) {
-                            "java.util.Collections.SingletonList" -> "java.util.Collections\$SingletonList"
-                            else -> cls
-                        }.let { Class.forName(it) }
-
-                        when {
-                            c.isEnum -> c.enumConstants.first { it.toString() == node["value"].asText() }
-                            else     -> ctxt.readValue(node["value"].traverse(), c)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        TODO("Not yet implemented")
+                    val c = Class.forName(cls)
+                    when {
+                        c.isEnum -> c.enumConstants.first { it.toString() == node["value"].asText() }
+                        else     -> ctxt.readValue(node["value"].traverse(), c)
                     }
                 }
             }
 
-            return Action.WithValue<ValueNode>(v) as Action.WithValue<*>
+            return Action.WithValue<ValueNode>(v)
         }
     }
 }

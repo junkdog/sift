@@ -96,7 +96,7 @@ object SystemModelSerializer {
             deserialized.forEach { e ->
                 // associate child entities
                 e.children.forEach { (key, children) ->
-                    entities[e.id]!! .addChildren(key, children.map { entities[it]!! })
+                    entities[e.id]!!.addChildren(key, children.map { entities[it]!! })
                 }
 
                 // transfer properties

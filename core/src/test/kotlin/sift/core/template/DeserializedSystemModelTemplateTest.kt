@@ -8,6 +8,7 @@ import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.terminal.Style
 import sift.core.terminal.TextTransformer.Companion.dedupe
+import sift.core.terminal.TextTransformer.Companion.idSequence
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 
@@ -22,7 +23,7 @@ class DeserializedSystemModelTemplateTest {
 
     @Test
     fun `save-load label formatters`() {
-        val json = LabelFormatterPipeline().serialize()
+        val json = LabelFormatterTemplate().serialize()
         val deserialized = SystemModelTemplate.deserialize(json)
 
         assertThat(json).isEqualTo(deserialized.serialize())
@@ -33,7 +34,7 @@ private class RestController
 private class Endpoint(val path: String, val method: String)
 private enum class Yolo { Foo, Bar }
 
-class LabelFormatterPipeline : SystemModelTemplate {
+class LabelFormatterTemplate : SystemModelTemplate {
     val e = Entity.Type("foobar")
     override val name: String = "test"
     override val defaultType: Entity.Type = Entity.Type("controller")
@@ -46,6 +47,12 @@ class LabelFormatterPipeline : SystemModelTemplate {
                 dedupe(' '),
                 replace("abc", "def"),
                 replace("abc", "def"),
+            ))
+            property(e, "dot-label-transform", editText(
+                replace("abc", "def"),
+                dedupe(' '),
+                uuidSequence(),
+                idSequence(Regex("abc")),
             ))
         }
     }

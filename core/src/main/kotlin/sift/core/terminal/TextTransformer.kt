@@ -5,14 +5,31 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.util.UUID
 import java.util.regex.Pattern
 
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
+//@JsonSubTypes(
+//    JsonSubTypes.Type(TextTransformersWrapper::class, name = "transformers"),
+//)
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
+internal class StringEditor(val transformers: List<TextTransformer>) {
+    override fun toString(): String {
+        fun format(transformer: TextTransformer): String = when (transformer) {
+            is Deduplicate -> "dedupe(${transformer.char})"
+            is IdSequencer -> "id-sequence(${transformer.pattern.pattern})"
+            is Replace     -> "replace(${transformer.regex.pattern} -> ${transformer.with})"
+        }
+
+        return transformers.joinToString(", ", "StringEditor(", ")", transform = ::format)
+    }
+}
+
 // applied before styling
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 @JsonSubTypes(
     JsonSubTypes.Type(Deduplicate::class, name = "dedupe"),
     JsonSubTypes.Type(IdSequencer::class, name = "id-sequence"),
     JsonSubTypes.Type(Replace::class, name = "replace"),
 )
-interface TextTransformer {
+sealed interface TextTransformer {
     operator fun invoke(s: String): String
 
     companion object {

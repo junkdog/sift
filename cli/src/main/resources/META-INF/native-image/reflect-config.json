@@ -503,6 +503,13 @@
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
+  "name":"sift.core.api.Action$EditText",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["sift.core.terminal.StringEditor"] }]
+},
+{
   "name":"sift.core.api.Action$Elements"
 },
 {
@@ -1092,6 +1099,16 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["kotlin.text.Regex","java.lang.String"] }]
+},
+{
+  "name":"sift.core.terminal.StringEditor",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["java.util.List"] }, 
+    {"name":"toString","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.terminal.Style",

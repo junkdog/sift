@@ -8,6 +8,7 @@ import sift.core.asm.type
 import sift.core.element.Element
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
+import sift.core.terminal.StringEditor
 import sift.core.terminal.TextTransformer
 import kotlin.reflect.KProperty1
 
@@ -137,26 +138,27 @@ abstract class Core<ELEMENT : Element> {
      * property(SE.controller, "@style-as", withValue(E.XmlController))
      * ```
      */
-    fun withValue(value: Any): Action<Iter<ELEMENT>, IterValues> {
-        val forkTo = Action.WithValue<ELEMENT>(value)
-            .let { Action.Fork(it) }
+    fun withValue(value: Entity.Type) = withErasedValue(value)
+    fun withValue(value: Number) = withErasedValue(value)
+    fun withValue(value: Boolean) = withErasedValue(value)
+    fun withValue(value: String) = withErasedValue(value)
+    fun <E> withValue(value: E) where E : Enum<E> = withErasedValue(value)
 
-        action += forkTo
+    @Suppress("UNCHECKED_CAST")
+    private fun withErasedValue(
+        value: Any
+    ): Action<Iter<ELEMENT>, IterValues> = Action.WithValue(value)
 
-        return forkTo.forked
-    }
+    fun editText(
+        vararg ops: TextTransformer
+    ): Action<Iter<ELEMENT>, IterValues> = Action.EditText(StringEditor(ops.toList()))
 
     /**
      * Reads the short form name of the element
      */
-    fun readName(shorten: Boolean = false): Action<Iter<ELEMENT>, IterValues> {
-        val forkTo = Action.ReadName<ELEMENT>(shorten)
-            .let { Action.Fork(it) }
-
-        action +=  forkTo
-
-        return forkTo.forked
-    }
+    fun readName(
+        shorten: Boolean = false
+    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadName(shorten)
 
     inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
 
@@ -171,14 +173,7 @@ abstract class Core<ELEMENT : Element> {
     fun readAnnotation(
         annotation: Type,
         field: String
-    ): Action<Iter<ELEMENT>, IterValues> {
-        val forkTo = Action.ReadAnnotation<ELEMENT>(annotation, field)
-            .let { Action.Fork(it) }
-
-        action += forkTo
-
-        return forkTo.forked
-    }
+    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
 
     /**
      * This entity tracks [children] under the label denoted by [key].

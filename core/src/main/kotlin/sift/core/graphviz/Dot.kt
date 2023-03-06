@@ -10,6 +10,7 @@ import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.terminal.Gruvbox
 import sift.core.terminal.TextTransformer
+import sift.core.terminal.StringEditor
 
 /*
 
@@ -237,7 +238,9 @@ private val Entity.dotLabel: String
 
 @Suppress("UNCHECKED_CAST")
 private val Entity.dotLabelTransformers: List<TextTransformer>
-    get() = this["dot-label-transform"] as List<TextTransformer>? ?: listOf()
+    get() = (this["dot-label-transform"] as Iterable<StringEditor>?)
+        ?.firstOrNull()
+        ?.transformers ?: listOf()
 
 private val Entity.dotArrowhead: String?
     get() = this["dot-arrowhead"]?.firstOrNull() as String?

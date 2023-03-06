@@ -212,33 +212,34 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     rank = 1, // endpoints @ rank = 0
                     type = Dot.node,
                     shape = Shape.component,
-                    label = replace(Regex("Aggregate\$"), ""),
+                    label = listOf(replace(Regex("Aggregate\$"), "")),
                 )
 
                 graphviz(E.event,
                     rank = 2,
-                    label = replace(Regex("Event\$"), ""),
                     shape = Shape.folder,
-                    type = Dot.node
+                    type = Dot.node,
+                    label = listOf(replace(Regex("Event\$"), "")),
                 )
 
                 graphviz(E.projection,
                     rank = 3,
                     type = Dot.node,
-                    label = replace(Regex("Projection\$"), ""),
+                    label = listOf(replace(Regex("Projection\$"), "")),
                     shape = Shape.box3d
                 )
 
                 // edges
                 graphviz(E.command,
                     type = Dot.edge,
-                    label = replace(Regex("Command\$"), "")
+                    label = listOf(replace(Regex("Command\$"), ""))
                 )
 
-                graphviz(E.query,
+                graphviz(
+                    E.query,
                     type = Dot.edge,
                     style = Style.dashed,
-                    label = replace(Regex("Query\$"), ""),
+                    label = listOf(replace(Regex("Query\$"), "")),
                     arrowheadShape = "onormal",
                 )
             }

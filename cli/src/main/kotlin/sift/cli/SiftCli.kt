@@ -33,7 +33,6 @@ import sift.template.*
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
-import sift.core.terminal.Gruvbox.dark1
 import sift.core.terminal.Gruvbox.dark2
 import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.dark4
@@ -59,7 +58,6 @@ import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.system.exitProcess
-import kotlin.time.Duration.Companion.microseconds
 import kotlin.time.ExperimentalTime
 
 object SiftCli : CliktCommand(
@@ -164,7 +162,15 @@ object SiftCli : CliktCommand(
                     .let(terminal::println)
             }
             template.listEntityTypes && template.template != null -> {
-                buildTree().let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
+                when {
+                    template.path != null ->
+                        buildTree().let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
+
+                    serialization.load != null ->
+                        terminal.println(toString(template.template!!, loadSystemModel(serialization.load!!)))
+
+                    else -> terminal.println(toString(template.template!!))
+                }
             }
             template.template == null -> {
                 terminal.println("${orange1("Error: ")} ${fg("Must specify a template")}")

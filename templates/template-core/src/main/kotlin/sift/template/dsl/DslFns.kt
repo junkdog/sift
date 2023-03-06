@@ -14,31 +14,6 @@ import sift.core.terminal.TextTransformer
 
 
 fun Template.graphviz(
-    e: Entity.Type,
-    identifyAs: Entity.Type? = null,
-    rank: Int? = null,
-    type: Dot? = null,
-    shape: Shape? = null,
-    style: Style? = null,
-    arrowheadShape: String? = null,
-    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    label: TextTransformer
-) {
-    graphviz(
-        e = e,
-        identifyAs = identifyAs,
-        rank = rank,
-        type = type,
-        shape = shape,
-        style = style,
-        arrowheadShape = arrowheadShape,
-        edgeLabel = edgeLabel,
-        label = arrayOf(label)
-    )
-}
-
-
-fun Template.graphviz(
     entities: Iterable<Entity.Type>,
     identifyAs: Entity.Type? = null,
     rank: Int? = null,
@@ -47,24 +22,10 @@ fun Template.graphviz(
     style: Style? = null,
     arrowheadShape: String? = null,
     edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    label: TextTransformer
-) {
-    graphviz(entities, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label = arrayOf(label))
-}
-
-fun Template.graphviz(
-    entities: Iterable<Entity.Type>,
-    identifyAs: Entity.Type? = null,
-    rank: Int? = null,
-    type: Dot? = null,
-    shape: Shape? = null,
-    style: Style? = null,
-    arrowheadShape: String? = null,
-    edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    vararg label: TextTransformer
+    label: List<TextTransformer> = listOf()
 ) {
     entities.forEach { e ->
-        graphviz(e, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, *label)
+        graphviz(e, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label)
     }
 }
 
@@ -73,35 +34,27 @@ fun Template.graphviz(
  * have no effect unless specified. Some parameters are mutually
  * dependent or exclusive; this function does not validate the set
  * of specified parameters.
+ *
+ * @param e the entity to configure
+ * @param identifyAs represents an entity to be used as the identifier in place for [e].
+ * @parm rank  the rank of [e] in the dot file. Ranks are used to specify the horizontal ordering of nodes, with lower ranks appearing to the left of higher ranks.
+ * @param type one of either [Dot.node] or [Dot.edge].
+ * @param shape the shape of the node.
+ * @param style the style of edges or nodes. E.g. [Style.dashed].
+ * @param arrowheadShape the shape of the arrowhead. Refer to https://graphviz.org/doc/info/arrows.html for values.
+ * @param edgeLabel used in conjunction with [identifyAs].
+ * @param label applies [transformations][TextTransformer] to the label of [e].
  */
 fun Template.graphviz(
-    /** Entity type to be configured. */
     e: Entity.Type,
-
-    /** Represents an entity to be used as the identifier in place for [e]. */
     identifyAs: Entity.Type? = null,
-
-    /**
-     * The rank of [e] in the dot file. Ranks are used to specify the horizontal ordering of nodes,
-     * with lower ranks appearing to the left of higher ranks.
-     */
     rank: Int? = null,
-
-    /** One of either [Dot.node] or [Dot.edge]. */
     type: Dot? = null,
-
-    /** The shape of nodes. */
     shape: Shape? = null,
-
-    /** The style of edges or nodes. E.g. [Style.dashed]. */
     style: Style? = null,
-
-    /** Override shape of arrowhead, refer to https://graphviz.org/doc/info/arrows.html for values. */
     arrowheadShape: String? = null,
-
-    /** ... */
     edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    vararg label: TextTransformer = arrayOf(),
+    label: List<TextTransformer> = listOf()
 ) {
     elementsOf(e) {
         rank?.let {           property(e, "dot-rank", withValue(it)) }
@@ -113,7 +66,7 @@ fun Template.graphviz(
         edgeLabel?.let {      property(e, "dot-edge-label", it()) }
 
         if (label.isNotEmpty() ) {
-            property(e, "dot-label-transform", withValue(label.toMutableList().toList()))
+            property(e, "dot-label-transform", editText(*label.toTypedArray()))
         }
     }
 }
