@@ -1,5 +1,8 @@
 ## Upcoming release
 
+
+## sift-0.7.0 2023-03-06
+
 DSL documentation published to https://junkdog.github.io/sift/ 
 
 ### Example template: Spring PetClinic Sample Application
@@ -24,7 +27,6 @@ describes relationships between entities, and configures properties for Graphviz
 - All scopes (Template, Classes, Methods...) are now top-level classes.
 - DSL/Core: restricted value of `withValue(value)` to String, Number, Boolean, Enum. This 
   solves a lot of issues with serialization.
-
 
 ### Fixes
 - DSL/property: Improved the `property()` method to resolve relationships via direct association 

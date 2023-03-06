@@ -177,6 +177,8 @@ template {
 Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
 The execution of a System Model Template can be introspected with the `--profile` option.
 
+![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
+
 A typical template can be expressed in about 100-200 lines of code. Some templates,
 such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined templates
 can include multiple existing templates to better describe the underlying system while also
@@ -185,7 +187,6 @@ keeping the resulting DSL concise.
  [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L45:L69
  [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L52:L69
 
-![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
 
 
 ## Installation

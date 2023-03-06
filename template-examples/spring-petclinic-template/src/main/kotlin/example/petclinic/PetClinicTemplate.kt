@@ -82,7 +82,8 @@ class PetClinicTemplate : SystemModelTemplate {
 
                 // prints current elements when running with `--debug`.
                 // while `--debug` has its uses, it's usually a better idea to inspect
-                // the template processing with `--profile`.
+                // the template processing with `--profile`. Another throubleshooting
+                // option is `--dump-system-model`, which shows all entity data.
                 log("@ModelAttribute functions")
             }
         }

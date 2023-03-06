@@ -1,9 +1,12 @@
 package sift.core.dsl
 
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
 import sift.core.entity.EntityService
+import sift.core.template.SystemModelTemplate
+import sift.core.template.load
 
 @Disabled
 class KnownBugs {
@@ -22,5 +25,11 @@ class KnownBugs {
             .entityService
             .also(block)
     }
+
+    @Test
+    fun hmm() {
+        SystemModelTemplate.load("petclinic")
+    }
 }
+
 
