@@ -1073,7 +1073,10 @@
   "name":"sift.core.entity.LabelFormatter$FromPattern$Companion"
 },
 {
-  "name":"sift.core.graphviz.Dot"
+  "name":"sift.core.graphviz.Dot",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"sift.core.jackson.SystemModelSerializer$Deserializer",
@@ -1098,7 +1101,11 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["kotlin.text.Regex","java.lang.String"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["kotlin.text.Regex","java.lang.String"] }, 
+    {"name":"getRegex","parameterTypes":[] }, 
+    {"name":"getWith","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.terminal.StringEditor",
@@ -1107,6 +1114,7 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":["java.util.List"] }, 
+    {"name":"getTransformers","parameterTypes":[] }, 
     {"name":"toString","parameterTypes":[] }
   ]
 },
