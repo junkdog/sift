@@ -11,6 +11,7 @@ import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import sift.core.asm.*
+import sift.core.dsl.resource
 import kotlin.reflect.KClass
 
 class GenericsTest {
@@ -22,6 +23,16 @@ class GenericsTest {
         SignatureParser(Opcodes.ASM9, LoggingSignatureVisitor())
             .also { SignatureReader(signature).accept(it) }
             .asClassSignatureNode
+    }
+
+    @Test
+    fun `reading method generic throws declaration`() {
+        val cn = classNode(resource("/testdata/no-debug/GenericThrows.class"))
+
+        // should not throw
+        cn.methods
+            .firstBy(MethodNode::name, "throwAsE")
+            .signature(listOf(), LoggingSignatureVisitor())!!
     }
 
     @Nested

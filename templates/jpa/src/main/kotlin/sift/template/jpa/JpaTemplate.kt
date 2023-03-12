@@ -6,7 +6,7 @@ import sift.core.dsl.template
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.template.SystemModelTemplate
-import sift.core.terminal.Style
+import sift.core.terminal.Style.Companion.plain
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = JpaTemplate.EntityTypes
@@ -68,8 +68,8 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
         }
     }
 
-    override fun theme() = mapOf<Entity.Type, Style>(
-        E.jpaRepository to Style.plain(orange1),
-        E.jpaMethod     to Style.plain(orange2),
+    override fun theme() = mapOf(
+        E.jpaRepository to plain(orange1),
+        E.jpaMethod     to plain(orange2),
     )
 }

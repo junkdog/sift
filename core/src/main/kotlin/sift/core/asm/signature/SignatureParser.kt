@@ -21,6 +21,7 @@ internal class SignatureParser(
     val typeParameters: MutableList<FormalTypeParameter> = typeParams.toMutableList()
 
     private var returnType: TypeSignature? = null
+    private var exceptionType: TypeSignature? = null // currently unused
     private val extends: MutableList<TypeSignature> = mutableListOf()
 
     private val methodParameters: MutableList<TypeSignature> = mutableListOf()
@@ -93,6 +94,14 @@ internal class SignatureParser(
         )
     }
 
+    override fun visitExceptionType(): SignatureVisitor {
+        return TypeArgumentVisitor(
+            onTypeArgument = { exceptionType = it },
+            formalTypeParameters = typeParameters::firstByName,
+            api = api,
+            signatureVisitor = sv?.visitExceptionType()
+        )
+    }
 }
 
 internal fun MutableList<FormalTypeParameter>.firstByName(

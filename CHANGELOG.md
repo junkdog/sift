@@ -1,6 +1,13 @@
 ## Upcoming release
 
 
+### Fixes
+- IllegalArgumentException for methods declaring thrown exceptions as generic types, e.g.:
+```java
+public static <X extends Throwable> void propagate(Throwable t) throws X
+```
+
+
 ## sift-0.7.0 2023-03-06
 
 DSL documentation published to https://junkdog.github.io/sift/ 

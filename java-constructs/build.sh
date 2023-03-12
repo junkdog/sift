@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function _build {
-    javac $2 ConstructA.java ConstructB.java Fn.java
+    javac $2 ConstructA.java ConstructB.java Fn.java GenericThrows.java
 
     local destination=../core/src/test/resources/testdata/$1
     mkdir -p $destination
