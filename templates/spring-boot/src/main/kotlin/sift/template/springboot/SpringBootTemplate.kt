@@ -6,6 +6,7 @@ import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.dsl.Methods
+import sift.core.dsl.ScopeEntityPredicate
 import sift.core.dsl.template
 import sift.core.graphviz.Dot
 import sift.core.terminal.Gruvbox.light2
@@ -91,7 +92,10 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
                         registerEndpoints("POST", A.postMapping)
                         registerEndpoints("PUT", A.putMapping)
 
-                        E.controller["endpoints"] = E.endpoint
+                        // not all controllers are REST controllers (@MessageMapping/rsocket endpoints)
+                        scope("attempt registering endpoints", ScopeEntityPredicate.ifExists, E.endpoint) {
+                           E.controller["endpoints"] = E.endpoint
+                        }
                     }
                 }
             }

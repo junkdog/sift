@@ -6,7 +6,7 @@
 ```java
 public static <X extends Throwable> void propagate(Throwable t) throws X
 ```
-
+- `spring-axon`: no longer fails if a @Controller doesn't register any REST endpoints.
 
 ## sift-0.7.0 2023-03-06
 
