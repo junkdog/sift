@@ -1,0 +1,27 @@
+on:
+  push:
+    tags:
+    - 'sift-*'
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: release sift-cli.jar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: 'maven'
+      - name: build sift cli
+        run: mvn -B -P clean package
+      - name: upload cli jar
+        uses: softprops/action-gh-release@v1
+        with:
+          files: cli/target/sift-cli.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
