@@ -4,6 +4,9 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
+import sift.core.api.Modifiers
+import sift.core.api.Modifiers.acc_public
+import sift.core.api.Modifiers.acc_synthetic
 import sift.core.api.SiftTemplateDsl
 import sift.core.asm.simpleName
 import sift.core.dsl.template
@@ -81,7 +84,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 }
 
                 scope("core") {
-                    filter("Core")
+                    filter(Regex("Core\$"))
                     entity(E.scope, label("\${name}"),
                         property("name", readName()))
                 }
@@ -98,6 +101,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
+                    filter(acc_public)
                     entity(E.dsl, label("\${name}(\${+params:})"),
                         property("name", readName()),
                     )
