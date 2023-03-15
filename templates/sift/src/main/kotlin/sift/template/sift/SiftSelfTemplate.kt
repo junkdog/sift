@@ -5,9 +5,11 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.api.SiftTemplateDsl
+import sift.core.asm.simpleName
 import sift.core.dsl.template
 import sift.core.asm.type
 import sift.core.dsl.Core
+import sift.core.element.AsmType
 import sift.core.entity.Entity
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -70,18 +72,24 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
         scope("register dsl") {
             classes {
-                filter("sift.core.api.Dsl")
+                filter("sift.core.dsl")
 
                 scope("scopes from annotated classes") {
                     annotatedBy<SiftTemplateDsl>()
                     entity(E.scope, label("\${name}"),
-                        property("name", readName(shorten = true)))
+                        property("name", readName()))
+                }
+
+                scope("core") {
+                    filter("Core")
+                    entity(E.scope, label("\${name}"),
+                        property("name", readName()))
                 }
 
                 scope("scopes from children of Core<Element>") {
                     implements(type<Core<*>>())
                     entity(E.scope, label("\${name}"),
-                        property("name", readName(shorten = true)))
+                        property("name", readName()))
                 }
             }
 
@@ -91,18 +99,18 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
                     entity(E.dsl, label("\${name}(\${+params:})"),
-                        property("name", readName()))
+                        property("name", readName()),
+                    )
 
                     parameters {
                         property(E.dsl, "params", readName(shorten = true))
+                        property(E.dsl, "param-types", readType())
                     }
                 }
                 e["fns"] = E.dsl
             }
 
-            methodsOf(E.dsl) { e ->
-                e["actions"] = E.action.instantiations
-            }
+            E.dsl["actions"] = E.action.instantiations
         }
     }
 
@@ -116,13 +124,34 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
 private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Style {
 
+    private val extensionFunction = Regex("\\\$this\\\$\\w+_\\w{10}")
+
     override fun format(
         e: Tree<EntityNode>,
         theme: Map<Entity.Type, Style>
     ): String {
         val fn = (e.value as EntityNode.Entity).entity
-        val name = fn["name"]?.first()?.let { fnStyle(it.toString().substringBefore("-")) } ?:  ""
-        val params = fn["params"]?.joinToString(fnStyle(", ")) { paramStyle(it.toString()) }  ?: ""
-        return "$name${fnStyle("(")}$params${fnStyle(")")}"
+
+        var params = (fn["params"] as List<String>? ?: listOf())
+
+        val isExtension = params.firstOrNull()?.matches(extensionFunction) == true
+        val extensionPrefix = if (isExtension) "${extensionType(fn)}." else ""
+
+        if (isExtension) {
+            params = params.drop(1)
+        }
+
+        val name = fn["name"]?.first()
+            ?.toString()
+            ?.substringBefore("-")
+            ?.let { fnStyle("$extensionPrefix$it") } ?:  ""
+        val parameters = params.joinToString(fnStyle(", ")) { paramStyle(it) }
+        return "$name${fnStyle("(")}$parameters${fnStyle(")")}"
+    }
+
+    private fun extensionType(e: Entity): String {
+        return (e["param-types"]!!.first() as AsmType)
+            .simpleName
+            .replace(Regex("^String\$"), "Entity.Type")
     }
 }

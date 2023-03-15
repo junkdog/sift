@@ -5,6 +5,7 @@
 
 
 ### Fixes
+- `sift` template: fix DSL registration.
 - IllegalArgumentException for methods declaring thrown exceptions as generic types, e.g.:
 ```java
 public static <X extends Throwable> void propagate(Throwable t) throws X
