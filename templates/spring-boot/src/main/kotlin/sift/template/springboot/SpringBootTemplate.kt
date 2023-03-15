@@ -56,6 +56,9 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
     override val name: String
         get() = "spring-boot"
 
+    override val description: String = """
+        |Spring Boot supporting template registering controllers and endpoints.
+    """.trimMargin()
 
     override fun template(): Action<Unit, Unit> = template {
         classes {

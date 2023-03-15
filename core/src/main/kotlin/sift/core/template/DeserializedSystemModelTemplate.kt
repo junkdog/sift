@@ -19,6 +19,7 @@ import java.io.File
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal class DeserializedSystemModelTemplate(
     override val name: String,
+    override val description: String = "Deserialized $name template.",
 
     override val defaultType: Entity.Type,
     @field:JsonProperty("entity-types")
@@ -58,6 +59,7 @@ fun SystemModelTemplate.Companion.deserialize(json: String): SystemModelTemplate
     val tree = mapper.readTree(json)
     return DeserializedSystemModelTemplate(
         tree["name"].asText(),
+        tree["description"]?.asText() ?: "Deserialized ${tree["name"].asText()} template.",
         Entity.Type(tree["root"].asText()),
         (tree.get("entity-types") as ArrayNode).map(JsonNode::asText).map(Entity::Type),
         mapper.convertValue<Action.Chain<Unit>>(tree.get("pipeline")),
@@ -70,6 +72,7 @@ fun SystemModelTemplate.serialize(): String {
     val mapper = mapper()
     val json = mapper.writeValueAsString(mapper.createObjectNode().apply {
         put("name", name)
+        put("description", description)
         replace("root", mapper.valueToTree(defaultType))
         replace("entity-types", mapper.createArrayNode().apply {
             entityTypes.forEach { add(mapper.valueToTree<JsonNode>(it)) }

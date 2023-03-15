@@ -2,5 +2,6 @@
 .idea/
 *.iml
 *.class
+tmp/
 target/
 template-examples/spring-petclinic-template/spring-petclinic

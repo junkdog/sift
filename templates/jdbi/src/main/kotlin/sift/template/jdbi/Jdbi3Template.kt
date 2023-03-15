@@ -49,6 +49,10 @@ class Jdbi3Template : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val name: String
         get() = "jdbi3"
 
+    override val description: String = """
+        |Supporting template for JDBI3.
+    """.trimMargin()
+
     override fun template() = template {
         classes {
             methods {

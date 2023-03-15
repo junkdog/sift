@@ -11,6 +11,7 @@ import sift.core.tree.buildTree
 
 interface SystemModelTemplate {
     val name: String
+    val description: String
     val defaultType: Entity.Type
     val entityTypes: Iterable<Entity.Type>
 

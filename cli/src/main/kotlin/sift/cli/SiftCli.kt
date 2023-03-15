@@ -140,7 +140,7 @@ object SiftCli : CliktCommand(
                         .lines()
                         .drop(1)
                         .joinToString("\n")
-                    println(err(trace))
+                    println(fg(trace))
                 }
 
                 println(fg("exiting..."))
@@ -157,8 +157,8 @@ object SiftCli : CliktCommand(
             }
             template.listTemplates -> {
                 templates()
-                    .map { (_, v) -> fg(v().name) }
-                    .joinToString(separator = "\n")
+                    .map { (_, v) -> fg(v().name.padEnd(25)) to v().description }
+                    .joinToString(separator = "\n") { (name, desc) -> "$name ${desc.lines().first()}" }
                     .let(terminal::println)
             }
             template.listEntityTypes && template.template != null -> {
@@ -173,7 +173,7 @@ object SiftCli : CliktCommand(
                 }
             }
             template.template == null -> {
-                terminal.println("${orange1("Error: ")} ${fg("Must specify a template")}")
+                terminal.println("${orange1("Error: ")} ${fg("Must specify a template, use -l to list available templates.)")}")
                 exitProcess(1)
             }
             template.path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")

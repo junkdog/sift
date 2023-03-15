@@ -42,6 +42,10 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val name: String
         get() = "jpa"
 
+    override val description: String = """
+        |Supporting template providing Spring JpaRepository types.
+    """.trimMargin()
+
     override fun template() = template {
         classes {
             scope("register JPA repositories") {

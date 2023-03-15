@@ -47,6 +47,11 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
     override val name: String
         get() = "sift"
 
+    override val description: String = """
+        |Introspects DSL API. Can be used to diff API between versions.
+    """.trimMargin()
+
+
     override fun template() = template {
         scope("register actions") {
             classes {

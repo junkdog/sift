@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### New/Tweaks
+- `--list-templates` now includes a short description per template.
+
 
 ### Fixes
 - IllegalArgumentException for methods declaring thrown exceptions as generic types, e.g.:

@@ -80,6 +80,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
     override val name: String
         get() = "spring-axon"
 
+    override val description: String = "Spring Boot + Axon CQRS applications"
 
     override fun template(): Action<Unit, Unit> {
 

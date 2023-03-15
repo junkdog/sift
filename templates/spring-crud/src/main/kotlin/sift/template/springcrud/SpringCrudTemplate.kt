@@ -45,6 +45,10 @@ class SpringCrudTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
     override val name: String
         get() = "spring-crud"
 
+    override val description: String = """
+        |Supporting template providing Spring Data Repository and CrudRepository types.
+    """.trimMargin()
+
     override fun template() = template {
         classes {
             listOf(T.crudRepository, T.repository).forEach { repository ->

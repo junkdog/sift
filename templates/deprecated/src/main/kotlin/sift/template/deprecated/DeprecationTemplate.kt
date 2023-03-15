@@ -28,6 +28,9 @@ class DeprecationTemplate : SystemModelTemplate, SystemModelTemplateServiceProvi
     override fun create() = this
     override val name: String
         get() = "deprecations"
+    override val description: String = """
+        |Simple template for finding deprecated classes, methods and fields.
+    """.trimMargin()
 
     override fun template(): Action<Unit, Unit> {
         fun Methods.registerWithParent() {

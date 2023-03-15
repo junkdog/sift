@@ -37,6 +37,7 @@ private enum class Yolo { Foo, Bar }
 class LabelFormatterTemplate : SystemModelTemplate {
     val e = Entity.Type("foobar")
     override val name: String = "test"
+    override val description: String = ""
     override val defaultType: Entity.Type = Entity.Type("controller")
     override val entityTypes: Iterable<Entity.Type> = listOf(e)
     override fun template() = template {
@@ -58,11 +59,11 @@ class LabelFormatterTemplate : SystemModelTemplate {
     }
 
     override fun theme(): Map<Entity.Type, Style> = mapOf()
-
 }
 
 class SomeTemplate : SystemModelTemplate {
     override val name: String = "test"
+    override val description: String = ""
     override val defaultType: Entity.Type = Entity.Type("controller")
     override val entityTypes: Iterable<Entity.Type> = listOf(
         Entity.Type("controller"),
@@ -86,6 +87,7 @@ class SynthesisPipeline : SystemModelTemplate {
     val e = Entity.Type("synth")
 
     override val name: String = "test-synth"
+    override val description: String = ""
     override val defaultType: Entity.Type = e
     override val entityTypes: Iterable<Entity.Type> = listOf(e)
     override fun template(): Action<Unit, Unit> {
