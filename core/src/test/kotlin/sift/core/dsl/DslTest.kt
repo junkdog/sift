@@ -175,13 +175,16 @@ class DslTest {
 
     @Test
     fun `filter parameter and fields by type`() {
+        val root = Entity.Type("class")
         val f = Entity.Type("field")
         val p = Entity.Type("param")
 
         classes {
+            entity(root)
             fields {
                 filterType(type<String>())
                 entity(f)
+                root["fields"] = f
             }
 
             methods {
@@ -189,15 +192,16 @@ class DslTest {
                 parameters {
                     filterType(type<String>())
                     entity(p)
+                    root["params"] = p
                 }
             }
-        }.execute(listOf(classNode(MethodWithParam::class))) { es ->
-            val eF = es[f].values.toList()
-            val pF = es[p].values.toList()
-
-            assertThat(eF).hasSize(1)
-            assertThat(pF).hasSize(1)
-        }
+        }.execute(listOf(classNode(MethodWithParam::class)), root, """
+            ── class
+               └─ MethodWithParam
+                  ├─ MethodWithParam.barField
+                  └─ MethodWithParam::fn(bar: String)
+            """
+        )
     }
 
     @Test
@@ -211,20 +215,17 @@ class DslTest {
                 signature {
                     typeArguments {
                         explodeType(synthesize = true) {
-                            entity(payload)
+                            entity(payload, label("field-owner: \${field-owner}"))
                         }
                     }
                 }
             }
             property(payload, "field-owner", readName())
-        }.execute(listOf(classNode(FieldClass::class))) { es ->
-            val entities = es[payload].values
-            assertThat(entities).hasSize(1)
-
-            entities.first().let { e ->
-                assertThat(e["field-owner"]).isEqualTo(listOf("FieldClass"))
-            }
-        }
+        }.execute(listOf(classNode(FieldClass::class)), payload, """
+            ── payload
+               └─ field-owner: FieldClass
+            """
+        )
     }
 
     @Test
@@ -244,10 +245,11 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(1)
-        }
+        }.execute(cns, payload, """
+            ── payload
+               └─ Payload
+            """
+        )
     }
 
     @Test
@@ -258,15 +260,15 @@ class DslTest {
         val bobEnum = Entity.Type("enum")
 
         val expectedTree = """
-            |── bob
-            |   ├─ Bobber::a
-            |   │  └─ Bob.A
-            |   ├─ Bobber::b
-            |   │  └─ Bob.A
-            |   └─ Bobber::c
-            |      ├─ Bob.A
-            |      └─ Bob.B
-            |"""
+            ── bob
+               ├─ Bobber::a
+               │  └─ Bob.A
+               ├─ Bobber::b
+               │  └─ Bob.A
+               └─ Bobber::c
+                  ├─ Bob.A
+                  └─ Bob.B
+            """
 
         // enums {} to register enum values as entities
         classes {
@@ -283,7 +285,8 @@ class DslTest {
                     filter("<init>", invert = true)
                     entity(bobber)
 
-                    bobber["references"] = bobEnum.fieldAccess                }
+                    bobber["references"] = bobEnum.fieldAccess
+                }
             }
         }.execute(cns, bobber, expectedTree)
 
@@ -303,7 +306,8 @@ class DslTest {
                     filter("<init>", invert = true)
                     entity(bobber)
 
-                    bobber["references"] = bobEnum.fieldAccess                }
+                    bobber["references"] = bobEnum.fieldAccess
+                }
             }
         }.execute(cns, bobber, expectedTree)
     }
@@ -343,13 +347,11 @@ class DslTest {
         val cns = listOf(classNode(ClassWithGenericElements::class))
         val payload = Entity.Type("payload")
 
-        fun validate(template: Action<Unit, Unit>) {
-            template.execute(cns) { es ->
-                val entities = es[payload].values.toList()
-                assertThat(entities).hasSize(1)
-                assertThat(entities.first().label).isEqualTo("Payload")
-            }
-        }
+        fun validate(template: Action<Unit, Unit>) = template.execute(cns, payload, """
+            ── payload
+               └─ Payload
+            """
+        )
 
         // fun complexReturn(): Map<String, List<Pair<Payload, Int>>>
         val template = classes {
@@ -421,18 +423,13 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            val payloads = es[payload].values.toList()
-            assertThat(payloads).hasSize(1)
-            assertThat(payloads.first().label).isEqualTo("Payload")
-
-            val methods = es[method].values.associateBy(Entity::label)
-            assertThat(methods).hasSize(2)
-
-            assertThat(methods["payloads"]!!.children("payload").map(Entity::label)).containsExactly("Payload")
-            assertThat(methods["complexParameters"]!!.children("payload")).isEmpty()
-        }
-
+        }.execute(cns, method, """
+            ── method
+               ├─ complexParameters
+               └─ payloads
+                  └─ Payload
+            """
+        )
     }
 
     @Test @Disabled
@@ -535,7 +532,7 @@ class DslTest {
     }
 
     @Test
-    fun `entity assignment via parentScope`() {
+    fun `entity assignment via outerScope`() {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
 
@@ -550,15 +547,13 @@ class DslTest {
                     controller["endpoints"] = endpoint
                 }
             }
-        }.execute { es ->
-            assertThat(es[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(e(controller, "SomeController", children = mapOf("endpoints" to listOf(
-                    e(endpoint, "SomeController::create"),
-                    e(endpoint, "SomeController::delete"),
-                ))))
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+                  ├─ SomeController::create
+                  └─ SomeController::delete
+            """
+        )
     }
 
     @Test
@@ -570,7 +565,7 @@ class DslTest {
             classNode<ClassWithFields>(),
         )
 
-        // note that kotlin properties are usually not backed by actual fields
+        // note that kotlin properties are not necessarily backed by actual fields
         classes {
             filter(Regex("ClassWithFields\$"))
             fields {
@@ -594,36 +589,6 @@ class DslTest {
     }
 
     @Test
-    fun `entity assignment from method to class via parentScope`() {
-        val controller = Entity.Type("controller")
-        val endpoint = Entity.Type("endpoint")
-
-        classes {
-            methods {
-                annotatedBy<Endpoint>()
-                logCount("found endpoints")
-                entity(endpoint)
-
-                outerScope("register controller class") {
-                    log("iterating set of classes with @Endpoint methods")
-                    entity(controller)
-                    controller["endpoints"] = endpoint
-                }
-            }
-        }.execute { es ->
-            assertThat(es[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(e(controller, "SomeController", children =
-                    mapOf("endpoints" to listOf(
-                        e(endpoint, "SomeController::create"),
-                        e(endpoint, "SomeController::delete"),
-                    )
-                )))
-        }
-    }
-
-    @Test
     fun `scope to methods of registered entities`() {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
@@ -642,16 +607,13 @@ class DslTest {
                     controller["endpoints"] = endpoint
                 }
             }
-        }.execute { es ->
-            assertThat(es[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(e(controller, "SomeController", children =
-                mapOf("endpoints" to listOf(
-                    e(endpoint, "SomeController::create"),
-                    e(endpoint, "SomeController::delete"),
-                ))))
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+                  ├─ SomeController::create
+                  └─ SomeController::delete
+            """
+        )
     }
 
     @Test
@@ -664,7 +626,7 @@ class DslTest {
 
         classes {
             log("classes")
-            entity(et)
+            entity(et, label("\${a-parameter-type}"))
             methods {
                 filter(Regex("mixedTypes"))
                 parameters {
@@ -672,14 +634,11 @@ class DslTest {
                     property(et, "a-parameter-type", readType())
                 }
             }
-        }.execute(cns) { es ->
-            val entities = es[et]
-            assertThat(entities)
-                .hasSize(1)
-
-            assertThat(entities.values.first().properties["a-parameter-type"])
-                .isEqualTo(listOf(type<String>()))
-        }
+        }.execute(cns, et, """
+            ── e
+               └─ Ljava/lang/String;
+            """
+        )
     }
 
     @Test
@@ -702,16 +661,12 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            assertThat(es[paramType].map(::TestEntity))
-                .hasSize(2)
-                .containsAll(
-                    listOf(
-                        e(paramType, "MethodsWithTypes.Foo"),
-                        e(paramType, "MethodsWithTypes.Bar")
-                    )
-                )
-        }
+        }.execute(cns, paramType, """
+            ── param-type
+               ├─ MethodsWithTypes.Bar
+               └─ MethodsWithTypes.Foo
+            """
+        )
 
         classes {
             methods {
@@ -722,15 +677,11 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            assertThat(es[paramType].map(::TestEntity))
-                .hasSize(1)
-                .containsAll(
-                    listOf(
-                        e(paramType, "MethodsWithTypes.Foo"),
-                    )
-                )
-        }
+        }.execute(cns, paramType, """
+            ── param-type
+               └─ MethodsWithTypes.Foo
+            """
+        )
 
         classes {
             methods {
@@ -839,14 +790,11 @@ class DslTest {
             entity(et, label("CLS \${name}"),
                 property("name", readName())
             )
-        }.execute(cns) { es ->
-            val e = es[et].map { (_, e) -> e }
-            assertThat(e).hasSize(1)
-            assertThat(e.first().label)
-                .isEqualTo("CLS MethodsWithTypes")
-
-
-        }
+        }.execute(cns, et, """
+            ── class
+               └─ CLS MethodsWithTypes
+            """
+        )
     }
 
     @Test
@@ -884,7 +832,6 @@ class DslTest {
         }
     }
 
-
     @Test
     fun `read outer class`() {
         val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set3")
@@ -919,14 +866,11 @@ class DslTest {
 
             annotatedBy<RestController>()
             entity(controller)
-        }.execute { entityService ->
-            assertThat(entityService[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(
-                    e(controller, "SomeController")
-                )
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+            """
+        )
     }
 
     @Test
@@ -945,22 +889,13 @@ class DslTest {
                     )
                 }
             }
-        }.execute { entityService ->
-            assertThat(entityService[endpoint].map(::TestEntity))
-                .hasSize(2)
-                .containsAll(
-                    listOf(
-                        e(type = endpoint, label = "POST /foo",
-                            "http-method" to "POST",
-                            "path" to "/foo"),
-                        e(type = endpoint, label = "DELETE /bar",
-                            "http-method" to "DELETE",
-                            "path" to "/bar"),
-                        )
-                    )
-            }
-        }
-
+        }.execute(allCns, endpoint, """
+            ── endpoint
+               ├─ DELETE /bar
+               └─ POST /foo
+            """
+        )
+    }
 
     @Test
     fun `synthesize missing classes for entity tagging`() {
@@ -1045,11 +980,11 @@ class DslTest {
         classes {
             implements(Type.getType("Lsift.core.api.testdata.set2.GenericInterface;".replace('.', '/')))
             entity(impl)
-        }.execute(cns) { es ->
-            assertThat(es[impl].map { (_, e) -> e}.map(::TestEntity))
-                .hasSize(1)
-                .contains(e(impl, "GenericInterfaceImpl"))
-        }
+        }.execute(cns, impl, """
+            ── implementer
+               └─ GenericInterfaceImpl
+            """
+        )
     }
 
     @Test
@@ -1072,14 +1007,13 @@ class DslTest {
             filter(Regex("Implementor"))
             implements(type<Interfaces.Base>())
             entity(base)
-        }.execute(cns) { es ->
-            assertThat(es[base].map { (_, e) -> e }.map(::TestEntity))
-                .containsExactlyInAnyOrder(
-                    e(base, "Interfaces.ImplementorB"),
-                    e(base, "Interfaces.ImplementorC"),
-                    e(base, "Interfaces.ImplementorD"),
-                )
-        }
+        }.execute(cns, base, """
+            ── base
+               ├─ Interfaces.ImplementorB
+               ├─ Interfaces.ImplementorC
+               └─ Interfaces.ImplementorD
+            """
+        )
     }
 
     @Test
@@ -1109,18 +1043,15 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
-            val fns = es[fn].map { (_, e) -> e }
-            assertThat(fns)
-                .hasSize(4)
-
-            assertThat(es[repo])
-                .hasSize(1)
-
-            val repoImpl = es[repo].values.first()
-            assertThat(repoImpl.children("methods"))
-                .hasSize(4)
-        }
+        }.execute(cns, repo, """
+            ── repo
+               └─ RepoImpl
+                  ├─ RepoImpl::a
+                  ├─ RepoImpl::b
+                  ├─ RepoImpl::c
+                  └─ RepoImpl::d
+            """
+        )
     }
 
     @Test
@@ -1140,20 +1071,17 @@ class DslTest {
 
                 method["invokes"] = method.invocations
             }
-        }.execute(cns) { es ->
-            val methods = es[method].values.toList()
-            assertThat(methods).hasSize(5)
-
-            fun er(s: String): Entity = methods.first { s in it.label }
-
-            val invoker = er("HandlerOfFns::invoker")
-            assertThat(invoker.children("invokes"))
-                .hasSize(2)
-                .containsExactlyInAnyOrder(
-                    er("HandlerOfFns::on"),
-                    er("HandlerOfFns::boo")
-                )
-        }
+        }.execute(cns, method, """
+            ── handler
+               ├─ HandlerOfFns::<init>
+               ├─ HandlerOfFns::boo
+               ├─ HandlerOfFns::dummy
+               ├─ HandlerOfFns::invoker
+               │  ├─ HandlerOfFns::boo
+               │  └─ HandlerOfFns::on
+               └─ HandlerOfFns::on
+            """
+        )
     }
 
     @Test
@@ -1181,21 +1109,13 @@ class DslTest {
 
                 handler["instantiates"] = data.instantiations
             }
-        }.execute(cns) { es ->
-            val handlers = es[handler].values.toList()
-            assertThat(handlers).hasSize(2)
-            assertThat(es[data].values.toList()).hasSize(1)
-
-            val boo = handlers
-                .first { "HandlerOfFns::boo" in it.label }
-
-            val payload = es[data].values.toList().first()
-
-            assertThat(boo.children("instantiates"))
-                .hasSize(1)
-                .first()
-                .isEqualTo(payload)
-        }
+        }.execute(cns, handler, """
+            ── handler
+               ├─ HandlerOfFns::boo
+               │  └─ Payload
+               └─ HandlerOfFns::on
+            """
+        )
     }
 
     @Test
@@ -1318,17 +1238,12 @@ class DslTest {
 
                 data.instantiations["instantiations-by"] = handler
             }
-        }.execute(cns) { es ->
-            val handlers = es[handler].values.toList()
-            assertThat(handlers).hasSize(2)
-            assertThat(es[data].values.toList()).hasSize(1)
-
-            val instantiatedBy = es[data].values.toList().first()
-                .children("instantiations-by")
-
-            assertThat(instantiatedBy)
-                .hasSize(1)
-        }
+        }.execute(cns, data, """
+            ── data
+               └─ Payload
+                  └─ HandlerOfFns::boo
+            """
+        )
     }
 
     @Test
@@ -1352,21 +1267,13 @@ class DslTest {
                     )
                 }
             }
-        }.execute { entityService ->
-            assertThat(entityService[endpoint].map(::TestEntity))
-                .hasSize(2)
-                .containsExactlyInAnyOrder(
-                    e(endpoint, "POST /foo",
-                            "http-method" to "POST",
-                            "path" to "/foo"),
-                    e(endpoint, "DELETE /bar",
-                        "http-method" to "DELETE",
-                        "path" to "/bar"),
-                )
-        }
+        }.execute(allCns, endpoint, """
+            ── endpoint
+               ├─ DELETE /bar
+               └─ POST /foo
+            """
+        )
     }
-
-
 
     @Test
     fun `correctly identify relations when scanning invocations`() {
@@ -1388,9 +1295,7 @@ class DslTest {
             }
             scope("scan invoker") {
                 methods {
-                    log("methods")
                     invokes(handler)
-                    log("handler-invokers")
                     entity(invoker)
                     invoker["invokes"] = handler
                     handler["invoked-by"] = invoker
@@ -1429,21 +1334,13 @@ class DslTest {
 
                 controller["endpoints"] = endpoint
             }
-        }.execute { entityService ->
-            assertThat(entityService[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(e(controller, "SomeController",
-                    children = mapOf("endpoints" to listOf(
-                        e(endpoint, "POST /foo",
-                            "http-method" to "POST",
-                            "path" to "/foo"),
-                        e(endpoint, "DELETE /bar",
-                            "http-method" to "DELETE",
-                            "path" to "/bar"),
-                    ))
-                ))
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+                  ├─ DELETE /bar
+                  └─ POST /foo
+            """
+        )
     }
 
     @Test
@@ -1472,31 +1369,25 @@ class DslTest {
         template {
             include(templateA)
             include(templateB)
-        }.execute { entityService ->
-            assertThat(entityService[controller].map(::TestEntity))
-                .hasSize(1)
-                .first()
-                .isEqualTo(e(controller, "SomeController",
-                    children = mapOf("endpoints" to listOf(
-                        e(endpoint, "POST /foo",
-                            "http-method" to "POST",
-                            "path" to "/foo"),
-                        e(endpoint, "DELETE /bar",
-                            "http-method" to "DELETE",
-                            "path" to "/bar"),
-                    ))
-                ))
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+                  ├─ DELETE /bar
+                  └─ POST /foo
+            """
+        )
     }
 
     @Test
     fun `read annotations from forked subsets using scope`() {
+        val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
         val query = Entity.Type("query")
 
         classes {
             filter(Regex("^sift\\.core\\.api\\.testdata"))
             annotatedBy<RestController>()
+            entity(controller)
 
             methods {
                 scope("scan endpoints") {
@@ -1507,33 +1398,22 @@ class DslTest {
                     )
 
                     log("Endpoints")
+                    controller["endpoints"] = endpoint
                 }
                 scope("scan queries ") {
                     annotatedBy<Query>()
                     entity(query)
+                    controller["queries"] = query
                 }
             }
-        }.execute { entityService ->
-            assertThat(entityService[endpoint].map(::TestEntity))
-                .hasSize(2)
-                .containsAll(
-                    listOf(
-                        e(type = endpoint, label = "POST /foo",
-                            "http-method" to "POST",
-                            "path"        to "/foo"),
-                        e(type = endpoint, label = "DELETE /bar",
-                            "http-method" to "DELETE",
-                            "path"        to "/bar"),
-                    )
-                )
-            assertThat(entityService[query].map(::TestEntity))
-                .hasSize(1)
-                .containsAll(
-                    listOf(
-                        e(type = query, label = "SomeController::query")
-                    )
-                )
-        }
+        }.execute(allCns, controller, """
+            ── controller
+               └─ SomeController
+                  ├─ DELETE /bar
+                  ├─ POST /foo
+                  └─ SomeController::query
+            """
+        )
     }
 
     @Test
@@ -1804,7 +1684,7 @@ class DslTest {
     ) {
         execute(cns) { es ->
             assertThat(es.toTree(root))
-                .isEqualTo(expectTree.trimMargin())
+                .isEqualTo(expectTree.trimIndent() + "\n")
         }
     }
 }
