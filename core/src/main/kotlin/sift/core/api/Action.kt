@@ -984,15 +984,9 @@ sealed class Action<IN, OUT> {
                         .forEach { (elem, e) -> e?.set(key, elem.data) }
                 }
                 else -> {
-                    input.map { it to ctx.entityService[it.reference] }
-                        .forEach { (elem, e) ->
-                            if (e != null) {
-                                e[key] = elem.data
-                            } else {
-                                // try harder, but occasionally identify false positives
-                                ctx.findRelatedEntities(elem, entity)
-                                    .forEach { e -> e[key] = elem.data }
-                            }
+                    input.forEach { elem ->
+                        ctx.findRelatedEntities(elem, entity)
+                            .forEach { e -> e[key] = elem.data }
                         }
                 }
             }

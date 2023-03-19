@@ -5,6 +5,7 @@
 
 
 ### Fixes
+- `DSL.property()`: would sometimes fail to update entity properties.
 - `sift` template: fix DSL registration.
 - IllegalArgumentException for methods declaring thrown exceptions as generic types, e.g.:
 ```java
