@@ -16,6 +16,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
             is Deduplicate -> "dedupe(${transformer.char})"
             is IdSequencer -> "id-sequence(${transformer.pattern.pattern})"
             is Replace     -> "replace(${transformer.regex.pattern} -> ${transformer.with})"
+            is TextEdit    -> "edit(${transformer.transformers.joinToString(transform = ::format)})"
         }
 
         return transformers.joinToString(", ", "StringEditor(", ")", transform = ::format)
@@ -25,6 +26,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
 // applied before styling
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 @JsonSubTypes(
+    JsonSubTypes.Type(TextEdit::class, name = "edit"),
     JsonSubTypes.Type(Deduplicate::class, name = "dedupe"),
     JsonSubTypes.Type(IdSequencer::class, name = "id-sequence"),
     JsonSubTypes.Type(Replace::class, name = "replace"),
@@ -33,12 +35,17 @@ sealed interface TextTransformer {
     operator fun invoke(s: String): String
 
     companion object {
+        fun edit(vararg transformers: TextTransformer): TextTransformer = TextEdit(transformers.toList())
         fun dedupe(char: Char): TextTransformer = Deduplicate(char)
         fun idSequence(regex: Regex, group: Int = 0): TextTransformer = IdSequencer(regex, group)
         fun uuidSequence(): TextTransformer = idSequence(uuidRegex)
         fun replace(text: String, with: String): TextTransformer = Replace(Pattern.quote(text).toRegex(), with)
         fun replace(regex: Regex, with: String): TextTransformer = Replace(regex, with)
     }
+}
+
+private class TextEdit(val transformers: List<TextTransformer>) : TextTransformer {
+    override fun invoke(s: String): String = transformers.fold(s) { acc, transformer -> transformer(acc) }
 }
 
 private class Replace(val regex: Regex, val with: String) : TextTransformer {

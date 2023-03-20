@@ -70,7 +70,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             val entities = es[payload].values.toList()
             assertThat(entities).hasSize(0)
         }
@@ -84,7 +84,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             val entities = es[payload].values.toList()
             assertThat(entities).hasSize(1)
         }
@@ -121,7 +121,7 @@ class DslTest {
             interfaces(recursive = true) {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             // A is not synthesized
             es.verify(listOf("B", "C"))
         }
@@ -131,7 +131,7 @@ class DslTest {
             interfaces(recursive = true, synthesize = true) {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             es.verify(listOf("A", "B", "C"))
         }
 
@@ -140,7 +140,7 @@ class DslTest {
             interfaces {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             es.verify(listOf("C"))
         }
 
@@ -149,7 +149,7 @@ class DslTest {
             interfaces {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             es.verify(listOf("C", "D"))
         }
 
@@ -158,7 +158,7 @@ class DslTest {
             interfaces(recursive = true) {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             es.verify(listOf("B", "C", "D"))
         }
 
@@ -167,7 +167,7 @@ class DslTest {
             interfaces(recursive = true, synthesize = true) {
                 entity(e)
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             // A is not synthesized
             es.verify(listOf("A", "B", "C", "D"))
         }
@@ -195,7 +195,7 @@ class DslTest {
                     root["params"] = p
                 }
             }
-        }.execute(listOf(classNode(MethodWithParam::class)), root, """
+        }.expecting(listOf(classNode(MethodWithParam::class)), root, """
             ── class
                └─ MethodWithParam
                   ├─ MethodWithParam.barField
@@ -221,7 +221,7 @@ class DslTest {
                 }
             }
             property(payload, "field-owner", readName())
-        }.execute(listOf(classNode(FieldClass::class)), payload, """
+        }.expecting(listOf(classNode(FieldClass::class)), payload, """
             ── payload
                └─ field-owner: FieldClass
             """
@@ -245,7 +245,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns, payload, """
+        }.expecting(cns, payload, """
             ── payload
                └─ Payload
             """
@@ -288,7 +288,7 @@ class DslTest {
                     bobber["references"] = bobEnum.fieldAccess
                 }
             }
-        }.execute(cns, bobber, expectedTree)
+        }.expecting(cns, bobber, expectedTree)
 
         // identify enums manually; functionally equivalent, but slower
         classes {
@@ -309,7 +309,7 @@ class DslTest {
                     bobber["references"] = bobEnum.fieldAccess
                 }
             }
-        }.execute(cns, bobber, expectedTree)
+        }.expecting(cns, bobber, expectedTree)
     }
 
     @Test
@@ -336,7 +336,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertThat(es[omg].values).hasSize(1)
             assertThat(es[payload].values).hasSize(1)
         }
@@ -347,7 +347,7 @@ class DslTest {
         val cns = listOf(classNode(ClassWithGenericElements::class))
         val payload = Entity.Type("payload")
 
-        fun validate(template: Action<Unit, Unit>) = template.execute(cns, payload, """
+        fun validate(template: Action<Unit, Unit>) = template.expecting(cns, payload, """
             ── payload
                └─ Payload
             """
@@ -423,7 +423,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns, method, """
+        }.expecting(cns, method, """
             ── method
                ├─ complexParameters
                └─ payloads
@@ -499,7 +499,7 @@ class DslTest {
                     property("double", readAnnotation(AnnoPrimitives::double))
                 )
             }
-        }.execute { entityService ->
+        }.expecting { entityService ->
             assertThat(entityService[klazz].values.map(Entity::toString))
                 .hasSize(1)
                 .first()
@@ -547,7 +547,7 @@ class DslTest {
                     controller["endpoints"] = endpoint
                 }
             }
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
                   ├─ SomeController::create
@@ -576,7 +576,7 @@ class DslTest {
                     entity(foo)
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertThat(es[foo].values.map(Entity::label))
                 .hasSize(1)
                 .first()
@@ -607,7 +607,7 @@ class DslTest {
                     controller["endpoints"] = endpoint
                 }
             }
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
                   ├─ SomeController::create
@@ -634,7 +634,7 @@ class DslTest {
                     property(et, "a-parameter-type", readType())
                 }
             }
-        }.execute(cns, et, """
+        }.expecting(cns, et, """
             ── e
                └─ Ljava/lang/String;
             """
@@ -661,7 +661,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns, paramType, """
+        }.expecting(cns, paramType, """
             ── param-type
                ├─ MethodsWithTypes.Bar
                └─ MethodsWithTypes.Foo
@@ -677,7 +677,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns, paramType, """
+        }.expecting(cns, paramType, """
             ── param-type
                └─ MethodsWithTypes.Foo
             """
@@ -692,7 +692,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertTrue(paramType !in es)
         }
     }
@@ -724,7 +724,7 @@ class DslTest {
                     payload["instantiated-by"] = method
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertThat(es[payload])
                 .hasSize(1)
 
@@ -790,7 +790,7 @@ class DslTest {
             entity(et, label("CLS \${name}"),
                 property("name", readName())
             )
-        }.execute(cns, et, """
+        }.expecting(cns, et, """
             ── class
                └─ CLS MethodsWithTypes
             """
@@ -819,7 +819,7 @@ class DslTest {
 
                 hof["foo"] = foo.instantiations
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertThat(es[foo]).hasSize(1)
             assertThat(es[hof]).hasSize(5)
 
@@ -851,7 +851,7 @@ class DslTest {
             }
 
 
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             assertThat(es[foo].values.map(Entity::label))
                 .containsExactly("KotlinInliningIntrospection[Foo]")
         }
@@ -866,7 +866,7 @@ class DslTest {
 
             annotatedBy<RestController>()
             entity(controller)
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
             """
@@ -889,7 +889,7 @@ class DslTest {
                     )
                 }
             }
-        }.execute(allCns, endpoint, """
+        }.expecting(allCns, endpoint, """
             ── endpoint
                ├─ DELETE /bar
                └─ POST /foo
@@ -946,7 +946,7 @@ class DslTest {
                     handler["instantiates"] = data.instantiations
                 }
             }
-        }.execute(cns, ::validate)
+        }.expecting(cns, ::validate)
 
         // inline synthesize
         template {
@@ -965,7 +965,7 @@ class DslTest {
                     handler["instantiates"] = data.instantiations
                 }
             }
-        }.execute(cns, ::validate)
+        }.expecting(cns, ::validate)
     }
 
     @Test
@@ -980,7 +980,7 @@ class DslTest {
         classes {
             implements(Type.getType("Lsift.core.api.testdata.set2.GenericInterface;".replace('.', '/')))
             entity(impl)
-        }.execute(cns, impl, """
+        }.expecting(cns, impl, """
             ── implementer
                └─ GenericInterfaceImpl
             """
@@ -1007,7 +1007,7 @@ class DslTest {
             filter(Regex("Implementor"))
             implements(type<Interfaces.Base>())
             entity(base)
-        }.execute(cns, base, """
+        }.expecting(cns, base, """
             ── base
                ├─ Interfaces.ImplementorB
                ├─ Interfaces.ImplementorC
@@ -1043,7 +1043,7 @@ class DslTest {
                     }
                 }
             }
-        }.execute(cns, repo, """
+        }.expecting(cns, repo, """
             ── repo
                └─ RepoImpl
                   ├─ RepoImpl::a
@@ -1071,7 +1071,7 @@ class DslTest {
 
                 method["invokes"] = method.invocations
             }
-        }.execute(cns, method, """
+        }.expecting(cns, method, """
             ── handler
                ├─ HandlerOfFns::<init>
                ├─ HandlerOfFns::boo
@@ -1109,7 +1109,7 @@ class DslTest {
 
                 handler["instantiates"] = data.instantiations
             }
-        }.execute(cns, handler, """
+        }.expecting(cns, handler, """
             ── handler
                ├─ HandlerOfFns::boo
                │  └─ Payload
@@ -1143,7 +1143,7 @@ class DslTest {
 
                 factory.invocations["invocations-by"] = method
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             val methods = es[method].values.toList()
             assertThat(methods).hasSize(5)
 
@@ -1195,7 +1195,7 @@ class DslTest {
                 }
             }
 
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             fun validate(type: Entity.Type) {
                 val entities = es[type].values.toList()
                 assertThat(entities)
@@ -1238,7 +1238,7 @@ class DslTest {
 
                 data.instantiations["instantiations-by"] = handler
             }
-        }.execute(cns, data, """
+        }.expecting(cns, data, """
             ── data
                └─ Payload
                   └─ HandlerOfFns::boo
@@ -1267,7 +1267,7 @@ class DslTest {
                     )
                 }
             }
-        }.execute(allCns, endpoint, """
+        }.expecting(allCns, endpoint, """
             ── endpoint
                ├─ DELETE /bar
                └─ POST /foo
@@ -1301,7 +1301,7 @@ class DslTest {
                     handler["invoked-by"] = invoker
                 }
             }
-        }.execute(cns) { es ->
+        }.expecting(cns) { es ->
             val handlers = es[handler].values.toList()
             val invoker = es[invoker].values.toList()
 
@@ -1334,7 +1334,7 @@ class DslTest {
 
                 controller["endpoints"] = endpoint
             }
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
                   ├─ DELETE /bar
@@ -1369,7 +1369,7 @@ class DslTest {
         template {
             include(templateA)
             include(templateB)
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
                   ├─ DELETE /bar
@@ -1406,7 +1406,7 @@ class DslTest {
                     controller["queries"] = query
                 }
             }
-        }.execute(allCns, controller, """
+        }.expecting(allCns, controller, """
             ── controller
                └─ SomeController
                   ├─ DELETE /bar
@@ -1439,7 +1439,7 @@ class DslTest {
                     entity(param)
                 }
             }
-        }.execute { entityService ->
+        }.expecting { entityService ->
             fun verify(type: Entity.Type, label: String) {
                 assertThat(entityService[type].map(::TestEntity))
                     .hasSize(1)
@@ -1492,14 +1492,14 @@ class DslTest {
                     }
                 }
             }
-        }.execute { }
+        }.expecting { }
 
         assertThrows<EntityNotFoundException> {
             classes {
                 scope("", ifExistsNot, foo) {
                     foo["bars"] = bar
                 }
-            }.execute { }
+            }.expecting { }
         }
     }
 
@@ -1535,7 +1535,7 @@ class DslTest {
                         foo["sends"] = payload
                     }
                 }
-            }.execute(input) { es ->
+            }.expecting(input) { es ->
                 assertThat(es[foo]).hasSize(1)
                 assertThat(es[payload]).hasSize(1)
 
@@ -1578,7 +1578,7 @@ class DslTest {
                         entity(param)
                     }
                 }
-            }.execute(input) { entityService ->
+            }.expecting(input) { entityService ->
                 assertThat(entityService[param].map(::TestEntity))
                     .hasSize(expected.size)
                     .containsAll(
@@ -1608,7 +1608,7 @@ class DslTest {
                     entity(et, property("type", readType()))
                 }
             }
-        }.execute(cns) {}
+        }.expecting(cns) {}
 
         assertThrows<IllegalEntityAssignmentException> {
             classes {
@@ -1619,7 +1619,7 @@ class DslTest {
                         entity(et, property("type", readType()))
                     }
                 }
-            }.execute(cns) {}
+            }.expecting(cns) {}
         }
     }
 
@@ -1630,13 +1630,13 @@ class DslTest {
             classes {
                 entity(Entity.Type("a"))
                 entity(Entity.Type("a"))
-            }.execute { }
+            }.expecting { }
 
             assertThrows<UniqueElementPerEntityViolation> {
                 classes {
                     entity(Entity.Type("a"))
                     entity(Entity.Type("b"))
-                }.execute { }
+                }.expecting { }
             }
         }
 
@@ -1648,26 +1648,26 @@ class DslTest {
             assertThrows<EntityNotFoundException> {
                 classes {
                     foo["bars"] = bar
-                }.execute { }
+                }.expecting { }
             }
 
             assertThrows<EntityNotFoundException> {
                 classes {
                     entity(foo)
                     foo["bars"] = bar
-                }.execute { }
+                }.expecting { }
             }
 
             assertThrows<EntityNotFoundException> {
                 classes {
                     entity(bar)
                     foo["bars"] = bar
-                }.execute { }
+                }.expecting { }
             }
         }
     }
 
-    private fun Action<Unit, Unit>.execute(
+    private fun Action<Unit, Unit>.expecting(
         cns: List<ClassNode> = allCns,
         block: (EntityService) -> Unit
     ) {
@@ -1677,12 +1677,12 @@ class DslTest {
             .also(block)
     }
 
-    private fun Action<Unit, Unit>.execute(
+    private fun Action<Unit, Unit>.expecting(
         cns: List<ClassNode> = allCns,
         root: Entity.Type,
         expectTree: String
     ) {
-        execute(cns) { es ->
+        expecting(cns) { es ->
             assertThat(es.toTree(root))
                 .isEqualTo(expectTree.trimIndent() + "\n")
         }

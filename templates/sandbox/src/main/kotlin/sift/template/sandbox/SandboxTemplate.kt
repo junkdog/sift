@@ -1,8 +1,8 @@
 package sift.template.sandbox
 
 import org.objectweb.asm.Type
+import sift.core.dsl.template
 import sift.core.entity.Entity
-import sift.core.api.Dsl.template
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style
 
@@ -36,6 +36,8 @@ class SandboxTemplate : SystemModelTemplate {
 
     override val name: String
         get() = "sanbox"
+
+    override val description: String = "playground"
 
     override fun template() = template {
         classes {

@@ -50,10 +50,10 @@ import sift.core.terminal.Gruvbox.yellow1
 import sift.core.terminal.Gruvbox.yellow2
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
+import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
-import java.util.Properties
-import java.util.ServiceLoader
+import java.util.*
 import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
@@ -484,14 +484,16 @@ object SiftCli : CliktCommand(
             node.add(fg("$key:".padEnd(padLength)) + style(value.toString()))
         }
 
+        val uuid = uuidSequence()
+
         val t = Tree(fg("entities"))
         fun addEntity(e: Entity) {
             t.add(Tree(fg("Entity[${green2(e.label.take(80))}]")).apply {
-                entry(this, 20, "id", e.id)
+                entry(this, 20, "id", uuid(e.id.toString()))
                 entry(this, 20, "type", e.type, orange1)
                 add("children").let { children ->
                     e.children().forEach { child ->
-                        entry(children, 17, child, e.children(child).joinToString { it.id.toString() })
+                        entry(children, 17, child, e.children(child).joinToString { uuid(it.id.toString()) })
                     }
                 }
                 add("properties").let { props ->
@@ -500,7 +502,6 @@ object SiftCli : CliktCommand(
                     }
                 }
             })
-
         }
 
         sm.entitiesByType.values

@@ -22,7 +22,7 @@ fun Template.graphviz(
     style: Style? = null,
     arrowheadShape: String? = null,
     edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    label: List<TextTransformer> = listOf()
+    label: TextTransformer? = null,
 ) {
     entities.forEach { e ->
         graphviz(e, identifyAs, rank, type, shape, style, arrowheadShape, edgeLabel, label)
@@ -54,7 +54,7 @@ fun Template.graphviz(
     style: Style? = null,
     arrowheadShape: String? = null,
     edgeLabel: (Elements.() -> Action<Iter<Element>, IterValues>)? = null,
-    label: List<TextTransformer> = listOf()
+    label: TextTransformer? = null,
 ) {
     elementsOf(e) {
         rank?.let {           property(e, "dot-rank", withValue(it)) }
@@ -64,9 +64,6 @@ fun Template.graphviz(
         style?.let {          property(e, "dot-style", withValue(it.name)) }
         arrowheadShape?.let { property(e, "dot-arrowhead", withValue(it)) }
         edgeLabel?.let {      property(e, "dot-edge-label", it()) }
-
-        if (label.isNotEmpty() ) {
-            property(e, "dot-label-transform", editText(*label.toTypedArray()))
-        }
+        label?.let {          property(e, "dot-label-transform", editText(it)) }
     }
 }
