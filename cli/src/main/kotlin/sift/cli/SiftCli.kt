@@ -164,7 +164,7 @@ object SiftCli : CliktCommand(
             template.listEntityTypes && template.template != null -> {
                 when {
                     template.path != null ->
-                        buildTree().let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
+                        buildTree(tree.treeRoot).let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
 
                     serialization.load != null ->
                         terminal.println(toString(template.template!!, loadSystemModel(serialization.load!!)))
@@ -196,7 +196,7 @@ object SiftCli : CliktCommand(
                     .let { lookup -> { type: Entity.Type -> lookup.getOrDefault(type, "#ffffff") } }
 
                 // updating labels and filtering
-                val tree = buildTree(sm, this.tree.treeRoot)
+                val tree = buildTree(sm, tree.treeRoot)
                 stylize(tree, theme)
                 filterTree(tree)
 
@@ -239,11 +239,11 @@ object SiftCli : CliktCommand(
 
     fun diffHead(
         deserializedResult: SystemModel,
-        root: Entity.Type?,
+        roots: List<Entity.Type>,
         template: SystemModelTemplate
     ): Tree<DiffNode> {
-        val (_, new) = buildTree(root)
-        val old = template.toTree(deserializedResult, root)
+        val (_, new) = buildTree(roots)
+        val old = template.toTree(deserializedResult, roots)
 
         require(old.label == new.label)
         return Tree(DiffNode(Unchanged, new.value)).apply {
@@ -411,17 +411,17 @@ object SiftCli : CliktCommand(
             }
     }
 
-    private fun buildTree(forType: Entity.Type? = null): Pair<SystemModel, Tree<EntityNode>> {
+    private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
         val sm: SystemModel = TemplateProcessor(classNodes(this.template.path!!))
             .execute(template.template(), this.template.profile)
 
-        return sm to template.toTree(sm, forType)
+        return sm to template.toTree(sm, roots)
     }
 
-    private fun buildTree(sm: SystemModel, forType: Entity.Type? = null): Tree<EntityNode> {
-        return template.template!!.toTree(sm, forType)
+    private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {
+        return template.template!!.toTree(sm, roots)
     }
 
     fun toString(template: SystemModelTemplate): String {

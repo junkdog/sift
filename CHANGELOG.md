@@ -8,8 +8,10 @@ how to work with JPA entities, and wires axon entities against `@MessageMapping`
  [example-gamerental]: template-examples/spring-axon-gamerental 
 
 ### New/Tweaks
-- `--list-templates` now includes a short description per template.
-- `--dump-system-model` sequences entity UUID:s to integers, to make the output easier to read.  
+- `--tree-root` option is now repeatable, allowing you to specify multiple roots.
+  For example: `sift -t spring-axon -r command -r query ...`
+- `--list-templates` option now displays a brief description for each template.
+- `--dump-system-model` option now converts entity UUIDs to integers, making the output more readable.
 
 ### Fixes
 - `DSL.property()`: would sometimes fail to update entity properties.

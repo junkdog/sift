@@ -18,18 +18,20 @@ interface SystemModelTemplate {
     fun template(): Action<Unit, Unit>
     fun theme(): Map<Entity.Type, Style>
 
-    fun toTree(sm: SystemModel, forType: Entity.Type?): Tree<EntityNode> {
-        return sm.toTree(forType ?: defaultType)
+    fun toTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {
+        return sm.toTree(roots.takeIf { it.isNotEmpty() } ?: listOf(defaultType))
     }
 
     companion object
 }
 
-fun SystemModel.toTree(root: Entity.Type): Tree<EntityNode> {
-    return tree(root.id) {
-        this@toTree[root].forEach { e ->
-            add(e) {
-                buildTree(e)
+fun SystemModel.toTree(roots: List<Entity.Type>): Tree<EntityNode> {
+    return tree(roots.joinToString(" + ")) {
+        roots.forEach { root ->
+            this@toTree[root].forEach { e ->
+                add(e) {
+                    buildTree(e)
+                }
             }
         }
     }.also { it.sort(compareBy(EntityNode::toString)) }

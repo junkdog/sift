@@ -81,7 +81,7 @@ class DeprecationTemplate : SystemModelTemplate, SystemModelTemplateServiceProvi
 
     override fun toTree(
         sm: SystemModel,
-        forType: Entity.Type?
+        roots: List<Entity.Type>
     ): Tree<EntityNode> {
         return tree("deprecations") {
             if (klazz in sm)

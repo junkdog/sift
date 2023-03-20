@@ -39,8 +39,9 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
         .convert { Entity.Type(it) }
         .multiple()
 
-    val treeRoot: Entity.Type? by option("-b", "--tree-root",
+    val treeRoot: List<Entity.Type> by option("-r", "--tree-root",
             metavar = "ENTITY_TYPE",
-            help = "Tree built around requested entity type.")
+            help = "Tree built around requested entity type. (repeatable)")
         .convert { Entity.Type(it) }
+        .multiple()
 }

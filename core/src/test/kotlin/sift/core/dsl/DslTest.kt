@@ -1058,7 +1058,6 @@ class DslTest {
     fun `child assignment using dot-invocations`() {
         val cns = listOf(
             classNode<HandlerFn>(),
-            classNode<Payload>(),
             classNode<HandlerOfFns>(),
         )
 
@@ -1071,7 +1070,8 @@ class DslTest {
 
                 method["invokes"] = method.invocations
             }
-        }.expecting(cns, method, """
+        }.expecting(cns, method,
+            """
             ── handler
                ├─ HandlerOfFns::<init>
                ├─ HandlerOfFns::boo
@@ -1109,7 +1109,8 @@ class DslTest {
 
                 handler["instantiates"] = data.instantiations
             }
-        }.expecting(cns, handler, """
+        }.expecting(cns, handler,
+            """
             ── handler
                ├─ HandlerOfFns::boo
                │  └─ Payload
@@ -1696,7 +1697,7 @@ fun Iterable<Entity>.prettyPrint(): List<String> {
 }
 
 fun EntityService.toTree(root: Entity.Type): String {
-    return SystemModel(this).toTree(root).toString()
+    return SystemModel(this).toTree(listOf(root)).toString()
 }
 
 private class FieldClass {

@@ -3,8 +3,8 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
 [![DSL docs](https://badgen.net/badge/docs/DSL/orange?icon=github)](https://junkdog.github.io/sift/)
 
-Sift is a command-line tool for modeling and analyzing the design of software systems from JVM
-bytecode. It operates by processing .class or .jar files using predefined templates
+Sift is a command-line tool for reverse modeling and analyzing the design of software systems from
+JVM bytecode. It operates by processing .class or .jar files using predefined templates
 known as System Model Templates. These templates provide knowledge about technology stacks or
 project-specific constructs, which enables the tool to generate a comprehensive model of the system.
 
@@ -76,7 +76,7 @@ Entity tree/graph options:
                                   nodes. (repeatable)
   -e, --exclude REGEX             Exclude nodes when label matches REGEX. (repeatable)
   -E, --exclude-type ENTITY_TYPE  Exclude entity types from tree. (repeatable)
-  -b, --tree-root ENTITY_TYPE     Tree built around requested entity type.
+  -r, --tree-root ENTITY_TYPE     Tree built around requested entity type. (repeatable)
 
 Visualization options:
   -R, --render                          Render entities with graphviz's DOT language.
@@ -92,7 +92,7 @@ Serialization options:
 Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
                                         Override automatically detected ANSI support.
-  --stacktrace                          Print stacktrace to stderr if an error occurs.
+  --stacktrace                          Print stacktrace to stderr if an error occurs
   --version                             Print version and release date.
   --debug                               Print log/logCount statements from the executed
                                         template.
@@ -118,6 +118,7 @@ Examples:
   Model the system using the "spring-axon" template on the current directory's
   classes, filter the graph to show only nodes containing "Product", and render
   the result using graphviz's DOT language.
+
 ```
 
 ## System Model Templates and Entities
