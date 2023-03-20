@@ -1,8 +1,15 @@
 ## Upcoming release
 
+### Example template: Game Rental Sample Application
+
+A short [template][example-gamerental] for the Game Rental demo application. It demonstrates
+how to work with JPA entities, and wires axon entities against `@MessageMapping` endpoints.
+
+ [example-gamerental]: template-examples/spring-axon-gamerental 
+
 ### New/Tweaks
 - `--list-templates` now includes a short description per template.
-
+- `--dump-system-model` sequences entity UUID:s to integers, to make the output easier to read.  
 
 ### Fixes
 - `DSL.property()`: would sometimes fail to update entity properties.
@@ -11,7 +18,8 @@
 ```java
 public static <X extends Throwable> void propagate(Throwable t) throws X
 ```
-- `spring-axon`: no longer fails if a @Controller doesn't register any REST endpoints.
+- `spring-axon`: no longer fails if a `@Controller` doesn't register any REST endpoints.
+
 
 ## sift-0.7.0 2023-03-06
 
