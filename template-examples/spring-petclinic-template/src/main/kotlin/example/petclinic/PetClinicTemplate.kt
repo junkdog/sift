@@ -65,6 +65,8 @@ class PetClinicTemplate : SystemModelTemplate {
     /** `sift --template petclinic ...` */
     override val name: String
         get() = "petclinic"
+    override val description: String
+        get() = "A basic template for the Spring Boot Pet Clinic demo application"
 
 
     // the "actual" template; defining how classes are processed and how entities are defined
@@ -136,7 +138,7 @@ class PetClinicTemplate : SystemModelTemplate {
                 rank = 2,
                 type = Dot.node,
                 shape = Shape.cylinder,
-                label = listOf(replace("Repository", ""))
+                label = replace("Repository", "")
             )
         }
     }

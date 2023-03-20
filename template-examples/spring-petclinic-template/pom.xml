@@ -10,7 +10,7 @@
     <name>Spring Boot petclinic</name>
 
     <properties>
-        <sift.version>0.7.0</sift.version>
+        <sift.version>0.8.0</sift.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.8.10</kotlin.version>

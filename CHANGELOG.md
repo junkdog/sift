@@ -1,5 +1,7 @@
 ## Upcoming release
 
+## sift-0.8.0 2023-03-20
+
 ### Example template: Game Rental Sample Application
 
 A short [template][example-gamerental] for the Game Rental demo application. It demonstrates
