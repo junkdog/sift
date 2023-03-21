@@ -42,11 +42,9 @@ class Template internal constructor(
 
     /** iterates all classes */
     fun classes(f: Classes.() -> Unit) {
-        action += Classes()
-            .also(f)
-            .action
-            .let(Action.Template.InstrumentClasses::andThen)
-            .let { it andThen Action.Class.ToTemplateScope }
+        action += Action.Fork(
+            Action.Template.InstrumentClasses andThen Classes().also(f).action
+        )
     }
 
     /** iterates class elements of registered [entity] type */

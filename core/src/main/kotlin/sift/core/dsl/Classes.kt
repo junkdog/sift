@@ -37,10 +37,8 @@ class Classes internal constructor(
      * Includes interfaces from all ancestors if [recursive] is `true`.
      */
     fun interfaces(recursive: Boolean = false, synthesize: Boolean = false, f: Classes.() -> Unit) {
-        val scope = Classes().also(f).action
-            .let { scope -> Action.Class.IntoInterfaces(recursive, synthesize) andThen scope }
-
-        action += Action.Fork(scope)
+        val intoInterfaces = Action.Class.IntoInterfaces(recursive, synthesize)
+        action += Action.Fork(intoInterfaces andThen Classes().also(f).action)
     }
 
     /** filter elements by access modifiers */
@@ -61,12 +59,7 @@ class Classes internal constructor(
     }
 
     fun readType(): Action<IterClasses, IterValues> {
-        val forkTo = Action.Class.ReadType
-            .let { Action.Fork(it) }
-
-        action +=  forkTo
-
-        return forkTo.forked
+        return Action.Class.ReadType
     }
 
     override fun scope(
@@ -97,23 +90,17 @@ class Classes internal constructor(
     }
 
     fun methods(f: Methods.() -> Unit) {
-        val forkTo = Methods().also(f).action
-            .let { methodScope -> Action.Class.IntoMethods andThen methodScope }
-
+        val forkTo = Action.Class.IntoMethods andThen Methods().also(f).action
         action += Action.Fork(forkTo)
     }
 
     fun fields(f: Fields.() -> Unit) {
-        val forkTo = Fields().also(f).action
-            .let { fieldScope -> Action.Class.IntoFields andThen fieldScope }
-
+        val forkTo = Action.Class.IntoFields andThen Fields().also(f).action
         action += Action.Fork(forkTo)
     }
 
     fun superclass(f: Signature.() -> Unit) {
-        val forkTo = Signature().also(f).action
-            .let { signatureScope -> Action.Class.IntoSuperclassSignature andThen signatureScope }
-
+        val forkTo = Action.Class.IntoSuperclassSignature andThen Signature().also(f).action
         action += Action.Fork(forkTo)
     }
 }

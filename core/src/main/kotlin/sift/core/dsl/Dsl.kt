@@ -38,18 +38,12 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
 
 /** Define a new template */
 fun template(f: Template.() -> Unit): Action<Unit, Unit> {
-    return Template()
-        .also(f)
-        .action
+    return Template().also(f).action
 }
 
 /** Define a new template */
 internal fun classes(f: Classes.() -> Unit): Action<Unit, Unit> {
-    return Classes()
-        .also(f)
-        .action
-        .let(Action.Template.InstrumentClasses::andThen)
-        .let { it andThen Action.Class.ToTemplateScope }
+    return template { classes(f) }
 }
 
 

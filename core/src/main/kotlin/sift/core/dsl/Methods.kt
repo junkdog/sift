@@ -137,10 +137,9 @@ class Methods internal constructor(
     }
 
     fun returns(f: Signature.() -> Unit) {
-        val forkTo = Signature().also(f).action
-            .let { signatureScope -> Action.Method.IntoReturnSignature andThen signatureScope }
-
-        action += Action.Fork(forkTo)
+        action += Action.Fork(
+            Action.Method.IntoReturnSignature andThen Signature().also(f).action
+        )
     }
 
     val Entity.Type.instantiations: EntityResolution

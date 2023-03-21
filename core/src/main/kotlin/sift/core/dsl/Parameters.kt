@@ -26,9 +26,7 @@ class Parameters internal constructor(
     }
 
     fun signature(f: Signature.() -> Unit) {
-        val forkTo = Signature().also(f).action
-            .let { signatureScope -> Action.Parameter.IntoSignature andThen signatureScope }
-
+        val forkTo = Action.Parameter.IntoSignature andThen Signature().also(f).action
         action += Action.Fork(forkTo)
     }
 
@@ -67,12 +65,7 @@ class Parameters internal constructor(
     }
 
     fun readType(): Action<IterParameters, IterValues> {
-        val forkTo = Action.Parameter.ReadType
-            .let { Action.Fork(it) }
-
-        action += forkTo
-
-        return forkTo.forked
+        return Action.Parameter.ReadType
     }
 
     fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {
