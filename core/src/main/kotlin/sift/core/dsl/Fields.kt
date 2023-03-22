@@ -1,7 +1,6 @@
 package sift.core.dsl
 
 import sift.core.api.*
-import sift.core.element.AsmType
 import sift.core.element.ClassNode
 import sift.core.element.FieldNode
 import sift.core.entity.Entity
@@ -69,8 +68,8 @@ class Fields internal constructor(
     /**
      * Filters fields to include only those with a type matching type.
      */
-    fun filterType(type: AsmType) {
-        action += Action.Field.FilterType(type)
+    fun filterType(type: Type) {
+        action += Action.Field.FilterType(type.asmType)
     }
 
     fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {

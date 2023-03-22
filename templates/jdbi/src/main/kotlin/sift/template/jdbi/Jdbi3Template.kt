@@ -2,7 +2,7 @@ package sift.template.jdbi
 
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import org.objectweb.asm.Type
+import sift.core.dsl.type
 import sift.core.dsl.template
 import sift.core.entity.Entity
 import sift.core.tree.EntityNode
@@ -15,7 +15,6 @@ import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = Jdbi3Template.EntityTypes
 typealias A = Jdbi3Template.Annotations
-typealias T = Jdbi3Template.AsmTypes
 
 @Suppress("unused")
 class Jdbi3Template : SystemModelTemplate, SystemModelTemplateServiceProvider {
@@ -24,17 +23,8 @@ class Jdbi3Template : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         val sqlQuery = "org.jdbi.v3.sqlobject.statement.SqlQuery".type
         val sqlUpdate = "org.jdbi.v3.sqlobject.statement.SqlUpdate".type
-    }
-
-    object AsmTypes {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
     }
 
     object EntityTypes {

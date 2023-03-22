@@ -1,6 +1,5 @@
 package sift.template.sandbox
 
-import org.objectweb.asm.Type
 import sift.core.dsl.template
 import sift.core.entity.Entity
 import sift.core.template.SystemModelTemplate
@@ -16,14 +15,9 @@ class SandboxTemplate : SystemModelTemplate {
     override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
     }
 
     object AsmTypes {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
     }
 
     object EntityTypes {

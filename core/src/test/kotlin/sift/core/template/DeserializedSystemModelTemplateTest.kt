@@ -3,8 +3,8 @@ package sift.core.template
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.core.api.Action
+import sift.core.dsl.type
 import sift.core.dsl.template
-import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.terminal.Style
 import sift.core.terminal.TextTransformer.Companion.dedupe
@@ -93,7 +93,7 @@ class SynthesisPipeline : SystemModelTemplate {
     override fun template(): Action<Unit, Unit> {
         return template {
             synthesize {
-                entity(e, type<String>(), label("\${a} \${b} \${c:yo}"))
+                entity(e, type("java.lang.String"), label("\${a} \${b} \${c:yo}"))
             }
 
             classesOf(e) {

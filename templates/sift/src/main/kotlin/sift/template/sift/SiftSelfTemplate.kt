@@ -4,15 +4,12 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import org.objectweb.asm.Type
 import sift.core.api.Action
-import sift.core.api.Modifiers
 import sift.core.api.Modifiers.acc_public
-import sift.core.api.Modifiers.acc_synthetic
 import sift.core.api.SiftTemplateDsl
 import sift.core.asm.simpleName
 import sift.core.dsl.template
-import sift.core.asm.type
 import sift.core.dsl.Core
-import sift.core.element.AsmType
+import sift.core.dsl.type
 import sift.core.entity.Entity
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -34,8 +31,6 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
     override val defaultType: Entity.Type = entityTypes.first()
 
     object AsmTypes {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
     }
 
     object EntityTypes {
@@ -154,7 +149,7 @@ private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Styl
     }
 
     private fun extensionType(e: Entity): String {
-        return (e["param-types"]!!.first() as AsmType)
+        return (e["param-types"]!!.first() as Type)
             .simpleName
             .replace(Regex("^String\$"), "Entity.Type")
     }

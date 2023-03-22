@@ -1,6 +1,6 @@
 package sift.template.springcrud
 
-import org.objectweb.asm.Type
+import sift.core.dsl.type
 import sift.core.entity.Entity
 import sift.core.dsl.template
 import sift.core.terminal.Gruvbox.orange1
@@ -19,14 +19,9 @@ class SpringCrudTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
     override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
     }
 
     object AsmTypes {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         val repository = "org.springframework.data.repository.Repository".type
         val crudRepository = "org.springframework.data.repository.CrudRepository".type
         val query = "org.springframework.data.jdbc.repository.query.Query".type

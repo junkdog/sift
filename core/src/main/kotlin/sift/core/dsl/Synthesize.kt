@@ -1,6 +1,5 @@
 package sift.core.dsl
 
-import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.api.SiftTemplateDsl
 import sift.core.api.chainFrom
@@ -22,7 +21,7 @@ class Synthesize internal constructor(
         type: Type,
         labelFormatter: LabelFormatter = LabelFormatter.FromElement,
     ) {
-        action += Action.RegisterSynthesizedEntity(id, type, labelFormatter)
+        action += Action.RegisterSynthesizedEntity(id, type.asmType, labelFormatter)
     }
 
     /**

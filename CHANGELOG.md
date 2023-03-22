@@ -1,5 +1,11 @@
 ## Upcoming release
 
+### Breaking changes
+- The `sift.core.dsl.Type` class supersedes `org.objectweb.asm.Type` usage in the DSL. The new type
+  class supports incorporating generic type information and generally easier to work with. Instances
+  of the new Type class are created with the `type()` function, for example: `type("java.lang.String")`.
+
+
 ## sift-0.8.0 2023-03-20
 
 ### Example template: Game Rental Sample Application

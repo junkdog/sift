@@ -5,6 +5,7 @@ import org.objectweb.asm.Opcodes.ACC_ENUM
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.asm.asmType
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
@@ -39,7 +40,7 @@ class ClassNode private constructor(
 
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     val isEnum: Boolean
-        get() = cn.superType == type<java.lang.Enum<*>>()
+        get() = cn.superType == asmType<java.lang.Enum<*>>()
 
     val extends: TypeSignature?
         get() = signature?.extends

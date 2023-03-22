@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
 import org.reflections.Reflections
 import sift.core.*
@@ -978,7 +977,7 @@ class DslTest {
         val impl = Entity.Type("implementer")
 
         classes {
-            implements(Type.getType("Lsift.core.api.testdata.set2.GenericInterface;".replace('.', '/')))
+            implements(type("sift.core.api.testdata.set2.GenericInterface"))
             entity(impl)
         }.expecting(cns, impl, """
             ── implementer

@@ -1,9 +1,10 @@
 package sift.template.sbacqrs
 
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
+import sift.core.dsl.Type
+import sift.core.dsl.type
 import sift.core.dsl.Classes
 import sift.core.dsl.Methods
 import sift.core.dsl.template
@@ -36,9 +37,6 @@ typealias E = SpringBootAxonCqrsTemplate.EntityType
 class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
     object Annotation {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         // axon
         val aggregate = "org.axonframework.spring.stereotype.Aggregate".type
         val aggregateIdentifier = "org.axonframework.modelling.command.AggregateIdentifier".type

@@ -1,6 +1,6 @@
 package sift.template.jpa
 
-import org.objectweb.asm.Type
+import sift.core.dsl.type
 import sift.core.entity.Entity
 import sift.core.dsl.template
 import sift.core.terminal.Gruvbox.orange1
@@ -19,14 +19,9 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val defaultType: Entity.Type = entityTypes.first()
 
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
     }
 
     object AsmTypes {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         val jpaRepository = "org.springframework.data.jpa.repository.JpaRepository".type
     }
 

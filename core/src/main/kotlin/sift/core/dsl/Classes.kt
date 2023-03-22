@@ -1,7 +1,6 @@
 package sift.core.dsl
 
 import sift.core.api.*
-import sift.core.element.AsmType
 import sift.core.element.ClassNode
 import sift.core.entity.Entity
 
@@ -22,8 +21,9 @@ class Classes internal constructor(
     }
 
     /** Filters the currently inspected class nodes by checking if they implement a particular type. */
-    fun implements(type: AsmType) {
-        action += Action.Class.FilterImplemented(type)
+    fun implements(type: Type) {
+        // TODO: also filter generic interfaces
+        action += Action.Class.FilterImplemented(type.asmType)
     }
 
     fun enums(f: Fields.() -> Unit) {
@@ -48,7 +48,6 @@ class Classes internal constructor(
     ) {
         filter(modifiers.toList(), invert)
     }
-
 
     /** filter elements by access modifiers */
     fun filter(

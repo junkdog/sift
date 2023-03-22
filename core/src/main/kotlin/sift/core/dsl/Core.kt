@@ -1,6 +1,5 @@
 package sift.core.dsl
 
-import org.objectweb.asm.Type
 import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.api.IterValues
@@ -163,7 +162,7 @@ abstract class Core<ELEMENT : Element> {
     inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
 
     fun annotatedBy(annotation: Type) {
-        action += Action.HasAnnotation(annotation)
+        action += Action.HasAnnotation(annotation.asmType)
     }
 
     inline fun <reified T : Annotation> readAnnotation(
@@ -173,7 +172,7 @@ abstract class Core<ELEMENT : Element> {
     fun readAnnotation(
         annotation: Type,
         field: String
-    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
+    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation.asmType, field)
 
     /**
      * This entity tracks [children] under the label denoted by [key].

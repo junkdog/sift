@@ -14,7 +14,7 @@ fun Iterable<AnnotationNode>.findAnnotation(type: Type) =
     findBy(AnnotationNode::desc, type.descriptor)
 
 inline fun <reified T : Annotation> Iterable<AnnotationNode>.findAnnotation() =
-    findAnnotation(type<T>())
+    findAnnotation(asmType<T>())
 
 /** Reads value from annotation property where [R] is a primitive value or string */
 inline fun <reified T : Annotation, reified R> Iterable<AnnotationNode>.read(

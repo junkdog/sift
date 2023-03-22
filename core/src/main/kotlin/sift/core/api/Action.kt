@@ -789,7 +789,7 @@ sealed class Action<IN, OUT> {
         val modifiers: Int,
         val invert: Boolean,
     ) : IsoAction<T>() {
-        override fun id() = "filter-modifiers(${"!".takeIf { invert } ?: ""}0x${modifiers.hex(2)}"
+        override fun id() = "filter-modifiers(${"!".takeIf { invert } ?: ""}0x${modifiers.hex(2)})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input.filter { elem ->
                 when (elem) {

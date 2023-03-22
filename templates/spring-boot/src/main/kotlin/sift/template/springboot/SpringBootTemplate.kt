@@ -2,9 +2,10 @@ package sift.template.springboot
 
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.inverse
-import org.objectweb.asm.Type
 import sift.core.entity.Entity
 import sift.core.api.Action
+import sift.core.dsl.Type
+import sift.core.dsl.type
 import sift.core.dsl.Methods
 import sift.core.dsl.ScopeEntityPredicate
 import sift.core.dsl.template
@@ -23,9 +24,6 @@ typealias E = SpringBootTemplate.EntityType
 class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
     object Annotation {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         // spring
         val controller = "org.springframework.stereotype.Controller".type
         val deleteMapping = "org.springframework.web.bind.annotation.DeleteMapping".type

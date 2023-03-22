@@ -2,7 +2,6 @@ package sift.core.asm
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Handle
-import org.objectweb.asm.Type
 import org.objectweb.asm.Type.getInternalName
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
@@ -48,31 +47,31 @@ fun classNodes(root: File): List<ClassNode> = when {
 }
 
 
-val ClassNode.type: Type
-    get() = Type.getType("L$name;")
-val AnnotationNode.type: Type
-    get() = Type.getType(desc)
+val ClassNode.type: AsmType
+    get() = AsmType.getType("L$name;")
+val AnnotationNode.type: AsmType
+    get() = AsmType.getType(desc)
 
-inline fun <reified T> type() = type(T::class)
-fun type(cls: KClass<*>) = Type.getType(cls.java)!!
+inline fun <reified T> asmType() = asmType(T::class)
+fun asmType(cls: KClass<*>) = AsmType.getType(cls.java)!!
 
-val MethodInsnNode.returnType: Type
-    get() = Type.getReturnType(desc)
+val MethodInsnNode.returnType: AsmType
+    get() = AsmType.getReturnType(desc)
 
-fun MethodInsnNode.argumentTypes(): Array<Type> = Type.getArgumentTypes(desc) ?: arrayOf()
-val MethodInsnNode.ownerType: Type
-    get() = Type.getType("L$owner;")
+fun MethodInsnNode.argumentTypes(): Array<AsmType> = AsmType.getArgumentTypes(desc) ?: arrayOf()
+val MethodInsnNode.ownerType: AsmType
+    get() = AsmType.getType("L$owner;")
 
-val FieldInsnNode.ownerType: Type
-    get() = Type.getType("L$owner;")
+val FieldInsnNode.ownerType: AsmType
+    get() = AsmType.getType("L$owner;")
 
-val Handle.ownerType: Type
-    get() = Type.getType("L$owner;")
+val Handle.ownerType: AsmType
+    get() = AsmType.getType("L$owner;")
 
-val Type.simpleName: String
+val AsmType.simpleName: String
     get() = simpleNameOf(this)
 
-private fun simpleNameOf(type: Type) = when (val name = type.className) {
+private fun simpleNameOf(type: AsmType) = when (val name = type.className) {
     "V" -> "Unit"
     "Z" -> "Boolean"
     "C" -> "Char"

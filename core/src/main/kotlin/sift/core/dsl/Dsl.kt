@@ -1,6 +1,5 @@
 package sift.core.dsl
 
-import org.objectweb.asm.Type
 import sift.core.*
 import sift.core.api.*
 import sift.core.element.*

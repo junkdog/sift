@@ -1,6 +1,6 @@
 package example.gamerental
 
-import org.objectweb.asm.Type
+import sift.core.api.type
 import sift.core.entity.Entity
 import sift.core.dsl.template
 import sift.core.graphviz.Dot
@@ -39,9 +39,6 @@ class GameRentalTemplate : SystemModelTemplate {
 
     // Annotations, AsmTypes and EntityTypes are just for organization
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
         // spring
         val messageMapping = "org.springframework.messaging.handler.annotation.MessageMapping".type
     }

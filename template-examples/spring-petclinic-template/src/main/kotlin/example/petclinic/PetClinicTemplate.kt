@@ -1,7 +1,7 @@
 package example.petclinic
 
-import org.objectweb.asm.Type
 import sift.core.entity.Entity
+import sift.core.api.type
 import sift.core.dsl.template
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
@@ -47,10 +47,6 @@ class PetClinicTemplate : SystemModelTemplate {
 
     // Annotations, AsmTypes and EntityTypes are just for organization
     object Annotations {
-        private val String.type
-            get() = Type.getType("L${replace('.', '/')};")!!
-
-
         // spring MVC
         val modelAttribute = "org.springframework.web.bind.annotation.ModelAttribute".type
     }
