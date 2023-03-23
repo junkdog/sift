@@ -12,11 +12,8 @@ import kotlin.reflect.KClass
 class Type private constructor(
     private val value: String
 ) {
-    val rawType: Type
-        get() = Type(value.substringBefore("<"))
-
     internal val internalName: String
-        get() = value.replace(".", "/")
+        get() = value.substringBefore("<").replace('.', '/')
 
     internal val asmType: AsmType
         get() = AsmType.getType("L${internalName};")

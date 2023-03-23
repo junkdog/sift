@@ -1016,6 +1016,42 @@ class DslTest {
     }
 
     @Test
+    fun `filter on implementation of generic interface`() {
+        //  class GenericInterfaceImpl : GenericInterface<String, Int>
+        //  class GenericInterfaceImpl2 : GenericInterface<String, Float>
+        //  class GenericInterfaceImpl3 : GenericInterface<String, GenericInterface<Boolean, String>>
+
+        val cns = listOf(
+            classNode<GenericInterface<*, *>>(),
+            classNode<GenericInterfaceImpl>(),
+            classNode<GenericInterfaceImpl2>(),
+            classNode<GenericInterfaceImpl3>(),
+        )
+
+        val a = Entity.Type("a")
+        val b = Entity.Type("b")
+
+        val genericInterface = "sift.core.api.testdata.set2.GenericInterface"
+
+        classes {
+            scope("a") {
+                implements(type("$genericInterface<String, Int>"))
+                entity(a, label("A \${name}"),
+                    property("name", readName()))
+            }
+            scope("b") {
+                implements(type("$genericInterface<String, Float>"))
+                entity(b, label("B \${name}"),
+                    property("name", readName()))
+            }
+        }.expecting(cns, listOf(a, b), """
+            ── a + b
+               └─ A GenericInterfaceImpl
+               └─ B GenericInterfaceImpl2
+            """
+        )
+    }
+    @Test
     fun `synthesize missing inherited methods`() {
         val cns = listOf(
             classNode<RepoImpl>(),
@@ -1682,6 +1718,14 @@ class DslTest {
         root: Entity.Type,
         expectTree: String
     ) {
+        expecting(cns, listOf(root), expectTree)
+    }
+
+    private fun Action<Unit, Unit>.expecting(
+        cns: List<ClassNode> = allCns,
+        root: List<Entity.Type>,
+        expectTree: String
+    ) {
         expecting(cns) { es ->
             assertThat(es.toTree(root))
                 .isEqualTo(expectTree.trimIndent() + "\n")
@@ -1695,8 +1739,8 @@ fun Iterable<Entity>.prettyPrint(): List<String> {
         .lines()
 }
 
-fun EntityService.toTree(root: Entity.Type): String {
-    return SystemModel(this).toTree(listOf(root)).toString()
+fun EntityService.toTree(roots: List<Entity.Type>): String {
+    return SystemModel(this).toTree(roots).toString()
 }
 
 private class FieldClass {

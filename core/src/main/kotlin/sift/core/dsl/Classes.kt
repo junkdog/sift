@@ -22,7 +22,6 @@ class Classes internal constructor(
 
     /** Filters the currently inspected class nodes by checking if they implement a particular type. */
     fun implements(type: Type) {
-        // TODO: also filter generic interfaces
         action += Action.Class.FilterImplemented(type.asmType)
     }
 
