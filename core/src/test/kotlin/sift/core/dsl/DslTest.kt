@@ -635,7 +635,7 @@ class DslTest {
             }
         }.expecting(cns, et, """
             ── e
-               └─ Ljava/lang/String;
+               └─ java.lang.String
             """
         )
     }

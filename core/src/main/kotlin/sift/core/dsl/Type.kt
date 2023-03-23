@@ -27,6 +27,8 @@ class Type private constructor(
     override fun equals(other: Any?): Boolean = value == (other as? Type)?.value
     override fun hashCode(): Int = value.hashCode()
 
+    override fun toString() = value
+
     companion object {
         internal fun from(s: String) = Type(s)
         internal fun from(type: AsmType) = Type(type.className)

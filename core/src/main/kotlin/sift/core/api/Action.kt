@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import sift.core.element.*
@@ -14,6 +13,7 @@ import sift.core.Throw
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
+import sift.core.dsl.Type
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
 import sift.core.terminal.StringEditor
@@ -332,7 +332,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
+        internal data class FilterImplemented(val type: AsmType) : Action<IterClasses, IterClasses>() {
             override fun id() = "implements(${type.simpleName})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
                 return input.filter { elem -> type in ctx.allInterfacesOf(elem) }
@@ -421,7 +421,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterClasses): IterValues {
                 return input
-                    .map { ValueNode.from(it.type, it) }
+                    .map { ValueNode.from(Type.from(it.type), it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -507,7 +507,7 @@ sealed class Action<IN, OUT> {
                     .flatMap(::introspect)
             }
 
-            private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
+            private fun instantiations(mn: MethodNode, types: Iterable<AsmType>): List<AsmType> {
                 return instantiations(mn).filter(types::contains)
             }
         }
@@ -538,7 +538,7 @@ sealed class Action<IN, OUT> {
         ) : Action<IterMethods, IterMethods>() {
             override fun id() = "invocations-of($match${", synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                fun typeOf(elem: Element): Type {
+                fun typeOf(elem: Element): AsmType {
                     return when (elem) {
                         is ClassNode     -> elem.type
                         is MethodNode    -> elem.owner.type
@@ -548,7 +548,7 @@ sealed class Action<IN, OUT> {
                     }
                 }
 
-                val matched: Set<Type> = ctx.entityService[match]
+                val matched: Set<AsmType> = ctx.entityService[match]
                     .map { (elem, _) -> typeOf(elem) }
                     .toSet()
 
@@ -594,7 +594,7 @@ sealed class Action<IN, OUT> {
             }
 
             internal data class Invocation(
-                val type: Type,
+                val type: AsmType,
                 val name: String,
                 val desc: String
             ) {
@@ -714,7 +714,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { ValueNode.from(it.type, it) }
+                    .map { ValueNode.from(Type.from(it.type), it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -770,7 +770,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
+    internal data class HasAnnotation<T : Element>(val annotation: AsmType) : IsoAction<T>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
@@ -820,7 +820,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class ReadAnnotation<T: Element>(val annotation: Type, val field: String) : Action<Iter<T>, IterValues>() {
+    internal data class ReadAnnotation<T: Element>(val annotation: AsmType, val field: String) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun readAnnotation(input: T): ValueNode? {
@@ -907,7 +907,7 @@ sealed class Action<IN, OUT> {
 
     internal data class RegisterSynthesizedEntity(
         val id: Entity.Type,
-        val type: Type,
+        val type: AsmType,
         val labelFormatter: LabelFormatter
     ) : Action<Unit, Unit>() {
         override fun id() = "register-entity-synthesized($id, ${type.simpleName})"
