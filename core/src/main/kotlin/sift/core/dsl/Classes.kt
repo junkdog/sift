@@ -22,7 +22,7 @@ class Classes internal constructor(
 
     /** Filters the currently inspected class nodes by checking if they implement a particular type. */
     fun implements(type: Type) {
-        action += Action.Class.FilterImplemented(type.asmType)
+        action += Action.Class.FilterImplemented(type)
     }
 
     fun enums(f: Fields.() -> Unit) {

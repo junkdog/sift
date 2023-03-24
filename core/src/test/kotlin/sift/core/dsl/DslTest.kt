@@ -1035,22 +1035,25 @@ class DslTest {
 
         classes {
             scope("a") {
-                implements(type("$genericInterface<String, Int>"))
+                // TODO: make this work with "GenericInterface<String, Integer>"
+                implements(type("$genericInterface<java.lang.String, java.lang.Integer>"))
                 entity(a, label("A \${name}"),
                     property("name", readName()))
             }
             scope("b") {
-                implements(type("$genericInterface<String, Float>"))
+                implements(type("$genericInterface<java.lang.String, java.lang.Float>"))
                 entity(b, label("B \${name}"),
                     property("name", readName()))
             }
-        }.expecting(cns, listOf(a, b), """
+        }.expecting(cns, listOf(a, b),
+            """
             ── a + b
-               └─ A GenericInterfaceImpl
+               ├─ A GenericInterfaceImpl
                └─ B GenericInterfaceImpl2
             """
         )
     }
+
     @Test
     fun `synthesize missing inherited methods`() {
         val cns = listOf(
@@ -1063,6 +1066,7 @@ class DslTest {
 
         template {
             classes {
+                log("pre-repository")
                 implements(type<Repo>())
                 log("repository")
                 entity(repo)

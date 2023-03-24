@@ -4,15 +4,19 @@ import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
-import org.objectweb.asm.Type
 import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
 import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
+import sift.core.asm.signature.ArgType
+import sift.core.asm.signature.TypeSignature
+import sift.core.dsl.Type
+import sift.core.dsl.type
 import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
+import sift.core.stringWriter
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.IdentityHashMap
@@ -48,20 +52,24 @@ internal data class Context(
     val parents: MutableMap<ClassNode, List<ClassNode>> = allClasses
         .associateWith(classByType::parentsOf)
         .toMutableMap()
-    val implementedInterfaces: MutableMap<ClassNode, List<AsmType>> = allClasses
+    val implementedInterfaces: MutableMap<ClassNode, List<Type>> = allClasses
         .associateWith { cn ->
 
-            val found = mutableSetOf<AsmType>()
+            val found = mutableSetOf<Type>()
             fun recurse(node: ClassNode) {
-                node.interfaces
+                val interfaces = node.signature?.implements?.map(TypeSignature::toType)
+                    ?: node.interfaces.map(Type::from)
+
+                interfaces
                     .filter { it !in found }
                     .onEach { found += it }
-                    .mapNotNull { classByType[it] }
+                    .mapNotNull { classByType[it.asmType] }
                     .forEach(::recurse)
 
+                // TODO: resolve signatures; write test first
                 parents[node]
                     ?.onEach(::recurse)
-                    ?.onEach { found += it.type }
+                    ?.onEach { found += Type.from(it.type) }
             }
             recurse(cn)
 
@@ -136,7 +144,7 @@ internal data class Context(
         return when {
             includeParents -> allImplemented
             else -> {
-                val parents = (parents[cn] ?: listOf()).map(ClassNode::type)
+                val parents = (parents[cn] ?: listOf()).map(ClassNode::type).map(Type::from)
                 allImplemented - parents
             }
         }
@@ -243,6 +251,24 @@ internal data class Context(
     }
 }
 
+private fun TypeSignature.toType(): Type {
+    val generics = args
+        .takeIf(List<TypeSignature>::isNotEmpty)
+        ?.map(TypeSignature::toType)
+        ?.joinToString(prefix = "<", postfix = ">")
+        ?: ""
+
+    return "${this.type.className()}$generics".type
+}
+
+private fun ArgType.className(): String {
+    return when (this) {
+        is ArgType.Array -> wrapped?.className() + "[]"
+        is ArgType.Plain -> type.className
+        is ArgType.Var   -> type.name
+    }
+}
+
 internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
     fun toMethodNodes(elem: Element, e: Entity): List<Pair<MethodNode, Entity>> {
         return when (elem) {
@@ -279,7 +305,7 @@ private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
         .toList()
 }
 
-internal fun Map<Type, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
+internal fun Map<AsmType, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
     return generateSequence(cn) { get(it.superType) }
         .drop(1)
         .toList()

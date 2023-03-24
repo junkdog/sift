@@ -298,14 +298,15 @@ sealed class Action<IN, OUT> {
             }
 
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                val resolveClassNode: (AsmType) -> ClassNode? = when {
-                    synthesize -> { type -> ctx.synthesize(type) }
-                    else       -> { type -> ctx.classByType[type] }
+                val resolveClassNode: (Type) -> ClassNode? = when {
+                    synthesize -> { type -> ctx.synthesize(type.asmType) }
+                    else       -> { type -> ctx.classByType[type.asmType] }
                 }
 
                 fun allInterfacesOf(elem: ClassNode): Iterable<ClassNode> {
                     val parentInterfaces = ctx.parents[elem]!!
                         .flatMap(ClassNode::interfaces)
+                        .map(Type::from)
 
                     return (parentInterfaces + ctx.allInterfacesOf(elem, false))
                         .toSet()
@@ -317,9 +318,10 @@ sealed class Action<IN, OUT> {
                     val parentInterfaces = elem.superType
                         ?.let(ctx.classByType::get)
                         ?.interfaces
+                        ?.map(Type::from)
                         ?: listOf()
 
-                    return (parentInterfaces + elem.interfaces)
+                    return (parentInterfaces + elem.interfaces.map(Type::from))
                         .toSet()
                         .mapNotNull(resolveClassNode)
                         .onEach { output -> ctx.scopeTransition(elem, output) }
@@ -332,10 +334,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterImplemented(val type: AsmType) : Action<IterClasses, IterClasses>() {
+        internal data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
             override fun id() = "implements(${type.simpleName})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                return input.filter { elem -> type in ctx.allInterfacesOf(elem) }
+                return input.filter { elem -> type matches ctx.allInterfacesOf(elem) }
             }
         }
 
@@ -1031,3 +1033,7 @@ internal fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(ac
 
 
 var debugLog = false
+
+infix fun Type.matches(types: List<Type>): Boolean {
+    return this in (types.takeIf { isGeneric } ?: types.map { Type.from(it.asmType) })
+}

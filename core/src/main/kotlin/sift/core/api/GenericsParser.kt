@@ -1,7 +1,11 @@
 package sift.core.api
 
+import sift.core.asm.signature.ArgType
+import sift.core.asm.signature.MetaType
+import sift.core.asm.signature.TypeSignature
 import sift.core.dsl.Classes
 import sift.core.dsl.Signature
+import sift.core.element.AsmType
 import sift.core.stringWriter
 
 
@@ -48,6 +52,10 @@ internal fun explodeTypeFromSignature(
     recurse(context, sig)
 }
 
+internal fun parseSignature(signature: String): TypeSignature {
+    return parseGenericType(signature.replace(" ", "")).signature
+}
+
 private fun parseGenericType(
     signature: String
 ): GenericType = GenericsParser(signature).parseType(0)
@@ -81,6 +89,12 @@ private class GenericType(val index: Int, val constraint: TypeName, val argument
     }
 
     fun flatten(): List<GenericType> = listOf(this) + arguments.flatMap { it.flatten() }
+
+    val signature: TypeSignature
+        get() {
+            val args = arguments.map(GenericType::signature).toMutableList()
+            return TypeSignature(ArgType.Plain(AsmType.getType("L${constraint};")), 0, MetaType.Class, args)
+        }
 }
 
 
@@ -109,7 +123,7 @@ private class GenericsParser(val input: String) {
     }
 
     private fun parseTypeName(): TypeName = TypeName.from(stringWriter {
-        while (!(at('<') || at('>') || at(','))) {
+        while (!(eol || at('<') || at('>') || at(','))) {
             append(consume())
         }
     })
@@ -129,4 +143,6 @@ private class GenericsParser(val input: String) {
     }
 
     private fun at(check: Char) = input.length > index && input[index] == check
+    private val eol: Boolean
+        get() = input.length <= index
 }
