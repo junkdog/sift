@@ -1016,6 +1016,39 @@ class DslTest {
     }
 
     @Test
+    fun `filter on generic superclass`() {
+        val cns = listOf(
+            classNode<GenericClass<*>>(), //  abstract class GenericClass<T>
+            classNode<ConcreteClass1>(),  //  class ConcreteClass1 : GenericClass<String>()
+            classNode<ConcreteClass2>(),  //  class ConcreteClass2 : GenericClass<Float>()
+        )
+
+        val a = Entity.Type("a")
+        val b = Entity.Type("b")
+
+        classes {
+            scope("a") {
+                // TODO: shorten to `type("GenericClass<String>")`
+                implements(type("sift.core.api.testdata.set2.GenericClass<java.lang.String>"))
+                entity(a, label("A \${name}"),
+                    property("name", readName(shorten = true)))
+            }
+
+            scope("b") {
+                implements(type("sift.core.api.testdata.set2.GenericClass<java.lang.Float>"))
+                entity(b, label("B \${name}"),
+                    property("name", readName(shorten = true)))
+            }
+        }.expecting(cns, listOf(a, b),
+            """
+            ── a + b
+               ├─ A ConcreteClass1
+               └─ B ConcreteClass2
+            """
+        )
+    }
+
+    @Test
     fun `filter on implementation of generic interface`() {
         //  class GenericInterfaceImpl : GenericInterface<String, Int>
         //  class GenericInterfaceImpl2 : GenericInterface<String, Float>

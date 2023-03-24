@@ -305,6 +305,7 @@ sealed class Action<IN, OUT> {
 
                 fun allInterfacesOf(elem: ClassNode): Iterable<ClassNode> {
                     val parentInterfaces = ctx.parents[elem]!!
+                        .map { cn -> ctx.classByType[cn.asmType]!! }
                         .flatMap(ClassNode::interfaces)
                         .map(Type::from)
 

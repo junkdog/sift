@@ -407,7 +407,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Class$IntoEnumValues",
@@ -1012,6 +1015,9 @@
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
   ]
+},
+{
+  "name":"sift.core.dsl.Type"
 },
 {
   "name":"sift.core.element.ClassNode"

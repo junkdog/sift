@@ -10,6 +10,7 @@ import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
 import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
+import sift.core.asm.superType
 import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.element.*
@@ -49,8 +50,8 @@ internal data class Context(
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
     private val methodFieldAccessCache: MutableMap<MethodNode, Iterable<FieldNode>> = mutableMapOf()
 
-    val parents: MutableMap<ClassNode, List<ClassNode>> = allClasses
-        .associateWith(classByType::parentsOf)
+    val parents: MutableMap<ClassNode, List<Type>> = allClasses
+        .associateWith(classByType::parentsTypesOf)
         .toMutableMap()
     val implementedInterfaces: MutableMap<ClassNode, List<Type>> = allClasses
         .associateWith { cn ->
@@ -68,8 +69,8 @@ internal data class Context(
 
                 // TODO: resolve signatures; write test first
                 parents[node]
-                    ?.onEach(::recurse)
-                    ?.onEach { found += Type.from(it.type) }
+                    ?.onEach { recurse(classByType[it.asmType]!!) }
+                    ?.onEach { found += it }
             }
             recurse(cn)
 
@@ -144,7 +145,7 @@ internal data class Context(
         return when {
             includeParents -> allImplemented
             else -> {
-                val parents = (parents[cn] ?: listOf()).map(ClassNode::type).map(Type::from)
+                val parents = (parents[cn] ?: listOf())
                 allImplemented - parents
             }
         }
@@ -302,6 +303,23 @@ internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
 private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
     return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
         .drop(1)
+        .toList()
+}
+
+private val ClassNode.parentType: Type?
+    get() = extends?.let(TypeSignature::toType) ?: superType?.let(Type::from)
+
+private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<Type> {
+
+    fun next(cn: ClassNode): Pair<Type, ClassNode>? {
+        val parentType = cn.parentType ?: return null
+        val parent = get(parentType.asmType) ?: return null
+        return parentType to parent
+    }
+
+    return generateSequence(Type.from(cn.type) to cn) { (_, cn) -> next(cn) }
+        .drop(1)
+        .map { (type, _) -> type }
         .toList()
 }
 
