@@ -3,6 +3,7 @@ package sift.core.api
 import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import net.onedaybeard.collectionsby.filterBy
+import net.onedaybeard.collectionsby.filterNotBy
 import net.onedaybeard.collectionsby.findBy
 import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
@@ -50,27 +51,31 @@ internal data class Context(
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
     private val methodFieldAccessCache: MutableMap<MethodNode, Iterable<FieldNode>> = mutableMapOf()
 
-    val parents: MutableMap<ClassNode, List<Type>> = allClasses
+    val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
         .associateWith(classByType::parentsTypesOf)
         .toMutableMap()
-    val implementedInterfaces: MutableMap<ClassNode, List<Type>> = allClasses
+    val implementedInterfaces: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
         .associateWith { cn ->
 
-            val found = mutableSetOf<Type>()
+            val found = mutableSetOf<TypeClassNode>()
             fun recurse(node: ClassNode) {
                 val interfaces = node.signature?.implements?.map(TypeSignature::toType)
                     ?: node.interfaces.map(Type::from)
 
                 interfaces
+                    .map { TypeClassNode(it, classByType[it.asmType]) }
                     .filter { it !in found }
                     .onEach { found += it }
-                    .mapNotNull { classByType[it.asmType] }
+                    .mapNotNull(TypeClassNode::cn)
                     .forEach(::recurse)
 
-                // TODO: resolve signatures; write test first
-                parents[node]
-                    ?.onEach { recurse(classByType[it.asmType]!!) }
-                    ?.onEach { found += it }
+                parents[node]?.let { parents ->
+                    parents
+                        .filterNotBy(TypeClassNode::cn, null)
+                        .onEach(found::add)
+                        .mapNotNull(TypeClassNode::cn)
+                        .onEach(::recurse)
+                }
             }
             recurse(cn)
 
@@ -148,7 +153,7 @@ internal data class Context(
                 val parents = (parents[cn] ?: listOf())
                 allImplemented - parents
             }
-        }
+        }.map(TypeClassNode::type)
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
@@ -309,17 +314,17 @@ private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
 private val ClassNode.parentType: Type?
     get() = extends?.let(TypeSignature::toType) ?: superType?.let(Type::from)
 
-private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<Type> {
+private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
 
-    fun next(cn: ClassNode): Pair<Type, ClassNode>? {
-        val parentType = cn.parentType ?: return null
+    fun next(tcn: TypeClassNode): TypeClassNode? {
+        val parentType = tcn.cn!!.parentType ?: return null
         val parent = get(parentType.asmType) ?: return null
-        return parentType to parent
+        return TypeClassNode(parentType, parent)
     }
 
-    return generateSequence(Type.from(cn.type) to cn) { (_, cn) -> next(cn) }
+    return generateSequence(TypeClassNode(Type.from(cn.type), cn)) { tcn -> next(tcn) }
         .drop(1)
-        .map { (type, _) -> type }
+        .map { (type, cn) -> TypeClassNode(type, cn) }
         .toList()
 }
 
@@ -402,3 +407,8 @@ private fun Element.stylized(width: Int): String {
         is ValueNode      -> Gruvbox.gray245
     } + bold)(s.substring(0..lastIndex).padEnd(width))
 }
+
+internal data class TypeClassNode(
+    val type: Type,
+    val cn: ClassNode?
+)

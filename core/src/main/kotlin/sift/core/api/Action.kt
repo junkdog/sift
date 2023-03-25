@@ -304,8 +304,9 @@ sealed class Action<IN, OUT> {
                 }
 
                 fun allInterfacesOf(elem: ClassNode): Iterable<ClassNode> {
+                    // fixme: not correctly resolving generic interface signatures; ref Context
                     val parentInterfaces = ctx.parents[elem]!!
-                        .map { cn -> ctx.classByType[cn.asmType]!! }
+                        .map { tcn -> tcn.cn!! }
                         .flatMap(ClassNode::interfaces)
                         .map(Type::from)
 
@@ -316,6 +317,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 fun interfacesOf(elem: ClassNode): Iterable<ClassNode> {
+                    // fixme: not correctly resolving generic interface signatures; ref Context
                     val parentInterfaces = elem.superType
                         ?.let(ctx.classByType::get)
                         ?.interfaces
