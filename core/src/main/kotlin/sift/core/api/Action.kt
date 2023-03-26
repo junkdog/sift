@@ -426,7 +426,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterClasses): IterValues {
                 return input
-                    .map { ValueNode.from(Type.from(it.type), it) }
+                    .map { cn -> ValueNode.from(cn.type, cn) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -499,7 +499,7 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 val types = ctx.entityService[match]
                     .map { (elem, _) -> elem as ClassNode } // FIXME: throw
-                    .map(ClassNode::type)
+                    .map(ClassNode::rawType)
 
                 fun introspect(elem: MethodNode): List<ClassNode> {
                     return ctx.methodsInvokedBy(elem)
@@ -545,9 +545,9 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
                 fun typeOf(elem: Element): AsmType {
                     return when (elem) {
-                        is ClassNode     -> elem.type
-                        is MethodNode    -> elem.owner.type
-                        is ParameterNode -> elem.owner.owner.type
+                        is ClassNode     -> elem.rawType
+                        is MethodNode    -> elem.owner.rawType
+                        is ParameterNode -> elem.owner.owner.rawType
                         is ValueNode     -> typeOf(elem.reference)
                         else             -> error("unable to extract methods from $elem")
                     }
@@ -650,7 +650,7 @@ sealed class Action<IN, OUT> {
         internal data class FilterType(val type: AsmType) : IsoAction<FieldNode>() {
             override fun id() = "filter-type(${type.simpleName})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
-                return input.filterBy(FieldNode::type, type)
+                return input.filterBy(FieldNode::rawType, type)
             }
         }
 
@@ -658,9 +658,9 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                fun explode(field: FieldNode): ClassNode? {
-                   var exploded = ctx.classByType[field.type]
+                   var exploded = ctx.classByType[field.rawType]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(field.type)
+                       exploded = ctx.synthesize(field.rawType)
 
                    return exploded
                        ?.also { ctx.scopeTransition(field, it) }

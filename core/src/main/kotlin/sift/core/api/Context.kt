@@ -45,7 +45,7 @@ internal data class Context(
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
     val classByType: MutableMap<AsmType, ClassNode> = allClasses
-        .associateBy(ClassNode::type)
+        .associateBy(ClassNode::rawType)
         .toMutableMap()
 
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
@@ -264,7 +264,7 @@ private fun TypeSignature.toType(): Type {
         ?.joinToString(prefix = "<", postfix = ">")
         ?: ""
 
-    return "${this.type.className()}$generics".type
+    return "${type.className()}$generics".type
 }
 
 private fun ArgType.className(): String {
@@ -306,7 +306,7 @@ internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
 }
 
 private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
-    return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
+    return generateSequence(cn) { findBy(ClassNode::rawType, it.superType) }
         .drop(1)
         .toList()
 }
@@ -322,7 +322,7 @@ private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClas
         return TypeClassNode(parentType, parent)
     }
 
-    return generateSequence(TypeClassNode(Type.from(cn.type), cn)) { tcn -> next(tcn) }
+    return generateSequence(TypeClassNode(cn.type, cn)) { tcn -> next(tcn) }
         .drop(1)
         .map { (type, cn) -> TypeClassNode(type, cn) }
         .toList()

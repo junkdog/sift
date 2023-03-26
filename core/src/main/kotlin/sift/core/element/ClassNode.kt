@@ -2,7 +2,6 @@ package sift.core.element
 
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Opcodes.ACC_ENUM
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.asmType
@@ -13,6 +12,7 @@ import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 import sift.core.asm.superType
 import sift.core.asm.type
+import sift.core.dsl.Type
 
 class ClassNode private constructor(
     private val cn: AsmClassNode,
@@ -45,27 +45,31 @@ class ClassNode private constructor(
     val extends: TypeSignature?
         get() = signature?.extends
 
-    val type: AsmType
+    val rawType: AsmType
         get() = cn.type
+
+    // note: type-erased
+    val type: Type
+        get() = Type.from(cn.type)
 
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
     val qualifiedName: String
-        get() = type.className
+        get() = rawType.className
 
     val superType: AsmType?
         get() = cn.superType
 
     override val simpleName: String
-        get() = type.simpleName
+        get() = rawType.simpleName
 
     val access: Int
         get() = cn.access
 
     // TODO: TypeSignature
     val interfaces: List<AsmType>
-        get() = cn.interfaces?.map { Type.getType("L${it};") } ?: emptyList()
+        get() = cn.interfaces?.map { AsmType.getType("L${it};") } ?: emptyList()
 
     override fun toString() = simpleName
 
@@ -84,5 +88,5 @@ class ClassNode private constructor(
     }
 }
 
-private val InnerClassNode.outerType: Type
-    get() = Type.getType("L${outerName};")
+private val InnerClassNode.outerType: AsmType
+    get() = AsmType.getType("L${outerName};")

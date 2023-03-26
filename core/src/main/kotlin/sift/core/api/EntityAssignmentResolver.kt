@@ -94,7 +94,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val types = ctx.entityService[type]
                 .map { (elem, _) -> elem as ClassNode } // FIXME: throw
-                .map(ClassNode::type)
+                .map(ClassNode::rawType)
                 .toSet()
 
             elements
@@ -116,7 +116,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val types = ctx.entityService[type]
                 .map { (elem, _) -> elem as ClassNode }
-                .map(ClassNode::type)
+                .map(ClassNode::rawType)
                 .toSet()
 
             elements

@@ -22,7 +22,7 @@ class FieldNode private constructor(
     val name: String
         get() = fn.name
 
-    val type: AsmType
+    val rawType: AsmType
         get() = fn.type
 
     val isStatic: Boolean
