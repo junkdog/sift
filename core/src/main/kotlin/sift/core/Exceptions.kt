@@ -65,6 +65,11 @@ internal sealed class SiftModelException(
     cause: Throwable? = null
 ) : SiftException(message, cause)
 
+internal class UnexpectedElementException(
+    val expected: KClass<out Element>,
+    val actual: KClass<out Element>,
+) : SiftModelException("Expected class ${expected.simpleName}, got class ${actual.simpleName}")
+
 internal class UniqueElementPerEntityViolation(
     message: String
 ) : SiftModelException(message)

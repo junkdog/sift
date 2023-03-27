@@ -6,6 +6,7 @@ import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.FieldSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.asm.type
+import sift.core.dsl.Type
 
 class FieldNode private constructor(
     private val cn: ClassNode,
@@ -21,6 +22,9 @@ class FieldNode private constructor(
 
     val name: String
         get() = fn.name
+
+    val type: Type
+        get() = Type.from(rawType)
 
     val rawType: AsmType
         get() = fn.type

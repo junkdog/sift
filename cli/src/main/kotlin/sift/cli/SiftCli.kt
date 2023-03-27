@@ -147,6 +147,8 @@ object SiftCli : CliktCommand(
             }
         }
 
+        validateParameterOptions()
+
         when {
             version -> {
                 val metadata = loadMetadata()
@@ -226,6 +228,11 @@ object SiftCli : CliktCommand(
             }
         }
 
+    }
+
+    private fun validateParameterOptions() {
+        if (serialization.save != null && listOfNotNull(serialization.diff, serialization.load).isNotEmpty())
+            error("Cannot use --save with --load or --diff")
     }
 
     fun systemModel(): SystemModel {

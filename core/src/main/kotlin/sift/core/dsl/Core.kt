@@ -3,7 +3,6 @@ package sift.core.dsl
 import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.api.IterValues
-import sift.core.asm.type
 import sift.core.element.Element
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
@@ -17,7 +16,7 @@ abstract class Core<ELEMENT : Element> {
 
     data class Property<T: Element>(
         val key: String,
-        internal val action: Action<Iter<T>, IterValues>?,
+        internal val action: Action<Iter<T>, IterValues>,
     )
 
     private var stack: MutableList<Action<*, *>> = mutableListOf()

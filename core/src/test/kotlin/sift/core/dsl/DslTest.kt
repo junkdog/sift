@@ -312,6 +312,48 @@ class DslTest {
     }
 
     @Test
+    fun `wire entities with fieldAccess when type is class`() {
+        val cns = listOf(classNode(Dob::class), classNode(Dibbler::class))
+        val dob = Entity.Type("dob")
+        val dibbler = Entity.Type("dibbler")
+
+        // fixme: poor test, plus not working; see sift self template
+        template {
+            classes {
+
+                scope("dibbler") {
+                    filter("Dibbler")
+                    methods {
+                        filter("<init>", invert = true)
+                        entity(dibbler)
+                    }
+                }
+
+                scope("dob") {
+                    filter("Dob")
+                    fields {
+                        filter("INSTANCE", invert = true)
+                        explodeType(synthesize = true) {
+                            entity(dob)
+                        }
+                    }
+                }
+
+            }
+
+            dibbler["references"] = dob.fieldAccess
+        }.expecting(cns, dibbler, """
+            ── dibbler
+               ├─ Dibbler::a
+               │  └─ String
+               ├─ Dibbler::b
+               │  └─ String
+               └─ Dibbler::c
+                  └─ String
+        """)
+    }
+
+    @Test
     fun `internal scope in signature scope`() {
         val cns = listOf(classNode(ClassExtendingMapOfOmgPayload::class))
 

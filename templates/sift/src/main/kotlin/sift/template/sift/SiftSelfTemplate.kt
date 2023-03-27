@@ -109,6 +109,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
 
             E.dsl["actions"] = E.action.instantiations
+            E.dsl["actions"] = E.action.fieldAccess
         }
     }
 

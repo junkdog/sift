@@ -15,12 +15,7 @@ class Signature internal constructor(
     var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
 ) {
     fun readName(): Action<IterSignatures, IterValues> {
-        val forkTo = Action.Signature.ReadSignature
-            .let { Action.Fork(it) }
-
-        action +=  forkTo
-
-        return forkTo.forked
+        return Action.Signature.ReadSignature
     }
 
     fun scope(label: String, f: Signature.() -> Unit) {

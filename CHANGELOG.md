@@ -1,6 +1,5 @@
 ## Upcoming release
 
-
 ### Breaking change: `sift.core.dsl.Type` supersedes `org.objectweb.asm.Type` 
 
 The `sift.core.dsl.Type` class supersedes `org.objectweb.asm.Type` usage in the DSL. The new type
@@ -9,11 +8,17 @@ of the new `Type` class are created with the `type()` function or the `String.ty
 for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
 
+### New/Tweaks
+- Entity elements of `Entity.Type.fieldAccess` can now be either fields or classes. If the latter, 
+  then the type of the field is used.
+
 
 ### Breaking changes
 - TODO: methods affected by `Type` change
   
-  
+### Fixes
+- sift template: `object` Actions were not associated with their DSL methods.
+
 
 ## sift-0.8.0 2023-03-20
 

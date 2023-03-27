@@ -1,6 +1,7 @@
 package sift.core.api
 
 import org.objectweb.asm.Type
+import sift.core.UnexpectedElementException
 import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
@@ -23,7 +24,7 @@ sealed class EntityAssignmentResolver<T: Element> {
             elements: Iter<MethodNode> // = rhs
         ) {
             @Suppress("UNCHECKED_CAST")
-            val matched = ctx.entityService[type] as Map<FieldNode, Entity>
+            val matched = ctx.entityService[type]
             elements
                 .forEach { registerFieldAccess(ctx, it, matched, key, "backtrack") }
         }
@@ -41,7 +42,7 @@ sealed class EntityAssignmentResolver<T: Element> {
             ctx: Context,
             elements: Iter<MethodNode>
         ) {
-            val matched = ctx.entityService[type] as Map<FieldNode, Entity>
+            val matched = ctx.entityService[type]
             elements
                 .forEach { registerFieldAccess(ctx, it, matched, key, "backtrack") }
         }
@@ -125,6 +126,21 @@ sealed class EntityAssignmentResolver<T: Element> {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+private inline fun <reified T : Element> Context.entities(
+    type: Entity.Type
+): Map<T, Entity> {
+    val entitiesByType: Map<Element, Entity> = entityService[type]
+    if (entitiesByType.isNotEmpty()) {
+        val first = entitiesByType.keys.first()
+        if (first !is T) {
+            throw UnexpectedElementException(T::class, first::class)
+        }
+    }
+
+    return entitiesByType as Map<T, Entity>
+}
+
 private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
     return instantiations(mn).filter(types::contains)
 }
@@ -167,14 +183,22 @@ private fun registerInvocations(
 private fun registerFieldAccess(
     ctx: Context,
     elem: MethodNode,
-    matched: Map<FieldNode, Entity>,
+    matched: Map<Element, Entity>,
     parentKey: String,
     childKey: String
 ) {
+    if (matched.isEmpty())
+        return
+
     val parent = ctx.entityService[elem]!!
-    ctx.fieldAccessBy(elem)
-        .filter { fn -> fn in matched }
-        .map { ctx.entityService[matched[it]!!] as FieldNode }
+
+    // `matched` entities must register to either fields or classes
+    when (matched.keys.first()) {
+        is ClassNode -> ctx.fieldAccessBy(elem).map(FieldNode::rawType).mapNotNull { ctx.classByType[it] }
+        is FieldNode -> ctx.fieldAccessBy(elem)
+        else         -> error("unexpected element type: ${matched.keys.first()}")
+    }.filter { el -> el in matched }
+        .map { ctx.entityService[matched[it]!!] }
         .mapNotNull { ctx.entityService[it] }
         .onEach { child -> parent.addChild(parentKey, child) }
         .onEach { child -> child.addChild(childKey, parent) }

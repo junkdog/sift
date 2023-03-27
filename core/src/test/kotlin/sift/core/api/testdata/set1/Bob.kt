@@ -11,3 +11,15 @@ class Bobber {
     fun b() = Bob.A
     fun c() = listOf(Bob.A, Bob.B)
 }
+
+class Dibbler {
+    fun a() = Dob.a
+    fun b() = Dob.b
+    fun c() = listOf(Dob.a, Dob.b)
+}
+
+object Dob {
+    var a: String = "a"
+    var b: String = "b"
+    var c: String = "c"
+}
