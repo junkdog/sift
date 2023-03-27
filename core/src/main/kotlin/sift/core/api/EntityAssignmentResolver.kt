@@ -126,21 +126,6 @@ sealed class EntityAssignmentResolver<T: Element> {
     }
 }
 
-@Suppress("UNCHECKED_CAST")
-private inline fun <reified T : Element> Context.entities(
-    type: Entity.Type
-): Map<T, Entity> {
-    val entitiesByType: Map<Element, Entity> = entityService[type]
-    if (entitiesByType.isNotEmpty()) {
-        val first = entitiesByType.keys.first()
-        if (first !is T) {
-            throw UnexpectedElementException(T::class, first::class)
-        }
-    }
-
-    return entitiesByType as Map<T, Entity>
-}
-
 private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
     return instantiations(mn).filter(types::contains)
 }

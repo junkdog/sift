@@ -10,6 +10,7 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.Throw
+import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
@@ -497,8 +498,9 @@ sealed class Action<IN, OUT> {
         ) : Action<IterMethods, IterClasses>() {
             override fun id() = "instantiations($match)"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
-                val types = ctx.entityService[match]
-                    .map { (elem, _) -> elem as ClassNode } // FIXME: throw
+
+                val types = ctx.entities<ClassNode>(match)
+                    .map { (elem, _) -> elem }
                     .map(ClassNode::rawType)
 
                 fun introspect(elem: MethodNode): List<ClassNode> {
@@ -528,7 +530,6 @@ sealed class Action<IN, OUT> {
                     return ctx.methodsInvokedBy(elem)
                         .filter { mn -> mn in matched }
                         .filter { mn -> elem != mn }
-                        .map { ctx.entityService[matched[it]!!] as MethodNode }
                         .onEach { ctx.scopeTransition(elem, it) }
                 }
 
@@ -1039,4 +1040,19 @@ var debugLog = false
 
 infix fun Type.matches(types: List<Type>): Boolean {
     return this in (types.takeIf { isGeneric } ?: types.map { Type.from(it.asmType) })
+}
+
+@Suppress("UNCHECKED_CAST")
+private inline fun <reified T : Element> Context.entities(
+    type: Entity.Type
+): Map<T, Entity> {
+    val entitiesByType: Map<Element, Entity> = entityService[type]
+    if (entitiesByType.isNotEmpty()) {
+        val first = entitiesByType.keys.first()
+        if (first !is T) {
+            throw UnexpectedElementException(T::class, first::class)
+        }
+    }
+
+    return entitiesByType as Map<T, Entity>
 }
