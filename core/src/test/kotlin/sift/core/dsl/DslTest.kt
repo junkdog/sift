@@ -1,5 +1,7 @@
 package sift.core.dsl
 
+import com.github.ajalt.mordant.rendering.AnsiLevel
+import com.github.ajalt.mordant.terminal.Terminal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -1805,8 +1807,9 @@ class DslTest {
         root: List<Entity.Type>,
         expectTree: String
     ) {
+        val noAnsi = Terminal(ansiLevel = AnsiLevel.NONE)
         expecting(cns) { es ->
-            assertThat(es.toTree(root))
+            assertThat(es.toTree(root).let(noAnsi::render))
                 .isEqualTo(expectTree.trimIndent() + "\n")
         }
     }

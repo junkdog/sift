@@ -3,6 +3,10 @@ package sift.core.tree
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.rendering.TextStyles
+import sift.core.terminal.Gruvbox
+import sift.core.terminal.Gruvbox.aqua1
 import java.lang.StringBuilder
 
 @JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)
@@ -73,7 +77,8 @@ class Tree<T>(val value: T) {
 
     fun toString(
         format: (T) -> String,
-        prefix: (T) -> String = { "" }
+        prefix: (T) -> String = { "" },
+        structure: TextStyle = Gruvbox.light2
     ): String {
         fun print(
             node: Tree<T>,
@@ -83,7 +88,7 @@ class Tree<T>(val value: T) {
         ): StringBuilder {
             val delim = if (last) '└' else '├'
             val value = format(node.value)
-            out.append("${prefix(node.value)}$indent$delim─ ${value}\n")
+            out.append("${prefix(node.value)}${structure("$indent$delim─")} ${value}\n")
 
             val nextIndent = indent + (if (last) "   " else "│  ")
             node.nodes.forEachIndexed { i, n ->
