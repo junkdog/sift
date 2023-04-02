@@ -11,6 +11,7 @@ for example: `type("java.lang.String")` and `"java.lang.String".type`.
 ### New/Tweaks
 - Entity elements of `Entity.Type.fieldAccess` can now be either fields or classes. If the latter, 
   then the type of the field is used.
+- `--stastistics` prints statistics about the state from the execution of the system model template.
 
 
 ### Breaking changes

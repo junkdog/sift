@@ -47,21 +47,27 @@ interface EntityRegistrar<ELEMENT : Element> {
     fun entity(
         id: Entity.Type,
         vararg properties: Property<ELEMENT>
-    )
+    ) {
+        entity(id, LabelFormatter.FromElement, true, *properties)
+    }
 
     /** register entity */
     fun entity(
         id: Entity.Type,
         labelFormatter: LabelFormatter,
         vararg properties: Property<ELEMENT>
-    )
+    ) {
+        entity(id, labelFormatter, true, *properties)
+    }
 
     /** new entity with label inferred from introspected bytecode element */
     fun entity(
         id: Entity.Type,
         errorIfExists: Boolean = true,
         vararg properties: Property<ELEMENT>
-    )
+    ) {
+        entity(id, LabelFormatter.FromElement, errorIfExists, *properties)
+    }
 
 
     /**
@@ -96,6 +102,7 @@ interface EntityRegistrar<ELEMENT : Element> {
 private class EntityRegistrarImpl<ELEMENT : Element>(
     val action: Action.Chain<Iter<ELEMENT>>
 ) : EntityRegistrar<ELEMENT> {
+
     override operator fun Entity.Type.set(
         key: String,
         children: Entity.Type
@@ -117,29 +124,6 @@ private class EntityRegistrarImpl<ELEMENT : Element>(
                 .map { Action.Fork(it) as Action<Iter<ELEMENT>, Iter<ELEMENT>> }
                 .reduce { acc, action -> acc andThen action }
         }
-    }
-
-    override fun entity(
-        id: Entity.Type,
-        vararg properties: Property<ELEMENT>
-    ) {
-        entity(id, LabelFormatter.FromElement, true, *properties)
-    }
-
-    override fun entity(
-        id: Entity.Type,
-        labelFormatter: LabelFormatter,
-        vararg properties: Property<ELEMENT>
-    ) {
-        entity(id, labelFormatter, true, *properties)
-    }
-
-    override fun entity(
-        id: Entity.Type,
-        errorIfExists: Boolean,
-        vararg properties: Property<ELEMENT>
-    ) {
-        entity(id, LabelFormatter.FromElement, errorIfExists, *properties)
     }
 
     override fun label(

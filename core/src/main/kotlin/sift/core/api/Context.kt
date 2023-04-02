@@ -255,6 +255,25 @@ internal data class Context(
     fun popMeasurementScope() {
         measurementStack.removeLast()
     }
+
+    fun statistics(): Map<String, Int> = mapOf(
+        "allClasses"                     to allClasses.size,
+        "classByMethod"                  to classByMethod.size,
+        "elementTraces.keys"             to elementTraces.size,
+        "elementTraces.traces"           to elementTraces.values.flatten().size,
+        "elementTraces.traces.max"       to elementTraces.values.maxOf(List<ElementTrace>::size),
+        "elementTraces.traces.depth"     to elementTraces.values.flatten().maxOf { it.asIterable().count() },
+        "elementTraces.flatten"          to elementTraces.values.flatten().sumOf { it.asIterable().count() },
+        "classByType"                    to classByType.size,
+        "methodInvocationsCache"         to methodInvocationsCache.size,
+        "methodInvocationsCache.flatten" to methodInvocationsCache.values.sumOf(Iterable<MethodNode>::count),
+        "methodFieldCache"               to methodFieldAccessCache.size,
+        "methodFieldCache.flatten"       to methodFieldAccessCache.values.sumOf(Iterable<FieldNode>::count),
+        "parents"                        to parents.size,
+        "parents.flatten"                to parents.values.sumOf(Iterable<TypeClassNode>::count),
+        "implementedInterfaces"          to implementedInterfaces.size,
+        "implementedInterfaces.flatten"  to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
+    )
 }
 
 private fun TypeSignature.toType(): Type {

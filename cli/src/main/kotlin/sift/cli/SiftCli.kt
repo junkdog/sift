@@ -21,15 +21,9 @@ import sift.core.api.*
 import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
+import sift.core.jackson.*
 import sift.core.template.SystemModelTemplate
 import sift.core.template.deserialize
-import sift.core.jackson.*
-import sift.core.tree.*
-import sift.core.tree.DiffNode.State
-import sift.core.tree.DiffNode.State.Unchanged
-import sift.core.tree.TreeDsl.Companion.tree
-import sift.core.tree.TreeDsl.Companion.treeOf
-import sift.template.*
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -51,14 +45,23 @@ import sift.core.terminal.Gruvbox.yellow2
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
+import sift.core.tree.*
+import sift.core.tree.DiffNode.State
+import sift.core.tree.DiffNode.State.Unchanged
+import sift.core.tree.TreeDsl.Companion.tree
+import sift.core.tree.TreeDsl.Companion.treeOf
+import sift.template.*
 import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.system.exitProcess
 import kotlin.time.ExperimentalTime
+
 
 object SiftCli : CliktCommand(
     name = "sift",
@@ -125,6 +128,10 @@ object SiftCli : CliktCommand(
         help = "Print log/logCount statements from the executed template.")
     .flag()
 
+    val statistics: Boolean by option("--statistics",
+        help = "Print internal statistics about the system model template context."
+    ).flag()
+
     private val noAnsi = Terminal(AnsiLevel.NONE)
 
     override fun run() {
@@ -173,6 +180,14 @@ object SiftCli : CliktCommand(
 
                     else -> terminal.println(toString(template.template!!))
                 }
+            }
+            statistics && template.template != null -> {
+                val sm = systemModel()
+                val format: (Any) -> String = numberFormatter()
+
+                sm.statistics.entries
+                    .joinToString("\n") { (k, v) -> "%-40s %8s".format(k, format(v)) }
+                    .let(terminal::println)
             }
             template.template == null -> {
                 terminal.println("${orange1("Error: ")} ${fg("Must specify a template, use -l to list available templates.)")}")
@@ -569,6 +584,15 @@ object SiftCli : CliktCommand(
             }
         ))
     }
+}
+
+private fun numberFormatter(): (Any) -> String {
+    val formatter = NumberFormat.getInstance(Locale.US) as DecimalFormat
+    formatter.decimalFormatSymbols
+        .also { it.groupingSeparator = ' ' }
+        .let(formatter::setDecimalFormatSymbols)
+    val format: (Any) -> String = formatter::format
+    return format
 }
 
 private fun loadMetadata(): (String) -> String {
