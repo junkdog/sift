@@ -3,10 +3,10 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)](https://maven-badges.herokuapp.com/maven-central/net.onedaybeard.sift/sift/badge.png)
 [![DSL docs](https://badgen.net/badge/docs/DSL/orange?icon=github)](https://junkdog.github.io/sift/)
 
-Sift is a command-line tool for reverse modeling and analyzing the design of software systems from
-JVM bytecode. It operates by processing .class or .jar files using predefined templates
-known as System Model Templates. These templates provide knowledge about technology stacks or
-project-specific constructs, which enables the tool to generate a comprehensive model of the system.
+Sift is a command-line tool that analyzes and reverse models software system designs from JVM bytecode.
+It operates by processing .class or .jar files using predefined templates known as System Model
+Templates. These templates provide knowledge about technology stacks or project-specific constructs,
+which enables the tool to generate a comprehensive model of the system.
 
 The resulting system model is composed of entities that describe the system's structure and behavior.
 
@@ -57,8 +57,8 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
 ```
 Usage: sift [OPTIONS]
 
-  Sift is a tool for modeling and analyzing the design of software systems from JVM
-  bytecode.
+  Sift is a command-line tool that analyzes and reverse models software system designs
+  from JVM bytecode.
 
 Template options:
   -t, --template TEMPLATE  The template producing the system model.

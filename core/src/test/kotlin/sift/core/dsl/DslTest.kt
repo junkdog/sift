@@ -760,49 +760,31 @@ class DslTest {
 
             filter(Regex("Instantiations"))
             methods {
+                filter(Regex("<(clinit|init)>"), invert = true)
                 entity(method)
                 instantiationsOf(payload) {
                     logCount("instantiations")
                     method["instantiates"] = payload
-                    payload["instantiated-by"] = method
+                    payload["backtrack"] = method
                 }
             }
-        }.expecting(cns) { es ->
-            assertThat(es[payload])
-                .hasSize(1)
-
-            val payloadInstantiatedBy = es[payload]
-                .map { (_, e) -> e }
-                .first()
-                .children["instantiated-by"]!!
-
-            assertThat(payloadInstantiatedBy.prettyPrint())
-                .containsExactlyInAnyOrder(
-                    "Entity(SimpleInstantiations::caseA, type=method)",
-                    "Entity(SimpleInstantiations::caseB, type=method)",
-                    "Entity(SimpleInstantiations.Yolo::hmm, type=method)",
-                    "Entity(Instantiations2::a, type=method)",
-                    "Entity(Instantiations2::b, type=method)",
-                    "Entity(Instantiations2::c, type=method)",
-                )
-
-            val payloadMethods = es[method]
-                .map { (_, v) -> v }
-                .filter { "instantiates" in it.children }
-
-            assertThat(payloadMethods.flatMap { it.children("instantiates") }.toSet())
-                .hasSize(1)
-
-            assertThat(payloadMethods.prettyPrint())
-                .containsExactlyInAnyOrder(
-                    "Entity(SimpleInstantiations::caseA, type=method)",
-                    "Entity(SimpleInstantiations::caseB, type=method)",
-                    "Entity(SimpleInstantiations.Yolo::hmm, type=method)",
-                    "Entity(Instantiations2::a, type=method)",
-                    "Entity(Instantiations2::b, type=method)",
-                    "Entity(Instantiations2::c, type=method)",
-                )
-        }
+        }.expecting(cns, method,
+            """
+            ── method
+               ├─ Instantiations2::a
+               │  └─ Payload
+               ├─ Instantiations2::b
+               │  └─ Payload
+               ├─ Instantiations2::c
+               │  └─ Payload
+               ├─ Instantiations2::notCalled
+               ├─ SimpleInstantiations.Yolo::hmm
+               │  └─ Payload
+               ├─ SimpleInstantiations::caseA
+               │  └─ Payload
+               └─ SimpleInstantiations::caseB
+                  └─ Payload
+            """.trimIndent())
     }
 
     @Test @Disabled
@@ -815,9 +797,92 @@ class DslTest {
         TODO()
     }
 
+    @Test
+    fun `register generic type from method parameters and fields`() {
+        // interface RepoT<T>
+        // abstract class AbstractRepoT<T>
+        //
+        // class GenericRepos {
+        //     var iRepoInt: RepoT<Int> = object : RepoT<Int> {}
+        //     var aRepoInt: RepoT<Int> = object : RepoT<Int> {}
+        //
+        //     fun aRepoString(repoT: AbstractRepoT<String>) = Unit
+        //     fun iRepoString(repoT: RepoT<String>) = Unit
+        //}
 
-    @Test @Disabled
-    fun `treat constructor properties as fields`() {
+        val cns: List<ClassNode> = listOf(
+            classNode(AbstractRepoT::class),
+            classNode(GenericRepos::class),
+            classNode(RepoT::class),
+        )
+
+        val et = Entity.Type("e")
+
+        classes {
+             fields {
+                filter(Regex("RepoInt"))
+                signature {
+                    entity(et)
+                }
+            }
+
+            methods {
+                filter(Regex("RepoString"))
+                parameters {
+                    parameter(0)
+                    signature {
+                        entity(et)
+                    }
+                }
+            }
+        }.expecting(cns, et,
+            """
+            ── e
+               ├─ AbstractRepoT<String>
+               ├─ RepoT<Integer>
+               └─ RepoT<String>
+            """
+        )
+    }
+
+    @Test
+    fun `resolve interface generic type inherited from abstract class`() {
+        // interface RepoT<T>
+        // abstract class AbstractRepoT<T>
+        //
+        // class GenericRepos {
+        //     var iRepoInt: RepoT<Int> = object : RepoT<Int> {}
+        //     var aRepoInt: RepoT<Int> = object : RepoT<Int> {}
+        //
+        //     fun aRepoString(repoT: AbstractRepoT<String>) = Unit
+        //     fun iRepoString(repoT: RepoT<String>) = Unit
+        //}
+
+        TODO()
+
+        val cns: List<ClassNode> = listOf(
+            classNode(AbstractRepoT::class),
+            classNode(RepoT::class),
+        )
+
+        val et = Entity.Type("e")
+
+        classes {
+            fields {
+                filter(Regex("RepoInt"))
+                signature {
+                    entity(et)
+                }
+            }
+        }.expecting(cns, et, """
+            ── e
+               └─ GenericRepos
+            """
+        )
+    }
+
+    @Test
+    fun `resolve invocations on generic interfaces`() {
         TODO()
     }
 
@@ -1059,8 +1124,12 @@ class DslTest {
         )
     }
 
-    @Test
-    fun `filter on generic superclass`() {
+    @Test  // <-- annotation(/decorator)
+    fun `filter on generic superclass`() { // fun `function name`() {} ; `function name`()
+
+
+        `filter on generic superclass`() // <-- stack overflow
+
         val cns = listOf(
             classNode<GenericClass<*>>(), //  abstract class GenericClass<T>
             classNode<ConcreteClass1>(),  //  class ConcreteClass1 : GenericClass<String>()

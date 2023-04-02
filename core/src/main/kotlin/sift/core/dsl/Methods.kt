@@ -14,13 +14,10 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Methods internal constructor(
     methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope
-) : Core<MethodNode>(),
+) : Core<MethodNode>(chainFrom(methods)),
     CommonOperations<MethodNode, Methods>,
     ParentOperations<ClassNode, Classes>
 {
-
-    override var action: Action.Chain<IterMethods> = chainFrom(methods)
-
     operator fun Entity.Type.set(
         key: String,
         rhs: EntityResolution

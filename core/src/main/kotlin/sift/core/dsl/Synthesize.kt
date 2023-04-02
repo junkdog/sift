@@ -13,7 +13,7 @@ import sift.core.terminal.TextTransformer
  */
 @SiftTemplateDsl
 class Synthesize internal constructor(
-    var action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
+    internal val action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
 ) {
     /** Stub missing class node for [type] and register it to an entity */
     fun entity(

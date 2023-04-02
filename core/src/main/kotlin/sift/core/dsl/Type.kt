@@ -1,17 +1,10 @@
 package sift.core.dsl
 
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.signature.SignatureReader
 import sift.core.api.parseSignature
-import sift.core.asm.internalName
-import sift.core.asm.signature.ClassSignatureNode
-import sift.core.asm.signature.FormalTypeParameter
-import sift.core.asm.signature.SignatureParser
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.type
 import sift.core.element.AsmClassNode
 import sift.core.element.AsmType
-import sift.core.element.SignatureNode
 import kotlin.reflect.KClass
 
 /**

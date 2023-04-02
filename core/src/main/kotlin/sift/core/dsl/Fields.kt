@@ -14,13 +14,10 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Fields internal constructor(
     fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope
-) : Core<FieldNode>(),
+) : Core<FieldNode>(chainFrom(fields)),
     CommonOperations<FieldNode, Fields>,
     ParentOperations<ClassNode, Classes>
 {
-
-    override var action: Action.Chain<IterFields> = chainFrom(fields)
-
     override fun scope(
         @Suppress("UNUSED_PARAMETER") label: String,
         f: Fields.() -> Unit

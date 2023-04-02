@@ -12,8 +12,9 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Classes internal constructor(
-    override var action: Action.Chain<IterClasses> = chainFrom(Action.Class.ClassScope)
-) : Core<ClassNode>(), CommonOperations<ClassNode, Classes>,
+    source: IsoAction<ClassNode> = Action.Class.ClassScope
+) : Core<ClassNode>(chainFrom(source)),
+    CommonOperations<ClassNode, Classes>,
     ParentOperations<ClassNode, Classes>
 {
     override fun filter(regex: Regex, invert: Boolean) {

@@ -1,6 +1,7 @@
 package sift.core.dsl
 
 import sift.core.api.*
+import sift.core.element.SignatureNode
 
 /**
  * Signature scope for working with generics.
@@ -12,8 +13,8 @@ import sift.core.api.*
  */
 @SiftTemplateDsl
 class Signature internal constructor(
-    var action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
-) {
+    internal val action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
+) : EntityRegistrar<SignatureNode> by EntityRegistrar.scopedTo(action) {
     fun readName(): Action<IterSignatures, IterValues> {
         return Action.Signature.ReadSignature
     }
@@ -48,6 +49,8 @@ class Signature internal constructor(
 
         action += Action.Fork(explodeType andThen forkTo)
     }
+
+
 
     /**
      * Iterates over all classes given a generic type signature, e.g.

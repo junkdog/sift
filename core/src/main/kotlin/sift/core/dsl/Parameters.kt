@@ -13,13 +13,10 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Parameters internal constructor(
     parameters: Action<Iter<ParameterNode>, Iter<ParameterNode>> = Action.Parameter.ParameterScope
-) : Core<ParameterNode>(),
+) : Core<ParameterNode>(chainFrom(parameters)),
     CommonOperations<ParameterNode, Parameters>,
     ParentOperations<MethodNode, Methods>
 {
-
-    override var action: Action.Chain<IterParameters> = chainFrom(parameters)
-
     fun parameter(nth: Int) {
         action += Action.Parameter.FilterNth(nth)
     }

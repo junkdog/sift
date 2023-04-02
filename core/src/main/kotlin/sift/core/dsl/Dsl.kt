@@ -32,7 +32,7 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
         f: SCOPE.() -> Unit
     )
 
-    fun property(tag: String, extract: Action<Iter<T>, IterValues>): Core.Property<T>
+    fun property(tag: String, extract: Action<Iter<T>, IterValues>): Property<T>
 }
 
 /** Define a new template */

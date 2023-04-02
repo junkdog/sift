@@ -9,7 +9,7 @@ import sift.core.entity.Entity
 
 @SiftTemplateDsl
 class Template internal constructor(
-    var action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
+    internal val action: Action.Chain<Unit> = chainFrom(Action.Template.TemplateScope)
 ) {
 
     /**
