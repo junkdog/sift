@@ -52,7 +52,7 @@ class FieldNode private constructor(
     val returns: SignatureNode?
         get() = fn.signature(cn.signature?.formalParameters ?: listOf())
             ?.let(FieldSignatureNode::extends)
-            ?.let { tsn -> SignatureNode.from(tsn, this) }
+            ?.let(SignatureNode::from)
 
     override fun toString(): String = "$cn.$name"
 

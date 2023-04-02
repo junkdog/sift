@@ -39,7 +39,7 @@ class MethodNode(
 
     fun returns(): SignatureNode? {
         return signature?.returns
-            ?.let { ts -> SignatureNode.from(ts, this) }
+            ?.let(SignatureNode::from)
     }
 
     override fun toString(): String = "$cn::$name"

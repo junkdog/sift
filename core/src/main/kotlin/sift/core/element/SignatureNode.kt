@@ -6,11 +6,10 @@ import sift.core.asm.signature.TypeSignature
 
 class SignatureNode private constructor(
     private val signature: TypeSignature,
-    private val reference: Element
 ) : Element {
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 
-    internal val inner: List<SignatureNode> by lazy { signature.args.map { from(it, this) } }
+    internal val inner: List<SignatureNode> by lazy { signature.args.map(::from) }
 
     override val simpleName: String
         get() = signature.toString()
@@ -20,17 +19,14 @@ class SignatureNode private constructor(
 
     override fun equals(other: Any?): Boolean {
         return other is SignatureNode
-            && reference == other.reference
             && signature == other.signature
     }
 
-    override fun hashCode(): Int = hash(signature, reference)
+    override fun hashCode(): Int = hash(signature)
 
     override fun toString(): String = signature.toString()
 
     companion object {
-        fun from(signature: TypeSignature, reference: Element): SignatureNode {
-            return SignatureNode(signature, reference)
-        }
+        fun from(signature: TypeSignature): SignatureNode = SignatureNode(signature)
     }
 }

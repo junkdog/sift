@@ -1126,10 +1126,6 @@ class DslTest {
 
     @Test  // <-- annotation(/decorator)
     fun `filter on generic superclass`() { // fun `function name`() {} ; `function name`()
-
-
-        `filter on generic superclass`() // <-- stack overflow
-
         val cns = listOf(
             classNode<GenericClass<*>>(), //  abstract class GenericClass<T>
             classNode<ConcreteClass1>(),  //  class ConcreteClass1 : GenericClass<String>()
