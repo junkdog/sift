@@ -21,79 +21,79 @@ import sift.core.terminal.StringEditor
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
-    JsonSubTypes.Type(value = Action.Template.TemplateScope::class, name = "template-scope"),
-    JsonSubTypes.Type(value = Action.Template.InstrumentClasses::class, name = "classes"),
-    JsonSubTypes.Type(value = Action.Template.ClassesOf::class, name = "classes-of"),
-    JsonSubTypes.Type(value = Action.Template.FieldsOf::class, name = "fields-of"),
-    JsonSubTypes.Type(value = Action.Template.MethodsOf::class, name = "methods-of"),
-    JsonSubTypes.Type(value = Action.Template.ElementsOf::class, name = "elements-of"),
+    JsonSubTypes.Type(Action.Template.TemplateScope::class, name = "template-scope"),
+    JsonSubTypes.Type(Action.Template.InstrumentClasses::class, name = "classes"),
+    JsonSubTypes.Type(Action.Template.ClassesOf::class, name = "classes-of"),
+    JsonSubTypes.Type(Action.Template.FieldsOf::class, name = "fields-of"),
+    JsonSubTypes.Type(Action.Template.MethodsOf::class, name = "methods-of"),
+    JsonSubTypes.Type(Action.Template.ElementsOf::class, name = "elements-of"),
 
-    JsonSubTypes.Type(value = Action.Signature.ExplodeType::class, name = "signature-explode-type"),
-    JsonSubTypes.Type(value = Action.Signature.Filter::class, name = "filter-signature"),
-    JsonSubTypes.Type(value = Action.Signature.FilterNth::class, name = "signature-filter-nth"),
-    JsonSubTypes.Type(value = Action.Signature.InnerTypeArguments::class, name = "type-arguments"),
-    JsonSubTypes.Type(value = Action.Signature.SignatureScope::class, name = "signature-scope"),
+    JsonSubTypes.Type(Action.Signature.ExplodeType::class, name = "signature-explode-type"),
+    JsonSubTypes.Type(Action.Signature.Filter::class, name = "filter-signature"),
+    JsonSubTypes.Type(Action.Signature.FilterNth::class, name = "signature-filter-nth"),
+    JsonSubTypes.Type(Action.Signature.InnerTypeArguments::class, name = "type-arguments"),
+    JsonSubTypes.Type(Action.Signature.SignatureScope::class, name = "signature-scope"),
 
-    JsonSubTypes.Type(value = Action.Elements.ElementScope::class, name = "elements-scope"),
-    JsonSubTypes.Type(value = Action.Elements.Filter::class, name = "filter-elements"),
+    JsonSubTypes.Type(Action.Elements.ElementScope::class, name = "elements-scope"),
+    JsonSubTypes.Type(Action.Elements.Filter::class, name = "filter-elements"),
 
-    JsonSubTypes.Type(value = Action.Class.ClassScope::class, name = "class-scope"),
-    JsonSubTypes.Type(value = Action.Class.Filter::class, name = "filter-class"),
-    JsonSubTypes.Type(value = Action.Class.FilterImplemented::class, name = "implements"),
-    JsonSubTypes.Type(value = Action.Class.ToTemplateScope::class, name = "to-template-scope"),
-    JsonSubTypes.Type(value = Action.Class.IntoEnumValues::class, name = "into-enum-values"),
-    JsonSubTypes.Type(value = Action.Class.IntoMethods::class, name = "methods"),
-    JsonSubTypes.Type(value = Action.Class.IntoOuterClass::class, name = "outer-class"),
-    JsonSubTypes.Type(value = Action.Class.IntoFields::class, name = "fields"),
-    JsonSubTypes.Type(value = Action.Class.IntoInterfaces::class, name = "into-interfaces"),
-    JsonSubTypes.Type(value = Action.Class.IntoSuperclassSignature::class, name = "superclass"),
-    JsonSubTypes.Type(value = Action.Class.ReadType::class, name = "read-type"),
+    JsonSubTypes.Type(Action.Class.ClassScope::class, name = "class-scope"),
+    JsonSubTypes.Type(Action.Class.Filter::class, name = "filter-class"),
+    JsonSubTypes.Type(Action.Class.FilterImplemented::class, name = "implements"),
+    JsonSubTypes.Type(Action.Class.ToTemplateScope::class, name = "to-template-scope"),
+    JsonSubTypes.Type(Action.Class.IntoEnumValues::class, name = "into-enum-values"),
+    JsonSubTypes.Type(Action.Class.IntoMethods::class, name = "methods"),
+    JsonSubTypes.Type(Action.Class.IntoOuterClass::class, name = "outer-class"),
+    JsonSubTypes.Type(Action.Class.IntoFields::class, name = "fields"),
+    JsonSubTypes.Type(Action.Class.IntoInterfaces::class, name = "into-interfaces"),
+    JsonSubTypes.Type(Action.Class.IntoSuperclassSignature::class, name = "superclass"),
+    JsonSubTypes.Type(Action.Class.ReadType::class, name = "read-type"),
 
-    JsonSubTypes.Type(value = Action.Method.IntoParameters::class, name = "parameters"),
-    JsonSubTypes.Type(value = Action.Method.IntoOuterScope::class, name = "method-parents"),
-    JsonSubTypes.Type(value = Action.Method.IntoReturnSignature::class, name = "returns"),
-    JsonSubTypes.Type(value = Action.Method.MethodScope::class, name = "method-scope"),
-    JsonSubTypes.Type(value = Action.Method.Filter::class, name = "filter-method"),
-    JsonSubTypes.Type(value = Action.Method.FilterName::class, name = "filter-method-name"),
-    JsonSubTypes.Type(value = Action.Method.Instantiations::class, name = "instantiations"),
-    JsonSubTypes.Type(value = Action.Method.Invokes::class, name = "invokes"),
-    JsonSubTypes.Type(value = Action.Method.InvocationsOf::class, name = "invocations-of"),
+    JsonSubTypes.Type(Action.Method.IntoParameters::class, name = "parameters"),
+    JsonSubTypes.Type(Action.Method.IntoOuterScope::class, name = "method-parents"),
+    JsonSubTypes.Type(Action.Method.IntoReturnSignature::class, name = "returns"),
+    JsonSubTypes.Type(Action.Method.MethodScope::class, name = "method-scope"),
+    JsonSubTypes.Type(Action.Method.Filter::class, name = "filter-method"),
+    JsonSubTypes.Type(Action.Method.FilterName::class, name = "filter-method-name"),
+    JsonSubTypes.Type(Action.Method.Instantiations::class, name = "instantiations"),
+    JsonSubTypes.Type(Action.Method.Invokes::class, name = "invokes"),
+    JsonSubTypes.Type(Action.Method.InvocationsOf::class, name = "invocations-of"),
 
-    JsonSubTypes.Type(value = Action.Field.FieldScope::class, name = "field-scope"),
-    JsonSubTypes.Type(value = Action.Field.Filter::class, name = "filter-field"),
-    JsonSubTypes.Type(value = Action.Field.FilterType::class, name = "filter-type-field"),
-    JsonSubTypes.Type(value = Action.Field.ExplodeType::class, name = "field-explode-type"),
-    JsonSubTypes.Type(value = Action.Field.IntoOuterScope::class, name = "field-parents"),
-    JsonSubTypes.Type(value = Action.Field.IntoSignature::class, name = "field-signature"),
+    JsonSubTypes.Type(Action.Field.FieldScope::class, name = "field-scope"),
+    JsonSubTypes.Type(Action.Field.Filter::class, name = "filter-field"),
+    JsonSubTypes.Type(Action.Field.FilterType::class, name = "filter-type-field"),
+    JsonSubTypes.Type(Action.Field.ExplodeType::class, name = "field-explode-type"),
+    JsonSubTypes.Type(Action.Field.IntoOuterScope::class, name = "field-parents"),
+    JsonSubTypes.Type(Action.Field.IntoSignature::class, name = "field-signature"),
 
-    JsonSubTypes.Type(value = Action.Parameter.ParameterScope::class, name = "parameter-scope"),
-    JsonSubTypes.Type(value = Action.Parameter.ExplodeType::class, name = "explode-type"),
-    JsonSubTypes.Type(value = Action.Parameter.ReadType::class, name = "read-type"),
-    JsonSubTypes.Type(value = Action.Parameter.IntoOuterScope::class, name = "parameter-parents"),
-    JsonSubTypes.Type(value = Action.Parameter.IntoSignature::class, name = "parameter-signature"),
-    JsonSubTypes.Type(value = Action.Parameter.FilterNth::class, name = "parameter-nth"),
-    JsonSubTypes.Type(value = Action.Parameter.Filter::class, name = "filter-parameter"),
-    JsonSubTypes.Type(value = Action.Parameter.FilterType::class, name = "filter-type-parameter"),
+    JsonSubTypes.Type(Action.Parameter.ParameterScope::class, name = "parameter-scope"),
+    JsonSubTypes.Type(Action.Parameter.ExplodeType::class, name = "explode-type"),
+    JsonSubTypes.Type(Action.Parameter.ReadType::class, name = "read-type"),
+    JsonSubTypes.Type(Action.Parameter.IntoOuterScope::class, name = "parameter-parents"),
+    JsonSubTypes.Type(Action.Parameter.IntoSignature::class, name = "parameter-signature"),
+    JsonSubTypes.Type(Action.Parameter.FilterNth::class, name = "parameter-nth"),
+    JsonSubTypes.Type(Action.Parameter.Filter::class, name = "filter-parameter"),
+    JsonSubTypes.Type(Action.Parameter.FilterType::class, name = "filter-type-parameter"),
 
-    JsonSubTypes.Type(value = Action.DebugLog::class, name = "log"),
-    JsonSubTypes.Type(value = Action.HasAnnotation::class, name = "has-annotation"),
-    JsonSubTypes.Type(value = Action.EntityFilter::class, name = "entity-filter"),
-    JsonSubTypes.Type(value = Action.FilterModifiers::class, name = "filter-modifiers"),
-    JsonSubTypes.Type(value = Action.ReadAnnotation::class, name = "read-annotation"),
-    JsonSubTypes.Type(value = Action.WithValue::class, name = "with-value"),
-    JsonSubTypes.Type(value = Action.EditText::class, name = "edit-text"),
-    JsonSubTypes.Type(value = Action.ReadName::class, name = "read-name"),
-    JsonSubTypes.Type(value = Action.Fork::class, name = "fork"),
-    JsonSubTypes.Type(value = Action.ForkOnEntityExistence::class, name = "fork-conditional"),
-    JsonSubTypes.Type(value = Action.RegisterEntity::class, name = "entity"),
-    JsonSubTypes.Type(value = Action.RegisterSynthesizedEntity::class, name = "synthesize-entity"),
-    JsonSubTypes.Type(value = Action.RegisterChildren::class, name = "children"),
-    JsonSubTypes.Type(value = Action.RegisterChildrenFromResolver::class, name = "children-resolver"),
-    JsonSubTypes.Type(value = Action.UpdateEntityProperty::class, name = "update-entity-property"),
-    JsonSubTypes.Type(value = Action.Compose::class, name = "compose"),
-    JsonSubTypes.Type(value = Action.Chain::class, name = "chain"),
+    JsonSubTypes.Type(Action.DebugLog::class, name = "log"),
+    JsonSubTypes.Type(Action.HasAnnotation::class, name = "has-annotation"),
+    JsonSubTypes.Type(Action.EntityFilter::class, name = "entity-filter"),
+    JsonSubTypes.Type(Action.FilterModifiers::class, name = "filter-modifiers"),
+    JsonSubTypes.Type(Action.ReadAnnotation::class, name = "read-annotation"),
+    JsonSubTypes.Type(Action.WithValue::class, name = "with-value"),
+    JsonSubTypes.Type(Action.EditText::class, name = "edit-text"),
+    JsonSubTypes.Type(Action.ReadName::class, name = "read-name"),
+    JsonSubTypes.Type(Action.Fork::class, name = "fork"),
+    JsonSubTypes.Type(Action.ForkOnEntityExistence::class, name = "fork-conditional"),
+    JsonSubTypes.Type(Action.RegisterEntity::class, name = "entity"),
+    JsonSubTypes.Type(Action.RegisterSynthesizedEntity::class, name = "synthesize-entity"),
+    JsonSubTypes.Type(Action.RegisterChildren::class, name = "children"),
+    JsonSubTypes.Type(Action.RegisterChildrenFromResolver::class, name = "children-resolver"),
+    JsonSubTypes.Type(Action.UpdateEntityProperty::class, name = "update-entity-property"),
+    JsonSubTypes.Type(Action.Compose::class, name = "compose"),
+    JsonSubTypes.Type(Action.Chain::class, name = "chain"),
 
-    JsonSubTypes.Type(value = Action::class, name = "action"),
+    JsonSubTypes.Type(Action::class, name = "action"),
 )
 @NoArgConstructor
 sealed class Action<IN, OUT> {
@@ -201,6 +201,7 @@ sealed class Action<IN, OUT> {
                     is FieldNode     -> Field.Filter(regex, invert).execute(ctx, elems as IterFields)
                     is MethodNode    -> Method.Filter(regex, invert).execute(ctx, elems as IterMethods)
                     is ParameterNode -> Parameter.Filter(regex, invert).execute(ctx, elems as IterParameters)
+                    is SignatureNode -> Signature.Filter(regex, invert).execute(ctx, elems as IterSignatures)
                     else -> error("cannot filter elements of ${elem::class.simpleName}")
                 }
             }
@@ -243,8 +244,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
                 fun classNameOf(elem: SignatureNode): String? =
                     (elem.argType as? ArgType.Plain)?.type?.className
-                fun simpleNameOf(elem: SignatureNode): String? =
-                    (elem.argType as? ArgType.Plain)?.type?.simpleName
 
                 return input
                     .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }

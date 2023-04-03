@@ -90,7 +90,7 @@ interface EntityRegistrar<ELEMENT : Element> {
     fun label(
         pattern: String,
         vararg ops: TextTransformer
-    ): LabelFormatter
+    ): LabelFormatter = LabelFormatter.FromPattern(pattern, ops.toList())
 
     companion object {
         fun <ELEMENT : Element> scopedTo(
@@ -125,9 +125,4 @@ private class EntityRegistrarImpl<ELEMENT : Element>(
                 .reduce { acc, action -> acc andThen action }
         }
     }
-
-    override fun label(
-        pattern: String,
-        vararg ops: TextTransformer
-    ) = LabelFormatter.FromPattern(pattern, ops.toList())
 }
