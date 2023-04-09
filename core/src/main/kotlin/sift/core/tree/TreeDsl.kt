@@ -1,6 +1,5 @@
 package sift.core.tree
 
-import net.onedaybeard.collectionsby.anyBy
 import sift.core.entity.Entity
 
 class TreeDsl(private val hosted: Tree<EntityNode>) {

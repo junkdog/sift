@@ -283,7 +283,7 @@ class DslTest {
             scope("enum usage") {
                 filter("Bobber")
                 methods {
-                    filter("<init>", invert = true)
+                    filterName("<init>", invert = true)
                     entity(bobber)
 
                     bobber["references"] = bobEnum.fieldAccess
@@ -606,29 +606,29 @@ class DslTest {
 
         val cns = listOf(
             classNode<ClassWithFields>(),
+            classNode<ClassWithFields.Foo>(),
         )
 
         // note that kotlin properties are not necessarily backed by actual fields
         classes {
             filter(Regex("ClassWithFields\$"))
-            fields {
-                entity(field, label("\${name}"),
-                    property("name", readName()))
+            scope("register field entities") {
+                fields {
+                    entity(field, label("\${name}"),
+                        property("name", readName()))
 
-                explodeType(true) {
-                    entity(foo)
+                    explodeType {
+                        entity(foo)
+                        field["type"] = foo
+                    }
                 }
             }
-        }.expecting(cns) { es ->
-            assertThat(es[foo].values.map(Entity::label))
-                .hasSize(1)
-                .first()
-                .isEqualTo("ClassWithFields.Foo")
-            assertThat(es[field].values.map(Entity::label))
-                .hasSize(1)
-                .first()
-                .isEqualTo("field")
-        }
+        }.expecting(cns, field, """
+            ── field
+               └─ field
+                  └─ ClassWithFields.Foo
+            """
+        )
     }
 
     @Test
@@ -816,6 +816,7 @@ class DslTest {
             classNode(RepoT::class),
         )
 
+        val owner = Entity.Type("owner")
         val et = Entity.Type("e")
 
         classes {
@@ -824,10 +825,15 @@ class DslTest {
                 signature {
                     entity(et)
                 }
+
+                outerScope("register owner") {
+                    entity(owner)
+                    et["owned-by"] = owner
+                }
             }
 
             methods {
-                filter(Regex("RepoString"))
+                filterName(Regex("RepoString"))
                 parameters {
                     parameter(0)
                     signature {
@@ -840,6 +846,7 @@ class DslTest {
             ── e
                ├─ AbstractRepoT<String>
                ├─ RepoT<Integer>
+               │  └─ GenericRepos
                └─ RepoT<String>
             """
         )
@@ -907,8 +914,8 @@ class DslTest {
             }
 
             methods {
-                filter(Regex("(Int|String)"))
-                filter(Regex("(^get|^set|RepoString)"), invert = true)
+                filterName(Regex("(Int|String)"))
+                filter(acc_synchronized)
                 entity(m)
 
                 // Scope into the signatures of accessed fields to establish a relationship

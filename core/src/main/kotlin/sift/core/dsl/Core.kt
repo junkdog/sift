@@ -43,7 +43,7 @@ abstract class Core<ELEMENT : Element>(
         action += Action.DebugLog(tag, format = Action.DebugLog.LogFormat.Count)
     }
 
-    inline fun <reified T> annotatedBy() = annotatedBy(sift.core.dsl.type<T>())
+    inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
 
     inline fun <reified T : Annotation> readAnnotation(
         field: KProperty1<T, *>

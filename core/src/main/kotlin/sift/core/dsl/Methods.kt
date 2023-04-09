@@ -70,12 +70,17 @@ class Methods internal constructor(
         action += Action.Fork(forkTo)
     }
 
+    /** filter elements by name and owner  */
     override fun filter(regex: Regex, invert: Boolean) {
         action += Action.Method.Filter(regex, invert)
     }
 
     fun filterName(regex: Regex, invert: Boolean = false) {
         action += Action.Method.FilterName(regex, invert)
+    }
+
+    fun filterName(name: String, invert: Boolean = false) {
+        filterName(Regex.fromLiteral(name), invert)
     }
 
     fun declaredMethods() {

@@ -14,6 +14,7 @@ for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
 
 ### New/Tweaks
+- - DSL/Method: `filterName()` added string overload for `name`.
 - - DSL/Method: `fieldAccess {}` to iterate accessed fields.
 - Entity elements of `Entity.Type.fieldAccess` can now be either fields or classes. If the latter, 
   then the type of the field is used.

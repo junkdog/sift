@@ -38,15 +38,18 @@ class GenericRepos {
     fun aRepoString(repoT: AbstractRepoT<String>) = Unit
     fun iRepoString(repoT: RepoT<String>) = Unit
 
+    @Synchronized
     fun intAndString() {
         iRepoInt.toString()
         iRepoString.toString()
     }
 
+    @Synchronized
     fun onlyInt() {
         iRepoInt.toString()
     }
 
+    @Synchronized
     fun onlyString() {
         iRepoString.toString()
     }

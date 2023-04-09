@@ -71,12 +71,3 @@ class Entity(
         fun format(entity: Entity, service: EntityService): String
     }
 }
-
-internal fun Entity.toTree(): Tree<EntityNode> {
-    return tree("") {
-        children.forEach { (label, entities) ->
-            add(label) {  entities.forEach { add(it) } }
-        }
-    }
-}
-
