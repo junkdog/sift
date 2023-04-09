@@ -3,7 +3,9 @@ package sift.core.api
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import net.onedaybeard.collectionsby.filterBy
+import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Handle
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import sift.core.element.*
@@ -53,6 +55,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.Method.IntoOuterScope::class, name = "method-parents"),
     JsonSubTypes.Type(Action.Method.IntoReturnSignature::class, name = "returns"),
     JsonSubTypes.Type(Action.Method.MethodScope::class, name = "method-scope"),
+    JsonSubTypes.Type(Action.Method.FieldAccess::class, name = "field-access"),
     JsonSubTypes.Type(Action.Method.Filter::class, name = "filter-method"),
     JsonSubTypes.Type(Action.Method.FilterName::class, name = "filter-method-name"),
     JsonSubTypes.Type(Action.Method.Instantiations::class, name = "instantiations"),
@@ -492,6 +495,25 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        object FieldAccess : Action<IterMethods, IterFields>() {
+            override fun id() = "field-access()"
+            override fun execute(ctx: Context, input: IterMethods): IterFields {
+                fun resolveFieldNode(ins: FieldInsnNode): FieldNode? = ctx
+                    .classByType[ins.ownerType]
+                    ?.fields
+                    ?.findBy(FieldNode::name, ins.name)
+
+                fun fieldsOf(elem: MethodNode): List<FieldNode> = ctx
+                    .methodsInvokedBy(elem)
+                    .flatMap(MethodNode::instructions)
+                    .mapNotNull { ins -> ins as? FieldInsnNode }
+                    .mapNotNull(::resolveFieldNode)
+                    .onEach { output -> ctx.scopeTransition(elem, output) }
+
+                return input.flatMap(::fieldsOf)
+            }
+        }
+
         internal data class Instantiations(
             val match: Entity.Type,
         ) : Action<IterMethods, IterClasses>() {
@@ -543,13 +565,23 @@ sealed class Action<IN, OUT> {
         ) : Action<IterMethods, IterMethods>() {
             override fun id() = "invocations-of($match${", synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
+                fun typeOf(arg: ArgType): AsmType {
+                    return when (arg) {
+                        is ArgType.Array -> typeOf(arg.wrapped!!)
+                        is ArgType.Plain -> arg.type
+                        is ArgType.Var -> TODO("typeOf not implemented for formal type variables")
+                    }
+                }
+
                 fun typeOf(elem: Element): AsmType {
                     return when (elem) {
                         is ClassNode     -> elem.rawType
                         is MethodNode    -> elem.owner.rawType
                         is ParameterNode -> elem.owner.owner.rawType
                         is ValueNode     -> typeOf(elem.reference)
-                        else             -> error("unable to extract methods from $elem")
+                        is SignatureNode -> typeOf(elem.argType)
+                        is FieldNode     -> elem.rawType
+                        else             -> error("unable to extract type of $elem")
                     }
                 }
 

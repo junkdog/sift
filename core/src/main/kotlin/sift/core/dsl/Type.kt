@@ -39,6 +39,7 @@ class Type private constructor(
         internal fun from(s: String) = Type(s)
         internal fun from(type: AsmType) = Type(type.className)
         internal fun from(cn: AsmClassNode) = from(cn.type)
+        internal fun from(signature: TypeSignature) = from(signature.toTypeString())
     }
 }
 

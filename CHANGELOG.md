@@ -1,5 +1,10 @@
 ## Upcoming release
 
+### Generics: initial support
+
+TBD
+
+
 ### Breaking change: `sift.core.dsl.Type` supersedes `org.objectweb.asm.Type` 
 
 The `sift.core.dsl.Type` class supersedes `org.objectweb.asm.Type` usage in the DSL. The new type
@@ -9,6 +14,7 @@ for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
 
 ### New/Tweaks
+- - DSL/Method: `fieldAccess {}` to iterate accessed fields.
 - Entity elements of `Entity.Type.fieldAccess` can now be either fields or classes. If the latter, 
   then the type of the field is used.
 - `--stastistics` prints statistics about the state from the execution of the system model template.

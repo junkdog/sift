@@ -845,10 +845,10 @@ class DslTest {
         )
     }
 
-    @Test @Disabled
+    @Test @Disabled("superclass for signatures not yet implemented")
     fun `resolve interface generic type inherited from abstract class`() {
         // interface RepoT<T>
-        // abstract class AbstractRepoT<T>
+        // abstract class AbstractRepoT<T> : RepoT<T>
         //
         // class GenericRepos {
         //     var iRepoInt: RepoT<Int> = object : RepoT<Int> {}
@@ -858,32 +858,80 @@ class DslTest {
         //     fun iRepoString(repoT: RepoT<String>) = Unit
         //}
 
-        TODO()
-
         val cns: List<ClassNode> = listOf(
             classNode(AbstractRepoT::class),
+            classNode(GenericRepos::class),
             classNode(RepoT::class),
         )
 
         val et = Entity.Type("e")
 
         classes {
-            fields {
-                filter(Regex("RepoInt"))
-                signature {
-                    entity(et)
+            methods {
+                filter(Regex("aRepoString"))
+                parameters {
+                    signature {
+//                        superclass {
+                            entity(et)
+//                        }
+                    }
                 }
             }
         }.expecting(cns, et, """
             ── e
-               └─ GenericRepos
+               └─ RepoT<String>
             """
         )
     }
 
-    @Test @Disabled
-    fun `resolve invocations on generic interfaces`() {
-        TODO()
+    @Test
+    fun `validate method to repository relationships via accessed fields signatures`() {
+        val cns: List<ClassNode> = listOf(
+            classNode(AbstractRepoT::class),
+            classNode(GenericRepos::class),
+            classNode(RepoT::class),
+        )
+
+        val m = Entity.Type("method")
+        val repo = Entity.Type("repo")
+
+        classes {
+            scope("register repos") {
+                filter("GenericRepos")
+                fields {
+                    filter("iRepo")
+                    signature {
+                        entity(repo)
+                    }
+                }
+            }
+
+            methods {
+                filter(Regex("(Int|String)"))
+                filter(Regex("(^get|^set|RepoString)"), invert = true)
+                entity(m)
+
+                // Scope into the signatures of accessed fields to establish a relationship
+                // between the 'm' entities and the 'repo' entities
+                fieldAccess {
+                    signature {
+                        // at this point, signatures of accessed fields are associated with each 'm' entity;
+                        m["repositories"] = repo   // resolves 'repo' entities from signatures
+                    }
+                }
+
+            }
+        }.expecting(cns, m, """
+            ── method
+               ├─ GenericRepos::intAndString
+               │  ├─ RepoT<Integer>
+               │  └─ RepoT<String>
+               ├─ GenericRepos::onlyInt
+               │  └─ RepoT<Integer>
+               └─ GenericRepos::onlyString
+                  └─ RepoT<String>
+           """
+        )
     }
 
     @Test

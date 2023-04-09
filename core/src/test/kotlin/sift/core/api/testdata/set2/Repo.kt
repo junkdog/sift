@@ -28,12 +28,26 @@ class RepoClient() {
 }
 
 interface RepoT<T>
-abstract class AbstractRepoT<T>
+abstract class AbstractRepoT<T> : RepoT<T>
 
 class GenericRepos {
     var iRepoInt: RepoT<Int> = object : RepoT<Int> {}
     var aRepoInt: RepoT<Int> = object : RepoT<Int> {}
+    var iRepoString: RepoT<String> = object : RepoT<String> {}
 
     fun aRepoString(repoT: AbstractRepoT<String>) = Unit
     fun iRepoString(repoT: RepoT<String>) = Unit
+
+    fun intAndString() {
+        iRepoInt.toString()
+        iRepoString.toString()
+    }
+
+    fun onlyInt() {
+        iRepoInt.toString()
+    }
+
+    fun onlyString() {
+        iRepoString.toString()
+    }
 }

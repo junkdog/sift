@@ -107,6 +107,17 @@ class Methods internal constructor(
         )
     }
 
+    /** iterate fields accessed by current methods */
+    fun fieldAccess(
+        f: Fields.() -> Unit
+    ) {
+        val fieldsScope = Fields().also(f).action
+
+        action += Action.Fork(
+            Action.Method.FieldAccess() andThen fieldsScope
+        )
+    }
+
     fun instantiationsOf(type: Entity.Type, f: Classes.() -> Unit) {
         val classScope = Classes().also(f).action
 
