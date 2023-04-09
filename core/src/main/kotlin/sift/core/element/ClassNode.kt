@@ -1,7 +1,6 @@
 package sift.core.element
 
 import net.onedaybeard.collectionsby.findBy
-import org.objectweb.asm.Opcodes.ACC_ENUM
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.asmType

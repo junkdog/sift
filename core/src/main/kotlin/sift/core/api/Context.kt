@@ -11,7 +11,6 @@ import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
 import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
-import sift.core.asm.superType
 import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.element.*

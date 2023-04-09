@@ -1,8 +1,5 @@
 package sift.core.entity
 
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
-import sift.core.tree.TreeDsl.Companion.tree
 import java.util.UUID
 
 

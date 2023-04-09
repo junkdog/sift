@@ -614,6 +614,9 @@
   "name":"sift.core.api.Action$Method$DeclaredMethods"
 },
 {
+  "name":"sift.core.api.Action$Method$FieldAccess"
+},
+{
   "name":"sift.core.api.Action$Method$Filter",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import com.github.ajalt.mordant.rendering.TextStyle
-import com.github.ajalt.mordant.rendering.TextStyles
 import sift.core.terminal.Gruvbox
-import sift.core.terminal.Gruvbox.aqua1
 import java.lang.StringBuilder
 
 @JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)

@@ -1,7 +1,6 @@
 package sift.core.api
 
 import org.objectweb.asm.Type
-import sift.core.UnexpectedElementException
 import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
