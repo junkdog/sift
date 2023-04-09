@@ -114,7 +114,7 @@ class Methods internal constructor(
         val fieldsScope = Fields().also(f).action
 
         action += Action.Fork(
-            Action.Method.FieldAccess() andThen fieldsScope
+            Action.Method.FieldAccess andThen fieldsScope
         )
     }
 
