@@ -18,7 +18,6 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
-import sift.core.stringWriter
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.IdentityHashMap

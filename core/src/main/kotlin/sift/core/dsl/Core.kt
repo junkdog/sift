@@ -5,9 +5,6 @@ import sift.core.api.Iter
 import sift.core.api.IterValues
 import sift.core.element.Element
 import sift.core.entity.Entity
-import sift.core.entity.LabelFormatter
-import sift.core.terminal.StringEditor
-import sift.core.terminal.TextTransformer
 import kotlin.reflect.KProperty1
 
 abstract class Core<ELEMENT : Element>(
