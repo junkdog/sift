@@ -202,6 +202,7 @@
                         <configuration>
                             <buildArgs>
                                 --no-fallback
+                                -H:+StaticExecutableWithDynamicLibC
                                 -H:GenerateDebugInfo=1
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/jpa/src/main/kotlin
@@ -234,6 +235,7 @@
                         <configuration>
                             <buildArgs>
                                 --no-fallback
+                                -H:+StaticExecutableWithDynamicLibC
                             </buildArgs>
                         </configuration>
                     </plugin>
