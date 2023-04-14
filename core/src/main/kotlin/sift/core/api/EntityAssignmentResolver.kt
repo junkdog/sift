@@ -22,7 +22,6 @@ sealed class EntityAssignmentResolver<T: Element> {
             ctx: Context,
             elements: Iter<MethodNode> // = rhs
         ) {
-            @Suppress("UNCHECKED_CAST")
             val matched = ctx.entityService[type]
             elements
                 .forEach { registerFieldAccess(ctx, it, matched, key, "backtrack") }

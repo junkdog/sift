@@ -268,9 +268,8 @@ sealed class Action<IN, OUT> {
             override fun id() = "filter-nth($nth)"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
                 fun resolve(elem: SignatureNode): SignatureNode? {
-                    val arg = elem.inner.getOrNull(nth) ?: return null
-                    return arg
-                        .also { output -> ctx.scopeTransition(elem, output) }
+                    return elem.inner.getOrNull(nth)
+                        ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
                 return input.mapNotNull(::resolve)
@@ -282,8 +281,7 @@ sealed class Action<IN, OUT> {
         internal data class Filter(val regex: Regex, val invert: Boolean) : Action<IterClasses, IterClasses>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                val f = if (invert) input::filterNot else input::filter
-                return f { cn -> regex in cn.qualifiedName }
+                return input.filter { cn -> (regex in cn.qualifiedName) xor invert }
             }
         }
 
@@ -834,7 +832,9 @@ sealed class Action<IN, OUT> {
                     is FieldNode  -> elem.access
                     is MethodNode -> elem.access
                     else -> error("No access modifiers possible for: ${elem::class.simpleName}")
-                }.let { access -> (access and modifiers == modifiers) xor invert }
+                }.let { access ->
+                    (access and modifiers == modifiers) xor invert
+                }
             }
         }
     }
@@ -914,7 +914,7 @@ sealed class Action<IN, OUT> {
     ) : Action<T, T>() {
         override fun id() = "fork-conditional($entity exists${"-not".takeIf { invert } ?: ""})"
         override fun execute(ctx: Context, input: T): T {
-            if (entity in ctx.entityService != invert) {
+            if ((entity in ctx.entityService) xor invert) {
                 ctx.pushMeasurementScope()
                 forked(ctx, input)
                 ctx.popMeasurementScope()

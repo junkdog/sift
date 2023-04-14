@@ -14,7 +14,7 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Fields internal constructor(
     fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope
-) : Core<FieldNode>(chainFrom(fields)),
+) : Core<FieldNode>(chainFrom(fields), AccessFlags.Scope.Field),
     CommonOperations<FieldNode, Fields>,
     ParentOperations<ClassNode, Classes>
 {
@@ -39,23 +39,6 @@ class Fields internal constructor(
     override fun outerScope(label: String, f: Classes.() -> Unit) {
         val forkTo = Action.Field.IntoOuterScope andThen Classes().also(f).action
         action += Action.Fork(forkTo)
-    }
-
-    /** filter elements by access modifiers */
-    fun filter(
-        vararg modifiers: Modifiers,
-        invert: Boolean = false
-    ) {
-        filter(modifiers.toList(), invert)
-    }
-
-
-    /** filter elements by access modifiers */
-    fun filter(
-        modifiers: List<Modifiers>,
-        invert: Boolean = false
-    ) {
-        action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
     }
 
     override fun filter(regex: Regex, invert: Boolean) {

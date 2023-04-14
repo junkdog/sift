@@ -311,9 +311,9 @@ internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity
 internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
     fun toFieldNodes(elem: Element, e: Entity): Pair<FieldNode, Entity> {
         return when (elem) {
-            is FieldNode     ->  elem to e
-            is ValueNode     -> toFieldNodes(elem.reference, e)
-            else             -> error("unable to extract methods from $elem")
+            is FieldNode ->  elem to e
+            is ValueNode -> toFieldNodes(elem.reference, e)
+            else         -> error("unable to extract methods from $elem")
         }
     }
 

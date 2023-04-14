@@ -1,9 +1,10 @@
 ## Upcoming release
 
-### Generics: initial support
+### Entity Registration with Generic Types
 
-TBD
-
+Entities can now be registered against generic type signatures, such as `Repository<User>`. This first iteration
+does not cover all use-cases, specifically type arguments inferred from context are currently not resolved,
+leading to sift ignoring the generic signatures of method invocations.
 
 ### Breaking change: `sift.core.dsl.Type` supersedes `org.objectweb.asm.Type` 
 

@@ -14,7 +14,9 @@ import sift.core.element.SignatureNode
 @SiftTemplateDsl
 class Signature internal constructor(
     internal val action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
-) : EntityRegistrar<SignatureNode> by EntityRegistrar.scopedTo(action) {
+) : EntityRegistrar<SignatureNode> by EntityRegistrar.scopedTo(action),
+    EntityPropertyRegistrar<SignatureNode> by EntityPropertyRegistrar.scopedTo(action)
+{
     fun readName(): Action<IterSignatures, IterValues> {
         return Action.Signature.ReadSignature
     }

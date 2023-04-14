@@ -1,5 +1,6 @@
 package sift.core.dsl
 
+import sift.core.api.AccessFlags
 import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.api.IterValues
@@ -9,8 +10,10 @@ import kotlin.reflect.KProperty1
 
 abstract class Core<ELEMENT : Element>(
     internal val action: Action.Chain<Iter<ELEMENT>>,
+    scope: AccessFlags.Scope,
 ) : EntityRegistrar<ELEMENT>         by EntityRegistrar.scopedTo(action),
-    EntityPropertyRegistrar<ELEMENT> by EntityPropertyRegistrar.scopedTo(action)
+    EntityPropertyRegistrar<ELEMENT> by EntityPropertyRegistrar.scopedTo(action),
+    FilterableByAccessFlag<ELEMENT>  by FilterableByAccessFlag.from(action, scope)
 {
     private var stack: MutableList<Action<*, *>> = mutableListOf()
 

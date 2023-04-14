@@ -3,7 +3,7 @@ package sift.template.sift
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
-import sift.core.api.Modifiers.acc_public
+import sift.core.api.AccessFlags.acc_public
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.template
 import sift.core.dsl.Core

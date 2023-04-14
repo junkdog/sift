@@ -1,7 +1,5 @@
 package sift.core.dsl
 
-import com.github.ajalt.mordant.rendering.AnsiLevel
-import com.github.ajalt.mordant.terminal.Terminal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -13,27 +11,19 @@ import sift.core.*
 import sift.core.EntityNotFoundException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.api.*
-import sift.core.api.Context
-import sift.core.api.Modifiers.*
+import sift.core.api.AccessFlags.*
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
-import sift.core.asm.type
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.template.toTree
 import sift.core.tree.debugTree
 import java.io.InputStream
 import kotlin.test.assertTrue
-
-typealias JavaDeprecated = java.lang.Deprecated
-
-fun resource(path: String): InputStream {
-    return DslTest::class.java.getResourceAsStream(path)!!
-}
 
 @Suppress("UNCHECKED_CAST")
 class DslTest {
@@ -216,15 +206,16 @@ class DslTest {
                 signature {
                     typeArguments {
                         explodeType(synthesize = true) {
-                            entity(payload, label("field-owner: \${field-owner}"))
+                            entity(payload, label("field-owner: \${field-owner}, signature: \${name}"))
                         }
                     }
+                    property(payload, "name", readName())
                 }
             }
             property(payload, "field-owner", readName())
         }.expecting(listOf(classNode(FieldClass::class)), payload, """
             ── payload
-               └─ field-owner: FieldClass
+               └─ field-owner: FieldClass, signature: List<PayLoad>
             """
         )
     }
@@ -236,12 +227,15 @@ class DslTest {
         val payload = Entity.Type("payload")
 
         classes {
+
             fields {
-                signature {
-                    typeArguments {
-                        filter(Regex("Payload"))
-                        explodeType(synthesize = true) {
-                            entity(payload)
+                scope("inspect fields for payload type") {
+                    signature {
+                        typeArguments {
+                            filter(Regex("Payload"))
+                            explodeType(synthesize = true) {
+                                entity(payload)
+                            }
                         }
                     }
                 }
@@ -908,21 +902,20 @@ class DslTest {
                 fields {
                     filter("iRepo")
                     signature {
-                        entity(repo)
+                        entity(repo) // RepoT<Integer>, RepoT<String>
                     }
                 }
             }
 
             methods {
-                filterName(Regex("(Int|String)"))
                 filter(acc_synchronized)
                 entity(m)
 
                 // Scope into the signatures of accessed fields to establish a relationship
-                // between the 'm' entities and the 'repo' entities
+                // between the 'm' entities and the 'repo' entities.
                 fieldAccess {
                     signature {
-                        // at this point, signatures of accessed fields are associated with each 'm' entity;
+                        // at this point, signatures of fields can be traced back to 'm' entities
                         m["repositories"] = repo   // resolves 'repo' entities from signatures
                     }
                 }
@@ -1380,19 +1373,13 @@ class DslTest {
 
                 factory.invocations["invocations-by"] = method
             }
-        }.expecting(cns) { es ->
-            val methods = es[method].values.toList()
-            assertThat(methods).hasSize(5)
-
-            fun er(s: String): Entity = methods.first { s in it.label }
-
-            assertThat(es[factory].values.first().children("invocations-by"))
-                .hasSize(2)
-                .containsExactly(
-                    er("HandlerOfFns::boo"),
-                    er("HandlerOfFns::invoker"),
-                )
-        }
+        }.expecting(cns, factory, """
+            ── factory
+               └─ SomeFactory::create
+                  ├─ HandlerOfFns::boo
+                  └─ HandlerOfFns::invoker
+            """
+        )
     }
 
     @Test
@@ -1904,45 +1891,18 @@ class DslTest {
         }
     }
 
-    private fun Action<Unit, Unit>.expecting(
-        cns: List<ClassNode> = allCns,
-        block: (EntityService) -> Unit
-    ) {
-        TemplateProcessor(cns)
-            .process(this, false, Context::debugTrails)
-            .entityService
-            .also(block)
-    }
-
-    private fun Action<Unit, Unit>.expecting(
-        cns: List<ClassNode> = allCns,
-        root: Entity.Type,
-        expectTree: String
-    ) {
-        expecting(cns, listOf(root), expectTree)
-    }
-
-    private fun Action<Unit, Unit>.expecting(
-        cns: List<ClassNode> = allCns,
-        root: List<Entity.Type>,
-        expectTree: String
-    ) {
-        val noAnsi = Terminal(ansiLevel = AnsiLevel.NONE)
-        expecting(cns) { es ->
-            assertThat(es.toTree(root).let(noAnsi::render))
-                .isEqualTo(expectTree.trimIndent() + "\n")
-        }
+    private fun Action<Unit, Unit>.expecting(f: (EntityService) -> Unit) {
+        return expecting(allCns, f)
     }
 }
 
-fun Iterable<Entity>.prettyPrint(): List<String> {
-    return map { e -> "Entity(${e.label}, type=${e.type})" }
-        .joinToString("\n")
-        .lines()
-}
 
 fun EntityService.toTree(roots: List<Entity.Type>): String {
     return SystemModel(this).toTree(roots).toString()
+}
+
+fun resource(path: String): InputStream {
+    return DslTest::class.java.getResourceAsStream(path)!!
 }
 
 private class FieldClass {
@@ -1950,3 +1910,4 @@ private class FieldClass {
 }
 
 private class PayLoad
+

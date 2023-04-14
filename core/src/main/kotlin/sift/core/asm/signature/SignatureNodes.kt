@@ -10,7 +10,7 @@ import sift.core.element.AsmMethodNode
 
 // todo; param signature node
 
-fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
+internal fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
     signature ?: return null
 
     return SignatureParser(Opcodes.ASM9, wrap)
@@ -18,7 +18,7 @@ fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
         .asClassSignatureNode
 }
 
-fun FieldNode.signature(
+internal fun FieldNode.signature(
     formalTypeParams: List<FormalTypeParameter>,
     wrap: SignatureVisitor? = null
 ): FieldSignatureNode? {
@@ -29,7 +29,7 @@ fun FieldNode.signature(
         .asFieldSignatureNode
 }
 
-fun AsmMethodNode.signature(
+internal fun AsmMethodNode.signature(
     formalTypeParams: List<FormalTypeParameter>,
     wrap: SignatureVisitor? = null,
 ): MethodSignatureNode? {
@@ -46,7 +46,7 @@ fun AsmMethodNode.signature(
     }
 }
 
-data class ClassSignatureNode(
+internal data class ClassSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: TypeSignature,
     val implements: List<TypeSignature>

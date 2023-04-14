@@ -1,8 +1,6 @@
 package sift.core.dsl
 
-import sift.core.api.Action
-import sift.core.api.Iter
-import sift.core.api.SiftTemplateDsl
+import sift.core.api.*
 import sift.core.api.chainFrom
 import sift.core.element.Element
 import sift.core.entity.Entity
@@ -15,7 +13,7 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Elements internal constructor(
     elements: Action<Iter<Element>, Iter<Element>> = Action.Elements.ElementScope
-) : Core<Element>(chainFrom(elements)),
+) : Core<Element>(chainFrom(elements), AccessFlags.Scope.TypeErased),
     CommonOperations<Element, Elements>
 {
 

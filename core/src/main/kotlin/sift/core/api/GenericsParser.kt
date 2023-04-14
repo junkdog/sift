@@ -103,14 +103,14 @@ private class GenericsParser(val input: String) {
 
     fun parseType(index: Int): GenericType {
         val name = parseTypeName()
-        return if (at('<')) {
+        val arguments = mutableListOf<GenericType>()
+        if (at('<')) {
             consume('<')
-            val arguments = parseTypeArguments()
+            arguments += parseTypeArguments()
             consume('>')
-            GenericType(index, name, arguments.toMutableList())
-        } else {
-            GenericType(index, name, mutableListOf())
         }
+
+        return GenericType(index, name, arguments)
     }
 
     private fun consume(): Char = input[index++]

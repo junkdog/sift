@@ -8,7 +8,6 @@ import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.jackson.SystemModelSerializer
 import sift.core.jackson.serializationModule
-import sift.core.template.toTree
 import sift.core.tree.Tree
 import java.io.File
 

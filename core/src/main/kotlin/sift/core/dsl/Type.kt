@@ -1,6 +1,7 @@
 package sift.core.dsl
 
 import sift.core.api.parseSignature
+import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.type
 import sift.core.element.AsmClassNode
@@ -20,7 +21,7 @@ class Type private constructor(
 
     internal val asmType: AsmType
         get() = AsmType.getType("L${internalName};")
-    val signature: TypeSignature
+    internal val signature: TypeSignature
         get() = parseSignature(value)
     val isGeneric: Boolean
         get() = signature.args.isNotEmpty()
@@ -39,10 +40,25 @@ class Type private constructor(
         internal fun from(s: String) = Type(s)
         internal fun from(type: AsmType) = Type(type.className)
         internal fun from(cn: AsmClassNode) = from(cn.type)
-        internal fun from(signature: TypeSignature) = from(signature.toTypeString())
+        internal fun from(signature: TypeSignature): Type {
+            fun fromType(argType: ArgType): String = when (argType) {
+                is ArgType.Array -> fromType(argType.wrapped!!)
+                is ArgType.Plain -> argType.type.className
+                is ArgType.Var   -> argType.type.name
+            }
+
+            val inner = signature.args
+                .takeIf(MutableList<TypeSignature>::isNotEmpty)
+                ?.joinToString(prefix = "<", postfix = ">") { fromType(it.type) }
+                ?: ""
+
+
+            return from("${signature.type}$inner")
+        }
     }
 }
 
+// FIXME: encode generics: name + generic args
 inline fun <reified T> type() = type(T::class)
 fun type(cls: KClass<*>) = Type.from(cls.java.name)
 fun type(value: String): Type = Type.from(value)

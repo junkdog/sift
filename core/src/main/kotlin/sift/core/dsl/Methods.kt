@@ -14,7 +14,7 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Methods internal constructor(
     methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope
-) : Core<MethodNode>(chainFrom(methods)),
+) : Core<MethodNode>(chainFrom(methods), AccessFlags.Scope.Method),
     CommonOperations<MethodNode, Methods>,
     ParentOperations<ClassNode, Classes>
 {
@@ -85,23 +85,6 @@ class Methods internal constructor(
 
     fun declaredMethods() {
         action += Action.Method.DeclaredMethods
-    }
-
-    /** filter elements by access modifiers */
-    fun filter(
-        vararg modifiers: Modifiers,
-        invert: Boolean = false
-    ) {
-        filter(modifiers.toList(), invert)
-    }
-
-
-    /** filter elements by access modifiers */
-    fun filter(
-        modifiers: List<Modifiers>,
-        invert: Boolean = false
-    ) {
-        action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
     }
 
     fun parameters(f: Parameters.() -> Unit) {

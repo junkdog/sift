@@ -18,21 +18,6 @@ data class TypeSignature(
 
         return "$type$array$inner"
     }
-
-    internal fun toTypeString(): String {
-        fun fromType(argType: ArgType): String = when (argType) {
-            is ArgType.Array -> fromType(argType.wrapped!!)
-            is ArgType.Plain -> argType.type.className
-            is ArgType.Var -> argType.type.name
-        }
-
-        val inner = args
-            .takeIf(MutableList<TypeSignature>::isNotEmpty)
-            ?.joinToString(prefix = "<", postfix = ">") { fromType(it.type) }
-            ?: ""
-
-        return "$type$inner"
-    }
 }
 
 sealed interface ArgType {

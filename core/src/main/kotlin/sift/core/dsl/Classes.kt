@@ -13,7 +13,7 @@ import sift.core.entity.Entity
 @SiftTemplateDsl
 class Classes internal constructor(
     source: IsoAction<ClassNode> = Action.Class.ClassScope
-) : Core<ClassNode>(chainFrom(source)),
+) : Core<ClassNode>(chainFrom(source), AccessFlags.Scope.Class),
     CommonOperations<ClassNode, Classes>,
     ParentOperations<ClassNode, Classes>
 {
@@ -39,22 +39,6 @@ class Classes internal constructor(
     fun interfaces(recursive: Boolean = false, synthesize: Boolean = false, f: Classes.() -> Unit) {
         val intoInterfaces = Action.Class.IntoInterfaces(recursive, synthesize)
         action += Action.Fork(intoInterfaces andThen Classes().also(f).action)
-    }
-
-    /** filter elements by access modifiers */
-    fun filter(
-        vararg modifiers: Modifiers,
-        invert: Boolean = false
-    ) {
-        filter(modifiers.toList(), invert)
-    }
-
-    /** filter elements by access modifiers */
-    fun filter(
-        modifiers: List<Modifiers>,
-        invert: Boolean = false
-    ) {
-        action += Action.FilterModifiers(Modifiers.bitmaskOf(modifiers), invert)
     }
 
     fun readType(): Action<IterClasses, IterValues> {
