@@ -27,7 +27,8 @@ for example: `type("java.lang.String")` and `"java.lang.String".type`.
   
 ### Fixes
 - sift template: `object` Actions were not associated with their DSL methods.
-
+- fixed a potential behind-the-scenes problem with element relations being wrongfully disassociated
+   when moving between scopes.
 
 ## sift-0.8.0 2023-03-20
 

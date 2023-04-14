@@ -1,30 +1,28 @@
 package sift.core.api
 
 import sift.core.element.*
+import java.util.*
+import kotlin.collections.ArrayList
 
-internal class ElementTrace : Sequence<Element> {
+internal class ElementTrace private constructor(
+    val elements: List<Element>
+) : Sequence<Element> {
+
     constructor(visited: Element) : this(listOf(visited))
 
-    private constructor(visited: List<Element>) {
-        elements += visited
-    }
-
-    private val elements: MutableList<Element> = mutableListOf()
-
-    fun intersects(other: ElementTrace): Boolean {
-        return elements.intersect(other.elements.toSet()).isNotEmpty()
-    }
-
     operator fun plus(element: Element): ElementTrace {
-        return ElementTrace(elements + element)
+        return ElementTrace(ArrayList<Element>(elements.size + 1).also {
+            it += element
+            it += elements
+        })
     }
 
     override fun iterator(): Iterator<Element> {
-        return elements.reversed().iterator()
+        return elements.iterator()
     }
 
     operator fun contains(other: ElementTrace): Boolean {
-        return other.elements.containsAll(elements)
+        return Collections.indexOfSubList(other.elements, elements) != -1
     }
 
     operator fun contains(element: Element): Boolean {
@@ -33,5 +31,13 @@ internal class ElementTrace : Sequence<Element> {
 
     override fun toString(): String {
         return "ScopeTrail(${joinToString(separator = " <- ") { it.simpleName }})"
+    }
+
+    override fun hashCode(): Int {
+        return elements.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return (other as? ElementTrace)?.elements == elements
     }
 }

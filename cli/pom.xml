@@ -205,10 +205,7 @@
                                 -H:+StaticExecutableWithDynamicLibC
                                 -H:GenerateDebugInfo=1
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/jpa/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/jdbi/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/instrumenter-core/src/main/kotlin
-                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/spring-boot-axon-cqrs/src/main/kotlin
+                                -H:DebugInfoSourceSearchPath=${project.basedir}/../templates/template-core/src/main/kotlin
                                 -H:DebugInfoSourceSearchPath=${project.basedir}/../core/src/main/kotlin
                             </buildArgs>
                         </configuration>
@@ -217,7 +214,7 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-sift-binary-to-local-m2</id>
+                                <id>install-sift-binary</id>
                                 <phase>install</phase>
                             </execution>
                         </executions>

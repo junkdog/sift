@@ -2,6 +2,9 @@ package sift.core.api
 
 import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.withIndex
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.filterNotBy
 import net.onedaybeard.collectionsby.findBy
@@ -134,10 +137,16 @@ internal data class Context(
     }
 
     fun scopeTransition(input: Element, output: Element) {
-        val transitions = tracesOf(input).map { it + output }
+        // existing traces of element being scoped to
+        val currentTraces = tracesOf(output)
+
+        // resolve new traces; filter already scoped element traces
+        val transitions = tracesOf(input)
+            .map { it + output }
+            .filter { it !in currentTraces }
 
         // TODO: profile/optimize
-        tracesOf(output)
+        currentTraces
             .also { trails -> trails.removeAll { o -> transitions.any { it in o } } }
             .addAll(transitions)
     }
