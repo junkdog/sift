@@ -2,6 +2,12 @@ package sift.core.api
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.Handle
@@ -1021,10 +1027,15 @@ sealed class Action<IN, OUT> {
                         .forEach { (elem, e) -> e?.set(key, elem.data) }
                 }
                 else -> {
-                    input.forEach { elem ->
-                        ctx.findRelatedEntities(elem, entity)
-                            .forEach { e -> e[key] = elem.data }
-                        }
+                    runBlocking(Dispatchers.Default) {
+                        input.asFlow()
+                            .map { elem ->
+                                val entities = ctx.findRelatedEntities(elem, entity)
+                                val f: () -> Unit = { entities.forEach { e -> e[key] = elem.data } }
+                                f
+                            }
+                            .toList()
+                    }.forEach { f -> f() }
                 }
             }
 

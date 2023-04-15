@@ -144,16 +144,17 @@ internal data class Context(
     }
 
     private fun flushTransitions() {
-        if (bufferedTransitions.isEmpty())
-            return
-
-        runBlocking(Dispatchers.Default) {
-            bufferedTransitions.asFlow()
-                .map { (input, output) -> registerTransition(input, output) }
-                .collect()
-
-            bufferedTransitions.clear()
+        when (bufferedTransitions.size) {
+            0       -> return
+            in 1..4 -> bufferedTransitions.forEach { (input, output) -> registerTransition(input, output) }
+            else    -> runBlocking(Dispatchers.Default) {
+                bufferedTransitions.asFlow()
+                    .map { (input, output) -> registerTransition(input, output) }
+                    .collect()
+            }
         }
+
+        bufferedTransitions.clear()
     }
 
     private fun registerTransition(input: Element, output: Element) {
