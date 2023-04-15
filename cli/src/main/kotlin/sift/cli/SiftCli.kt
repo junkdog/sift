@@ -185,7 +185,7 @@ object SiftCli : CliktCommand(
                 val sm = systemModel()
                 val format: (Any) -> String = numberFormatter()
 
-                sm.statistics.entries
+                sm.statistics().entries
                     .joinToString("\n") { (k, v) -> "%-40s %8s".format(k, format(v)) }
                     .let(terminal::println)
             }

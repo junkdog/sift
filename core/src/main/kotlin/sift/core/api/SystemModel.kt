@@ -16,19 +16,19 @@ import java.io.File
 data class SystemModel(
     val entitiesByType: Map<Entity.Type, List<Entity>>,
     val measurements: Tree<Measurement>,
-    val statistics: Map<String, Int>
+    val statistics: () -> Map<String, Int>
 ) {
     internal constructor(
         context: Context
     ) : this(
         context.entityService.entitiesByType.map { (type, v) -> type to v.values.toList() }.toMap(),
         context.measurements,
-        context.statistics()
+        { context.statistics() }
     )
 
     internal constructor(
         es: EntityService
-    ) : this(es.allEntities().groupBy(Entity::type), Tree(Measurement.NONE), mapOf())
+    ) : this(es.allEntities().groupBy(Entity::type), Tree(Measurement.NONE), { mapOf() })
 
     operator fun get(type: Entity.Type): List<Entity> = entitiesByType[type] ?: listOf()
     operator fun contains(type: Entity.Type): Boolean = type in entitiesByType

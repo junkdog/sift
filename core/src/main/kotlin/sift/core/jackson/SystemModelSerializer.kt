@@ -107,7 +107,7 @@ object SystemModelSerializer {
             return SystemModel(
                 entitiesByType = entities.values.groupBy(Entity::type),
                 measurements = Tree(Measurement(".", MeasurementScope.Template, MeasurementScope.Template, 0, 0, 0, 0.milliseconds)),
-                statistics = mapOf()
+                statistics = { mapOf() }
             )
         }
 
