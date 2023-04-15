@@ -70,13 +70,15 @@ class ClassNode private constructor(
     val interfaces: List<AsmType>
         get() = cn.interfaces?.map { AsmType.getType("L${it};") } ?: emptyList()
 
+    private val hash = idHash(cn)
+
     override fun toString() = simpleName
 
     override fun equals(other: Any?): Boolean {
         return cn === (other as? ClassNode)?.cn
     }
 
-    override fun hashCode(): Int = idHash(cn)
+    override fun hashCode(): Int = hash
     internal fun asAsmNode(): AsmClassNode = cn
 
     companion object {

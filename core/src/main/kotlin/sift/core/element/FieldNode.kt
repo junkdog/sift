@@ -41,13 +41,15 @@ class FieldNode private constructor(
     val access: Int
         get() = fn.access
 
+    private val hash = hash(cn) * 31 + idHash(fn)
+
     override fun equals(other: Any?): Boolean {
         return other is FieldNode
             && cn == other.cn
             && fn === other.fn
     }
 
-    override fun hashCode(): Int = hash(cn) * 31 + idHash(fn)
+    override fun hashCode(): Int = hash
 
     val returns: SignatureNode?
         get() = fn.signature(cn.signature?.formalParameters ?: listOf())

@@ -3,10 +3,8 @@ package sift.core.api
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.findBy
@@ -962,6 +960,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
+    @FlowPreview
     internal data class RegisterChildren<T : Element>(
         val parentType: Entity.Type,
         val key: String,
@@ -976,20 +975,25 @@ sealed class Action<IN, OUT> {
             if (parentType !in ctx.entityService)
                 Throw.entityNotRegistered(parentType)
 
-            fun relations(elem: Element, type: Entity.Type): Set<Entity> {
+            fun relations(elem: Element, type: Entity.Type): Flow<Entity> {
                 val related = ctx.findRelatedEntities(elem, type)
                 if (related.isEmpty() && elem !in ctx.entityService) {
                     Throw.entityNotFound(type, elem)
                 }
-                return related.filter { ctx.entityService[elem] != it }.toSet()
+
+                return related.filter { ctx.entityService[elem] != it }.toSet().asFlow()
             }
 
-            ctx.entityService[parentType]
-                .flatMap { (elem, parent) -> relations(elem, childType).map { parent to it } }
-                .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
-                ?.onEach { (parent, child) -> parent.addChild(key, child) }
-                ?.onEach { (parent, child) -> child.addChild("backtrack", parent) }
-                ?: Throw.unableToResolveParentRelation(parentType, childType)
+            runBlocking(Dispatchers.Default) {
+                ctx.entityService[parentType].entries.chunked(5).asFlow()
+                    .flatMapConcat { it.asFlow() }
+                    .flatMapConcat { (elem, parent) -> relations(elem, childType).map { parent to it } }
+                    .toList()
+                    .onEach { (parent, child) -> child.addChild("backtrack", parent) }
+                    .onEach { (parent, child) -> parent.addChild(key, child) }
+                    .takeIf(List<Pair<Entity, Entity>>::isNotEmpty)
+                    ?: Throw.unableToResolveParentRelation(parentType, childType)
+            }
 
             return input
         }

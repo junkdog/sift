@@ -6,6 +6,7 @@ import kotlin.collections.ArrayList
 internal class ElementTrace private constructor(
     val elements: List<Element>
 ) : Sequence<Element> {
+    private val hash = elements.hashCode()
 
     constructor(visited: Element) : this(listOf(visited))
 
@@ -29,14 +30,14 @@ internal class ElementTrace private constructor(
     }
 
     override fun toString(): String {
-        return "ScopeTrail(${joinToString(separator = " <- ") { it.simpleName }})"
+        return "ElementTrace(${joinToString(separator = " <- ") { it.simpleName }})"
     }
 
-    override fun hashCode(): Int {
-        return elements.hashCode()
-    }
+    override fun hashCode(): Int = hash
 
     override fun equals(other: Any?): Boolean {
-        return (other as? ElementTrace)?.elements == elements
+        return other is ElementTrace
+            && other.hash == hash
+            && other.elements == elements
     }
 }

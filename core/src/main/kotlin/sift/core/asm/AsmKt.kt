@@ -106,6 +106,7 @@ private fun classesDir(root: File): List<ClassNode> {
     return runBlocking(Dispatchers.Default) {
         root.walk()
             .filter { it.extension == "class" }
+            .map(File::readBytes)
             .asFlow()
             .map(::classNode)
             .toList()

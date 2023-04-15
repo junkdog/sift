@@ -22,7 +22,9 @@ class SignatureNode private constructor(
             && signature == other.signature
     }
 
-    override fun hashCode(): Int = hash(signature)
+    private val hash = hash(signature)
+
+    override fun hashCode(): Int = hash
 
     override fun toString(): String = signature.toString()
 

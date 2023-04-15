@@ -18,9 +18,9 @@ class ValueNode private constructor(
             && data == other.data
     }
 
-    override fun hashCode(): Int {
-        return hash(data, reference)
-    }
+    private val hash = hash(data, reference)
+
+    override fun hashCode(): Int = hash
 
     override fun toString(): String = "<<$data>>"
 

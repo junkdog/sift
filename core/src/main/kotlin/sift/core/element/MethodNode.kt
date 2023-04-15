@@ -13,6 +13,7 @@ class MethodNode(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>
 ) : Element {
+
     override val simpleName: String
         get() = mn.name
 
@@ -42,6 +43,8 @@ class MethodNode(
             ?.let(SignatureNode::from)
     }
 
+    private val hash = hash(cn) * 31 + idHash(mn)
+
     override fun toString(): String = "$cn::$name"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
@@ -52,9 +55,7 @@ class MethodNode(
             && mn === other.mn
     }
 
-    override fun hashCode(): Int {
-        return hash(cn) * 31 + idHash(mn)
-    }
+    override fun hashCode() = hash
 
     companion object {
         fun from(cn: ClassNode, mn: AsmMethodNode): MethodNode {
