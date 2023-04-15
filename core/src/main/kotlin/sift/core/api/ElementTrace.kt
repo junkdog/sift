@@ -1,7 +1,6 @@
 package sift.core.api
 
 import sift.core.element.*
-import java.util.*
 import kotlin.collections.ArrayList
 
 internal class ElementTrace private constructor(
@@ -22,7 +21,7 @@ internal class ElementTrace private constructor(
     }
 
     operator fun contains(other: ElementTrace): Boolean {
-        return Collections.indexOfSubList(other.elements, elements) != -1
+        return other.elements.containsAll(elements)
     }
 
     operator fun contains(element: Element): Boolean {

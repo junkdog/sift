@@ -2,9 +2,9 @@ package sift.core.api
 
 import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.withIndex
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
 import net.onedaybeard.collectionsby.filterNotBy
 import net.onedaybeard.collectionsby.findBy
@@ -22,7 +22,8 @@ import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
-import java.util.IdentityHashMap
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
@@ -41,7 +42,7 @@ internal data class Context(
         .let(::IdentityHashMap)
 
     val entityService: EntityService = EntityService()
-    var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = mutableMapOf()
+    var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = ConcurrentHashMap()
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
@@ -136,7 +137,26 @@ internal data class Context(
         }
     }
 
+    private val bufferedTransitions: MutableList<Pair<Element, Element>> = mutableListOf()
+
     fun scopeTransition(input: Element, output: Element) {
+        bufferedTransitions += input to output
+    }
+
+    private fun flushTransitions() {
+        if (bufferedTransitions.isEmpty())
+            return
+
+        runBlocking(Dispatchers.Default) {
+            bufferedTransitions.asFlow()
+                .map { (input, output) -> registerTransition(input, output) }
+                .collect()
+
+            bufferedTransitions.clear()
+        }
+    }
+
+    private fun registerTransition(input: Element, output: Element) {
         // existing traces of element being scoped to
         val currentTraces = tracesOf(output)
 
@@ -145,7 +165,6 @@ internal data class Context(
             .map { it + output }
             .filter { it !in currentTraces }
 
-        // TODO: profile/optimize
         currentTraces
             .also { trails -> trails.removeAll { o -> transitions.any { it in o } } }
             .addAll(transitions)
@@ -245,6 +264,7 @@ internal data class Context(
 
         val start = System.nanoTime().nanoseconds
         val out = action.execute(ctx, input) // TODO: measureTimedValue
+        ctx.flushTransitions()
         val end = System.nanoTime().nanoseconds
         measurement.apply {
             output = sizeOf(out)

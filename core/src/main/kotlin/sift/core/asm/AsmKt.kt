@@ -1,5 +1,10 @@
 package sift.core.asm
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Type.getInternalName
@@ -98,8 +103,11 @@ private fun classesJar(root: File): List<ClassNode> {
 }
 
 private fun classesDir(root: File): List<ClassNode> {
-    return root.walk()
-        .filter { it.extension == "class" }
-        .map(::classNode)
-        .toList()
+    return runBlocking(Dispatchers.Default) {
+        root.walk()
+            .filter { it.extension == "class" }
+            .asFlow()
+            .map(::classNode)
+            .toList()
+    }
 }

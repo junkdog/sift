@@ -345,6 +345,10 @@
   "name":"kotlin.enums.EnumEntries"
 },
 {
+  "name":"kotlin.internal.jdk8.JDK8PlatformImplementations",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"kotlin.jvm.internal.DefaultConstructorMarker"
 },
 {
