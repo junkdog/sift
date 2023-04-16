@@ -77,12 +77,6 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                         property("name", readName()))
                 }
 
-                scope("core") {
-                    filter(Regex("Core\$"))
-                    entity(E.scope, label("\${name}"),
-                        property("name", readName()))
-                }
-
                 scope("scopes from children of Core<Element>") {
                     implements(type<Core<*>>())
                     entity(E.scope, label("\${name}"),
@@ -91,7 +85,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
 
             classesOf(E.scope) { e ->
-                methods {
+                methods(inherited = true) {
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
@@ -108,8 +102,8 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 e["fns"] = E.dsl
             }
 
-            E.dsl["actions"] = E.action.instantiations
-            E.dsl["actions"] = E.action.fieldAccess
+//            E.dsl["actions"] = E.action.instantiations
+//            E.dsl["actions"] = E.action.fieldAccess
         }
     }
 

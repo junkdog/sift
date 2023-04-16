@@ -13,6 +13,15 @@ class supports incorporating generic type information and is generally easier to
 of the new `Type` class are created with the `type()` function or the `String.type` extension property,
 for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
+### Breaking change: entity property update strategies
+Entity properties now overwrite existing properties by default, instead of appending to them as previously.
+You can modify this behavior by specifying the `strategy` parameter in the `property()` function. For example:
+
+```kotlin
+property(PropertyStrategy.unique, foo, "labels", withValue("hello"))
+```
+
+Property strategies are one of: `replace`, `append`, `prepend`, `immutable` and `unique`. 
 
 ### New/Tweaks
 - DSL/Class: added `inherited` parameter to `methods()` and `fields()` to include inherited methods and fields.

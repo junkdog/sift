@@ -29,8 +29,6 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
         entity: Entity.Type,
         f: SCOPE.() -> Unit
     )
-
-    fun property(tag: String, extract: Action<Iter<T>, IterValues>): Property<T>
 }
 
 /** Define a new template */

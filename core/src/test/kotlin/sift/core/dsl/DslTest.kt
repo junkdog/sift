@@ -25,7 +25,6 @@ import sift.core.tree.debugTree
 import java.io.InputStream
 import kotlin.test.assertTrue
 
-@Suppress("UNCHECKED_CAST")
 class DslTest {
 
     init {
@@ -566,6 +565,31 @@ class DslTest {
                         " bool=false, byte=3, char=\u0004, short=5, int=6, long=7, float=3.0, double=4.0)"
                 )
         }
+    }
+
+    @Test
+    fun `validate property update strategies`() {
+        val e = Entity.Type("e")
+
+        fun t(strategy: PropertyStrategy, expect: String) {
+            classes {
+                entity(e, label("\${+props}"),
+                    property(strategy, "props", withValue("a")))
+
+                property(strategy, e, "props", withValue("a"))
+                property(strategy, e, "props", withValue("b"))
+            }.expecting(listOf(classNode(SomeController::class)), e, """
+                ── e
+                   └─ $expect
+                """
+            )
+        }
+
+        t(PropertyStrategy.unique,    "a, b")
+        t(PropertyStrategy.append,    "a, a, b")
+        t(PropertyStrategy.immutable, "a")
+        t(PropertyStrategy.prepend,   "b, a, a")
+        t(PropertyStrategy.replace,   "b")
     }
 
     @Test

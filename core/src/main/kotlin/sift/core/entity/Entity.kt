@@ -15,6 +15,7 @@ class Entity(
     fun properties(): Map<String, List<Any>> = properties
 
     operator fun set(property: String, value: Any) {
+        @Suppress("UNCHECKED_CAST")
         val v = if (value !is List<*>) listOf(value) else value as List<Any>
         properties.getOrPut(property, ::mutableListOf).addAll(v)
     }
@@ -24,10 +25,6 @@ class Entity(
     }
 
     operator fun minusAssign(property: String) {
-        properties -= property
-    }
-
-    fun remove(property: String) {
         properties -= property
     }
 

@@ -37,8 +37,9 @@ class Fields internal constructor(
     }
 
     override fun outerScope(label: String, f: Classes.() -> Unit) {
-        val forkTo = Action.Field.IntoOuterScope andThen Classes().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(
+            Action.Field.IntoOuterScope andThen Classes().also(f).action
+        )
     }
 
     override fun filter(regex: Regex, invert: Boolean) {

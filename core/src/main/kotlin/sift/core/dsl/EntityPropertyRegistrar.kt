@@ -11,10 +11,38 @@ import sift.core.terminal.TextTransformer
 interface EntityPropertyRegistrar<ELEMENT : Element> {
     /** updates existing entities with property */
     fun property(
+        strategy: PropertyStrategy = PropertyStrategy.replace,
         entity: Entity.Type,
         key: String,
         extract: Action<Iter<ELEMENT>, IterValues>
     )
+
+    fun property(
+        entity: Entity.Type,
+        key: String,
+        extract: Action<Iter<ELEMENT>, IterValues>
+    ) = property(PropertyStrategy.replace, entity, key, extract)
+
+    /**
+     * Associates entity property [tag] with result of [extract] action.
+     *
+     * ## Example
+     * ```
+     * entity(endpoint, label("\${http-method} \${path}"),
+     *     property("http-method", readAnnotation(Endpoint::method)),
+     *     property("path", readAnnotation(Endpoint::path)))
+     * ```
+     */
+    fun property(
+        strategy: PropertyStrategy,
+        key: String,
+        extract: Action<Iter<ELEMENT>, IterValues>
+    ): Property<ELEMENT>
+
+    fun property(
+        key: String,
+        extract: Action<Iter<ELEMENT>, IterValues>
+    ): Property<ELEMENT> = property(PropertyStrategy.replace, key, extract)
 
     /**
      * Associates [value] with entity.
@@ -30,11 +58,6 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
     fun withValue(value: Boolean): Action<Iter<ELEMENT>, IterValues>
     fun withValue(value: String): Action<Iter<ELEMENT>, IterValues>
     fun <E> withValue(value: E): Action<Iter<ELEMENT>, IterValues> where E : Enum<E>
-
-    @Suppress("UNCHECKED_CAST")
-    fun withErasedValue(
-        value: Any
-    ): Action<Iter<ELEMENT>, IterValues>
 
     fun editText(
         vararg ops: TextTransformer
@@ -54,21 +77,6 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
         field: String
     ): Action<Iter<ELEMENT>, IterValues>
 
-    /**
-     * Associates entity property [tag] with result of [extract] action.
-     *
-     * ## Example
-     * ```
-     * entity(endpoint, label("\${http-method} \${path}"),
-     *     property("http-method", readAnnotation(Endpoint::method)),
-     *     property("path", readAnnotation(Endpoint::path)))
-     * ```
-     */
-    fun property(
-        tag: String,
-        extract: Action<Iter<ELEMENT>, IterValues>
-    ): Property<ELEMENT>
-
     companion object {
         fun <ELEMENT: Element> scopedTo(
             action: Action.Chain<Iter<ELEMENT>>
@@ -81,12 +89,13 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
 ) : EntityPropertyRegistrar<ELEMENT> {
 
     override fun property(
+        strategy: PropertyStrategy,
         entity: Entity.Type,
         key: String,
         extract: Action<Iter<ELEMENT>, IterValues>
     ) {
         action += Action.Fork(
-            extract andThen Action.UpdateEntityProperty(key, entity)
+            extract andThen Action.UpdateEntityProperty(strategy, key, entity)
         )
     }
 
@@ -96,8 +105,7 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
     override fun withValue(value: String) = withErasedValue(value)
     override fun <E> withValue(value: E) where E : Enum<E> = withErasedValue(value)
 
-    @Suppress("UNCHECKED_CAST")
-    override fun withErasedValue(
+    fun withErasedValue(
         value: Any
     ): Action<Iter<ELEMENT>, IterValues> = Action.WithValue(value)
 
@@ -120,11 +128,29 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
     ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation.asmType, field)
 
     override fun property(
-        tag: String,
+        strategy: PropertyStrategy,
+        key: String,
         extract: Action<Iter<ELEMENT>, IterValues>
     ): Property<ELEMENT> {
-        return Property(tag, extract andThen Action.UpdateEntityProperty(tag))
+        return Property(key, extract andThen Action.UpdateEntityProperty(strategy, key))
     }
+}
+
+/**
+ * Property update strategy comes into play when the property already exists.
+ */
+@Suppress("EnumEntryName")
+enum class PropertyStrategy {
+    /** replaces existing value */
+    replace,
+    /** appends to existing value */
+    append,
+    /** prepends to existing value */
+    prepend,
+    /** does not update existing value */
+    immutable,
+    /** appends value unless it exists */
+    unique
 }
 
 data class Property<T: Element>(

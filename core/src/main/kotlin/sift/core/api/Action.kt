@@ -20,6 +20,7 @@ import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
+import sift.core.dsl.PropertyStrategy
 import sift.core.dsl.Type
 import sift.core.element.ParameterNode
 import sift.core.jackson.NoArgConstructor
@@ -407,6 +408,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input.flatMap(::methodsOf)
+                    .let { if (inherited) it.toSet() else it }
             }
         }
 
@@ -429,6 +431,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input.flatMap(::fieldsOf)
+                    .let { if (inherited) it.toSet() else it }
             }
         }
 
@@ -1031,6 +1034,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal data class UpdateEntityProperty(
+        val strategy: PropertyStrategy,
         val key: String,
         /** if null: resolves [Entity.Type] from currently referenced element */
         val entity: Entity.Type? = null
@@ -1046,16 +1050,48 @@ sealed class Action<IN, OUT> {
                     runBlocking(Dispatchers.Default) {
                         input.asFlow()
                             .map { elem ->
-                                val entities = ctx.findRelatedEntities(elem, entity)
-                                val f: () -> Unit = { entities.forEach { e -> e[key] = elem.data } }
-                                f
+                                ctx.findRelatedEntities(elem, entity)
+                                    .associateWith { elem.data.ensureList }
                             }
                             .toList()
-                    }.forEach { f -> f() }
+                            .reduce { acc, f -> acc + f }
+                            .let(::updateProperties)
+                    }
                 }
             }
 
             return input
+        }
+
+        private operator fun Map<Entity, List<Any>>.plus(rhs: Map<Entity, List<Any>>): Map<Entity, List<Any>> {
+            return toMutableMap().also { out ->
+                rhs.forEach { (k, v) -> out[k] = out[k]?.plus(v) ?: v }
+            }
+        }
+
+        private fun updateProperties(entities: Map<Entity, List<Any>>) {
+            when (strategy) {
+                PropertyStrategy.replace -> entities.forEach { (e, data) ->
+                    e -= key
+                    e[key] = data
+                }
+                PropertyStrategy.append -> entities.forEach { (e, data) ->
+                    e[key] = data
+                }
+                PropertyStrategy.prepend -> entities.forEach { (e, data) ->
+                    val existing = e[key] ?: listOf()
+                    e -= key
+                    e[key] = data + existing
+                }
+                PropertyStrategy.immutable -> entities.forEach { (e, data) ->
+                    if (key !in e.properties) {
+                        e[key] = data.filter { it !in e[key]!! }
+                    }
+                }
+                PropertyStrategy.unique -> entities.forEach { (e, data) ->
+                    e[key] = data.filter { it !in e[key]!! }
+                }
+            }
         }
     }
 
@@ -1114,3 +1150,8 @@ private inline fun <reified T : Element> Context.entities(
 
     return entitiesByType as Map<T, Entity>
 }
+
+
+@Suppress("UNCHECKED_CAST")
+private val Any.ensureList: List<Any>
+    get() = if (this is List<*>) this as List<Any> else listOf(this)
