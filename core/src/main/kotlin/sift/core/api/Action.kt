@@ -1054,8 +1054,9 @@ sealed class Action<IN, OUT> {
                                     .associateWith { elem.data.ensureList }
                             }
                             .toList()
-                            .reduce { acc, f -> acc + f }
-                            .let(::updateProperties)
+                            .takeIf { it.isNotEmpty() }
+                            ?.reduce { acc, f -> acc + f }
+                            ?.let(::updateProperties)
                     }
                 }
             }
