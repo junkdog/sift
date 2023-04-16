@@ -15,7 +15,8 @@ import sift.core.element.SignatureNode
 class Signature internal constructor(
     internal val action: Action.Chain<IterSignatures> = chainFrom(Action.Signature.SignatureScope)
 ) : EntityRegistrar<SignatureNode> by EntityRegistrar.scopedTo(action),
-    EntityPropertyRegistrar<SignatureNode> by EntityPropertyRegistrar.scopedTo(action)
+    EntityPropertyRegistrar<SignatureNode> by EntityPropertyRegistrar.scopedTo(action),
+    ElementDebugLogger<SignatureNode> by ElementDebugLogger.scopedTo(action)
 {
     fun readName(): Action<IterSignatures, IterValues> {
         return Action.Signature.ReadSignature
@@ -108,27 +109,5 @@ class Signature internal constructor(
         f: Classes.() -> Unit
     ) {
         explodeTypeFromSignature(this, signature, synthesize, f)
-    }
-
-    /**
-     * When `--debug` is passed to the CLI, prints [tag] and all elements
-     * currently in scope.
-     *
-     * Note that for most use-cases, `--profile` yields better results
-     * without having to modify the pipeline.
-     **/
-    fun log(tag: String) {
-        action += Action.DebugLog(tag)
-    }
-
-    /**
-     * When `--debug` is passed to the CLI, prints [tag] and the count
-     * of elements currently in scope.
-     *
-     * Note that for most use-cases, `--profile` yields better results
-     * without having to modify the template.
-     **/
-    fun logCount(tag: String) {
-        action += Action.DebugLog(tag, format = Action.DebugLog.LogFormat.Count)
     }
 }

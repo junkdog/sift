@@ -21,7 +21,7 @@ interface FilterableByAccessFlag<ELEMENT : Element> {
     }
 
     companion object {
-        internal fun <ELEMENT : Element> from(
+        internal fun <ELEMENT : Element> scopedTo(
             action: Action.Chain<Iter<ELEMENT>>,
             scope: AccessFlags.Scope
         ): FilterableByAccessFlag<ELEMENT> = FilterableByAccessFlagImpl(action, scope)

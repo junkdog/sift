@@ -13,7 +13,8 @@ abstract class Core<ELEMENT : Element>(
     scope: AccessFlags.Scope,
 ) : EntityRegistrar<ELEMENT>         by EntityRegistrar.scopedTo(action),
     EntityPropertyRegistrar<ELEMENT> by EntityPropertyRegistrar.scopedTo(action),
-    FilterableByAccessFlag<ELEMENT>  by FilterableByAccessFlag.from(action, scope)
+    FilterableByAccessFlag<ELEMENT>  by FilterableByAccessFlag.scopedTo(action, scope),
+    ElementDebugLogger<ELEMENT>      by ElementDebugLogger.scopedTo(action)
 {
     private var stack: MutableList<Action<*, *>> = mutableListOf()
 
@@ -22,28 +23,6 @@ abstract class Core<ELEMENT : Element>(
      */
     fun filter(entity: Entity.Type) {
         action += Action.EntityFilter(entity)
-    }
-
-    /**
-     * When `--debug` is past to the CLI, prints [tag] and all elements
-     * currently in scope.
-     *
-     * Note that for most use-cases, `--profile` yields better results
-     * without having to modify the template.
-     **/
-    fun log(tag: String) {
-        action += Action.DebugLog(tag)
-    }
-
-    /**
-     * When `--debug` is past to the CLI, prints [tag] and the count
-     * of elements currently in scope.
-     *
-     * Note that for most use-cases, `--profile` yields better results
-     * without having to modify the template.
-     **/
-    fun logCount(tag: String) {
-        action += Action.DebugLog(tag, format = Action.DebugLog.LogFormat.Count)
     }
 
     inline fun <reified T> annotatedBy() = annotatedBy(type<T>())
