@@ -43,6 +43,11 @@ class FieldNode private constructor(
 
     private val hash = hash(cn) * 31 + idHash(fn)
 
+    val returns: SignatureNode?
+        get() = fn.signature(cn.signature?.formalParameters ?: listOf())
+            ?.let(FieldSignatureNode::extends)
+            ?.let(SignatureNode::from)
+
     override fun equals(other: Any?): Boolean {
         return other is FieldNode
             && cn == other.cn
@@ -51,18 +56,10 @@ class FieldNode private constructor(
 
     override fun hashCode(): Int = hash
 
-    val returns: SignatureNode?
-        get() = fn.signature(cn.signature?.formalParameters ?: listOf())
-            ?.let(FieldSignatureNode::extends)
-            ?.let(SignatureNode::from)
-
     override fun toString(): String = "$cn.$name"
 
-    private val signature: FieldSignatureNode?
-        get() = fn.signature(cn.signature?.formalParameters ?: listOf())
-
     companion object {
-        fun from(cn: ClassNode, fn: AsmFieldNode): FieldNode {
+        internal fun from(cn: ClassNode, fn: AsmFieldNode): FieldNode {
             val ans = AnnotationNode.from(fn.visibleAnnotations, fn.invisibleAnnotations)
             return FieldNode(cn, fn, ans)
         }

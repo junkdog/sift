@@ -72,13 +72,21 @@ class Classes internal constructor(
         action += Action.Fork(forkTo)
     }
 
-    fun methods(f: Methods.() -> Unit) {
-        val forkTo = Action.Class.IntoMethods andThen Methods().also(f).action
+    /**
+     * iterates methods of current classes. When [inherited] is `true`,
+     * fields inherited from super classes are included too.
+     */
+    fun methods(inherited: Boolean = false, f: Methods.() -> Unit) {
+        val forkTo = Action.Class.IntoMethods(inherited) andThen Methods().also(f).action
         action += Action.Fork(forkTo)
     }
 
-    fun fields(f: Fields.() -> Unit) {
-        val forkTo = Action.Class.IntoFields andThen Fields().also(f).action
+    /**
+     * iterates fields of current classes. When [inherited] is `true`,
+     * fields inherited from super classes are included too.
+     */
+    fun fields(inherited: Boolean = false, f: Fields.() -> Unit) {
+        val forkTo = Action.Class.IntoFields(inherited) andThen Fields().also(f).action
         action += Action.Fork(forkTo)
     }
 

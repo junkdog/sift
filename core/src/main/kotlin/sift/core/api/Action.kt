@@ -389,11 +389,20 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoMethods : Action<IterClasses, IterMethods>() {
+        internal data class IntoMethods(
+            val inherited: Boolean,
+        ) : Action<IterClasses, IterMethods>() {
             override fun id() = "methods"
             override fun execute(ctx: Context, input: IterClasses): IterMethods {
-                fun methodsOf(input: ClassNode): Iterable<MethodNode> {
-                    return input.methods
+                fun inheritedMethodsOf(input: ClassNode): IterMethods {
+                    return ctx.parents[input]!!
+                        .mapNotNull { (_, cn) ->  cn?.methods }
+                        .flatten()
+                }
+
+                fun methodsOf(input: ClassNode): IterMethods {
+                    val inheritedMethods = if (inherited) inheritedMethodsOf(input) else emptyList()
+                    return (input.methods + inheritedMethods)
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
@@ -401,15 +410,25 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoFields : Action<IterClasses, IterFields>() {
-            override fun id() = "fields"
+        internal data class IntoFields(
+            val inherited: Boolean,
+        ) : Action<IterClasses, IterFields>() {
+            override fun id() = "fields(${"inherited".takeIf { inherited } ?: ""})"
             override fun execute(ctx: Context, input: IterClasses): IterFields {
-                fun methodsOf(input: ClassNode): IterFields {
-                    return input.fields
-                        .onEach { output -> ctx.scopeTransition(input, output) }
+                fun inheritedFieldsOf(input: ClassNode): IterFields {
+                    return ctx.parents[input]!!
+                        .mapNotNull { (_, cn) ->  cn?.fields }
+                        .flatten()
                 }
 
-                return input.flatMap(::methodsOf)
+                fun fieldsOf(input: ClassNode): IterFields {
+                    val inheritedFields = if (inherited) inheritedFieldsOf(input) else emptyList()
+
+                    return (input.fields + inheritedFields)
+                            .onEach { output -> ctx.scopeTransition(input, output) }
+                }
+
+                return input.flatMap(::fieldsOf)
             }
         }
 
@@ -476,13 +495,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterMethods = input
         }
 
-        internal object DeclaredMethods : Action<IterMethods, IterMethods>() {
-            override fun id() = "declared-scope"
-            override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                return input
-            }
-        }
-
         internal data class Filter(val regex: Regex, val invert: Boolean) : Action<IterMethods, IterMethods>() {
             override fun id() = "filter($regex${", invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
@@ -498,7 +510,7 @@ sealed class Action<IN, OUT> {
         }
 
         object FieldAccess : Action<IterMethods, IterFields>() {
-            override fun id() = "field-access()"
+            override fun id() = "field-access"
             override fun execute(ctx: Context, input: IterMethods): IterFields {
                 fun resolveFieldNode(ins: FieldInsnNode): FieldNode? = ctx
                     .classByType[ins.ownerType]

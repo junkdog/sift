@@ -1,10 +1,8 @@
 package sift.core.dsl
 
-import sift.core.*
 import sift.core.api.*
 import sift.core.element.*
 import sift.core.entity.Entity
-import java.util.*
 
 
 interface ParentOperations<T : Element, PARENT_SCOPE : Core<T>> {

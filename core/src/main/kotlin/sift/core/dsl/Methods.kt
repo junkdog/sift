@@ -83,10 +83,6 @@ class Methods internal constructor(
         filterName(Regex.fromLiteral(name), invert)
     }
 
-    fun declaredMethods() {
-        action += Action.Method.DeclaredMethods
-    }
-
     fun parameters(f: Parameters.() -> Unit) {
         val forkTo = Parameters().also(f).action
 

@@ -434,8 +434,14 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
-    {"name":"id","parameterTypes":[] }
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
   ]
 },
 {
@@ -462,8 +468,14 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["boolean"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
-    {"name":"id","parameterTypes":[] }
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"toString","parameterTypes":[] }
   ]
 },
 {

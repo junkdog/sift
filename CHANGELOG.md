@@ -15,6 +15,7 @@ for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
 
 ### New/Tweaks
+- DSL/Class: added `inherited` parameter to `methods()` and `fields()` to include inherited methods and fields.
 - Enhanced performance primarily focused on element trace optimizations - the process of interrelating
   elements as they are navigated by the DSL. This enhancement reduces the total execution time by up to
   40% for complex templates.
