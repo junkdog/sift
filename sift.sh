@@ -4,9 +4,16 @@
 SIFT_PATH="$HOME/.local/share/sift"
 SIFT_JAR="$SIFT_PATH/bin/sift-cli.jar"
 SIFT_BIN="$SIFT_PATH/bin/sift"
+SIFT_RC="$SIFT_PATH/siftrc.sh"
+
+# Check if siftrc.zsh exists, create it if not
+if [ ! -f "$SIFT_RC" ]; then
+    echo 'SIFT_ARGS="--ansi=ansi256"' > "$SIFT_RC"
+fi
+
+source "$SIFT_RC"
 
 # common args
-SIFT_ARGS="--ansi=truecolor"
 
 # error codes
 ERROR_SIFT_NOT_FOUND=2

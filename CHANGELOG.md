@@ -32,6 +32,8 @@ Property strategies are one of: `replace`, `append`, `prepend`, `immutable` and 
 - DSL/Method: `fieldAccess {}` to iterate accessed fields.
 - Entity elements of `Entity.Type.fieldAccess` can now be either fields or classes. If the latter, 
   then the type of the field is used.
+- siftrc.zsh|sh is now created under `~/.local/share/sift/`. It currently holds `SIFT_ARGS`, CLI options
+  always appended.
 - `--stastistics` prints statistics about the state from the execution of the system model template.
 
 
