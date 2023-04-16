@@ -14,8 +14,8 @@ of the new `Type` class are created with the `type()` function or the `String.ty
 for example: `type("java.lang.String")` and `"java.lang.String".type`.
 
 ### Breaking change: entity property update strategies
-Entity properties now overwrite existing properties by default, instead of appending to them as previously.
-You can modify this behavior by specifying the `strategy` parameter in the `property()` function. For example:
+Entity properties now overwrite existing properties by default, instead of appending to them . You can
+can modify this behavior by specifying the `strategy` parameter in the `property()` function. For example:
 
 ```kotlin
 property(PropertyStrategy.unique, foo, "labels", withValue("hello"))

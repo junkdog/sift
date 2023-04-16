@@ -1086,7 +1086,7 @@ sealed class Action<IN, OUT> {
                 }
                 PropertyStrategy.immutable -> entities.forEach { (e, data) ->
                     if (key !in e.properties) {
-                        e[key] = data.filter { it !in e[key]!! }
+                        e[key] = data
                     }
                 }
                 PropertyStrategy.unique -> entities.forEach { (e, data) ->
