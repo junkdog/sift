@@ -1,0 +1,26 @@
+on:
+  workflow_dispatch
+
+name: testing graalvm
+
+jobs:
+  build:
+    name: building with graalvm
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+
+      - name: setup jdk
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+
+      - name: build sift cli
+        run: |
+          mvn -B clean package -P native-image -Dmaven.test.skip=true
+          ls -lh cli/target/
