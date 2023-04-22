@@ -1,4 +1,4 @@
-## Upcoming release
+## sift-0.9.0 2023-04-22
 
 ### Entity Registration with Generic Types
 

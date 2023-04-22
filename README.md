@@ -29,7 +29,7 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
 
  [kitty]: https://sw.kovidgoyal.net/kitty/
 
- [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L129:L248
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L127:L246
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
  [sift-render]: docs/images/sift-render-s.png
@@ -185,8 +185,8 @@ such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
 
- [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L49:L73
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L56:L73
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L44:L68
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:63
 
 
 
