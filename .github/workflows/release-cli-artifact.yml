@@ -7,21 +7,38 @@ name: Upload Release Asset
 
 jobs:
   build:
-    name: release sift-cli.jar
+    name: release CLI artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: setup jdk
-        uses: actions/setup-java@v3
+        uses: graalvm/setup-graalvm@v1
         with:
+          version: 'latest'
           java-version: '17'
-          distribution: 'corretto'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
+
       - name: build sift cli
-        run: mvn -B -P clean package
-      - name: upload cli jar
+        run: mvn -B clean package -P native-image -Dmaven.test.skip=true
+
+      - name: package native sift for linux
+        run: |
+          mkdir sift-linux-amd64
+          
+          cp sift.sh sift.zsh README.md $sift_path
+          cp cli/target/sift $sift_path
+          tar -czvf ${sift_path}.tar.gz $sift_path
+
+      - name: upload artifacts
         uses: softprops/action-gh-release@v1
         with:
-          files: cli/target/sift-cli.jar
+          files:
+           - cli/target/sift-cli.jar
+           - cli/target/sift-linux-amd64.tar.gz
+           - sift.zsh
+           - sift.sh
+           - README.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

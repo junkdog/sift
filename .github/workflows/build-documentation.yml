@@ -19,10 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: setup jdk
-        uses: actions/setup-java@v3
+        uses: graalvm/setup-graalvm@v1
         with:
+          version: 'latest'
           java-version: '17'
-          distribution: 'corretto'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
       - name: dokka
         run: mvn -B -P dsl-docs dokka:dokka -f core
