@@ -576,6 +576,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
+        @OptIn(FlowPreview::class)
         internal data class InvocationsOf(
             val match: Entity.Type,
             val synthesize: Boolean
@@ -606,7 +607,7 @@ sealed class Action<IN, OUT> {
                     .map { (elem, _) -> typeOf(elem) }
                     .toSet()
 
-                fun invocations(mn: MethodNode): List<Invocation> {
+                fun invocations(mn: MethodNode): Flow<Invocation> {
                     val invocationsA = mn.instructions()
                         .mapNotNull { it as? MethodInsnNode }
                         .map(::Invocation)
@@ -617,7 +618,7 @@ sealed class Action<IN, OUT> {
                         .map(::Invocation)
                         .toList()
 
-                    return invocationsA + invocationsB
+                    return (invocationsA + invocationsB).asFlow()
                 }
 
                 fun methodElementOf(invocation: Invocation): MethodNode? {
@@ -632,19 +633,24 @@ sealed class Action<IN, OUT> {
                     }
                 }
 
-                fun resolveInvocations(elem: MethodNode): List<MethodNode> {
+                fun resolveInvocations(elem: MethodNode): Flow<Pair<MethodNode, MethodNode>> {
                     return ctx.methodsInvokedBy(elem)
-                        .asSequence()
-                        .flatMap(::invocations)
-                        .distinct()
+                        .asFlow()
+                        .flatMapConcat(::invocations)
                         .filter { it.type in matched }
                         .mapNotNull(::methodElementOf)
-                        .onEach { ctx.scopeTransition(elem, it) }
-                        .toList()
+                        .map { elem to it }
                 }
 
-                return input
-                    .flatMap(::resolveInvocations)
+                return runBlocking(Dispatchers.Default) {
+                    input.asFlow()
+                        .flatMapConcat { mn -> resolveInvocations(mn) }
+                            .toList()
+                            .distinctBy { (_, mn) -> mn }
+                            .onEach { (old, mn) -> ctx.scopeTransition(old, mn) }
+                            .map { (_, mn) -> mn }
+
+                }
             }
 
             internal data class Invocation(
@@ -895,7 +901,7 @@ sealed class Action<IN, OUT> {
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             return input
                 .map { ValueNode.from(value, it) }
-                .onEach { ctx.scopeTransition(it.reference, it) }
+//                .onEach { ctx.scopeTransition(it.reference, it) } // can never refer to value nodes anyway
         }
 
         override fun toString() = "WithValue($value)"

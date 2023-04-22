@@ -49,9 +49,7 @@ class FieldNode private constructor(
             ?.let(SignatureNode::from)
 
     override fun equals(other: Any?): Boolean {
-        return other is FieldNode
-            && cn == other.cn
-            && fn === other.fn
+        return fn === (other as? FieldNode)?.fn
     }
 
     override fun hashCode(): Int = hash

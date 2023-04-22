@@ -373,8 +373,8 @@ object SiftCli : CliktCommand(
         fun e(node: Tree<EntityNode>?): EntityNode.Entity? {
             return when (val v = node?.value) {
                 is EntityNode.Entity -> v
-                is EntityNode.Label -> null
-                null -> null
+                is EntityNode.Label  -> null
+                null                 -> null
             }
         }
 

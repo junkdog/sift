@@ -50,9 +50,7 @@ class MethodNode(
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
 
     override fun equals(other: Any?): Boolean {
-        return other is MethodNode
-            && cn == other.cn
-            && mn === other.mn
+        return mn === (other as? MethodNode)?.mn
     }
 
     override fun hashCode() = hash

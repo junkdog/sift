@@ -4,7 +4,7 @@ import sift.core.element.*
 import kotlin.collections.ArrayList
 
 internal class ElementTrace private constructor(
-    val elements: List<Element>
+    private val elements: List<Element>
 ) : Sequence<Element> {
     private val hash = elements.hashCode()
 

@@ -19,20 +19,16 @@ class ParameterNode private constructor(
     val owner: MethodNode
         get() = mn
 
+    private val hash = hash(cn, mn, name, type)
+
     override val simpleName: String
         get() = type.simpleName
 
     override fun equals(other: Any?): Boolean {
-        return other is ParameterNode
-            && cn == other.cn
-            && mn == other.mn
-            && name == other.name
-            && type == other.type
+        return this === other
     }
 
-    override fun hashCode(): Int {
-        return hash(cn, mn, name, type)
-    }
+    override fun hashCode(): Int = hash
 
     override fun toString(): String = "$mn($name: ${type.simpleName})"
 

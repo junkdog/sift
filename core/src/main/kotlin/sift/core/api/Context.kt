@@ -36,11 +36,6 @@ internal data class Context(
         cns: Iterable<AsmClassNode>
     ) : this(cns.map(ClassNode::from).toMutableList())
 
-    val classByMethod: IdentityHashMap<MethodNode, ClassNode> = allClasses
-        .flatMap { cn -> cn.methods.map { mn -> mn to cn } }
-        .toMap()
-        .let(::IdentityHashMap)
-
     val entityService: EntityService = EntityService()
     var elementTraces: MutableMap<Element, MutableList<ElementTrace>> = ConcurrentHashMap()
 
@@ -50,7 +45,7 @@ internal data class Context(
         .associateBy(ClassNode::rawType)
         .toMutableMap()
 
-    private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = mutableMapOf()
+    private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = ConcurrentHashMap()
     private val methodFieldAccessCache: MutableMap<MethodNode, Iterable<FieldNode>> = mutableMapOf()
 
     val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
@@ -112,6 +107,8 @@ internal data class Context(
         }
     }
 
+    private var lock = Any()
+
     fun synthesize(owner: AsmType, name: String, desc: String): MethodNode {
         val cn = classByType[owner]
             ?: error("'${owner}' not found")
@@ -129,11 +126,12 @@ internal data class Context(
         }.let { method -> MethodNode.from(cn, method) }.also {
             method ->
                 // register
+            synchronized(lock) {
                 cn.methods.add(method)
-                classByMethod[method] = cn
 
                 // must rebuild method invocation cache
                 methodInvocationsCache.clear()
+            }
         }
     }
 
@@ -286,7 +284,6 @@ internal data class Context(
 
     fun statistics(): Map<String, Int> = mapOf(
         "allClasses"                     to allClasses.size,
-        "classByMethod"                  to classByMethod.size,
         "elementTraces.keys"             to elementTraces.size,
         "elementTraces.traces"           to elementTraces.values.flatten().size,
         "elementTraces.traces.max"       to elementTraces.values.maxOf(List<ElementTrace>::size),

@@ -19,6 +19,7 @@ class SignatureNode private constructor(
 
     override fun equals(other: Any?): Boolean {
         return other is SignatureNode
+            && hash == other.hash
             && signature == other.signature
     }
 
