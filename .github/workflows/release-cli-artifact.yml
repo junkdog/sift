@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   push:
     tags:
     - 'sift-*'
@@ -34,11 +35,11 @@ jobs:
       - name: upload artifacts
         uses: softprops/action-gh-release@v1
         with:
-          files:
-           - cli/target/sift-cli.jar
-           - cli/target/sift-linux-amd64.tar.gz
-           - sift.zsh
-           - sift.sh
-           - README.md
+          files: |
+            cli/target/sift-cli.jar
+            cli/target/sift-linux-amd64.tar.gz
+            sift.zsh
+            sift.sh
+            README.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
