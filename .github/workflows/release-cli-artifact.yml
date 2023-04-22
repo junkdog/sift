@@ -1,5 +1,4 @@
 on:
-  workflow_dispatch:
   push:
     tags:
     - 'sift-*'
@@ -28,9 +27,9 @@ jobs:
         run: |
           mkdir sift-linux-amd64
           
-          cp sift.sh sift.zsh README.md $sift_path
-          cp cli/target/sift $sift_path
-          tar -czvf ${sift_path}.tar.gz $sift_path
+          cp sift.sh sift.zsh README.md sift-linux-amd64
+          cp cli/target/sift sift-linux-amd64
+          tar -czvf ${sift_path}.tar.gz sift-linux-amd64
 
       - name: upload artifacts
         uses: softprops/action-gh-release@v1
