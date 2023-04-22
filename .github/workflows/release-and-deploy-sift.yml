@@ -1,0 +1,49 @@
+name: 🚀 release and deploy sift
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    name: release next version
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: setup jdk
+        uses: graalvm/setup-graalvm@v1
+        with:
+          version: 'latest'
+          java-version: '17'
+          components: 'native-image'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+          server-id: 'sonatype-nexus'
+          server-username: DEPLOY_USERNAME
+          server-password: DEPLOY_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: release and deploy
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mkdir ~/.ssh && chmod 700 ~/.ssh 
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KEY_PUB }}" > ~/.ssh/id_ed25519.pub
+          chmod 400 ~/.ssh/id_ed25519*
+          
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          
+          mvn -B release:prepare -P release
+          export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          mvn -B release:perform -P release
+          
+          git pull
+          git checkout main
+          git merge sift-${RELEASE_VERSION}
+          git push
