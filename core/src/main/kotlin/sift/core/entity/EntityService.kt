@@ -29,8 +29,6 @@ class EntityService {
         return existing ?: entity
     }
 
-
-
     fun allEntities(): List<Entity> = allEntities
 
     operator fun contains(element: Element): Boolean = element in elementToEntity

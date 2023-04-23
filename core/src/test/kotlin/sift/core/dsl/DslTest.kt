@@ -1196,8 +1196,8 @@ class DslTest {
         )
     }
 
-    @Test  // <-- annotation(/decorator)
-    fun `filter on generic superclass`() { // fun `function name`() {} ; `function name`()
+    @Test
+    fun `filter on generic superclass`() {
         val cns = listOf(
             classNode<GenericClass<*>>(), //  abstract class GenericClass<T>
             classNode<ConcreteClass1>(),  //  class ConcreteClass1 : GenericClass<String>()
@@ -1216,7 +1216,9 @@ class DslTest {
             }
 
             scope("b") {
+                log("before")
                 implements(type("sift.core.api.testdata.set2.GenericClass<java.lang.Float>"))
+                log("after")
                 entity(b, label("B \${name}"),
                     property("name", readName(shorten = true)))
             }

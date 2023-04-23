@@ -21,7 +21,7 @@ class Synthesize internal constructor(
         type: Type,
         labelFormatter: LabelFormatter = LabelFormatter.FromElement,
     ) {
-        action += Action.RegisterSynthesizedEntity(id, type.asmType, labelFormatter)
+        action += Action.RegisterSynthesizedEntity(id, type, labelFormatter)
     }
 
     /**

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import sift.core.dsl.Type
-import sift.core.dsl.type
 
 object SiftTypeSerializer {
     class Serializer : JsonSerializer<Type>() {
@@ -15,14 +14,23 @@ object SiftTypeSerializer {
             value: Type,
             gen: JsonGenerator,
             serializers: SerializerProvider
-        ) = gen.writeString(value.toString())
+        ) = when {
+            value.isPrimitive -> gen.writeString("!${value.value}")
+            else              -> gen.writeString(value.value)
+        }
     }
 
     class Deserializer : JsonDeserializer<Type>() {
         override fun deserialize(
             p: JsonParser,
             ctxt: DeserializationContext
-        ): Type = p.readValueAs<String>().type
+        ): Type = p.readValueAs<String>().let { raw ->
+            val isPrimitive = (raw.startsWith("!"))
+            when {
+                isPrimitive -> Type.primitiveType(raw[1])
+                else        -> Type.from(raw)
+            }
+        }
     }
 }
 

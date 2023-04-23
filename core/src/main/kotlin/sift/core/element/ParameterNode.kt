@@ -1,17 +1,17 @@
 package sift.core.element
 
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.LocalVariableNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
+import sift.core.dsl.Type
 
 class ParameterNode private constructor(
     private val cn: ClassNode,
     private val mn: MethodNode,
     val name: String,
-    val type: AsmType,
+    val type: Type,
     val signature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
@@ -34,7 +34,7 @@ class ParameterNode private constructor(
 
     companion object {
         fun from(cn: ClassNode, mn: MethodNode, asmMn: AsmMethodNode): List<ParameterNode> {
-            val argumentTypes = Type.getArgumentTypes(asmMn.desc)
+            val argumentTypes = AsmType.getArgumentTypes(asmMn.desc)
 
             val annotations: List<List<AsmAnnotationNode>> by lazy {
                 val visible = asmMn.visibleParameterAnnotations?.toList()
@@ -62,7 +62,7 @@ class ParameterNode private constructor(
                         cn,
                         mn,
                         asmMn.parameters[idx].name,
-                        type,
+                        Type.from(type),
                         signatures?.getOrNull(idx),
                         anno.map(AnnotationNode::from),
                         Source.Parameter
@@ -78,7 +78,7 @@ class ParameterNode private constructor(
                         cn,
                         mn,
                         localVar.name,
-                        argumentTypes[idx],
+                        Type.from(argumentTypes[idx]),
                         signatures?.getOrNull(idx),
                         anno.map(AnnotationNode::from),
                         Source.LocalVariable
@@ -91,7 +91,7 @@ class ParameterNode private constructor(
                         cn,
                         mn,
                         "${type.simpleName.camelCase}$idx",
-                        type,
+                        Type.from(type),
                         signatures?.getOrNull(idx),
                         ans.map(AnnotationNode::from),
                         Source.NoDebugInfo

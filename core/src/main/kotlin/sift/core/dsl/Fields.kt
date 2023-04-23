@@ -50,7 +50,7 @@ class Fields internal constructor(
      * Filters fields to include only those with a type matching type.
      */
     fun filterType(type: Type) {
-        action += Action.Field.FilterType(type.asmType)
+        action += Action.Field.FilterType(type)
     }
 
     fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {

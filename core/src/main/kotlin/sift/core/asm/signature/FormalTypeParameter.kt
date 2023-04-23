@@ -2,6 +2,7 @@ package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.filterNotBy
 import org.objectweb.asm.Type
+import sift.core.dsl.type
 
 data class FormalTypeParameter(
     val name: String,
@@ -18,4 +19,4 @@ data class FormalTypeParameter(
     }
 }
 
-private val extendsAny = ArgType.Plain(Type.getType(java.lang.Object::class.java))
+private val extendsAny = ArgType.Plain("java.lang.Object".type)

@@ -12,6 +12,7 @@ import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
+import sift.core.dsl.Type
 import sift.core.element.AsmType
 import java.io.File
 import java.io.FileNotFoundException
@@ -52,26 +53,23 @@ fun classNodes(root: File): List<ClassNode> = when {
 }
 
 
-val ClassNode.type: AsmType
-    get() = AsmType.getType("L$name;")
-val AnnotationNode.type: AsmType
-    get() = AsmType.getType(desc)
+val ClassNode.type: Type
+    get() = Type.from(name)
+val AnnotationNode.type: Type
+    get() = Type.fromTypeDescriptor(desc)
 
-inline fun <reified T> asmType() = asmType(T::class)
-fun asmType(cls: KClass<*>) = AsmType.getType(cls.java)!!
-
-val MethodInsnNode.returnType: AsmType
-    get() = AsmType.getReturnType(desc)
+val MethodInsnNode.returnType: Type
+    get() = AsmType.getReturnType(desc).let { Type.from(it) }
 
 fun MethodInsnNode.argumentTypes(): Array<AsmType> = AsmType.getArgumentTypes(desc) ?: arrayOf()
-val MethodInsnNode.ownerType: AsmType
-    get() = AsmType.getType("L$owner;")
+val MethodInsnNode.ownerType: Type
+    get() = Type.from(owner)
 
-val FieldInsnNode.ownerType: AsmType
-    get() = AsmType.getType("L$owner;")
+val FieldInsnNode.ownerType: Type
+    get() = Type.from(owner)
 
-val Handle.ownerType: AsmType
-    get() = AsmType.getType("L$owner;")
+val Handle.ownerType: Type
+    get() = Type.from(owner)
 
 val AsmType.simpleName: String
     get() = simpleNameOf(this)

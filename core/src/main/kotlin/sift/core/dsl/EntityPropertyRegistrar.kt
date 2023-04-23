@@ -119,13 +119,13 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
 
 
     override fun annotatedBy(annotation: Type) {
-        action += Action.HasAnnotation(annotation.asmType)
+        action += Action.HasAnnotation(annotation)
     }
 
     override fun readAnnotation(
         annotation: Type,
         field: String
-    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation.asmType, field)
+    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
 
     override fun property(
         strategy: PropertyStrategy,

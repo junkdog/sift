@@ -251,7 +251,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "filter-signature($regex${" invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
                 fun classNameOf(elem: SignatureNode): String? =
-                    (elem.argType as? ArgType.Plain)?.type?.className
+                    (elem.argType as? ArgType.Plain)?.type?.name
 
                 return input
                     .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }
@@ -305,8 +305,8 @@ sealed class Action<IN, OUT> {
 
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
                 val resolveClassNode: (Type) -> ClassNode? = when {
-                    synthesize -> { type -> ctx.synthesize(type.asmType) }
-                    else       -> { type -> ctx.classByType[type.asmType] }
+                    synthesize -> { type -> ctx.synthesize(type) }
+                    else       -> { type -> ctx.classByType[type] }
                 }
 
                 fun allInterfacesOf(elem: ClassNode): Iterable<ClassNode> {
@@ -314,7 +314,6 @@ sealed class Action<IN, OUT> {
                     val parentInterfaces = ctx.parents[elem]!!
                         .map { tcn -> tcn.cn!! }
                         .flatMap(ClassNode::interfaces)
-                        .map(Type::from)
 
                     return (parentInterfaces + ctx.allInterfacesOf(elem, false))
                         .toSet()
@@ -327,10 +326,9 @@ sealed class Action<IN, OUT> {
                     val parentInterfaces = elem.superType
                         ?.let(ctx.classByType::get)
                         ?.interfaces
-                        ?.map(Type::from)
                         ?: listOf()
 
-                    return (parentInterfaces + elem.interfaces.map(Type::from))
+                    return (parentInterfaces + elem.interfaces)
                         .toSet()
                         .mapNotNull(resolveClassNode)
                         .onEach { output -> ctx.scopeTransition(elem, output) }
@@ -539,7 +537,7 @@ sealed class Action<IN, OUT> {
 
                 val types = ctx.entities<ClassNode>(match)
                     .map { (elem, _) -> elem }
-                    .map(ClassNode::rawType)
+                    .map(ClassNode::type)
 
                 fun introspect(elem: MethodNode): List<ClassNode> {
                     return ctx.methodsInvokedBy(elem)
@@ -552,7 +550,7 @@ sealed class Action<IN, OUT> {
                     .flatMap(::introspect)
             }
 
-            private fun instantiations(mn: MethodNode, types: Iterable<AsmType>): List<AsmType> {
+            private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
                 return instantiations(mn).filter(types::contains)
             }
         }
@@ -583,7 +581,7 @@ sealed class Action<IN, OUT> {
         ) : Action<IterMethods, IterMethods>() {
             override fun id() = "invocations-of($match${", synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterMethods): IterMethods {
-                fun typeOf(arg: ArgType): AsmType {
+                fun typeOf(arg: ArgType): Type {
                     return when (arg) {
                         is ArgType.Array -> typeOf(arg.wrapped!!)
                         is ArgType.Plain -> arg.type
@@ -591,19 +589,19 @@ sealed class Action<IN, OUT> {
                     }
                 }
 
-                fun typeOf(elem: Element): AsmType {
+                fun typeOf(elem: Element): Type {
                     return when (elem) {
-                        is ClassNode     -> elem.rawType
-                        is MethodNode    -> elem.owner.rawType
-                        is ParameterNode -> elem.owner.owner.rawType
+                        is ClassNode     -> elem.type
+                        is MethodNode    -> elem.owner.type
+                        is ParameterNode -> elem.owner.owner.type
                         is ValueNode     -> typeOf(elem.reference)
                         is SignatureNode -> typeOf(elem.argType)
-                        is FieldNode     -> elem.rawType
+                        is FieldNode     -> elem.type
                         else             -> error("unable to extract type of $elem")
                     }
                 }
 
-                val matched: Set<AsmType> = ctx.entityService[match]
+                val matched: Set<Type> = ctx.entityService[match]
                     .map { (elem, _) -> typeOf(elem) }
                     .toSet()
 
@@ -654,7 +652,7 @@ sealed class Action<IN, OUT> {
             }
 
             internal data class Invocation(
-                val type: AsmType,
+                val type: Type,
                 val name: String,
                 val desc: String
             ) {
@@ -702,10 +700,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterType(val type: AsmType) : IsoAction<FieldNode>() {
+        internal data class FilterType(val type: Type) : IsoAction<FieldNode>() {
             override fun id() = "filter-type(${type.simpleName})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
-                return input.filterBy(FieldNode::rawType, type)
+                return input.filterBy(FieldNode::type, type)
             }
         }
 
@@ -713,9 +711,9 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                fun explode(field: FieldNode): ClassNode? {
-                   var exploded = ctx.classByType[field.rawType]
+                   var exploded = ctx.classByType[field.type]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(field.rawType)
+                       exploded = ctx.synthesize(field.type)
 
                    return exploded
                        ?.also { ctx.scopeTransition(field, it) }
@@ -746,7 +744,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterType(val type: AsmType) : IsoAction<ParameterNode>() {
+        internal data class FilterType(val type: Type) : IsoAction<ParameterNode>() {
             override fun id() = "filter-type(${type.simpleName})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
                 return input.filterBy(ParameterNode::type, type)
@@ -774,7 +772,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { ValueNode.from(Type.from(it.type), it) }
+                    .map { ValueNode.from(it.type, it) }
                     .onEach { ctx.scopeTransition(it.reference, it) }
             }
         }
@@ -830,7 +828,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class HasAnnotation<T : Element>(val annotation: AsmType) : IsoAction<T>() {
+    internal data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
@@ -882,7 +880,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class ReadAnnotation<T: Element>(val annotation: AsmType, val field: String) : Action<Iter<T>, IterValues>() {
+    internal data class ReadAnnotation<T: Element>(val annotation: Type, val field: String) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun readAnnotation(input: T): ValueNode? {
@@ -969,7 +967,7 @@ sealed class Action<IN, OUT> {
 
     internal data class RegisterSynthesizedEntity(
         val id: Entity.Type,
-        val type: AsmType,
+        val type: Type,
         val labelFormatter: LabelFormatter
     ) : Action<Unit, Unit>() {
         override fun id() = "register-entity-synthesized($id, ${type.simpleName})"
@@ -1006,8 +1004,10 @@ sealed class Action<IN, OUT> {
             }
 
             runBlocking(Dispatchers.Default) {
-                ctx.entityService[parentType].entries.chunked(5).asFlow()
-                    .flatMapConcat { it.asFlow() }
+                ctx.entityService[parentType].entries
+                    .asFlow()
+                    .buffer(5)
+//                    .flatMapConcat { it.asFlow() }
                     .flatMapConcat { (elem, parent) -> relations(elem, childType).map { parent to it } }
                     .toList()
                     .onEach { (parent, child) -> child.addChild("backtrack", parent) }
@@ -1140,7 +1140,7 @@ internal fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(ac
 var debugLog = false
 
 infix fun Type.matches(types: List<Type>): Boolean {
-    return this in (types.takeIf { isGeneric } ?: types.map { Type.from(it.asmType) })
+    return this in (types.takeIf { isGeneric } ?: types.map { it.rawType })
 }
 
 @Suppress("UNCHECKED_CAST")

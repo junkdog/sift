@@ -3,12 +3,10 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
-import sift.core.asm.asmType
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
-import sift.core.asm.simpleName
 import sift.core.asm.superType
 import sift.core.asm.type
 import sift.core.dsl.Type
@@ -20,7 +18,7 @@ class ClassNode private constructor(
 
     internal val signature: ClassSignatureNode? = cn.signature()
 
-    val outerType: AsmType?
+    val outerType: Type?
         get() = cn.innerClasses
             ?.findBy(InnerClassNode::name, cn.name)
             ?.outerType
@@ -37,38 +35,34 @@ class ClassNode private constructor(
         .map { mn -> MethodNode.from(this, mn) }
         .toMutableList()
 
-    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     val isEnum: Boolean
-        get() = cn.superType == asmType<java.lang.Enum<*>>()
+        get() = cn.superType?.rawType?.name == "java.lang.Enum"
 
     val extends: TypeSignature?
         get() = signature?.extends
 
-    val rawType: AsmType
-        get() = cn.type
-
     // note: type-erased
     val type: Type
-        get() = Type.from(cn.type)
+        get() = Type.from(cn.name)
 
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
     val qualifiedName: String
-        get() = rawType.className
+        get() = type.name
 
-    val superType: AsmType?
+    val superType: Type?
         get() = cn.superType
 
     override val simpleName: String
-        get() = rawType.simpleName
+        get() = type.simpleName
 
     val access: Int
         get() = cn.access
 
     // TODO: TypeSignature
-    val interfaces: List<AsmType>
-        get() = cn.interfaces?.map { AsmType.getType("L${it};") } ?: emptyList()
+    val interfaces: List<Type>
+        get() = cn.interfaces?.map { Type.from(it) } ?: emptyList()
 
     private val hash = idHash(cn)
 
@@ -89,5 +83,5 @@ class ClassNode private constructor(
     }
 }
 
-private val InnerClassNode.outerType: AsmType
-    get() = AsmType.getType("L${outerName};")
+private val InnerClassNode.outerType: Type
+    get() = Type.from(outerName)

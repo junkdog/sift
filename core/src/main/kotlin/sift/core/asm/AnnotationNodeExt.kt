@@ -1,37 +1,37 @@
 package sift.core.asm
 
 import net.onedaybeard.collectionsby.findBy
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.AnnotationNode
+import sift.core.dsl.Type
 import kotlin.reflect.KProperty1
 
 operator fun Iterable<AnnotationNode>?.contains(type: Type) =
     this?.findAnnotation(type) != null
 
-fun Iterable<AnnotationNode>.asTypes(): List<Type> = map(AnnotationNode::type)
+internal fun Iterable<AnnotationNode>.asTypes(): List<Type> = map(AnnotationNode::type)
 
-fun Iterable<AnnotationNode>.findAnnotation(type: Type) =
+internal fun Iterable<AnnotationNode>.findAnnotation(type: Type) =
     findBy(AnnotationNode::desc, type.descriptor)
 
-inline fun <reified T : Annotation> Iterable<AnnotationNode>.findAnnotation() =
-    findAnnotation(asmType<T>())
+internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.findAnnotation() =
+    findAnnotation(Type.from(T::class))
 
 /** Reads value from annotation property where [R] is a primitive value or string */
-inline fun <reified T : Annotation, reified R> Iterable<AnnotationNode>.read(
+internal inline fun <reified T : Annotation, reified R> Iterable<AnnotationNode>.read(
     field: KProperty1<T, R>
 ) = findAnnotation<T>()?.let { readField<R>(field.name) }
 
 /** Reads class value of annotation property as type */
-inline fun <reified T : Annotation> Iterable<AnnotationNode>.readType(
+internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.readType(
     field: KProperty1<T, *>
 ) = findAnnotation<T>()?.let { readField<Type>(field.name) }
 
 /** Reads class values of annotation property as types */
-inline fun <reified T : Annotation> Iterable<AnnotationNode>.readTypes(
+internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.readTypes(
     field: KProperty1<T, Array<*>>
 ) = findAnnotation<T>()?.let { readField<List<Type>>(field.name) }
 
-inline fun <reified T> readField(
+internal inline fun <reified T> readField(
     name: String
 ): (AnnotationNode) -> T? = { an ->
     val values = an.values ?: listOf()
@@ -46,7 +46,7 @@ inline fun <reified T> readField(
     }
 }
 
-fun readFieldAny(
+internal fun readFieldAny(
     name: String
 ): (AnnotationNode) -> Any? = { an ->
     val values = an.values ?: listOf()

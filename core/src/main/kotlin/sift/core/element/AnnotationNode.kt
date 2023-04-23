@@ -2,9 +2,9 @@ package sift.core.element
 
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.readFieldAny
-import sift.core.asm.simpleName
 import sift.core.asm.type
 import sift.core.combine
+import sift.core.dsl.Type
 
 class AnnotationNode private constructor(
     private val an: AsmAnnotationNode,
@@ -12,7 +12,7 @@ class AnnotationNode private constructor(
     override val simpleName: String
         get() = an.type.simpleName
 
-    val type: AsmType
+    val type: Type
         get() = an.type
 
     operator fun get(field: String): Any? {

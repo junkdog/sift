@@ -24,10 +24,7 @@ class FieldNode private constructor(
         get() = fn.name
 
     val type: Type
-        get() = Type.from(rawType)
-
-    val rawType: AsmType
-        get() = fn.type
+        get() = Type.fromTypeDescriptor(fn.desc)
 
     val isStatic: Boolean
         get() = (fn.access and ACC_STATIC) == ACC_STATIC

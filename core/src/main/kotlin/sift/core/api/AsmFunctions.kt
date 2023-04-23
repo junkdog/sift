@@ -3,9 +3,10 @@ package sift.core.api
 import net.onedaybeard.collectionsby.filterBy
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import sift.core.asm.ownerType
+import sift.core.dsl.Type
+import sift.core.element.AsmType
 import sift.core.element.ClassNode
 import sift.core.element.FieldNode
 import sift.core.element.MethodNode
@@ -18,6 +19,7 @@ internal fun instantiations(
     .filter(AbstractInsnNode::isCallingConstructor)
     .map(MethodInsnNode::ownerType)
     .distinct()
+    .map { it }
     .toList()
 
 internal fun fieldAccessBy(

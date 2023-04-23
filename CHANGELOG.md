@@ -1,3 +1,7 @@
+## Upcoming Release
+
+- Remaining usages of `org.objectweb.asm.Type` replaced with `sift.core.dsl.Type`.
+
 ## sift-0.9.0 2023-04-22
 
 ### Entity Registration with Generic Types

@@ -1,6 +1,6 @@
 package sift.core.api
 
-import org.objectweb.asm.Type
+import sift.core.dsl.Type
 import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
@@ -93,7 +93,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val types = ctx.entityService[type]
                 .map { (elem, _) -> elem as ClassNode } // FIXME: throw
-                .map(ClassNode::rawType)
+                .map(ClassNode::type)
                 .toSet()
 
             elements
@@ -115,7 +115,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val types = ctx.entityService[type]
                 .map { (elem, _) -> elem as ClassNode }
-                .map(ClassNode::rawType)
+                .map(ClassNode::type)
                 .toSet()
 
             elements
@@ -131,7 +131,7 @@ private fun instantiations(mn: MethodNode, types: Iterable<Type>): List<Type> {
 private fun registerInstantiations(
     ctx: Context,
     elem: MethodNode,
-    types: Set<AsmType>,
+    types: Set<Type>,
     parentKey: String,
     childKey: String
 ) {
@@ -177,7 +177,7 @@ private fun registerFieldAccess(
 
     // `matched` entities must register to either fields or classes
     when (matched.keys.first()) {
-        is ClassNode -> ctx.fieldAccessBy(elem).map(FieldNode::rawType).mapNotNull { ctx.classByType[it] }
+        is ClassNode -> ctx.fieldAccessBy(elem).map(FieldNode::type).mapNotNull { ctx.classByType[it] }
         is FieldNode -> ctx.fieldAccessBy(elem)
         else         -> error("unexpected element type: ${matched.keys.first()}")
     }.filter { el -> el in matched }

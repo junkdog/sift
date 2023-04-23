@@ -1,8 +1,8 @@
 package sift.core.asm.signature
 
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
+import sift.core.dsl.Type
 
 internal class TypeArgumentVisitor(
     val onTypeArgument: (TypeSignature) -> Unit,
@@ -44,7 +44,7 @@ internal class TypeArgumentVisitor(
     override fun visitClassType(name: String) {
         require(arg == null)
 
-        val type = Type.getType("L$name;")
+        val type = Type.from(name)
         arg = TypeSignature(ArgType.Plain(type), arrayDepth, MetaType.Class)
             .also(onTypeArgument)
 
@@ -64,19 +64,7 @@ internal class TypeArgumentVisitor(
     }
 
     override fun visitBaseType(descriptor: Char) {
-        val type = when (descriptor) {
-            'Z' -> Type.BOOLEAN_TYPE
-            'B' -> Type.BYTE_TYPE
-            'C' -> Type.CHAR_TYPE
-            'S' -> Type.SHORT_TYPE
-            'I' -> Type.INT_TYPE
-            'J' -> Type.LONG_TYPE
-            'F' -> Type.FLOAT_TYPE
-            'D' -> Type.DOUBLE_TYPE
-            'V' -> Type.VOID_TYPE
-            else -> error(descriptor)
-        }
-
+        val type = Type.primitiveType(descriptor)
         arg = TypeSignature(ArgType.Plain(type), arrayDepth, MetaType.Class)
             .also(onTypeArgument)
 

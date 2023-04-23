@@ -41,8 +41,8 @@ internal data class Context(
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 
-    val classByType: MutableMap<AsmType, ClassNode> = allClasses
-        .associateBy(ClassNode::rawType)
+    val classByType: MutableMap<Type, ClassNode> = allClasses
+        .associateBy(ClassNode::type)
         .toMutableMap()
 
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = ConcurrentHashMap()
@@ -57,10 +57,10 @@ internal data class Context(
             val found = mutableSetOf<TypeClassNode>()
             fun recurse(node: ClassNode) {
                 val interfaces = node.signature?.implements?.map(TypeSignature::toType)
-                    ?: node.interfaces.map(Type::from)
+                    ?: node.interfaces
 
                 interfaces
-                    .map { TypeClassNode(it, classByType[it.asmType]) }
+                    .map { TypeClassNode(it, classByType[it]) }
                     .filter { it !in found }
                     .onEach { found += it }
                     .mapNotNull(TypeClassNode::cn)
@@ -85,7 +85,7 @@ internal data class Context(
     private var measurementStack: MutableList<Tree<Measurement>> = mutableListOf(measurements)
     private var pushScopes: Int = 0
 
-    fun synthesize(type: AsmType): ClassNode {
+    fun synthesize(type: Type): ClassNode {
         return classByType[type] ?: (classNode<SynthesisTemplate>()
             .also { cn -> cn.name = type.internalName }
             .let(ClassNode::from)
@@ -109,7 +109,7 @@ internal data class Context(
 
     private var lock = Any()
 
-    fun synthesize(owner: AsmType, name: String, desc: String): MethodNode {
+    fun synthesize(owner: Type, name: String, desc: String): MethodNode {
         val cn = classByType[owner]
             ?: error("'${owner}' not found")
 
@@ -314,7 +314,7 @@ private fun TypeSignature.toType(): Type {
 private fun ArgType.className(): String {
     return when (this) {
         is ArgType.Array -> wrapped?.className() + "[]"
-        is ArgType.Plain -> type.className
+        is ArgType.Plain -> type.name
         is ArgType.Var   -> type.name
     }
 }
@@ -350,19 +350,19 @@ internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
 }
 
 private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
-    return generateSequence(cn) { findBy(ClassNode::rawType, it.superType) }
+    return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
         .drop(1)
         .toList()
 }
 
 private val ClassNode.parentType: Type?
-    get() = extends?.let(TypeSignature::toType) ?: superType?.let(Type::from)
+    get() = extends?.let(TypeSignature::toType) ?: superType
 
-private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
+private fun Map<Type, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
 
     fun next(tcn: TypeClassNode): TypeClassNode? {
         val parentType = tcn.cn!!.parentType ?: return null
-        val parent = get(parentType.asmType) ?: return null
+        val parent = get(parentType.rawType) ?: return null
         return TypeClassNode(parentType, parent)
     }
 
@@ -372,7 +372,7 @@ private fun Map<AsmType, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClas
         .toList()
 }
 
-internal fun Map<AsmType, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
+internal fun Map<Type, ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
     return generateSequence(cn) { get(it.superType) }
         .drop(1)
         .toList()

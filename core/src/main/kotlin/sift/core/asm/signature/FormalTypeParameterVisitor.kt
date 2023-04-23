@@ -1,8 +1,8 @@
 package sift.core.asm.signature
 
 import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
 import org.objectweb.asm.signature.SignatureVisitor
+import sift.core.dsl.Type
 
 internal class FormalTypeParameterVisitor(
     val parameter: FormalTypeParameter,
@@ -12,7 +12,7 @@ internal class FormalTypeParameterVisitor(
 ) : BaseSignatureVisitor(api, signatureVisitor) {
 
     override fun visitClassType(name: String) {
-        parameter.extends += TypeSignature(ArgType.Plain(Type.getType("L$name;")), 0, MetaType.Class)
+        parameter.extends += TypeSignature(ArgType.Plain(Type.from(name)), 0, MetaType.Class)
         sv?.visitClassType(name)
     }
 

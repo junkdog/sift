@@ -30,7 +30,7 @@ class Parameters internal constructor(
      * Filters fields to include only those with a type matching type.
      */
     fun filterType(type: Type) {
-        action += Action.Parameter.FilterType(type.asmType)
+        action += Action.Parameter.FilterType(type)
     }
 
     override fun scope(

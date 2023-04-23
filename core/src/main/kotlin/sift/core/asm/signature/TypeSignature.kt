@@ -1,7 +1,6 @@
 package sift.core.asm.signature
 
-import sift.core.asm.simpleName
-import sift.core.element.AsmType
+import sift.core.dsl.Type
 
 data class TypeSignature(
     val type: ArgType,
@@ -21,7 +20,7 @@ data class TypeSignature(
 }
 
 sealed interface ArgType {
-    data class Plain(val type: AsmType) : ArgType {
+    data class Plain(val type: Type) : ArgType {
         override fun toString(): String = type.simpleName
     }
 

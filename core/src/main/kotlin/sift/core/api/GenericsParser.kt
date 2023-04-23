@@ -5,7 +5,7 @@ import sift.core.asm.signature.MetaType
 import sift.core.asm.signature.TypeSignature
 import sift.core.dsl.Classes
 import sift.core.dsl.Signature
-import sift.core.element.AsmType
+import sift.core.dsl.Type
 import sift.core.stringWriter
 
 
@@ -93,7 +93,7 @@ private class GenericType(val index: Int, val constraint: TypeName, val argument
     val signature: TypeSignature
         get() {
             val args = arguments.map(GenericType::signature).toMutableList()
-            return TypeSignature(ArgType.Plain(AsmType.getType("L${constraint};")), 0, MetaType.Class, args)
+            return TypeSignature(ArgType.Plain(Type.from(constraint.toString())), 0, MetaType.Class, args)
         }
 }
 

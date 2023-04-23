@@ -1,5 +1,6 @@
 package sift.core.dsl
 
+import kotlinx.coroutines.FlowPreview
 import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.element.Element
@@ -99,6 +100,7 @@ interface EntityRegistrar<ELEMENT : Element> {
     }
 }
 
+@OptIn(FlowPreview::class)
 private class EntityRegistrarImpl<ELEMENT : Element>(
     val action: Action.Chain<Iter<ELEMENT>>
 ) : EntityRegistrar<ELEMENT> {
