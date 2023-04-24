@@ -46,11 +46,11 @@ class Classes internal constructor(
     }
 
     override fun scope(
-        @Suppress("UNUSED_PARAMETER") label: String,
+        label: String,
         f: Classes.() -> Unit
     ) {
         val forkTo = Classes().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label.takeIf(String::isNotEmpty), forkTo)
     }
 
     override fun scope(

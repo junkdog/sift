@@ -19,11 +19,11 @@ class Fields internal constructor(
     ParentOperations<ClassNode, Classes>
 {
     override fun scope(
-        @Suppress("UNUSED_PARAMETER") label: String,
+        label: String,
         f: Fields.() -> Unit
     ) {
         val forkTo = Fields().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label.takeIf(String::isNotEmpty), forkTo)
     }
 
     override fun scope(

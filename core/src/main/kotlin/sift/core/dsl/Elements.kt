@@ -22,11 +22,11 @@ class Elements internal constructor(
     }
 
     override fun scope(
-        @Suppress("UNUSED_PARAMETER") label: String,
+        label: String,
         f: Elements.() -> Unit
     ) {
         val forkTo = Elements().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label.takeIf(String::isNotEmpty), forkTo)
     }
 
     override fun scope(

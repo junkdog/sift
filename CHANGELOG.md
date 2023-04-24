@@ -1,6 +1,10 @@
 ## Upcoming Release
 
+### New/Tweaks
 - Remaining usages of `org.objectweb.asm.Type` replaced with `sift.core.dsl.Type`.
+- DSL: The `fork` actions displayed when using the `--profile` flag now incorporate the
+  labels from the `scope()` functions.  
+
 
 ## sift-0.9.0 2023-04-22
 

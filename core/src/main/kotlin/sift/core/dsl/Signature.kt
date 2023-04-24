@@ -23,7 +23,7 @@ class Signature internal constructor(
     }
 
     fun scope(label: String, f: Signature.() -> Unit) {
-        action += Action.Fork(Signature().also(f).action)
+        action += Action.Fork(label.takeIf(String::isNotEmpty), Signature().also(f).action)
     }
 
     fun filter(s: String, invert: Boolean = false) {
@@ -52,8 +52,6 @@ class Signature internal constructor(
 
         action += Action.Fork(explodeType andThen forkTo)
     }
-
-
 
     /**
      * Iterates over all classes given a generic type signature, e.g.

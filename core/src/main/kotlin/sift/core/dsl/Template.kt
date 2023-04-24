@@ -27,11 +27,11 @@ class Template internal constructor(
     }
 
     fun scope(label: String, f: Template.() -> Unit) {
-        action += Template().also(f).action
+        action += Action.Fork(label.takeIf(String::isNotEmpty), Template().also(f).action)
     }
 
     fun scope(
-        label: String,
+        @Suppress("UNUSED_PARAMETER") label: String,
         op: ScopeEntityPredicate,
         entity: Entity.Type,
         f: Template.() -> Unit

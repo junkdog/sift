@@ -919,9 +919,12 @@ sealed class Action<IN, OUT> {
     }
 
     internal data class Fork<T, FORK_T>(
+        val label: String?,
         val forked: Action<T, FORK_T>
     ) : Action<T, T>() {
-        override fun id() = "fork"
+        constructor(forked: Action<T, FORK_T>) : this(null, forked)
+
+        override fun id() = label?.let { "fork(\"$it\")" } ?: "fork"
         override fun execute(ctx: Context, input: T): T {
             ctx.pushMeasurementScope()
             forked(ctx, input)

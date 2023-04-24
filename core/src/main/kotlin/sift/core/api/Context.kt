@@ -335,26 +335,6 @@ internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity
         .toMap()
 }
 
-internal fun Context.fieldsOf(type: Entity.Type): Map<FieldNode, Entity> {
-    fun toFieldNodes(elem: Element, e: Entity): Pair<FieldNode, Entity> {
-        return when (elem) {
-            is FieldNode ->  elem to e
-            is ValueNode -> toFieldNodes(elem.reference, e)
-            else         -> error("unable to extract methods from $elem")
-        }
-    }
-
-    return entityService[type]
-        .map { (elem, e) -> toFieldNodes(elem, e) } // FIXME: throw
-        .toMap()
-}
-
-private fun Iterable<ClassNode>.parentsOf(cn: ClassNode): List<ClassNode> {
-    return generateSequence(cn) { findBy(ClassNode::type, it.superType) }
-        .drop(1)
-        .toList()
-}
-
 private val ClassNode.parentType: Type?
     get() = extends?.let(TypeSignature::toType) ?: superType
 
