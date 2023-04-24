@@ -607,7 +607,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["sift.core.api.Action"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["java.lang.String","sift.core.api.Action"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.api.Action"] }
+  ]
 },
 {
   "name":"sift.core.api.Action$ForkOnEntityExistence",
