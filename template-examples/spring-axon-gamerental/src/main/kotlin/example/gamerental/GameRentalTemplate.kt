@@ -1,13 +1,14 @@
 package example.gamerental
 
-import sift.core.api.type
 import sift.core.entity.Entity
 import sift.core.dsl.template
+import sift.core.dsl.type
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Style.Companion.plain
+import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.template.dsl.graphviz
 import sift.template.jpa.JpaTemplate
@@ -111,7 +112,7 @@ class GameRentalTemplate : SystemModelTemplate {
                 rank = 4,                      // projections.rank = 3
                 type = Dot.node,
                 shape = Shape.cylinder,
-                label = listOf(replace("Repository", ""))
+                label = edit(replace("Repository", ""))
             )
         }
     }

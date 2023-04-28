@@ -1,8 +1,8 @@
 package example.petclinic
 
 import sift.core.entity.Entity
-import sift.core.api.type
 import sift.core.dsl.template
+import sift.core.dsl.type
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
 import sift.core.template.SystemModelTemplate
@@ -73,7 +73,7 @@ class PetClinicTemplate : SystemModelTemplate {
         // register @ModelAttribute methods
         classes {
             methods {
-                annotatedBy(A.modelAttribute )
+                annotatedBy(A.modelAttribute)
                 // register @ModelAttribute entities as their function name
                 entity(E.modelAttribute, label("\uD83D\uDE40 \${name}"), //
                     property("name", readName()))  // <- for \${name} in label

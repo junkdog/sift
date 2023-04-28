@@ -1191,7 +1191,11 @@
   "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.mordant.rendering.TextStyle"] }]
 },
 {
-  "name":"sift.core.terminal.TextEdit"
+  "name":"sift.core.terminal.TextEdit",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["java.util.List"] }]
 },
 {
   "name":"sift.core.terminal.TextTransformer",
