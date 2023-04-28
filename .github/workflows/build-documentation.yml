@@ -1,6 +1,9 @@
 name: 📜 dsl docs
 on:
-  workflow_dispatch
+  workflow_dispatch:
+  push:
+    tags:
+      - 'sift-*'
 
 # Allow one concurrent deployment
 concurrency:

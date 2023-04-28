@@ -23,22 +23,32 @@ jobs:
       - name: build sift cli
         run: mvn -B clean package -P native-image -Dmaven.test.skip=true
 
+      - name: package sift for jvm
+        run: |
+          export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          mkdir sift-jvm
+          
+          cp cli/target/sift-cli.jar sift-jvm
+          cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-jvm
+          cp release-scripts/install.sh sift-${RELEASE_VERSION}-jvm
+          tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-jvm
+
       - name: package native sift for linux
         run: |
+          export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           mkdir sift-linux-amd64
           
-          cp sift.sh sift.zsh README.md sift-linux-amd64
           cp cli/target/sift sift-linux-amd64
-          tar -czvf ${sift_path}.tar.gz sift-linux-amd64
+          cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-linux-amd64
+          cp release-scripts/install.sh sift-${RELEASE_VERSION}-linux-amd64
+          tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-linux-amd64
 
       - name: upload artifacts
         uses: softprops/action-gh-release@v1
         with:
           files: |
+            sift-linux-amd64.tar.gz
+            sift-jvm.tar.gz
             cli/target/sift-cli.jar
-            cli/target/sift-linux-amd64.tar.gz
-            sift.zsh
-            sift.sh
-            README.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
