@@ -27,24 +27,24 @@ val KClass<*>.internalName: String
 val Class<*>.internalName: String
     get() = getInternalName(this)
 
-fun classReader(stream: InputStream) = stream.use(::ClassReader)
-fun classReader(klazz: KClass<*>)    = classReader(klazz.java)
-fun classReader(file: File)          = classReader(file.inputStream().buffered())
-fun classReader(bytes: ByteArray)    = ClassReader(bytes)
-fun classReader(klazz: Class<*>) =
+internal fun classReader(stream: InputStream) = stream.use(::ClassReader)
+internal fun classReader(klazz: KClass<*>)    = classReader(klazz.java)
+internal fun classReader(file: File)          = classReader(file.inputStream().buffered())
+internal fun classReader(bytes: ByteArray)    = ClassReader(bytes)
+internal fun classReader(klazz: Class<*>) =
     classReader(klazz.getResourceAsStream("/${klazz.internalName}.class")!!)
 
-inline fun <reified T> classNode()   = classNode(T::class)
-fun classNode(cr: ClassReader)       = ClassNode().apply { cr.accept(this, 0) }
-fun classNode(bytes: ByteArray)      = classNode(classReader(bytes))
-fun classNode(klazz: KClass<*>)      = classNode(classReader(klazz))
-fun classNode(klazz: Class<*>)       = classNode(classReader(klazz))
-fun classNode(stream: InputStream)   = classNode(classReader(stream))
-fun classNode(file: File)            = classNode(classReader(file))
+internal inline fun <reified T> classNode()   = classNode(T::class)
+internal fun classNode(cr: ClassReader)       = ClassNode().apply { cr.accept(this, 0) }
+internal fun classNode(bytes: ByteArray)      = classNode(classReader(bytes))
+internal fun classNode(klazz: KClass<*>)      = classNode(classReader(klazz))
+internal fun classNode(klazz: Class<*>)       = classNode(classReader(klazz))
+internal fun classNode(stream: InputStream)   = classNode(classReader(stream))
+internal fun classNode(file: File)            = classNode(classReader(file))
 
 /** reads all classes, where [root] points to a root directory or jar file */
-fun classNodes(root: Path): List<ClassNode> = classNodes(root.toFile())
-fun classNodes(root: File): List<ClassNode> = when {
+internal fun classNodes(root: Path): List<ClassNode> = classNodes(root.toFile())
+internal fun classNodes(root: File): List<ClassNode> = when {
     root.exists().not()       -> throw FileNotFoundException(root.path)
     root.isDirectory          -> classesDir(root)
     root.extension == "jar"   -> classesJar(root)
@@ -58,10 +58,6 @@ val ClassNode.type: Type
 val AnnotationNode.type: Type
     get() = Type.fromTypeDescriptor(desc)
 
-val MethodInsnNode.returnType: Type
-    get() = AsmType.getReturnType(desc).let { Type.from(it) }
-
-fun MethodInsnNode.argumentTypes(): Array<AsmType> = AsmType.getArgumentTypes(desc) ?: arrayOf()
 val MethodInsnNode.ownerType: Type
     get() = Type.from(owner)
 

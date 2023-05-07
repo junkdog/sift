@@ -1,6 +1,8 @@
 ## Upcoming Release
 
 ### New/Tweaks
+- `-f` option has been updated to also support URI paths and maven coordinates, for example: 
+  `sift -f https:///path/to/classes.jar ...` and `sift -f net.onedaybead.sift:core:0.9.0 ...`.
 - Remaining usages of `org.objectweb.asm.Type` replaced with `sift.core.dsl.Type`.
 - DSL: The `fork` actions displayed when using the `--profile` flag now incorporate the
   labels from the `scope()` functions.  

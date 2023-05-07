@@ -1,13 +1,10 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
-@file:OptIn(ExperimentalTime::class)
 
 package sift.cli
 
 import com.fasterxml.jackson.module.kotlin.*
 import com.github.ajalt.clikt.completion.completionOption
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.PrintMessage
-import com.github.ajalt.clikt.core.context
+import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.output.CliktHelpFormatter
 import com.github.ajalt.clikt.parameters.arguments.*
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
@@ -18,7 +15,6 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
-import sift.core.asm.classNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
@@ -172,7 +168,7 @@ object SiftCli : CliktCommand(
             }
             template.listEntityTypes && template.template != null -> {
                 when {
-                    template.path != null ->
+                    template.classNodes != null ->
                         buildTree(tree.treeRoot).let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
 
                     serialization.load != null ->
@@ -193,7 +189,7 @@ object SiftCli : CliktCommand(
                 terminal.println("${orange1("Error: ")} ${fg("Must specify a template, use -l to list available templates.)")}")
                 exitProcess(1)
             }
-            template.path == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
+            template.classNodes == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
             graphviz.render -> {
                 require(serialization.diff == null)
                 val sm = systemModel()
@@ -254,7 +250,7 @@ object SiftCli : CliktCommand(
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            TemplateProcessor(classNodes(template.path!!))
+            TemplateProcessor(template.classNodes!!)
                 .execute(template.template!!.template(), template.profile)
         }
     }
@@ -436,7 +432,7 @@ object SiftCli : CliktCommand(
     private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
-        val sm: SystemModel = TemplateProcessor(classNodes(this.template.path!!))
+        val sm: SystemModel = TemplateProcessor(this.template.classNodes!!)
             .execute(template.template(), this.template.profile)
 
         return sm to template.toTree(sm, roots)
