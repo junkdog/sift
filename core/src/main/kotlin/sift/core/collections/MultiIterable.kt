@@ -1,7 +1,5 @@
 package sift.core.collections
 
-import java.lang.IllegalStateException
-
 
 internal class MutableMultiIterable<T>(
     private val iterables: List<MutableIterable<T>?>

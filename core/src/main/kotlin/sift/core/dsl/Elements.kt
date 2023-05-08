@@ -1,7 +1,6 @@
 package sift.core.dsl
 
 import sift.core.api.*
-import sift.core.api.chainFrom
 import sift.core.element.Element
 import sift.core.entity.Entity
 

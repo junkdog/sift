@@ -3,7 +3,6 @@ package sift.core
 import sift.core.api.Action
 import sift.core.element.Element
 import sift.core.entity.Entity
-import java.lang.RuntimeException
 import kotlin.reflect.KClass
 
 

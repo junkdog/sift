@@ -2,7 +2,7 @@ package sift.core.terminal
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 
 //@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")

@@ -12,9 +12,6 @@ import org.objectweb.asm.Handle
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.InvokeDynamicInsnNode
 import org.objectweb.asm.tree.MethodInsnNode
-import sift.core.element.*
-import sift.core.entity.Entity
-import sift.core.entity.LabelFormatter
 import sift.core.Throw
 import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
@@ -22,7 +19,10 @@ import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.dsl.PropertyStrategy
 import sift.core.dsl.Type
+import sift.core.element.*
 import sift.core.element.ParameterNode
+import sift.core.entity.Entity
+import sift.core.entity.LabelFormatter
 import sift.core.jackson.NoArgConstructor
 import sift.core.terminal.StringEditor
 

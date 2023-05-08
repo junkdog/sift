@@ -8,16 +8,14 @@ import org.junit.jupiter.api.assertThrows
 import org.objectweb.asm.tree.ClassNode
 import org.reflections.Reflections
 import sift.core.*
-import sift.core.EntityNotFoundException
-import sift.core.UniqueElementPerEntityViolation
 import sift.core.api.*
 import sift.core.api.AccessFlags.*
-import sift.core.dsl.ScopeEntityPredicate.ifExists
-import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
+import sift.core.dsl.ScopeEntityPredicate.ifExists
+import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.template.toTree
@@ -1560,8 +1558,8 @@ class DslTest {
 
             assertThat(invoker.first().children["invokes"]!!.map(Entity::toString))
                 .containsExactlyInAnyOrder(
-                    e(handler, "HandlerOfFns::boo").toString(),
-                    e(handler, "HandlerOfFns::on").toString(),
+                    "Entity(HandlerOfFns::boo, type=handler)",
+                    "Entity(HandlerOfFns::on, type=handler)",
                 )
         }
     }
@@ -1691,10 +1689,10 @@ class DslTest {
             }
         }.expecting { entityService ->
             fun verify(type: Entity.Type, label: String) {
-                assertThat(entityService[type].map(::TestEntity))
+                assertThat(entityService[type].map { (_, e) -> e.label })
                     .hasSize(1)
                     .first()
-                    .isEqualTo(e(type, label))
+                    .isEqualTo(label)
             }
 
             verify(cls,    "MethodWithParam")
@@ -1829,11 +1827,9 @@ class DslTest {
                     }
                 }
             }.expecting(input) { entityService ->
-                assertThat(entityService[param].map(::TestEntity))
+                assertThat(entityService[param].map { (_, e) -> e.label })
                     .hasSize(expected.size)
-                    .containsAll(
-                        expected.map { e(param, it) }
-                    )
+                    .containsAll(expected.toList())
             }
         }
     }

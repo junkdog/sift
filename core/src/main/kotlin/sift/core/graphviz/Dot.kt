@@ -6,11 +6,11 @@ import net.onedaybeard.collectionsby.firstBy
 import sift.core.api.SystemModel
 import sift.core.entity.Entity
 import sift.core.pop
+import sift.core.terminal.Gruvbox
+import sift.core.terminal.StringEditor
+import sift.core.terminal.TextTransformer
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
-import sift.core.terminal.Gruvbox
-import sift.core.terminal.TextTransformer
-import sift.core.terminal.StringEditor
 
 /*
 

@@ -1,7 +1,6 @@
 package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.filterNotBy
-import org.objectweb.asm.Type
 import sift.core.dsl.type
 
 data class FormalTypeParameter(

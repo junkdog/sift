@@ -17,7 +17,6 @@ import sift.core.element.AsmType
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.lang.IllegalStateException
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.reflect.KClass

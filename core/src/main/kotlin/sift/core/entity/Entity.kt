@@ -1,6 +1,6 @@
 package sift.core.entity
 
-import java.util.UUID
+import java.util.*
 
 
 class Entity(

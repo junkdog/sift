@@ -1,7 +1,7 @@
 package sift.core.entity
 
-import sift.core.element.Element
 import sift.core.Throw
+import sift.core.element.Element
 
 class EntityService {
     private val entityToElement: MutableMap<Entity, Element> = mutableMapOf()

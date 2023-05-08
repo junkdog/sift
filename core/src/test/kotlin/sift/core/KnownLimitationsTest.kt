@@ -58,7 +58,8 @@ class KnownLimitationsTest {
 //            assertThat(es[data].values.first().children["sent-by"]!!.map(Entity::toString))
             Assertions.assertThat(es[data].values.first().children["sent-by"]!!.map(Entity::toString))
                 .containsExactlyInAnyOrder(
-                    e(handler, "HandlerOfFns::boo").toString(),
+                    "Entity(HandlerOfFns::on, type=handler)",
+                    "Entity(HandlerOfFns::boo, type=handler)",
                 )
         }
     }

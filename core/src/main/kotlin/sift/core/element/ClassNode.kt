@@ -8,7 +8,6 @@ import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
-import sift.core.asm.type
 import sift.core.dsl.Type
 
 class ClassNode private constructor(

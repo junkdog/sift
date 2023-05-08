@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import com.github.ajalt.mordant.rendering.TextStyle
 import sift.core.terminal.Gruvbox
-import java.lang.StringBuilder
 
 @JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)
 @JsonIgnoreProperties("depth", "prev", "next")

@@ -5,7 +5,6 @@ import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.FieldSignatureNode
 import sift.core.asm.signature.signature
-import sift.core.asm.type
 import sift.core.dsl.Type
 
 class FieldNode private constructor(

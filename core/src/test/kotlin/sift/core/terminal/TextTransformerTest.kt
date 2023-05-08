@@ -6,7 +6,7 @@ import sift.core.terminal.TextTransformer.Companion.dedupe
 import sift.core.terminal.TextTransformer.Companion.idSequence
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
-import java.util.UUID
+import java.util.*
 
 class TextTransformerTest {
 

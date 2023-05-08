@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
-import sift.core.asm.*
+import sift.core.asm.classNode
 import sift.core.dsl.resource
 import kotlin.reflect.KClass
 

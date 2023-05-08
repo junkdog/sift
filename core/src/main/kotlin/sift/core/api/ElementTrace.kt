@@ -1,7 +1,6 @@
 package sift.core.api
 
-import sift.core.element.*
-import kotlin.collections.ArrayList
+import sift.core.element.Element
 
 internal class ElementTrace private constructor(
     private val elements: List<Element>

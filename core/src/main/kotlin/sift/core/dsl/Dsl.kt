@@ -1,7 +1,9 @@
 package sift.core.dsl
 
-import sift.core.api.*
-import sift.core.element.*
+import sift.core.api.Action
+import sift.core.api.Iter
+import sift.core.api.IterValues
+import sift.core.element.Element
 import sift.core.entity.Entity
 
 

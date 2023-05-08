@@ -1,7 +1,10 @@
 package sift.core.api
 
 import sift.core.dsl.Type
-import sift.core.element.*
+import sift.core.element.ClassNode
+import sift.core.element.Element
+import sift.core.element.FieldNode
+import sift.core.element.MethodNode
 import sift.core.entity.Entity
 import sift.core.jackson.NoArgConstructor
 
