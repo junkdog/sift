@@ -191,7 +191,7 @@ object SiftCli : CliktCommand(
             }
             template.classNodes == null && serialization.load == null -> throw PrintMessage("PATH was not specified")
             graphviz.render -> {
-                require(serialization.diff == null)
+                require(template.diff == null)
                 val sm = systemModel()
 
                 fun color(style: Style): String {
@@ -221,8 +221,8 @@ object SiftCli : CliktCommand(
             }
             template.dumpSystemModel -> dumpEntities(terminal)
             template.profile -> profile(terminal)
-            serialization.diff != null -> {
-                val tree = diffHead(loadSystemModel(serialization.diff!!), this.tree.treeRoot, template.template!!)
+            template.diff != null -> {
+                val tree = diffHead(template.diff!!, this.tree.treeRoot, template.template!!)
                 terminal.printTree(tree)
             }
             serialization.load != null -> {
@@ -242,7 +242,7 @@ object SiftCli : CliktCommand(
     }
 
     private fun validateParameterOptions() {
-        if (serialization.save != null && listOfNotNull(serialization.diff, serialization.load).isNotEmpty())
+        if (serialization.save != null && listOfNotNull(template.diff, serialization.load).isNotEmpty())
             error("Cannot use --save with --load or --diff")
     }
 

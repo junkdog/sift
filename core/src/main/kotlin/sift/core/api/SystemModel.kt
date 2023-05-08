@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import sift.core.asm.resolveClassNodes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.jackson.SystemModelSerializer
 import sift.core.jackson.serializationModule
+import sift.core.template.SystemModelTemplate
 import sift.core.tree.Tree
 import java.io.File
+import java.io.FileNotFoundException
 
 @JsonSerialize(using = SystemModelSerializer.Serializer::class)
 @JsonDeserialize(using = SystemModelSerializer.Deserializer::class)
@@ -45,4 +48,23 @@ fun loadSystemModel(file: File): SystemModel {
     return jacksonObjectMapper()
         .registerModule(serializationModule())
         .readValue(file)
+}
+
+fun resolveSystemModel(
+    path: String,
+    template: SystemModelTemplate?
+): SystemModel {
+    return if (path.endsWith("json")) {
+        // todo: support URI:s
+        val f = File(path)
+        if (!f.exists()) throw FileNotFoundException(path)
+
+        return loadSystemModel(f)
+    } else {
+        requireNotNull(template) { "unable to load $path as no template is specified" }
+
+        TemplateProcessor(resolveClassNodes(path))
+            .process(template.template(), false)
+            .let(::SystemModel)
+    }
 }

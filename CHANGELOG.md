@@ -3,6 +3,9 @@
 ### New/Tweaks
 - `-f` option has been updated to also support URI paths and maven coordinates, for example: 
   `sift -f https:///path/to/classes.jar ...` and `sift -f net.onedaybead.sift:core:0.9.0 ...`.
+- `--diff` now also works against class directories, jars, URI:s and maven coordinates. This
+  means that it is no longer necessary to `--save` the system model before running `--diff`, e.g.:
+  `sift --template sift -f net.onedaybead.sift:core:0.9.0 --diff net.onedaybead.sift:core:0.7.0`
 - Remaining usages of `org.objectweb.asm.Type` replaced with `sift.core.dsl.Type`.
 - DSL: The `fork` actions displayed when using the `--profile` flag now incorporate the
   labels from the `scope()` functions.  
