@@ -61,13 +61,20 @@ Usage: sift [OPTIONS]
   from JVM bytecode.
 
 Template options:
-  -t, --template TEMPLATE  The template producing the system model.
-  -l, --list-templates     Print all installed templates.
-  -T, --list-entity-types  Lists entity types defined by template.
-  -f, --class-dir PATH     Jar or root directory with classes to analyze.
-  --profile                Print execution times and input/output for the executed
-                           template.
-  -X, --dump-system-model  Print all entities along with their properties and metadata.
+  -t, --template TEMPLATE               The template producing the system model.
+  -l, --list-templates                  Print all installed templates.
+  -T, --list-entity-types               Lists entity types defined by template.
+  -f, --class-dir, --classes PATH|URI|MAVEN_COORD
+                                        Provide class input as a directory, JAR file, URI
+                                        (pointing to a JAR), or Maven coordinate.
+  -d, --diff FILE_JSON|URI|MAVEN_COORD  Compare the system model from '-f' with another,
+                                        specified as a JSON file (previously saved System
+                                        Model), class input as a directory, JAR file, URI
+                                        (pointing to a JAR), or Maven coordinate.
+  --profile                             Print execution times and input/output for the
+                                        executed template.
+  -X, --dump-system-model               Print all entities along with their properties and
+                                        metadata.
 
 Entity tree/graph options:
   -L, --max-depth INT             Max display depth of the tree.
@@ -87,7 +94,6 @@ Visualization options:
 Serialization options:
   -s, --save FILE_JSON  Save the resulting system model as json.
   --load FILE_JSON      Load a previously saved system model.
-  -d, --diff FILE_JSON  Compare against a previously saved system model.
 
 Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
@@ -96,6 +102,8 @@ Miscellaneous options:
   --version                             Print version and release date.
   --debug                               Print log/logCount statements from the executed
                                         template.
+  --statistics                          Print internal statistics about the system model
+                                        template context.
   --generate-completion [bash|zsh|fish]
   -h, --help                            Show this message and exit
 
@@ -125,7 +133,7 @@ Examples:
 
 The system model describes the structure and relationships of entities within a system.
 An entity is an object or component within the system, uniquely identified by a class,
-method, field, or parameter. 
+method, field, parameter or generic signature. 
 
 Entities are categorized by their `Entity.Type`. An entity type represents any
 noteworthy part of the system. For example, types can include REST controllers, HTTP
@@ -175,10 +183,10 @@ template {
     }
 }
 ```
-Input elements (classes, methods, parameters, and fields) are processed in batches, line-by-line.
-The execution of a System Model Template can be introspected with the `--profile` option.
+Input elements (classes, methods, parameters, fields, generic signatures) are processed in batches,
+line-by-line. The execution of a System Model Template can be introspected with the `--profile` option.
 
-![sift spring-boot axon framework demo](docs/images/sift-spring-axon-profile-pipeline.png)
+![sift profile template](docs/images/sift-spring-axon-profile-pipeline.png)
 
 A typical template can be expressed in about 100-200 lines of code. Some templates,
 such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined templates
