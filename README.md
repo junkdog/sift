@@ -102,6 +102,10 @@ Miscellaneous options:
   --version                             Print version and release date.
   --debug                               Print log/logCount statements from the executed
                                         template.
+  -m, --maven-repository VALUE          Additional maven repositories to use for
+                                        downloading artifacts. Maven central
+                                        (https://repo1.maven.org/maven2/) and local user
+                                        repositories are always included.
   --statistics                          Print internal statistics about the system model
                                         template context.
   --generate-completion [bash|zsh|fish]
@@ -229,5 +233,3 @@ unknown types (e.g. from `withValue()`).
 ## Caveats and limitations
 - no flow analysis making precise entity identification difficult for e.g. dispatcher-like 
   methods dealing with multiple entity types.
-- Class signatures can not yet be registered as entities. This means that e.g. `Repository<Order>`
-  is not a valid entity; only the raw `Repository` type can be registered. 
