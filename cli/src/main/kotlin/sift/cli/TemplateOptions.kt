@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.completion.CompletionCandidates
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.*
 import sift.core.template.SystemModelTemplate
-import java.net.URI
 
 class TemplateOptions : OptionGroup(name = "Template options") {
     val template: SystemModelTemplate? by option("-t", "--template",
@@ -20,12 +19,6 @@ class TemplateOptions : OptionGroup(name = "Template options") {
     val listEntityTypes: Boolean by option("-T", "--list-entity-types",
             help = "Lists entity types defined by template.")
         .flag()
-
-    val mavenRepositories: List<URI> by option("-m", "--maven-repository",
-            help = "Additional maven repositories to use for downloading artifacts. Maven central " +
-                   "(https://repo1.maven.org/maven2/) and local user repositories are always included.")
-        .convert { URI(it) }
-        .multiple()
 
     val classNodes: String? by option("-f", "--class-dir", "--classes",
             metavar = "PATH|URI|MAVEN_COORD",

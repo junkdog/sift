@@ -59,7 +59,6 @@ import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.system.exitProcess
-import kotlin.time.ExperimentalTime
 
 
 object SiftCli : CliktCommand(
@@ -126,6 +125,12 @@ object SiftCli : CliktCommand(
     val debug: Boolean by option("--debug",
         help = "Print log/logCount statements from the executed template.")
     .flag()
+
+    val mavenRepositories: List<URI> by option("-m", "--maven-repository",
+            help = "Additional maven repositories to use for downloading artifacts. Maven central " +
+                   "(https://repo1.maven.org/maven2/) and local user repositories are always included.")
+        .convert { URI(it) }
+        .multiple()
 
     val statistics: Boolean by option("--statistics",
         help = "Print internal statistics about the system model template context."
@@ -225,7 +230,7 @@ object SiftCli : CliktCommand(
             template.dumpSystemModel -> dumpEntities(terminal)
             template.profile -> profile(terminal)
             template.diff != null -> {
-                val other = resolveSystemModel(template.diff!!, template.template, template.mavenRepositories)
+                val other = resolveSystemModel(template.diff!!, template.template, mavenRepositories)
                 val tree = diffHead(other, this.tree.treeRoot, template.template!!)
                 terminal.printTree(tree)
             }
@@ -254,7 +259,7 @@ object SiftCli : CliktCommand(
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            resolveClassNodes(template.classNodes!!, template.mavenRepositories)
+            resolveClassNodes(template.classNodes!!, mavenRepositories)
                 .let(::TemplateProcessor)
                 .execute(template.template!!.template(), template.profile)
         }
@@ -442,7 +447,7 @@ object SiftCli : CliktCommand(
     private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
-        val sm: SystemModel = resolveClassNodes(this.template.classNodes!!, this.template.mavenRepositories)
+        val sm: SystemModel = resolveClassNodes(this.template.classNodes!!, this.mavenRepositories)
             .let(::TemplateProcessor)
             .execute(template.template(), this.template.profile)
 
