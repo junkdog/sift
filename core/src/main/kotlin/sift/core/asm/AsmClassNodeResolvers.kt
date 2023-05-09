@@ -9,12 +9,15 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.*
 
-fun resolveClassNodes(source: String): List<AsmClassNode> {
+fun resolveClassNodes(
+    source: String,
+    mavenRepositories: List<URI> = listOf(),
+): List<AsmClassNode> {
     val isUri = Regex("^[a-z-]{2,}:") in source
     val mavenArtifact = MavenArtifact.parse(source)
 
     return when {
-        mavenArtifact != null -> classNodesOf(mavenArtifact)
+        mavenArtifact != null -> classNodesOf(mavenArtifact, mavenRepositories)
         isUri                 -> classNodesOf(URI(source))
         else                  -> classNodes(resolvePath(source))
     }
@@ -48,7 +51,10 @@ private fun classNodesOf(uri: URI): List<AsmClassNode> {
     }
 }
 
-private fun classNodesOf(artifact: MavenArtifact): List<AsmClassNode> {
+private fun classNodesOf(
+    artifact: MavenArtifact,
+    mavenRepositories: List<URI>,
+): List<AsmClassNode> {
     fun tryDownload(uri: URI): List<AsmClassNode>? {
         return try {
             classNodesOf(uri)
@@ -57,11 +63,19 @@ private fun classNodesOf(artifact: MavenArtifact): List<AsmClassNode> {
         }
     }
 
-    return sequenceOf(artifact.mavenLocal, artifact.mavenCentral)
+    val customLocations = mavenRepositories
+        .map(URI::asDirectory) // ensures a trailing slash, or else resolve() fails
+        .map { it.resolve(artifact.repoPath) }
+
+    return (customLocations + artifact.mavenLocal + artifact.mavenCentral)
+        .asSequence()
         .mapNotNull(::tryDownload)
         .firstOrNull()
         ?: error("failed downloading maven artifact: $artifact")
 }
+
+private val URI.asDirectory: URI
+    get() = if (path.endsWith("/")) this else URI("$this/")
 
 private data class MavenArtifact(
     val groupId: String,
@@ -69,7 +83,7 @@ private data class MavenArtifact(
     val version: String,
     val extension: String = "jar",
 ) {
-    private val repoPath: String
+    val repoPath: String
         get() = "${groupId.replace('.', '/')}/$artifactId/$version/$artifactId-$version.$extension"
 
     val mavenLocal: URI

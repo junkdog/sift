@@ -13,6 +13,7 @@ import sift.core.template.SystemModelTemplate
 import sift.core.tree.Tree
 import java.io.File
 import java.io.FileNotFoundException
+import java.net.URI
 
 @JsonSerialize(using = SystemModelSerializer.Serializer::class)
 @JsonDeserialize(using = SystemModelSerializer.Deserializer::class)
@@ -52,7 +53,8 @@ fun loadSystemModel(file: File): SystemModel {
 
 fun resolveSystemModel(
     path: String,
-    template: SystemModelTemplate?
+    template: SystemModelTemplate?,
+    mavenRepostiories: List<URI>,
 ): SystemModel {
     return if (path.endsWith("json")) {
         // todo: support URI:s
@@ -63,7 +65,7 @@ fun resolveSystemModel(
     } else {
         requireNotNull(template) { "unable to load $path as no template is specified" }
 
-        TemplateProcessor(resolveClassNodes(path))
+        TemplateProcessor(resolveClassNodes(path, mavenRepostiories))
             .process(template.template(), false)
             .let(::SystemModel)
     }

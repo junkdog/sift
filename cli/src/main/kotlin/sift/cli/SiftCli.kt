@@ -15,6 +15,7 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
+import sift.core.asm.resolveClassNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
@@ -47,8 +48,10 @@ import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
 import sift.template.*
+import sift.template.sift.SiftSelfTemplate
 import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
+import java.net.URI
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.*
@@ -222,7 +225,8 @@ object SiftCli : CliktCommand(
             template.dumpSystemModel -> dumpEntities(terminal)
             template.profile -> profile(terminal)
             template.diff != null -> {
-                val tree = diffHead(template.diff!!, this.tree.treeRoot, template.template!!)
+                val other = resolveSystemModel(template.diff!!, template.template, template.mavenRepositories)
+                val tree = diffHead(other, this.tree.treeRoot, template.template!!)
                 terminal.printTree(tree)
             }
             serialization.load != null -> {
@@ -250,7 +254,8 @@ object SiftCli : CliktCommand(
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            TemplateProcessor(template.classNodes!!)
+            resolveClassNodes(template.classNodes!!, template.mavenRepositories)
+                .let(::TemplateProcessor)
                 .execute(template.template!!.template(), template.profile)
         }
     }
@@ -366,6 +371,11 @@ object SiftCli : CliktCommand(
     }
 
     fun backtrackStyling(tree: Tree<EntityNode>, theme: Map<Entity.Type, Style>) {
+        // avoid styling sift template as it is a special case relating to not
+        // yet having a good way to deal with elements inherited by multiple classes
+        if (template.template is SiftSelfTemplate)
+            return
+
         fun e(node: Tree<EntityNode>?): EntityNode.Entity? {
             return when (val v = node?.value) {
                 is EntityNode.Entity -> v
@@ -432,7 +442,8 @@ object SiftCli : CliktCommand(
     private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
-        val sm: SystemModel = TemplateProcessor(this.template.classNodes!!)
+        val sm: SystemModel = resolveClassNodes(this.template.classNodes!!, this.template.mavenRepositories)
+            .let(::TemplateProcessor)
             .execute(template.template(), this.template.profile)
 
         return sm to template.toTree(sm, roots)
