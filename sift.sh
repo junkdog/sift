@@ -4,14 +4,14 @@
 SIFT_PATH="$HOME/.local/share/sift"
 SIFT_JAR="$SIFT_PATH/bin/sift-cli.jar"
 SIFT_BIN="$SIFT_PATH/bin/sift"
-SIFT_RC="$SIFT_PATH/siftrc.sh"
+SIFT_CONFIG="$SIFT_PATH/sift.config"
 
 # Check if siftrc.zsh exists, create it if not
-if [ ! -f "$SIFT_RC" ]; then
-    echo 'SIFT_ARGS="--ansi=ansi256"' > "$SIFT_RC"
+if [ ! -f "$SIFT_CONFIG" ]; then
+    echo 'SIFT_ARGS="--ansi=ansi256"' > "$SIFT_CONFIG"
 fi
 
-source "$SIFT_RC"
+source "$SIFT_CONFIG"
 
 # common args
 
@@ -22,9 +22,9 @@ ERROR_IMAGE_VIEWERS_NOT_FOUND=4
 
 function _sift() {
     if [[ -x $SIFT_BIN ]]; then
-        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m $SIFT_ARGS $*
+        $SIFT_VALGRIND $SIFT_BIN -Xmx256m -Xmn32m ${SIFT_ARGS[@]} $*
     elif [[ -f $SIFT_JAR ]]; then
-        java -jar $SIFT_JAR $SIFT_ARGS $*
+        java -jar $SIFT_JAR ${SIFT_ARGS[@]} $*
     else
         echo "Error: Unable to find sift binary or jar" >&2
         exit $ERROR_SIFT_NOT_FOUND

@@ -4,14 +4,14 @@
 SIFT_PATH="$HOME/.local/share/sift"
 SIFT_JAR="$SIFT_PATH/bin/sift-cli.jar"
 SIFT_BIN="$SIFT_PATH/bin/sift"
-SIFT_RC="$SIFT_PATH/siftrc.zsh"
+SIFT_CONFIG="$SIFT_PATH/sift.config"
 
-# Check if siftrc.zsh exists, create it if not
-if [ ! -f "$SIFT_RC" ]; then
-    echo 'SIFT_ARGS=(--ansi=ansi256)' > "$SIFT_RC"
+# Check if sift.config exists, create it if not
+if [ ! -f "$SIFT_CONFIG" ]; then
+    echo 'SIFT_ARGS=(--ansi=ansi256)' > "$SIFT_CONFIG"
 fi
 
-source "$SIFT_RC"
+source "$SIFT_CONFIG"
 
 # base graphviz dot args
 DOT_ARGS=(-Tpng -Gmargin=0)

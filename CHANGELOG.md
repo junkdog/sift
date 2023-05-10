@@ -12,6 +12,9 @@
 - DSL: The `fork` actions displayed when using the `--profile` flag now incorporate the
   labels from the `scope()` functions.  
 
+### Breaking change
+- - `siftrc.sh` and `siftrc.zsh` replaced by `sift.config`. Update custom configurations to this new file.
+
 
 ## sift-0.9.0 2023-04-22
 
