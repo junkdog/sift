@@ -40,8 +40,9 @@ class RegexType internal constructor(
 @JsonDeserialize(using = SiftTypeSerializer.Deserializer::class)
 class Type private constructor(
     internal val value: String,
-    internal val isPrimitive: Boolean = false,
 ): SiftType {
+    internal val isPrimitive: Boolean = value.length == 1 && value in primitiveDescriptors
+
     val name =  if (isPrimitive) when (value) {
         "Z" -> "boolean"
         "B" -> "byte"
@@ -82,10 +83,11 @@ class Type private constructor(
     override fun toString() = name
 
     companion object {
+        private const val primitiveDescriptors = "ZBCSIJFDV"
 
         internal fun primitiveType(descriptor: Char): Type {
-            require(descriptor in "ZBCSIJFDV")
-            return Type(descriptor.toString(), true)
+            require(descriptor in primitiveDescriptors)
+            return Type(descriptor.toString())
         }
 
         internal fun fromTypeDescriptor(descriptor: String): Type {
