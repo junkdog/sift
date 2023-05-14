@@ -97,7 +97,10 @@
     {"name":"TYPE"}, 
     {"name":"value"}
   ],
-  "methods":[{"name":"<init>","parameterTypes":["boolean"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"getBoolean","parameterTypes":["java.lang.String"] }
+  ]
 },
 {
   "name":"java.lang.Byte",

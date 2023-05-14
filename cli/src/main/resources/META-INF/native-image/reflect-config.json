@@ -3,6 +3,9 @@
   "name":"[C"
 },
 {
+  "name":"[F"
+},
+{
   "name":"[Lcom.fasterxml.jackson.databind.deser.BeanDeserializerModifier;"
 },
 {
@@ -16,6 +19,9 @@
 },
 {
   "name":"[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+},
+{
+  "name":"[Ljava.lang.Object;"
 },
 {
   "name":"com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
@@ -413,6 +419,7 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }
   ]
 },
@@ -574,6 +581,7 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }
   ]
 },
@@ -629,6 +637,7 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }
   ]
 },
@@ -780,10 +789,12 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType","java.lang.String"] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.Type","java.lang.String"] }, 
     {"name":"component1","parameterTypes":[] }, 
     {"name":"component2","parameterTypes":[] }, 
     {"name":"copy","parameterTypes":["org.objectweb.asm.Type","java.lang.String"] }, 
+    {"name":"copy","parameterTypes":["sift.core.dsl.SiftType","java.lang.String"] }, 
     {"name":"copy","parameterTypes":["sift.core.dsl.Type","java.lang.String"] }, 
     {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
@@ -1055,6 +1066,12 @@
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
+  "name":"sift.core.dsl.RegexType"
+},
+{
+  "name":"sift.core.dsl.SiftType"
+},
+{
   "name":"sift.core.dsl.Type"
 },
 {
@@ -1121,6 +1138,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sift.core.jackson.SiftTypeSerializer$Deserializer",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sift.core.jackson.SystemModelSerializer$Deserializer",
