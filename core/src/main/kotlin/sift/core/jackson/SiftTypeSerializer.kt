@@ -25,7 +25,8 @@ object SiftTypeSerializer {
             p: JsonParser,
             ctxt: DeserializationContext
         ): Type = p.readValueAs<String>().let { raw ->
-            val isPrimitive = (raw.startsWith("!"))
+            TODO("update to SiftType")
+            val isPrimitive = raw.startsWith("!")
             when {
                 isPrimitive -> Type.primitiveType(raw[1])
                 else        -> Type.from(raw)

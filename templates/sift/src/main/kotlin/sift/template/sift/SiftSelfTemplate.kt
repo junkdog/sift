@@ -17,6 +17,7 @@ import sift.core.terminal.Gruvbox.orange2
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.plain
+import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.template.spi.SystemModelTemplateServiceProvider
@@ -68,19 +69,22 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
         }
 
         scope("register dsl") {
-            classes {
-                filter("sift.core.dsl")
+            // 'sift.core.api.Dsl' for sift < 0.7.0
+            listOf("sift.core.dsl", "sift.core.api.Dsl").forEach { dsl ->
+                classes {
+                    filter(dsl)
 
-                scope("scopes from annotated classes") {
-                    annotatedBy<SiftTemplateDsl>()
-                    entity(E.scope, label("\${name}"),
-                        property("name", readName()))
-                }
+                    scope("scopes from annotated classes") {
+                        annotatedBy<SiftTemplateDsl>()
+                        entity(E.scope, label("\${name}", replace("Dsl.", "")),
+                            property("name", readName()))
+                    }
 
-                scope("scopes from children of Core<Element>") {
-                    implements(type<Core<*>>())
-                    entity(E.scope, label("\${name}"),
-                        property("name", readName()))
+                    scope("scopes from children of Core<Element>") {
+                        implements(type<Core<*>>())
+                        entity(E.scope, label("\${name}", replace("Dsl.", "!")),
+                            property("name", readName()))
+                    }
                 }
             }
 

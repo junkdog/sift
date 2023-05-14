@@ -18,7 +18,9 @@ import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.dsl.PropertyStrategy
+import sift.core.dsl.SiftType
 import sift.core.dsl.Type
+import sift.core.dsl.contains
 import sift.core.element.*
 import sift.core.element.ParameterNode
 import sift.core.entity.Entity
@@ -341,10 +343,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterImplemented(val type: Type) : Action<IterClasses, IterClasses>() {
+        internal data class FilterImplemented(val type: SiftType) : Action<IterClasses, IterClasses>() {
             override fun id() = "implements(${type.simpleName})"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
-                return input.filter { elem -> type matches ctx.allInterfacesOf(elem) }
+                return input.filter { elem -> type in ctx.allInterfacesOf(elem) } // fixme: signatures not preserved
             }
         }
 
@@ -700,10 +702,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterType(val type: Type) : IsoAction<FieldNode>() {
+        internal data class FilterType(val type: SiftType) : IsoAction<FieldNode>() {
             override fun id() = "filter-type(${type.simpleName})"
             override fun execute(ctx: Context, input: IterFields): IterFields {
-                return input.filterBy(FieldNode::type, type)
+                return input.filterBy(FieldNode::type, type::matches)
             }
         }
 
@@ -744,10 +746,10 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterType(val type: Type) : IsoAction<ParameterNode>() {
+        internal data class FilterType(val type: SiftType) : IsoAction<ParameterNode>() {
             override fun id() = "filter-type(${type.simpleName})"
             override fun execute(ctx: Context, input: IterParameters): IterParameters {
-                return input.filterBy(ParameterNode::type, type)
+                return input.filterBy(ParameterNode::type, type::matches)
             }
         }
 
@@ -828,7 +830,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class HasAnnotation<T : Element>(val annotation: Type) : IsoAction<T>() {
+    internal data class HasAnnotation<T : Element>(val annotation: SiftType) : IsoAction<T>() {
         override fun id() = "annotated-by(${annotation.simpleName})"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
@@ -880,12 +882,12 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class ReadAnnotation<T: Element>(val annotation: Type, val field: String) : Action<Iter<T>, IterValues>() {
+    internal data class ReadAnnotation<T: Element>(val annotation: SiftType, val field: String) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun readAnnotation(input: T): ValueNode? {
                 return input.annotations
-                    .find { an -> an.type == annotation }
+                    .findBy(AnnotationNode::type, annotation::matches)
                     ?.let { an -> an[field] }
                     ?.let { ValueNode.from(it, input) }
                     ?.also { ctx.scopeTransition(input, it) }

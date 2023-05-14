@@ -8,6 +8,21 @@ import sift.core.element.AsmClassNode
 import sift.core.element.AsmType
 import kotlin.reflect.KClass
 
+// a 'descriptor' of types
+sealed interface SiftType {
+    val simpleName: String
+    fun matches(rhs: Type): Boolean
+}
+
+class RegexType internal constructor(
+    private val match: Regex
+): SiftType {
+    override val simpleName: String = match.pattern
+    override fun matches(rhs: Type): Boolean = match.containsMatchIn(rhs.name)
+    override fun hashCode(): Int = match.hashCode()
+    override fun equals(other: Any?): Boolean = (other as? RegexType)?.match == match
+}
+
 /**
  * Represents a reference to a class, including its generic type information if
  * applicable. The Type class provides methods and properties to work with both
@@ -16,7 +31,7 @@ import kotlin.reflect.KClass
 class Type private constructor(
     internal val value: String,
     internal val isPrimitive: Boolean = false,
-) {
+): SiftType {
     val name =  if (isPrimitive) when (value) {
         "Z" -> "boolean"
         "B" -> "byte"
@@ -38,18 +53,22 @@ class Type private constructor(
     val isGeneric: Boolean
         get() = signature.args.isNotEmpty()
 
-    val simpleName: String
+    override val simpleName: String
         get() = if (isPrimitive) name else value.substringAfterLast("/").replace('$', '.')
 
     val descriptor: String
         get() = if (isPrimitive) value else "L$internalName;"
 
     val rawType: Type
-        get() = if (isGeneric) Type.from(value.substringBefore("<")) else this
+        get() = if (isGeneric) from(value.substringBefore("<")) else this
+
+    override fun matches(rhs: Type): Boolean {
+        // if this is not generic type, only compare raw types
+        return equals(rhs.takeUnless { !isGeneric && rhs.isGeneric } ?: rhs.rawType)
+    }
 
     override fun equals(other: Any?): Boolean = value == (other as? Type)?.value
     override fun hashCode(): Int = value.hashCode()
-
     override fun toString() = name
 
     companion object {
@@ -92,5 +111,15 @@ inline fun <reified T> type() = type(T::class)
 fun type(cls: KClass<*>) = Type.from(cls)
 fun type(value: String): Type = Type.from(value)
 
+fun regexType(value: String): RegexType = RegexType(value.toRegex())
+fun regexType(value: Regex): RegexType = RegexType(value)
+
 val String.type: Type
     get() = Type.from(this)
+
+val String.regexType: RegexType
+    get() = RegexType(this.toRegex())
+val Regex.type: RegexType
+    get() = RegexType(this)
+
+operator fun List<Type>.contains(type: SiftType): Boolean = any(type::matches)

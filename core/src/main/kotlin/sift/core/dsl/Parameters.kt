@@ -29,7 +29,7 @@ class Parameters internal constructor(
     /**
      * Filters fields to include only those with a type matching type.
      */
-    fun filterType(type: Type) {
+    fun filterType(type: SiftType) {
         action += Action.Parameter.FilterType(type)
     }
 

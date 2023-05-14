@@ -21,8 +21,8 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
     /**
      * Filter elements that are decorated by [annotation]
      */
-    fun annotatedBy(annotation: Type)
-    fun readAnnotation(annotation: Type, field: String): Action<Iter<T>, IterValues>
+    fun annotatedBy(annotation: SiftType)
+    fun readAnnotation(annotation: SiftType, field: String): Action<Iter<T>, IterValues>
 
     fun scope(label: String, f: SCOPE.() -> Unit)
     fun scope(

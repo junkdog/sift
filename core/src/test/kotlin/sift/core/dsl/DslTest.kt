@@ -170,7 +170,7 @@ class DslTest {
         classes {
             entity(root)
             fields {
-                filterType(type<String>())
+                filterType(Regex("String\$").type)
                 entity(f)
                 root["fields"] = f
             }
@@ -1157,6 +1157,15 @@ class DslTest {
 
         classes {
             implements(type("sift.core.api.testdata.set2.GenericInterface"))
+            entity(impl)
+        }.expecting(cns, impl, """
+            ── implementer
+               └─ GenericInterfaceImpl
+            """
+        )
+
+        classes {
+            implements(Regex("GenericInterface").type)
             entity(impl)
         }.expecting(cns, impl, """
             ── implementer

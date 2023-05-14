@@ -70,10 +70,10 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
         shorten: Boolean = false
     ): Action<Iter<ELEMENT>, IterValues>
 
-    fun annotatedBy(annotation: Type)
+    fun annotatedBy(annotation: SiftType)
 
     fun readAnnotation(
-        annotation: Type,
+        annotation: SiftType,
         field: String
     ): Action<Iter<ELEMENT>, IterValues>
 
@@ -118,12 +118,12 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
     ): Action<Iter<ELEMENT>, IterValues> = Action.ReadName(shorten)
 
 
-    override fun annotatedBy(annotation: Type) {
+    override fun annotatedBy(annotation: SiftType) {
         action += Action.HasAnnotation(annotation)
     }
 
     override fun readAnnotation(
-        annotation: Type,
+        annotation: SiftType,
         field: String
     ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
 

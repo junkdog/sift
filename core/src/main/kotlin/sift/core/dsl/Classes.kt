@@ -22,7 +22,7 @@ class Classes internal constructor(
     }
 
     /** Filters the currently inspected class nodes by checking if they implement a particular type. */
-    fun implements(type: Type) {
+    fun implements(type: SiftType) {
         action += Action.Class.FilterImplemented(type)
     }
 
