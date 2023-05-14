@@ -63,6 +63,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
         }
 
+
         scope("register dsl") {
             // 'sift.core.api.Dsl' for sift < 0.7.0
             listOf("sift.core.dsl", "sift.core.api.Dsl").forEach { dsl ->
@@ -89,9 +90,17 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
                     filter(acc_public)
-                    entity(E.dsl, label("\${name}(\${+params:})"),
+                    entity(E.dsl, label("\${icon:}\${name}(\${+params:})"),
                         property("name", readName()),
                     )
+
+                    // mark functions used for updating entity properties
+                    returns {
+                        explodeTypeT("Action<_, _<T>>") {
+                            filter("ValueNode")
+                            property(E.dsl, "icon", withValue("⚙ "))
+                        }
+                    }
 
                     parameters {
                         property(E.dsl, "params", readName(shorten = true))
@@ -133,12 +142,13 @@ private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Styl
             params = params.drop(1)
         }
 
+        val icon = fn["icon"]?.first()?.toString() ?: ""
         val name = fn["name"]?.first()
             ?.toString()
             ?.substringBefore("-")
             ?.let { fnStyle("$extensionPrefix$it") } ?:  ""
         val parameters = params.joinToString(fnStyle(", ")) { paramStyle(it) }
-        return "$name${fnStyle("(")}$parameters${fnStyle(")")}"
+        return "$icon$name${fnStyle("(")}$parameters${fnStyle(")")}"
     }
 
     private fun extensionType(e: Entity): String {
