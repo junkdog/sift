@@ -6,7 +6,6 @@ import sift.core.api.Action
 import sift.core.api.AccessFlags.acc_public
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.template
-import sift.core.dsl.Core
 import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.entity.Entity
@@ -23,15 +22,11 @@ import sift.core.tree.Tree
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = SiftSelfTemplate.EntityTypes
-typealias T = SiftSelfTemplate.AsmTypes
 
 @Suppress("unused")
 class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val entityTypes: Iterable<Entity.Type> = listOf(E.scope, E.dsl, E.action, E.element)
     override val defaultType: Entity.Type = entityTypes.first()
-
-    object AsmTypes {
-    }
 
     object EntityTypes {
         private val String.type
@@ -81,8 +76,8 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     }
 
                     scope("scopes from children of Core<Element>") {
-                        implements(type<Core<*>>())
-                        entity(E.scope, label("\${name}", replace("Dsl.", "!")),
+                        implements(Regex("Core").type)
+                        entity(E.scope, label("\${name}", replace("Dsl.", "")), // Dsl. prefix < 0.7.0
                             property("name", readName()))
                     }
                 }

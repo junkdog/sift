@@ -314,7 +314,7 @@ private fun TypeSignature.toType(): Type {
 private fun ArgType.className(): String {
     return when (this) {
         is ArgType.Array -> wrapped?.className() + "[]"
-        is ArgType.Plain -> type.name
+        is ArgType.Plain -> type.internalName
         is ArgType.Var   -> type.name
     }
 }

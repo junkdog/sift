@@ -1,6 +1,10 @@
 ## Upcoming Release
 
 ### New/Tweaks
+- Introduced `RegexType` for flexible type matching using regular expressions. Use the `.regexType`
+  extension function on a string, or `.type` on a Regex, to create a RegexType. For example,
+  `Regex("java.util.*").type` matches all types in the java.util package. DSL methods `implements()`,
+  `filterType()` and `annotatedBy()` have been updated accordingly.  
 - `-f` option has been updated to also support URI paths and maven coordinates, for example: 
   `sift -f https:///path/to/classes.jar ...` and `sift -f net.onedaybead.sift:core:0.9.0 ...`.
 - `--diff` now also works against class directories, jars, URI:s and maven coordinates. This

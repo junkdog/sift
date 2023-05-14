@@ -1,26 +1,34 @@
 package sift.core.dsl
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import sift.core.api.parseSignature
 import sift.core.asm.internalName
 import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
 import sift.core.element.AsmClassNode
 import sift.core.element.AsmType
+import sift.core.jackson.SiftTypeSerializer
 import kotlin.reflect.KClass
 
 // a 'descriptor' of types
+@JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
 sealed interface SiftType {
     val simpleName: String
     fun matches(rhs: Type): Boolean
 }
 
+@JsonSerialize(using = SiftTypeSerializer.Serializer::class)
+@JsonDeserialize(using = SiftTypeSerializer.Deserializer::class)
 class RegexType internal constructor(
-    private val match: Regex
+    internal val match: Regex
 ): SiftType {
     override val simpleName: String = match.pattern
     override fun matches(rhs: Type): Boolean = match.containsMatchIn(rhs.name)
     override fun hashCode(): Int = match.hashCode()
     override fun equals(other: Any?): Boolean = (other as? RegexType)?.match == match
+    override fun toString(): String = match.pattern
 }
 
 /**
@@ -28,6 +36,8 @@ class RegexType internal constructor(
  * applicable. The Type class provides methods and properties to work with both
  * the raw class and its generic type variant.
  */
+@JsonSerialize(using = SiftTypeSerializer.Serializer::class)
+@JsonDeserialize(using = SiftTypeSerializer.Deserializer::class)
 class Type private constructor(
     internal val value: String,
     internal val isPrimitive: Boolean = false,
@@ -87,7 +97,7 @@ class Type private constructor(
 
         internal fun from(s: String) = Type(s.replace('.', '/'))
         internal fun from(cls: KClass<*>) = from(cls.internalName)
-        internal fun from(type: AsmType) = from(type.className)
+        internal fun from(type: AsmType) = from(type.internalName)
         internal fun from(cn: AsmClassNode) = from(cn.name)
         internal fun from(signature: TypeSignature): Type {
             fun fromType(argType: ArgType): String = when (argType) {
@@ -106,7 +116,6 @@ class Type private constructor(
     }
 }
 
-// FIXME: encode generics: name + generic args
 inline fun <reified T> type() = type(T::class)
 fun type(cls: KClass<*>) = Type.from(cls)
 fun type(value: String): Type = Type.from(value)
