@@ -25,7 +25,7 @@ The resulting system model is composed of entities that describe the system's st
 _Spring-Boot with Axon Framework [template][spring-axon] in action; filtering on shipped and confirmed orders
 in https://github.com/eugenp/tutorials/tree/master/axon._
 
-[![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][profile-t]][profile]
+[![][orders-t]][orders] [![][system-render-t]][system-render] [![][dump-sm-t]][dump-sm] [![][sift-dsl-t]][sift-dsl]
 
  [kitty]: https://sw.kovidgoyal.net/kitty/
 
@@ -49,8 +49,8 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
  [dump-sm]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-spring-axon-dump-system-model.png
  [dump-sm-t]: docs/images/sift-spring-axon-dump-system-model_thumbnail.png
 
- [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-template-sift.png
- [sift-dsl-t]: docs/images/sift-template-sift_thumbnail.png
+ [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-diff-maven-coords.png
+ [sift-dsl-t]: docs/images/sift-diff-maven-coords_thumbnail.png
 
 ## CLI options
 

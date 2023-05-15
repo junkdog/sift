@@ -23,7 +23,7 @@ class SiftTypeTest {
     )
 
     @Test
-    fun `fuzzy match non-generic java lang types`() {
+    fun `match non-generic java lang types`() {
         val javaLang = Regex("""java\.lang\.[\w.]+$""").type // \w does not match <
         assertThat(types.filter(javaLang::matches))
             .containsExactlyInAnyOrder(
@@ -39,7 +39,7 @@ class SiftTypeTest {
     }
 
     @Test
-    fun `fuzzy match concrete map types`() {
+    fun `match concrete map types`() {
         val maps = Regex("[^.]Map").type
         assertThat(types.filter(maps::matches))
             .containsExactlyInAnyOrder(
@@ -51,7 +51,7 @@ class SiftTypeTest {
     }
 
     @Test
-    fun `fuzzy match maps with integer keys`() {
+    fun `match maps with integer keys`() {
         val mapOfInts = Regex("Map<[\\w.]+Integer").type
         assertThat(types.filter(mapOfInts::matches))
             .containsExactlyInAnyOrder(
@@ -61,7 +61,7 @@ class SiftTypeTest {
     }
 
     @Test
-    fun `fuzzy match types operator contains`() {
+    fun `match types operator contains`() {
         assertThat(Regex("Field").type in types).isTrue
         assertThat(Regex("Field2").type in types).isFalse
     }

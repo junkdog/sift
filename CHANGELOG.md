@@ -1,5 +1,17 @@
 ## Upcoming Release
 
+![sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"][sift-dsl]
+
+The `sift` template now enables direct comparison between releases without any
+local prerequisites. Previously, one needed to have the older .jar locally available and execute a `--save` on
+the older version before running `--diff <OLD_VERSION.JSON>`. The new release simplifies the process. Now,
+the `--diff` command can be applied directly to Maven coordinates, eliminating the previous steps. For example:
+`sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"` to
+identify changes to the API in the latest release.
+
+ [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-diff-maven-coords.png
+ [sift-dsl-t]: docs/images/sift-diff-maven-coords_thumbnail.png
+
 ### New/Tweaks
 - Introduced `RegexType` for flexible type matching using regular expressions. Use the `.regexType`
   extension function on a string, or `.type` on a Regex, to create a RegexType. For example,
