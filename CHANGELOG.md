@@ -3,7 +3,7 @@
 ![sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"][sift-dsl]
 
 The `sift` template now enables direct comparison between releases without any
-local prerequisites. Previously, one needed to have the older .jar locally available and execute a `--save` on
+local prerequisites. Previously, one needed to have the older `.jar` locally available and execute a `--save` on
 the older version before running `--diff <OLD_VERSION.JSON>`. The new release simplifies the process. Now,
 the `--diff` command can be applied directly to Maven coordinates, eliminating the previous steps. For example:
 `sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"` to
@@ -25,11 +25,12 @@ identify changes to the API in the latest release.
 - `--maven-repository` option has been added to specify additional Maven repositories for downloading artifacts.
   By default, Maven Central and local user repositories are always included.
 - Remaining usages of `org.objectweb.asm.Type` replaced with `sift.core.dsl.Type`.
+- `sift` template: DSL methods for dealing with entity properties are now prefixed with a :gear: icon.
 - DSL: The `fork` actions displayed when using the `--profile` flag now incorporate the
   labels from the `scope()` functions.  
 
 ### Breaking change
-- - `siftrc.sh` and `siftrc.zsh` replaced by `sift.config`. Update custom configurations to this new file.
+- `siftrc.sh` and `siftrc.zsh` replaced by `sift.config`. Update custom configurations to this new file.
 
 
 ## sift-0.9.0 2023-04-22
