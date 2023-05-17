@@ -1,9 +1,9 @@
+name: 📦 package release artifacts
+
 on:
   push:
     tags:
     - 'sift-*'
-
-name: Upload Release Asset
 
 jobs:
   build:
