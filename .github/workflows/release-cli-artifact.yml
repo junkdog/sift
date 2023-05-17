@@ -32,7 +32,7 @@ jobs:
           cp cli/target/sift-cli.jar sift-${RELEASE_VERSION}-jvm
           cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-jvm
           cp release-scripts/install.sh sift-${RELEASE_VERSION}-jvm
-          tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-jvm
+          tar -czvf sift-jvm.tar.gz sift-${RELEASE_VERSION}-jvm
 
       - name: package native sift for linux
         run: |
@@ -43,7 +43,7 @@ jobs:
           cp cli/target/sift-cli.jar sift-${RELEASE_VERSION}-linux-amd64
           cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-linux-amd64
           cp release-scripts/install.sh sift-${RELEASE_VERSION}-linux-amd64
-          tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-linux-amd64
+          tar -czvf sift-linux-amd64.tar.gz sift-${RELEASE_VERSION}-linux-amd64
 
       - name: upload artifacts
         uses: softprops/action-gh-release@v1
