@@ -198,7 +198,7 @@ can include multiple existing templates to better describe the underlying system
 keeping the resulting DSL concise.
 
  [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L44:L68
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:63
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:L63
 
 
 

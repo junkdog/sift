@@ -1,5 +1,8 @@
 ## Upcoming Release
 
+
+## sift-0.10.0 2023-05-17
+
 ![sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"][sift-dsl]
 
 The `sift` template now enables direct comparison between releases without any
@@ -9,7 +12,7 @@ the `--diff` command can be applied directly to Maven coordinates, eliminating t
 `sift --template sift -f "net.onedaybeard.sift:core:0.10.0" --diff "net.onedaybeard.sift:core:0.9.0"` to
 identify changes to the API in the latest release.
 
- [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-diff-maven-coords.png
+ [sift-dsl]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-diff-maven-coords.png
  [sift-dsl-t]: docs/images/sift-diff-maven-coords_thumbnail.png
 
 ### New/Tweaks
