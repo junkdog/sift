@@ -299,7 +299,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>3.0.0</version>
                         <configuration>
                             <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -308,6 +308,13 @@
                             <goals>deploy</goals>
                             <tagNameFormat>sift-@{project.version}</tagNameFormat>
                         </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.release</groupId>
+                                <artifactId>maven-release-semver-policy</artifactId>
+                                <version>3.0.0</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
