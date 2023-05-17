@@ -26,9 +26,9 @@ jobs:
       - name: package sift for jvm
         run: |
           export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          mkdir sift-jvm
+          mkdir sift-${RELEASE_VERSION}-jvm
           
-          cp cli/target/sift-cli.jar sift-jvm
+          cp cli/target/sift-cli.jar sift-${RELEASE_VERSION}-jvm
           cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-jvm
           cp release-scripts/install.sh sift-${RELEASE_VERSION}-jvm
           tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-jvm
@@ -36,9 +36,10 @@ jobs:
       - name: package native sift for linux
         run: |
           export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          mkdir sift-linux-amd64
+          mkdir sift-${RELEASE_VERSION}-linux-amd64
           
-          cp cli/target/sift sift-linux-amd64
+          cp cli/target/sift sift-${RELEASE_VERSION}-linux-amd64
+          cp cli/target/sift-cli.jar sift-${RELEASE_VERSION}-linux-amd64
           cp sift.sh sift.zsh README.md sift-${RELEASE_VERSION}-linux-amd64
           cp release-scripts/install.sh sift-${RELEASE_VERSION}-linux-amd64
           tar -czvf ${sift_path}.tar.gz sift-${RELEASE_VERSION}-linux-amd64
@@ -49,6 +50,5 @@ jobs:
           files: |
             sift-linux-amd64.tar.gz
             sift-jvm.tar.gz
-            cli/target/sift-cli.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
