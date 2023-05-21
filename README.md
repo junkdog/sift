@@ -43,9 +43,6 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
  [system-render]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-spring-axon-render.png
  [system-render-t]: docs/images/sift-spring-axon-render_thumbnail.png
 
- [profile]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-spring-axon-profile-template.png
- [profile-t]: docs/images/sift-spring-axon-profile-template_thumbnail.png
-
  [dump-sm]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-spring-axon-dump-system-model.png
  [dump-sm-t]: docs/images/sift-spring-axon-dump-system-model_thumbnail.png
 
@@ -190,7 +187,7 @@ template {
 Input elements (classes, methods, parameters, fields, generic signatures) are processed in batches,
 line-by-line. The execution of a System Model Template can be introspected with the `--profile` option.
 
-![sift profile template](docs/images/sift-spring-axon-profile-pipeline.png)
+![sift profile JPA template](docs/images/sift-profile-jpa.png)
 
 A typical template can be expressed in about 100-200 lines of code. Some templates,
 such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined templates
