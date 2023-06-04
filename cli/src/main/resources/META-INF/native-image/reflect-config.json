@@ -562,7 +562,16 @@
   "name":"sift.core.api.Action$Field"
 },
 {
-  "name":"sift.core.api.Action$Field$ExplodeType"
+  "name":"sift.core.api.Action$Field$ExplodeType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["boolean"] }, 
+    {"name":"<init>","parameterTypes":["boolean","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Field$FieldScope",

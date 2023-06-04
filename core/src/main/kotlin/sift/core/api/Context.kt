@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
-import net.onedaybeard.collectionsby.filterNotBy
 import net.onedaybeard.collectionsby.findBy
 import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
@@ -68,7 +67,6 @@ internal data class Context(
 
                 parents[node]?.let { parents ->
                     parents
-                        .filterNotBy(TypeClassNode::cn, null)
                         .onEach(found::add)
                         .mapNotNull(TypeClassNode::cn)
                         .onEach(::recurse)
@@ -339,16 +337,14 @@ private val ClassNode.parentType: Type?
     get() = extends?.let(TypeSignature::toType) ?: superType
 
 private fun Map<Type, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
-
-    fun next(tcn: TypeClassNode): TypeClassNode? {
-        val parentType = tcn.cn!!.parentType ?: return null
-        val parent = get(parentType.rawType) ?: return null
+    fun Map<Type, ClassNode>.next(tcn: TypeClassNode): TypeClassNode? {
+        val parentType = tcn.cn?.parentType ?: return null
+        val parent = get(parentType.rawType)
         return TypeClassNode(parentType, parent)
     }
 
     return generateSequence(TypeClassNode(cn.type, cn)) { tcn -> next(tcn) }
         .drop(1)
-        .map { (type, cn) -> TypeClassNode(type, cn) }
         .toList()
 }
 

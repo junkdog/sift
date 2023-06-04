@@ -8,6 +8,7 @@ import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.dsl.Methods
 import sift.core.dsl.ScopeEntityPredicate
+import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.template
 import sift.core.graphviz.Dot
 import sift.core.terminal.Gruvbox.light2
@@ -94,7 +95,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
                         registerEndpoints("PUT", A.putMapping)
 
                         // not all controllers are REST controllers (@MessageMapping/rsocket endpoints)
-                        scope("attempt registering endpoints", ScopeEntityPredicate.ifExists, E.endpoint) {
+                        scope("attempt registering endpoints", ifExists, E.endpoint) {
                            E.controller["endpoints"] = E.endpoint
                         }
                     }

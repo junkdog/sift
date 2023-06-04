@@ -1,5 +1,11 @@
 ## Upcoming Release
 
+### New/Tweaks
+
+
+### Fixes
+- DSL/Class: `implements()` now correctly matches types even when they are not incorporated within the input classes.
+- SiftType `RegexType::simpleName` trims the regex pattern to only include the substring following the last dot. 
 
 ## sift-0.10.0 2023-05-17
 
