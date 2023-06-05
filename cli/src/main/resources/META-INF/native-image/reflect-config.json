@@ -493,7 +493,15 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sift.core.api.Action$Class$IntoSuperclassSignature"
+  "name":"sift.core.api.Action$Class$IntoSuperclassSignature",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Class$ReadType"
