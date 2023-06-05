@@ -1,6 +1,7 @@
 ## Upcoming Release
 
 ### New/Tweaks
+- Added `jakarta-ws`, "Supporting template for Jakarta RESTful Web Services".
 
 ### Fixes
 - DSL/Class: `implements()` now correctly matches types even when they are not incorporated within the input classes.

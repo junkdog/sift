@@ -71,6 +71,16 @@
             <artifactId>sift</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.onedaybeard.sift.template</groupId>
+            <artifactId>jakarta-ws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.onedaybeard.sift.template</groupId>
+            <artifactId>dropwizard</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
