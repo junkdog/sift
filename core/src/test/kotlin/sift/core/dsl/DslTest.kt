@@ -572,10 +572,10 @@ class DslTest {
         fun t(strategy: PropertyStrategy, expect: String) {
             classes {
                 entity(e, label("\${+props}"),
-                    property(strategy, "props", withValue("a")))
+                    property("props", strategy, withValue("a")))
 
-                property(strategy, e, "props", withValue("a"))
-                property(strategy, e, "props", withValue("b"))
+                property(e, "props", strategy, withValue("a"))
+                property(e, "props", strategy, withValue("b"))
             }.expecting(listOf(classNode(SomeController::class)), e, """
                 ── e
                    └─ $expect

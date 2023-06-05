@@ -2,10 +2,14 @@
 
 ### New/Tweaks
 
-
 ### Fixes
 - DSL/Class: `implements()` now correctly matches types even when they are not incorporated within the input classes.
 - SiftType `RegexType::simpleName` trims the regex pattern to only include the substring following the last dot. 
+
+### Breaking changes
+- DSL: The complete parameter sequence for the `property()` method has been revised to (entity, key, strategy, extract).
+  For the relevant overloads that include `strategy`, it is now positioned prior to the `extract` parameter.
+
 
 ## sift-0.10.0 2023-05-17
 

@@ -11,9 +11,9 @@ import sift.core.terminal.TextTransformer
 interface EntityPropertyRegistrar<ELEMENT : Element> {
     /** updates existing entities with property */
     fun property(
-        strategy: PropertyStrategy = PropertyStrategy.replace,
         entity: Entity.Type,
         key: String,
+        strategy: PropertyStrategy,
         extract: Action<Iter<ELEMENT>, IterValues>
     )
 
@@ -21,7 +21,7 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
         entity: Entity.Type,
         key: String,
         extract: Action<Iter<ELEMENT>, IterValues>
-    ) = property(PropertyStrategy.replace, entity, key, extract)
+    ) = property(entity, key, PropertyStrategy.replace, extract)
 
     /**
      * Associates entity property [tag] with result of [extract] action.
@@ -34,15 +34,15 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
      * ```
      */
     fun property(
-        strategy: PropertyStrategy,
         key: String,
+        strategy: PropertyStrategy,
         extract: Action<Iter<ELEMENT>, IterValues>
     ): Property<ELEMENT>
 
     fun property(
         key: String,
         extract: Action<Iter<ELEMENT>, IterValues>
-    ): Property<ELEMENT> = property(PropertyStrategy.replace, key, extract)
+    ): Property<ELEMENT> = property(key, PropertyStrategy.replace, extract)
 
     /**
      * Associates [value] with entity.
@@ -89,9 +89,9 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
 ) : EntityPropertyRegistrar<ELEMENT> {
 
     override fun property(
-        strategy: PropertyStrategy,
         entity: Entity.Type,
         key: String,
+        strategy: PropertyStrategy,
         extract: Action<Iter<ELEMENT>, IterValues>
     ) {
         action += Action.Fork(
@@ -128,8 +128,8 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
     ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
 
     override fun property(
-        strategy: PropertyStrategy,
         key: String,
+        strategy: PropertyStrategy,
         extract: Action<Iter<ELEMENT>, IterValues>
     ): Property<ELEMENT> {
         return Property(key, extract andThen Action.UpdateEntityProperty(strategy, key))

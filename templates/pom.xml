@@ -15,14 +15,16 @@
     <name>sift template</name>
 
     <modules>
-        <module>template-core</module>
         <module>deprecated</module>
-        <module>spring-boot</module>
-        <module>spring-boot-axon-cqrs</module>
-        <module>jpa</module>
-        <module>spring-crud</module>
+        <module>jakarta-ws</module>
+        <module>dropwizard</module>
         <module>jdbi</module>
+        <module>jpa</module>
         <module>sift</module>
+        <module>spring-boot-axon-cqrs</module>
+        <module>spring-boot</module>
+        <module>spring-crud</module>
+        <module>template-core</module>
     </modules>
 
     <profiles>
