@@ -5,3 +5,4 @@
 tmp/
 target/
 template-examples/spring-petclinic-template/spring-petclinic
+templates/sandbox/src/main/kotlin/sift/template/sandbox/SandboxTemplate.kt
