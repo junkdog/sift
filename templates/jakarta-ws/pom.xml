@@ -11,7 +11,7 @@
 
     <artifactId>jakarta-ws</artifactId>
     <packaging>jar</packaging>
-    <name>jakarta-ws template</name>
+    <name>sift template - jakarta-ws</name>
 
     <dependencies>
         <dependency>

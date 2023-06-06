@@ -11,7 +11,7 @@
 
     <artifactId>deprecated</artifactId>
     <packaging>jar</packaging>
-    <name>deprecation template</name>
+    <name>sift template - deprecations</name>
 
     <dependencies>
         <dependency>

@@ -11,7 +11,7 @@
 
     <artifactId>jdbi</artifactId>
     <packaging>jar</packaging>
-    <name>jdbi template</name>
+    <name>sift template - jdbi</name>
 
     <dependencies>
         <dependency>

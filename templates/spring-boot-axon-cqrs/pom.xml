@@ -11,7 +11,7 @@
 
     <artifactId>spring-boot-axon-cqrs</artifactId>
     <packaging>jar</packaging>
-    <name>spring-boot axon cqrs template</name>
+    <name>sift template - spring-boot axon cqrs</name>
 
     <dependencies>
         <dependency>

@@ -11,7 +11,7 @@
 
     <artifactId>template-core</artifactId>
     <packaging>jar</packaging>
-    <name>template core</name>
+    <name>sift template - template core</name>
 
     <dependencies>
         <dependency>

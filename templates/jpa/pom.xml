@@ -11,7 +11,7 @@
 
     <artifactId>jpa</artifactId>
     <packaging>jar</packaging>
-    <name>jpa template</name>
+    <name>sift template - jpa</name>
 
     <dependencies>
         <dependency>

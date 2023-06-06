@@ -11,7 +11,7 @@
 
     <artifactId>spring-crud</artifactId>
     <packaging>jar</packaging>
-    <name>spring data template</name>
+    <name>sift template - spring data</name>
 
     <dependencies>
         <dependency>

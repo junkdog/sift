@@ -11,7 +11,7 @@
 
     <artifactId>spring-boot</artifactId>
     <packaging>jar</packaging>
-    <name>spring-boot controller template</name>
+    <name>sift template - spring-boot controller</name>
 
     <dependencies>
         <dependency>

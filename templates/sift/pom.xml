@@ -11,7 +11,7 @@
 
     <artifactId>sift</artifactId>
     <packaging>jar</packaging>
-    <name>sift-self instrumenter</name>
+    <name>sift template - sift-self</name>
 
     <dependencies>
         <dependency>
