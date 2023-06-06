@@ -1,5 +1,14 @@
 ## Upcoming Release
 
+### Error Handling
+sift's error reporting mechanism has been improved and now supports integration with the `--profile` option.
+
+![profile-trace-error](docs/images/sift-profile-trace-error.png)
+
+The `--profile` option assists in identifying problematic DSL methods by marking the operation causing the
+error. This feature enables traceability back to the template DSL.  
+
+
 ### New/Tweaks
 - Added `jakarta-ws`, "Supporting template for Jakarta RESTful Web Services".
 

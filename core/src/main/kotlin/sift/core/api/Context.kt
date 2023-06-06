@@ -378,6 +378,7 @@ enum class MeasurementScope(val id: String) {
     Method("method-scope"),
     Parameter("parameter-scope"),
     TypeErased("element-scope"),
+    Exception("exception-scope"), // used as marker when an exception is thrown
     FromContext("")
 }
 
@@ -392,8 +393,7 @@ internal fun Context.debugTrails() {
     val colWidth = elementTraces.flatMap { (_, trails) -> trails }
         .flatMap(ElementTrace::toList)
         .map(Element::toString)
-        .map(String::length)
-        .maxOrNull() ?: 0
+        .maxOfOrNull(String::length) ?: 0
 
     elementTraces.flatMap { (_, trails) -> trails }
         .map { it.debugString(this, colWidth) }

@@ -14,8 +14,10 @@ class TreeWalker<T>(val root: Tree<T>) : Sequence<Tree<T>> {
         }
 
         private fun prepareNext(): Tree<T>? {
+            // need to add children in reverse, so that last() during walk()
+            // returns the last child of the last node
             return stack.removeLastOrNull()
-                ?.also { stack.addAll(it.children()) }
+                ?.also { stack.addAll(it.children().reversed()) }
         }
     }
 }

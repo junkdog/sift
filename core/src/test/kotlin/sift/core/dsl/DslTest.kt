@@ -1751,7 +1751,7 @@ class DslTest {
             }
         }.expecting { }
 
-        assertThrows<EntityNotFoundException> {
+        assertThrowsTemplateProcessingException<EntityNotFoundException> {
             classes {
                 scope("", ifExistsNot, foo) {
                     foo["bars"] = bar
@@ -1865,7 +1865,7 @@ class DslTest {
             }
         }.expecting(cns) {}
 
-        assertThrows<IllegalEntityAssignmentException> {
+        assertThrowsTemplateProcessingException<IllegalEntityAssignmentException> {
             classes {
                 entity(et, property("type", readType()))
                 methods {
@@ -1887,7 +1887,7 @@ class DslTest {
                 entity(Entity.Type("a"))
             }.expecting { }
 
-            assertThrows<UniqueElementPerEntityViolation> {
+            assertThrowsTemplateProcessingException<UniqueElementPerEntityViolation> {
                 classes {
                     entity(Entity.Type("a"))
                     entity(Entity.Type("b"))
@@ -1900,20 +1900,20 @@ class DslTest {
             val foo = Entity.Type("foo")
             val bar = Entity.Type("bar")
 
-            assertThrows<EntityNotFoundException> {
+            assertThrowsTemplateProcessingException<EntityNotFoundException> {
                 classes {
                     foo["bars"] = bar
                 }.expecting { }
             }
 
-            assertThrows<EntityNotFoundException> {
+            assertThrowsTemplateProcessingException<EntityNotFoundException> {
                 classes {
                     entity(foo)
                     foo["bars"] = bar
                 }.expecting { }
             }
 
-            assertThrows<EntityNotFoundException> {
+            assertThrowsTemplateProcessingException<EntityNotFoundException> {
                 classes {
                     entity(bar)
                     foo["bars"] = bar
@@ -1942,3 +1942,10 @@ private class FieldClass {
 
 private class PayLoad
 
+internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline f: () -> Unit) {
+    val t = assertThrows<TemplateProcessingException> {
+        f()
+    }
+
+    assertThat(t.cause).isInstanceOf(T::class.java)
+}

@@ -21,6 +21,7 @@ import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
 import sift.core.template.SystemModelTemplate
 import sift.core.template.deserialize
+import sift.core.terminal.ExceptionHandler
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -42,6 +43,7 @@ import sift.core.terminal.Gruvbox.yellow2
 import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
+import sift.core.terminal.printProfile
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
@@ -142,21 +144,8 @@ object SiftCli : CliktCommand(
         debugLog = debug
 
         val terminal = Terminal(ansi)
-        Thread.setDefaultUncaughtExceptionHandler { _, e ->
-            val err = red2 + inverse + bold
-            terminal.forStdErr().apply {
-                println("${err("${e::class.simpleName!!}:")} ${fg(e.message ?: "")}")
-                if (stacktrace) {
-                    val trace = e.stackTraceToString()
-                        .lines()
-                        .drop(1)
-                        .joinToString("\n")
-                    println(fg(trace))
-                }
-
-                println(fg("exiting..."))
-            }
-        }
+        val exceptionHandler = ExceptionHandler(terminal, stacktrace)
+        Thread.setDefaultUncaughtExceptionHandler { _, e -> exceptionHandler(e) }
 
         validateParameterOptions()
 
@@ -548,53 +537,7 @@ object SiftCli : CliktCommand(
 
     private fun profile(terminal: Terminal) {
         val (sm, _) = buildTree(tree.treeRoot)
-        fun MeasurementScope.style(): TextStyle = when (this) {
-            MeasurementScope.Template    -> fg
-            MeasurementScope.Class       -> aqua2
-            MeasurementScope.Field       -> blue2
-            MeasurementScope.Method      -> green2
-            MeasurementScope.Parameter   -> purple2
-            MeasurementScope.FromContext -> red2 // shouldn't happen often
-            MeasurementScope.Signature   -> orange2
-            MeasurementScope.TypeErased  -> blue1 + bold
-        }
-
-        val gradient = listOf(dark4, gray, light3, yellow1, yellow2, red1, red2)
-
-        var lastEntityCount = 0
-
-        // print headers
-        terminal.println((fg + bold)("     exec  ety#    in      out"))
-        terminal.println(sm.measurements.toString(
-            format = { measurement ->
-                measurement.scopeIn.style()(measurement.action)
-            },
-            prefix = { measurement ->
-                val ms = measurement.execution.inWholeMicroseconds / 1000.0
-                val c = if (ms < 1) {
-                    dark3
-                } else {
-                    gradient[max(0, min(gradient.lastIndex, log(ms, 2.5).toInt()))]
-                }
-
-                val c2 = if (measurement.entites > lastEntityCount) (fg + bold) else dark4
-                lastEntityCount = measurement.entites
-
-                val input = measurement.scopeIn.style()
-                val output = when (measurement.scopeOut) {
-                    MeasurementScope.FromContext -> measurement.scopeIn
-                    else                         -> measurement.scopeOut
-                }.style()
-
-                if (measurement.execution.isPositive()) {
-                    "${c("%6.2f ms")} ${c2("%5d")} ${input("%5d")} ${light0("->")} ${output("%5d")}  "
-                        .format(ms, measurement.entites, measurement.input, measurement.output)
-                } else {
-                    "${c("         ")} ${c2("%5s")} ${input("%5d")} ${light0("->")} ${output("%5d")}  "
-                        .format("", measurement.input, measurement.output)
-                }
-            }
-        ))
+        printProfile(terminal, sm.measurements)
     }
 }
 

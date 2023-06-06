@@ -17,7 +17,6 @@
     <modules>
         <module>deprecated</module>
         <module>jakarta-ws</module>
-        <module>dropwizard</module>
         <module>jdbi</module>
         <module>jpa</module>
         <module>sift</module>

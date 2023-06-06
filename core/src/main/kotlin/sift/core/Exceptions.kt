@@ -1,10 +1,11 @@
 package sift.core
 
 import sift.core.api.Action
+import sift.core.api.Measurement
 import sift.core.element.Element
 import sift.core.entity.Entity
+import sift.core.tree.Tree
 import kotlin.reflect.KClass
-
 
 internal object Throw {
     fun entityAlreadyExists(new: Entity, old: Entity, element: Element): Nothing {
@@ -96,3 +97,8 @@ internal class IllegalEntityAssignmentException(
 internal class RhsEntityResolutionException(
     message: String
 ) : SiftModelException(message)
+
+internal class TemplateProcessingException(
+    val trace: Tree<Measurement>?,
+    override val cause: Throwable,
+) : SiftException("Template threw exception: ${cause.message}", cause)
