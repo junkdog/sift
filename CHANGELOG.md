@@ -1,5 +1,8 @@
 ## Upcoming Release
 
+
+## sift-0.11.0 2023-06-06
+
 ### Error Handling
 sift's error reporting mechanism has been improved and now supports integration with the `--profile` option.
 
