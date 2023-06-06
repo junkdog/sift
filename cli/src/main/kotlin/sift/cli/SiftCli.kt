@@ -44,6 +44,7 @@ import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.core.terminal.printProfile
+import sift.core.terminal.stripEmoji
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
@@ -276,7 +277,7 @@ object SiftCli : CliktCommand(
         filterTree(tree)
         backtrackStyling(tree, theme)
 
-        println(tree.toString(EntityNode::toString))
+        println(tree.toString(entityNodeFormatter()))
     }
 
     @JvmName("printTreeDiff")
@@ -309,8 +310,15 @@ object SiftCli : CliktCommand(
                     else          -> "     "
                 }
             },
-            format = EntityNode::toString)
+            format = entityNodeFormatter())
         )
+    }
+
+    private fun entityNodeFormatter(): EntityNode.() -> String {
+        return when {
+            tree.noEmoji -> { { toString().stripEmoji() } }
+            else         -> EntityNode::toString
+        }
     }
 
     fun filterTree(tree: Tree<EntityNode>) {

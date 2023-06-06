@@ -1,6 +1,7 @@
 package sift.core
 
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.objectweb.asm.tree.ClassNode
@@ -12,6 +13,7 @@ import sift.core.asm.classNode
 import sift.core.dsl.classes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import java.util.regex.Pattern
 
 
 @Disabled
@@ -20,7 +22,6 @@ class KnownLimitationsTest {
     init {
         debugLog = true
     }
-
 
     @Test
     fun `correctly identify relations when scanning instantiations`() {

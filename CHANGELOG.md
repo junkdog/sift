@@ -10,6 +10,8 @@ error. This feature enables traceability back to the template DSL.
 
 
 ### New/Tweaks
+- `--no-emoji` option to disable emoji output, for terminals that do not support it. The
+  implementation is coarse, but should work for most emoji. 
 - Added `jakarta-ws`, "Supporting template for Jakarta RESTful Web Services".
 
 ### Fixes

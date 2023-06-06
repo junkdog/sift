@@ -2,6 +2,7 @@ package sift.cli
 
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
@@ -44,4 +45,8 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
             help = "Tree built around requested entity type. (repeatable)")
         .convert { Entity.Type(it) }
         .multiple()
+
+    val noEmoji: Boolean by option("--no-emoji",
+            help = "Disables printing emoji in entity labels.")
+        .flag()
 }

@@ -81,6 +81,7 @@ Entity tree/graph options:
   -e, --exclude REGEX             Exclude nodes when label matches REGEX. (repeatable)
   -E, --exclude-type ENTITY_TYPE  Exclude entity types from tree. (repeatable)
   -r, --tree-root ENTITY_TYPE     Tree built around requested entity type. (repeatable)
+  --no-emoji                      Disables printing emoji in entity labels.
 
 Visualization options:
   -R, --render                          Render entities with graphviz's DOT language.
@@ -195,7 +196,7 @@ can include multiple existing templates to better describe the underlying system
 keeping the resulting DSL concise.
 
  [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L44:L68
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:L63
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:L61
 
 
 
