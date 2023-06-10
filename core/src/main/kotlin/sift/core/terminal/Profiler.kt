@@ -1,7 +1,9 @@
 package sift.core.terminal
 
 import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.ajalt.mordant.rendering.TextStyles.italic
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.Measurement
 import sift.core.api.MeasurementScope
@@ -9,11 +11,14 @@ import sift.core.api.SystemModel
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
+import sift.core.terminal.Gruvbox.dark1
+import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.dark4
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
+import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Gruvbox.light3
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.terminal.Gruvbox.purple2
@@ -26,6 +31,7 @@ import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 
+
 fun printProfile(
     terminal: Terminal,
     trace: Tree<Measurement>
@@ -36,12 +42,12 @@ fun printProfile(
     var lastEntityCount = 0
     terminal.println(trace.toString(
         format = { measurement ->
-            measurement.scopeIn.style()(measurement.action)
+            measurement.scopeIn.style()(measurement.action.replace(Label.match, Label.style("\$1")))
         },
         prefix = { measurement ->
             val ms = measurement.execution.inWholeMicroseconds / 1000.0
             val c = if (ms < 1) {
-                Gruvbox.dark3
+                dark3
             } else {
                 gradient[max(0, min(gradient.lastIndex, log(ms, 2.5).toInt()))]
             }
@@ -64,6 +70,11 @@ fun printProfile(
             }
         }
     ))
+}
+
+private object Label {
+    val match = Regex("(\"[^\"]*\")")
+    val style = light3 + italic + bold
 }
 
 private val gradient = listOf(
