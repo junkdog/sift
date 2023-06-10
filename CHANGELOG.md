@@ -1,6 +1,10 @@
 ## Upcoming Release
 
 
+### Fixes
+- SiftType `Type::simpleName` now correctly handles types with generic signatures.
+
+
 ## sift-0.11.0 2023-06-06
 
 ### Error Handling
@@ -11,7 +15,7 @@ sift's error reporting mechanism has been improved and now supports integration 
 The `--profile` option assists in identifying problematic DSL methods by marking the operation causing the
 error. This feature enables traceability back to the template DSL.  
 
-
+  
 ### New/Tweaks
 - `--no-emoji` option to disable emoji output, for terminals that do not support it. The
   implementation is coarse, but should work for most emoji. 

@@ -65,7 +65,11 @@ class Type private constructor(
         get() = signature.args.isNotEmpty()
 
     override val simpleName: String
-        get() = if (isPrimitive) name else value.substringAfterLast("/").replace('$', '.')
+        get() = when {
+            isPrimitive -> name
+            isGeneric   -> signature.toString()
+            else        -> internalName.substringAfterLast("/").replace('$', '.')
+        }
 
     val descriptor: String
         get() = if (isPrimitive) value else "L$internalName;"
