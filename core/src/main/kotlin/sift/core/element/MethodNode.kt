@@ -7,6 +7,7 @@ import sift.core.asm.asSequence
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
+import sift.core.dsl.Type
 import sift.core.kotlin.KotlinFunction
 
 class MethodNode private constructor(
@@ -28,6 +29,14 @@ class MethodNode private constructor(
     val desc: String
         get() = mn.desc
 
+    /** returns true if this function is a kotlin extension function */
+    val isExtension: Boolean
+        get() = kfn?.isExtension == true
+
+    /** returns the type of the receiver if this function is a kotlin extension function */
+    val receiver: Type?
+        get() = kfn?.receiver
+
     val signature: MethodSignatureNode? by lazy {
         mn.signature(cn.signature?.formalParameters ?: listOf())
     }
@@ -35,7 +44,7 @@ class MethodNode private constructor(
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
-    val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn)
+    val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn, kfn)
 
     val access: Int
         get() = mn.access

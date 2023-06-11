@@ -12,8 +12,10 @@ import sift.core.element.AsmClassNode
 internal class KotlinClass(
     private val kmClass: KmClass,
 ) {
-    val type: Type = kmClass.name.let(Type.Companion::from)
+    val type: Type = kmClass.name.let(Type::from)
     val functions: List<KotlinFunction> = kmClass.functions.map(::KotlinFunction)
+
+    override fun toString(): String = type.simpleName
 
     companion object {
         fun from(cn: AsmClassNode): KotlinClass? = cn

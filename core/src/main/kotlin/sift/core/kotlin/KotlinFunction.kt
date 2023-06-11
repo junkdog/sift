@@ -18,6 +18,9 @@ internal class KotlinFunction(
     val isInternal: Boolean
         get() = Flag.IS_INTERNAL(kmFunction.flags)
 
+    val isExtension: Boolean
+        get() = receiver != null
+
     val receiver: Type? = kmFunction
         .receiverParameterType
         ?.let(Type::from)
@@ -27,6 +30,8 @@ internal class KotlinFunction(
         receiver?.let { "." },
         kmFunction.name,
     ).joinToString("")
+
+    val parameters: List<KotlinParameter> = kmFunction.valueParameters.map(KotlinParameter::from)
 
     fun matches(other: AsmMethodNode): Boolean {
         return kmFunction.signature?.name == other.name
@@ -46,23 +51,5 @@ internal class KotlinFunction(
     }
 }
 
-private fun Type.Companion.from(typeProjection: KmTypeProjection): Type {
-    return from(typeProjection.type!!)
-}
 
 
-private fun Type.Companion.from(kmType: KmType): Type {
-    val rawType = when (val c = kmType.classifier) {
-        is KmClassifier.Class         -> from(c.name)
-        is KmClassifier.TypeAlias     -> from(c.name)
-        is KmClassifier.TypeParameter -> error("type parameters are no yet supported")
-    }
-
-    val generics = kmType.arguments
-        .takeIf(List<KmTypeProjection>::isNotEmpty)
-        ?.map(::from)
-        ?.let { "<${it.joinToString()}>" }
-        ?: ""
-
-    return from(rawType.internalName + generics)
-}

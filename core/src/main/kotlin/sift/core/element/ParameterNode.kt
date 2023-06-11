@@ -6,10 +6,13 @@ import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 import sift.core.dsl.Type
+import sift.core.kotlin.KotlinFunction
+import sift.core.kotlin.KotlinParameter
 
 class ParameterNode private constructor(
     private val cn: ClassNode,
     private val mn: MethodNode,
+    private val kpn: KotlinParameter? = null,
     val name: String,
     val type: Type,
     val signature: TypeSignature?,
@@ -24,17 +27,30 @@ class ParameterNode private constructor(
     override val simpleName: String
         get() = type.simpleName
 
-    override fun equals(other: Any?): Boolean {
-        return this === other
-    }
+    /** returns true if this parameter is a kotlin extension function receiver */
+    val isReceiver: Boolean
+        get() = kpn?.isExtensionReceiver == true
 
+    override fun equals(other: Any?): Boolean = this === other
     override fun hashCode(): Int = hash
-
     override fun toString(): String = "$mn($name: ${type.simpleName})"
 
     companion object {
-        fun from(cn: ClassNode, mn: MethodNode, asmMn: AsmMethodNode): List<ParameterNode> {
+        internal fun from(
+            cn: ClassNode,
+            mn: MethodNode,
+            asmMn: AsmMethodNode,
+            kfn: KotlinFunction?,
+        ): List<ParameterNode> {
             val argumentTypes = AsmType.getArgumentTypes(asmMn.desc)
+            val extensionFunctionOffset = kfn?.isExtension?.takeIf { it }?.let { 1 } ?: 0
+
+            fun kotlinParameter(idx: Int): KotlinParameter? {
+                return when {
+                    extensionFunctionOffset == 1 && idx == 0 -> KotlinParameter.from(mn.receiver!!)
+                    else -> kfn?.parameters?.getOrNull(idx - extensionFunctionOffset)
+                }
+            }
 
             val annotations: List<List<AsmAnnotationNode>> by lazy {
                 val visible = asmMn.visibleParameterAnnotations?.toList()
@@ -61,6 +77,7 @@ class ParameterNode private constructor(
                     .mapIndexed { idx, (type, anno) -> ParameterNode(
                         cn,
                         mn,
+                        kotlinParameter(idx),
                         asmMn.parameters[idx].name,
                         Type.from(type),
                         signatures?.getOrNull(idx),
@@ -77,6 +94,7 @@ class ParameterNode private constructor(
                     .mapIndexed { idx, (localVar, anno) -> ParameterNode(
                         cn,
                         mn,
+                        kotlinParameter(idx),
                         localVar.name,
                         Type.from(argumentTypes[idx]),
                         signatures?.getOrNull(idx),
@@ -90,6 +108,7 @@ class ParameterNode private constructor(
                     .mapIndexed { idx, (type, ans) -> ParameterNode(
                         cn,
                         mn,
+                        kotlinParameter(idx),
                         "${type.simpleName.camelCase}$idx",
                         Type.from(type),
                         signatures?.getOrNull(idx),
