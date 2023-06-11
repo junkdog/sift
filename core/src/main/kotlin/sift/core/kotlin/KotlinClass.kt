@@ -14,8 +14,12 @@ internal class KotlinClass(
     private val kmClass: KmClass,
 ) {
     val type: Type = kmClass.name.let(Type::from)
-    val functions: List<KotlinFunction> = kmClass.functions.map(::KotlinFunction)
-    val properties: List<KotlinProperty> = kmClass.properties.map(::KotlinProperty)
+    val functions: Map<String, KotlinFunction> = kmClass.functions
+        .map(::KotlinFunction)
+        .associateBy { it.name + it.descriptor }
+    val properties: Map<String, KotlinProperty> = kmClass.properties
+        .map(::KotlinProperty)
+        .associateBy(KotlinProperty::name)
 
     val isInternal: Boolean
         get() = Flag.IS_INTERNAL(kmClass.flags)

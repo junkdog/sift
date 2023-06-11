@@ -25,6 +25,8 @@ internal class KotlinFunction(
         .receiverParameterType
         ?.let(Type::from)
 
+    val descriptor: String = kmFunction.signature?.desc ?: "<unknown>"
+
     val name: String = listOfNotNull(
         receiver?.simpleName,
         receiver?.let { "." },

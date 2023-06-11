@@ -2,10 +2,8 @@ package sift.core.kotlin
 
 import kotlinx.metadata.Flag
 import kotlinx.metadata.KmProperty
-import kotlinx.metadata.jvm.fieldSignature
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
-import sift.core.element.AsmFieldNode
 
 internal class KotlinProperty(
     private val kmProperty: KmProperty
@@ -30,9 +28,4 @@ internal class KotlinProperty(
     }
 
     override fun toString(): String = name
-
-    fun matches(other: AsmFieldNode): Boolean {
-        return kmProperty.fieldSignature?.desc == other.desc
-            && kmProperty.fieldSignature?.name == other.name
-    }
 }

@@ -35,10 +35,10 @@ class ClassNode private constructor(
             ?.innerName
 
     val fields: List<FieldNode> = cn.fields
-        .map { fn -> FieldNode.from(this, fn, kotlinClass?.properties?.find { it.matches(fn) }) }
+        .map { fn -> FieldNode.from(this, fn, kotlinClass?.properties?.get(fn.name)) }
 
     val methods: MutableList<MethodNode> = cn.methods
-        .map { mn -> MethodNode.from(this, mn, kotlinClass?.functions?.find { it.matches(mn) }) }
+        .map { mn -> MethodNode.from(this, mn, kotlinClass?.functions?.get(mn.name + mn.desc)) }
         .toMutableList()
 
     val isEnum: Boolean
