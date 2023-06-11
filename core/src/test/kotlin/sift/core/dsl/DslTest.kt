@@ -14,6 +14,8 @@ import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
+import sift.core.dsl.ParameterSelection.receiver
+import sift.core.dsl.ParameterSelection.standard
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
@@ -971,6 +973,31 @@ class DslTest {
         }.expecting(cns, et, """
             ── class
                └─ CLS MethodsWithTypes
+            """
+        )
+    }
+
+    @Test
+    fun `parameter selections for kotlin extension functions`() {
+        val cns: List<ClassNode> = listOf(
+            classNode<ClassWithExtensionFunction>(),
+        )
+
+        val method = Entity.Type("method")
+
+        classes {
+            methods {
+                entity(method, label("extension: \${extension:false} \${name}(\${+params:})"),
+                    property("name", readName())
+                )
+
+                parameters(receiver) { property(method, "extension", withValue(true)) }
+                parameters(standard) { property(method, "params", readName()) }
+            }
+        }.expecting(cns, method, """
+            ── method
+               ├─ extension: false <init>()
+               └─ extension: true List<Foo>.hello(foo)
             """
         )
     }

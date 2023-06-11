@@ -1,5 +1,9 @@
 ## Upcoming Release
 
+### New/Tweaks
+- DSL/Method: `paramters()` now accepts a `**ParameterSelection**` to indicate which parameters to 
+  iterate. The default is `complete`, which is the same behavior as before. `standard` and `receiver`
+  come into play when dealing with kotlin extension functions.
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.

@@ -18,6 +18,9 @@ internal class KotlinFunction(
     val isInternal: Boolean
         get() = Flag.IS_INTERNAL(kmFunction.flags)
 
+//    val visiblity: KmVisibility?
+//        get() = kmFunction.visibility
+
     val isExtension: Boolean
         get() = receiver != null
 

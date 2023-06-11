@@ -17,10 +17,7 @@ import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
-import sift.core.dsl.PropertyStrategy
-import sift.core.dsl.SiftType
-import sift.core.dsl.Type
-import sift.core.dsl.contains
+import sift.core.dsl.*
 import sift.core.element.*
 import sift.core.element.ParameterNode
 import sift.core.entity.Entity
@@ -472,15 +469,24 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoParameters : Action<IterMethods, IterParameters>() {
+        internal data class IntoParameters(
+            val selection: ParameterSelection
+        ) : Action<IterMethods, IterParameters>() {
             override fun id() = "parameters"
             override fun execute(ctx: Context, input: IterMethods): IterParameters {
                 fun parametersOf(input: MethodNode): IterParameters {
                     return input.parameters
+                        .filter(::parameterSelection)
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
                 return input.flatMap(::parametersOf)
+            }
+
+            private fun parameterSelection(pn: ParameterNode) = when (selection) {
+                ParameterSelection.complete -> true
+                ParameterSelection.standard -> !pn.isReceiver
+                ParameterSelection.receiver -> pn.isReceiver
             }
         }
 

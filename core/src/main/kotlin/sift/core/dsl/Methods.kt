@@ -1,6 +1,7 @@
 package sift.core.dsl
 
 import sift.core.api.*
+import sift.core.dsl.ParameterSelection.complete
 import sift.core.element.ClassNode
 import sift.core.element.MethodNode
 import sift.core.entity.Entity
@@ -83,11 +84,13 @@ class Methods internal constructor(
         filterName(Regex.fromLiteral(name), invert)
     }
 
-    fun parameters(f: Parameters.() -> Unit) {
+    fun parameters(
+        selection: ParameterSelection = complete,
+        f: Parameters.() -> Unit
+    ) {
         val forkTo = Parameters().also(f).action
-
         action += Action.Fork(
-            Action.Method.IntoParameters andThen forkTo
+            Action.Method.IntoParameters(selection) andThen forkTo
         )
     }
 
@@ -140,4 +143,14 @@ class Methods internal constructor(
         get() = Invocations(this)
     val Entity.Type.fieldAccess: EntityResolution
         get() = FieldAccess(this)
+}
+
+@Suppress("EnumEntryName")
+enum class ParameterSelection {
+    /** all parameters, including kotlin's extension receiver */
+    complete,
+    /** all "normal" parameters, excluding kotlin's extension receiver */
+    standard,
+    /** exclude normal parameters */
+    receiver
 }
