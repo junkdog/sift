@@ -475,11 +475,14 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelection"] }, 
     {"name":"<init>","parameterTypes":["boolean"] }, 
     {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["sift.core.dsl.MethodSelection"] }, 
     {"name":"copy","parameterTypes":["boolean"] }, 
     {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"filteredMethods","parameterTypes":["sift.core.element.ClassNode"] }, 
     {"name":"hashCode","parameterTypes":[] }, 
     {"name":"id","parameterTypes":[] }, 
     {"name":"toString","parameterTypes":[] }
@@ -628,6 +631,9 @@
   "methods":[{"name":"<init>","parameterTypes":["int","boolean"] }]
 },
 {
+  "name":"sift.core.api.Action$FilterVisible"
+},
+{
   "name":"sift.core.api.Action$Fork",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -713,8 +719,15 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.ParameterSelection"] }, 
+    {"name":"component1","parameterTypes":[] }, 
+    {"name":"copy","parameterTypes":["sift.core.dsl.ParameterSelection"] }, 
+    {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
-    {"name":"id","parameterTypes":[] }
+    {"name":"hashCode","parameterTypes":[] }, 
+    {"name":"id","parameterTypes":[] }, 
+    {"name":"parameterSelection","parameterTypes":["sift.core.element.ParameterNode"] }, 
+    {"name":"toString","parameterTypes":[] }
   ]
 },
 {
@@ -1075,6 +1088,18 @@
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"<init>","parameterTypes":["java.lang.String","java.lang.String","kotlin.jvm.internal.DefaultConstructorMarker"] }
   ]
+},
+{
+  "name":"sift.core.dsl.MethodSelection",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sift.core.dsl.ParameterSelection",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"sift.core.dsl.PropertyStrategy",
