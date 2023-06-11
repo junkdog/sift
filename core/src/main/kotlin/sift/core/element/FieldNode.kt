@@ -6,21 +6,24 @@ import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.FieldSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.dsl.Type
+import sift.core.dsl.Visibility
+import sift.core.kotlin.KotlinProperty
 
 class FieldNode private constructor(
     private val cn: ClassNode,
     private val fn: AsmFieldNode,
+    private val kprop: KotlinProperty?,
     override val annotations: List<AnnotationNode>
 ) : Element {
 
     override val simpleName: String
-        get() = fn.name
+        get() = kprop?.name ?: fn.name
 
     val owner: ClassNode
         get() = cn
 
     val name: String
-        get() = fn.name
+        get() = simpleName
 
     val type: Type
         get() = Type.fromTypeDescriptor(fn.desc)
@@ -36,6 +39,9 @@ class FieldNode private constructor(
 
     val access: Int
         get() = fn.access
+
+    val visibility: Visibility
+        get() = kprop?.visibility ?: Visibility.from(access)
 
     private val hash = hash(cn) * 31 + idHash(fn)
 
@@ -53,9 +59,9 @@ class FieldNode private constructor(
     override fun toString(): String = "$cn.$name"
 
     companion object {
-        internal fun from(cn: ClassNode, fn: AsmFieldNode): FieldNode {
+        internal fun from(cn: ClassNode, fn: AsmFieldNode, kp: KotlinProperty?): FieldNode {
             val ans = AnnotationNode.from(fn.visibleAnnotations, fn.invisibleAnnotations)
-            return FieldNode(cn, fn, ans)
+            return FieldNode(cn, fn, kp, ans)
         }
     }
 }

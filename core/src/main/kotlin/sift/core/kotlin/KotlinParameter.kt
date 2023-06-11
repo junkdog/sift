@@ -1,7 +1,9 @@
 package sift.core.kotlin
 
 import kotlinx.metadata.*
+import kotlinx.metadata.jvm.signature
 import sift.core.dsl.Type
+import sift.core.element.AsmFieldNode
 
 internal class KotlinParameter private constructor(
     private val kmParam: KmValueParameter?,

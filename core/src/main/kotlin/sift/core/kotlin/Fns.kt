@@ -9,7 +9,6 @@ fun Type.Companion.from(kmType: KmType): Type {
     val rawType = when (val c = kmType.classifier) {
         is KmClassifier.Class         -> from(c.name.replace('.', '$'))
         is KmClassifier.TypeAlias     -> from(c.name.replace('.', '$'))
-//        is KmClassifier.TypeParameter -> kmType.classifier
         is KmClassifier.TypeParameter -> {
 //            error("type parameters are no yet supported")
             // fixme: this isn't correct; resolve proper type parameter name

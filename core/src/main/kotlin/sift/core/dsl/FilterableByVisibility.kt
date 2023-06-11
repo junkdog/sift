@@ -48,6 +48,6 @@ private class FilterableByVisibilityImpl<ELEMENT : Element>(
         access: Visibility,
         invert: Boolean
     ) {
-        action += Action.FilterVisibile(access)
+        action += Action.FilterVisible(access)
     }
 }

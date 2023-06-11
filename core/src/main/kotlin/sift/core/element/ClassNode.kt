@@ -3,8 +3,6 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
-import sift.core.api.AccessFlags
-import sift.core.api.AccessFlags.*
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
@@ -37,7 +35,7 @@ class ClassNode private constructor(
             ?.innerName
 
     val fields: List<FieldNode> = cn.fields
-        .map { fn -> FieldNode.from(this, fn) }
+        .map { fn -> FieldNode.from(this, fn, kotlinClass?.properties?.find { it.matches(fn) }) }
 
     val methods: MutableList<MethodNode> = cn.methods
         .map { mn -> MethodNode.from(this, mn, kotlinClass?.functions?.find { it.matches(mn) }) }

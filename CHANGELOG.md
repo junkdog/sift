@@ -15,7 +15,8 @@ The `MethodSelection` can be used with `methods()`:
 - `declaredAndAccessors`: Similar to declared, but also includes Kotlin property accessors.
 
 ### New/Tweaks
-- DSL: `filter(Visibility)` added to class and method scopes.
+- DSL: `filter(Visibility)` added to class, field and method scopes. For kotlin properties, field visibility
+  is reported as the visibility of the property getter.
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.

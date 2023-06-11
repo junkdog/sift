@@ -13,8 +13,10 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Fields internal constructor(
-    fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope
-) : Core<FieldNode>(chainFrom(fields), AccessFlags.Scope.Field),
+    fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope,
+    action: Action.Chain<Iter<FieldNode>> = chainFrom(fields),
+) : Core<FieldNode>(action, AccessFlags.Scope.Field),
+    FilterableByVisibility<FieldNode> by FilterableByVisibility.scopedTo(action),
     CommonOperations<FieldNode, Fields>,
     ParentOperations<ClassNode, Classes>
 {

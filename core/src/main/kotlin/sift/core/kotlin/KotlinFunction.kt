@@ -3,7 +3,6 @@ package sift.core.kotlin
 import kotlinx.metadata.*
 import kotlinx.metadata.jvm.signature
 import sift.core.dsl.Type
-import sift.core.dsl.Visibility
 import sift.core.element.AsmMethodNode
 
 internal class KotlinFunction(

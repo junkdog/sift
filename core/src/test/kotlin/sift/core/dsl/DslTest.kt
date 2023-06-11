@@ -999,8 +999,9 @@ class DslTest {
             """
         )
 
-        // filter methods by visibility
+        // filter methods and properties by visibility
         val m = Entity.Type("method")
+        val f = Entity.Type("field")
         enumValues<Visibility>().filter { it != Visibility.PackagePrivate }.forEach { visibility ->
             template {
                 classes {
@@ -1010,10 +1011,16 @@ class DslTest {
                         filter(visibility)
                         entity(m, label("\${name}"), property("name", readName()))
                     }
+                    fields {
+                        // visibility of property getter, even if backing field is private
+                        filter(visibility)
+                        entity(f, label("\${name}"), property("name", readName()))
+                    }
                 }
-            }.expecting(cns, m, """
-                ── method
-                   └─ fn${visibility.name}
+            }.expecting(cns, listOf(m, f), """
+                ── method + field
+                   ├─ fn${visibility.name}
+                   └─ prop${visibility.name}
                 """
             )
         }
