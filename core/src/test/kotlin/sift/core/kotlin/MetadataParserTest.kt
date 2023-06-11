@@ -11,7 +11,7 @@ class MetadataParserTest {
 
         val exhibitA = KotlinClass.from(classNode<ExhibitA>())!!
 
-        assertThat(exhibitA.functions.map { it.toString() })
+        assertThat(exhibitA.functions.values.map(KotlinFunction::toString))
             .containsExactlyInAnyOrder(
                 "foo(string, int)",
                 "infix foo(rhs)",
