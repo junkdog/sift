@@ -1,8 +1,9 @@
 package sift.core.kotlin
 
 import kotlinx.metadata.*
-import sift.core.asm.signature.TypeSignature
+import kotlinx.metadata.jvm.signature
 import sift.core.dsl.Type
+import sift.core.element.AsmMethodNode
 
 internal class KotlinFunction(
     private val kmFunction: KmFunction,
@@ -20,6 +21,17 @@ internal class KotlinFunction(
     val receiver: Type? = kmFunction
         .receiverParameterType
         ?.let(Type::from)
+
+    val name: String = listOfNotNull(
+        receiver?.simpleName,
+        receiver?.let { "." },
+        kmFunction.name,
+    ).joinToString("")
+
+    fun matches(other: AsmMethodNode): Boolean {
+        return kmFunction.signature?.name == other.name
+            && kmFunction.signature?.desc == other.desc
+    }
 
     override fun toString(): String {
         return listOfNotNull(
@@ -52,5 +64,5 @@ private fun Type.Companion.from(kmType: KmType): Type {
         ?.let { "<${it.joinToString()}>" }
         ?: ""
 
-    return Type.from(rawType.internalName + generics)
+    return from(rawType.internalName + generics)
 }

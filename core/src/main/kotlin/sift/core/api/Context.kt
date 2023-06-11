@@ -121,7 +121,7 @@ internal data class Context(
         return mn ?: AsmMethodNode().also { method -> // stub
             method.name = name
             method.desc = desc
-        }.let { method -> MethodNode.from(cn, method) }.also {
+        }.let { method -> MethodNode.from(cn, method, null) }.also {
             method ->
                 // register
             synchronized(lock) {

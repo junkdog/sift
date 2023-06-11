@@ -9,6 +9,7 @@ import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
 import sift.core.dsl.Type
+import sift.core.kotlin.KotlinClass
 
 class ClassNode private constructor(
     private val cn: AsmClassNode,
@@ -16,6 +17,8 @@ class ClassNode private constructor(
 ) : Element {
 
     internal val signature: ClassSignatureNode? = cn.signature()
+
+    private val kotlinClass: KotlinClass? = KotlinClass.from(cn)
 
     val outerType: Type?
         get() = cn.innerClasses
@@ -31,7 +34,7 @@ class ClassNode private constructor(
         .map { fn -> FieldNode.from(this, fn) }
 
     val methods: MutableList<MethodNode> = cn.methods
-        .map { mn -> MethodNode.from(this, mn) }
+        .map { mn -> MethodNode.from(this, mn, kotlinClass?.functions?.find { it.matches(mn) }) }
         .toMutableList()
 
     val isEnum: Boolean

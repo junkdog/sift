@@ -20,7 +20,7 @@ internal class KotlinClass(
             .annotations()
             .findBy(AsmAnnotationNode::desc, "Lkotlin/Metadata;")
             ?.let(AsmAnnotationNode::toKotlinMetadata)
-            ?.let { metadata -> KotlinClassMetadata.read(metadata) as KotlinClassMetadata.Class }
+            ?.let { metadata -> KotlinClassMetadata.read(metadata) as? KotlinClassMetadata.Class }
             ?.toKmClass()
             ?.let(::KotlinClass)
     }

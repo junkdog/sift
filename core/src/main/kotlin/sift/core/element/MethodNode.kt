@@ -7,21 +7,23 @@ import sift.core.asm.asSequence
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
+import sift.core.kotlin.KotlinFunction
 
-class MethodNode(
+class MethodNode private constructor(
     private val cn: ClassNode,
     private val mn: AsmMethodNode,
-    override val annotations: List<AnnotationNode>
+    override val annotations: List<AnnotationNode>,
+    private val kfn: KotlinFunction?,
 ) : Element {
 
     override val simpleName: String
-        get() = mn.name
+        get() = kfn?.name ?: mn.name
 
     val owner: ClassNode
         get() = cn
 
     val name: String
-        get() = mn.name
+        get() = kfn?.name ?: mn.name
 
     val desc: String
         get() = mn.desc
@@ -56,9 +58,13 @@ class MethodNode(
     override fun hashCode() = hash
 
     companion object {
-        fun from(cn: ClassNode, mn: AsmMethodNode): MethodNode {
+        internal fun from(
+            cn: ClassNode,
+            mn: AsmMethodNode,
+            kfn: KotlinFunction?
+        ): MethodNode {
             val ans = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
-            return MethodNode(cn, mn, ans)
+            return MethodNode(cn, mn, ans, kfn)
         }
     }
 }
