@@ -13,12 +13,14 @@ class ParameterNode private constructor(
     private val cn: ClassNode,
     private val mn: MethodNode,
     private val kpn: KotlinParameter? = null,
-    val name: String,
+    name: String,
     val type: Type,
     val signature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
 ) : Element {
+    val name: String = kpn?.name ?: name
+
     val owner: MethodNode
         get() = mn
 

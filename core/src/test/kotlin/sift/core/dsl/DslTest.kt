@@ -978,6 +978,32 @@ class DslTest {
     }
 
     @Test
+    fun `readName for method should include receiver type name for extension functions`() {
+        val cns: List<ClassNode> = listOf(
+            classNode(EntityRegistrar::class),
+        )
+
+        val method = Entity.Type("method")
+
+        classes {
+            methods {
+                filter("<clinit>", invert = true)
+                filter("entity", invert = true)
+                entity(method, label("\${name}(\${+params:})"),
+                    property("name", readName())
+                )
+
+                parameters(standard) { property(method, "params", readName()) }
+            }
+        }.expecting(cns, method, """
+            ── method
+               ├─ Entity.Type.set(key, children)
+               └─ label(pattern, ops)
+            """
+        )
+    }
+
+    @Test
     fun `parameter selections for kotlin extension functions`() {
         val cns: List<ClassNode> = listOf(
             classNode<ClassWithExtensionFunction>(),

@@ -7,6 +7,12 @@ internal class KotlinParameter private constructor(
     private val kmParam: KmValueParameter?,
     receiverType: Type?
 ) {
+    init {
+        require(kmParam != null || receiverType != null) {
+            "either kmParam or receiverType must be non-null"
+        }
+    }
+
     val name: String = kmParam?.name ?: receiverType!!.simpleName
     val type: Type = kmParam?.type?.let(Type::from) ?: receiverType!!
     val isExtensionReceiver: Boolean = receiverType != null
