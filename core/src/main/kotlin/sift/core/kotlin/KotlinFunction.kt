@@ -3,6 +3,7 @@ package sift.core.kotlin
 import kotlinx.metadata.*
 import kotlinx.metadata.jvm.signature
 import sift.core.dsl.Type
+import sift.core.dsl.Visibility
 import sift.core.element.AsmMethodNode
 
 internal class KotlinFunction(
@@ -17,9 +18,6 @@ internal class KotlinFunction(
 
     val isInternal: Boolean
         get() = Flag.IS_INTERNAL(kmFunction.flags)
-
-//    val visiblity: KmVisibility?
-//        get() = kmFunction.visibility
 
     val isExtension: Boolean
         get() = receiver != null

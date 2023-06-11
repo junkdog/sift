@@ -81,6 +81,10 @@ enum class AccessFlags(val flag: Int, internal vararg val scopes: Scope) {
         internal fun bitmaskOf(
             accessFlags: Iterable<AccessFlags>
         ): Int = accessFlags.fold(0) { acc, m -> acc or m.flag }
+
+        internal fun bitmaskOf(
+            vararg accessFlags: AccessFlags
+        ): Int = accessFlags.fold(0) { acc, m -> acc or m.flag }
     }
 
     enum class Scope {

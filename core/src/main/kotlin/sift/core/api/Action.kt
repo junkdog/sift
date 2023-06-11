@@ -86,6 +86,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.HasAnnotation::class, name = "has-annotation"),
     JsonSubTypes.Type(Action.EntityFilter::class, name = "entity-filter"),
     JsonSubTypes.Type(Action.FilterModifiers::class, name = "filter-modifiers"),
+    JsonSubTypes.Type(Action.FilterVisibile::class, name = "filter-visible"),
     JsonSubTypes.Type(Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(Action.WithValue::class, name = "with-value"),
     JsonSubTypes.Type(Action.EditText::class, name = "edit-text"),
@@ -888,7 +889,23 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    class ReadName<T : Element>(val shortened: Boolean = false) : Action<Iter<T>, IterValues>() {
+    internal data class FilterVisibile<T : Element>(
+        val visibility: Visibility,
+    ) : IsoAction<T>() {
+        override fun id() = "filter-visibility(${visibility.name.lowercase()})"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.filter { elem ->
+                visibility == when (elem) {
+                    is ClassNode  -> elem.visibility
+                    is FieldNode  -> TODO()
+                    is MethodNode -> elem.visibility
+                    else -> error("No access modifiers possible for: ${elem::class.simpleName}")
+                }
+            }
+        }
+    }
+
+    internal class ReadName<T : Element>(val shortened: Boolean = false) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun nameOf(elem: T): String = when (elem) {

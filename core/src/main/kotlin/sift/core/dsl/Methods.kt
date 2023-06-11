@@ -14,8 +14,10 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Methods internal constructor(
-    methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope
-) : Core<MethodNode>(chainFrom(methods), AccessFlags.Scope.Method),
+    methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope,
+    action: Action.Chain<IterMethods> = chainFrom(methods),
+) : Core<MethodNode>(action, AccessFlags.Scope.Method),
+    FilterableByVisibility<MethodNode> by FilterableByVisibility.scopedTo(action),
     CommonOperations<MethodNode, Methods>,
     ParentOperations<ClassNode, Classes>
 {

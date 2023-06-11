@@ -1,5 +1,6 @@
 package sift.core.kotlin
 
+import kotlinx.metadata.Flag
 import kotlinx.metadata.KmClass
 import kotlinx.metadata.jvm.KotlinClassMetadata
 import net.onedaybeard.collectionsby.findBy
@@ -14,6 +15,9 @@ internal class KotlinClass(
 ) {
     val type: Type = kmClass.name.let(Type::from)
     val functions: List<KotlinFunction> = kmClass.functions.map(::KotlinFunction)
+
+    val isInternal: Boolean
+        get() = Flag.IS_INTERNAL(kmClass.flags)
 
     override fun toString(): String = type.simpleName
 

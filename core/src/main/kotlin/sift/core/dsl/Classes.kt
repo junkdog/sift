@@ -12,8 +12,10 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Classes internal constructor(
-    source: IsoAction<ClassNode> = Action.Class.ClassScope
-) : Core<ClassNode>(chainFrom(source), AccessFlags.Scope.Class),
+    source: IsoAction<ClassNode> = Action.Class.ClassScope,
+    action: Action.Chain<Iter<ClassNode>> = chainFrom(source)
+) : Core<ClassNode>(action, AccessFlags.Scope.Class),
+    FilterableByVisibility<ClassNode> by FilterableByVisibility.scopedTo(action),
     CommonOperations<ClassNode, Classes>,
     ParentOperations<ClassNode, Classes>
 {

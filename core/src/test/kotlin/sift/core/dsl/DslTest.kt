@@ -979,6 +979,47 @@ class DslTest {
     }
 
     @Test
+    fun `filter visibility modifiers on classes and methods`() {
+        val cns: List<ClassNode> = listOf(
+            classNode<ClassWithVisibilityA>(),
+            classNode<ClassWithVisibilityB>(),
+        )
+
+        // filter internal classes
+        val cls = Entity.Type("class")
+
+        template {
+            classes {
+                filter(Visibility.Internal)
+                entity(cls)
+            }
+        }.expecting(cns, cls, """
+            ── class
+               └─ ClassWithVisibilityB
+            """
+        )
+
+        // filter methods by visibility
+        val m = Entity.Type("method")
+        enumValues<Visibility>().filter { it != Visibility.PackagePrivate }.forEach { visibility ->
+            template {
+                classes {
+                    filter(Visibility.Internal)
+                    methods {
+                        filter("<init>", invert = true)
+                        filter(visibility)
+                        entity(m, label("\${name}"), property("name", readName()))
+                    }
+                }
+            }.expecting(cns, m, """
+                ── method
+                   └─ fn${visibility.name}
+                """
+            )
+        }
+    }
+
+    @Test
     fun `readName for method should include receiver type name for extension functions`() {
         val cns: List<ClassNode> = listOf(
             classNode(EntityRegistrar::class),

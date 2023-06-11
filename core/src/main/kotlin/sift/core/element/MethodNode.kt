@@ -8,6 +8,7 @@ import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.dsl.Type
+import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinFunction
 
 class MethodNode private constructor(
@@ -52,6 +53,12 @@ class MethodNode private constructor(
 
     val access: Int
         get() = mn.access
+
+    val visibility: Visibility
+        get() = kfn?.isInternal
+            ?.takeIf { it }
+            ?.let { Visibility.Internal }
+            ?: Visibility.from(access)
 
     fun returns(): SignatureNode? {
         return signature?.returns

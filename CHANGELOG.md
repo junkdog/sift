@@ -14,6 +14,9 @@ The `MethodSelection` can be used with `methods()`:
 - `inherited`: Includes all declared methods and inherited methods.
 - `declaredAndAccessors`: Similar to declared, but also includes Kotlin property accessors.
 
+### New/Tweaks
+- DSL: `filter(Visibility)` added to class and method scopes.
+
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.
 

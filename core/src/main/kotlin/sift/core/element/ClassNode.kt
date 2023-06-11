@@ -3,12 +3,15 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.api.AccessFlags
+import sift.core.api.AccessFlags.*
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
 import sift.core.dsl.Type
+import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinClass
 
 class ClassNode private constructor(
@@ -64,6 +67,12 @@ class ClassNode private constructor(
 
     val access: Int
         get() = cn.access
+
+    val visibility: Visibility
+        get() = kotlinClass?.isInternal
+            ?.takeIf { it }
+            ?.let { Visibility.Internal }
+            ?: Visibility.from(access)
 
     // TODO: TypeSignature
     val interfaces: List<Type>
