@@ -1,9 +1,18 @@
 ## Upcoming Release
 
-### New/Tweaks
-- DSL/Method: `paramters()` now accepts a `**ParameterSelection**` to indicate which parameters to 
-  iterate. The default is `complete`, which is the same behavior as before. `standard` and `receiver`
-  come into play when dealing with kotlin extension functions.
+### Kotlin language support: selection enum for `methods()` and `parameters()`
+DSL functions `parameters() {}` and `properties()` now take an optional `ParameterSelection` and
+`MethodSelection` enum, in order to make it easier to iterate over the pertinent elements.
+
+The `ParameterSelection` enum can be used with the `parameters()` function. It provides the following options:
+- `all`: Iterates over all parameters including Kotlin's extension receivers. This is the default behavior, matching previous functionality.
+- `excludingReceiver`: Iterates over all parameters, but excludes the extension receiver in Kotlin.
+- `onlyReceiver`: Focuses solely on the extension receiver, excluding all other parameters.
+
+The `MethodSelection` can be used with `methods()`:
+- `declared`: Selects all methods directly declared by the class, excluding Kotlin property accessors.
+- `inherited`: Includes all declared methods and inherited methods.
+- `declaredAndAccessors`: Similar to declared, but also includes Kotlin property accessors.
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.

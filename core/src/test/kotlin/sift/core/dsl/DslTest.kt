@@ -14,8 +14,9 @@ import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
-import sift.core.dsl.ParameterSelection.receiver
-import sift.core.dsl.ParameterSelection.standard
+import sift.core.dsl.MethodSelection.declaredAndAccessors
+import sift.core.dsl.ParameterSelection.onlyReceiver
+import sift.core.dsl.ParameterSelection.excludingReceiver
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
@@ -993,7 +994,7 @@ class DslTest {
                     property("name", readName())
                 )
 
-                parameters(standard) { property(method, "params", readName()) }
+                parameters(excludingReceiver) { property(method, "params", readName()) }
             }
         }.expecting(cns, method, """
             ── method
@@ -1017,13 +1018,45 @@ class DslTest {
                     property("name", readName())
                 )
 
-                parameters(receiver) { property(method, "extension", withValue(true)) }
-                parameters(standard) { property(method, "params", readName()) }
+                parameters(onlyReceiver) { property(method, "extension", withValue(true)) }
+                parameters(excludingReceiver) { property(method, "params", readName()) }
             }
         }.expecting(cns, method, """
             ── method
                ├─ extension: false <init>()
                └─ extension: true List<Foo>.hello(foo)
+            """
+        )
+    }
+
+    @Test
+    fun `method enumeration over all methods including accessors`() {
+        val cns: List<ClassNode> = listOf(
+            classNode<ClassWithExtensionFunction>(),
+        )
+
+        val method = Entity.Type("method")
+
+        classes {
+            methods { // default is declared; excludes property accessors
+                entity(method)
+            }
+        }.expecting(cns, method, """
+            ── method
+               ├─ ClassWithExtensionFunction::<init>
+               └─ ClassWithExtensionFunction::List<Foo>.hello
+            """
+        )
+
+        classes {
+            methods(declaredAndAccessors) {
+                entity(method)
+            }
+        }.expecting(cns, method, """
+            ── method
+               ├─ ClassWithExtensionFunction::<init>
+               ├─ ClassWithExtensionFunction::List<Foo>.hello
+               └─ ClassWithExtensionFunction::getFoo
             """
         )
     }

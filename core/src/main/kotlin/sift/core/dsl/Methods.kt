@@ -1,7 +1,7 @@
 package sift.core.dsl
 
 import sift.core.api.*
-import sift.core.dsl.ParameterSelection.complete
+import sift.core.dsl.ParameterSelection.all
 import sift.core.element.ClassNode
 import sift.core.element.MethodNode
 import sift.core.entity.Entity
@@ -85,7 +85,7 @@ class Methods internal constructor(
     }
 
     fun parameters(
-        selection: ParameterSelection = complete,
+        selection: ParameterSelection = all,
         f: Parameters.() -> Unit
     ) {
         val forkTo = Parameters().also(f).action
@@ -147,10 +147,10 @@ class Methods internal constructor(
 
 @Suppress("EnumEntryName")
 enum class ParameterSelection {
-    /** all parameters, including kotlin's extension receiver */
-    complete,
-    /** all "normal" parameters, excluding kotlin's extension receiver */
-    standard,
-    /** exclude normal parameters */
-    receiver
+    /** All parameters, including kotlin's extension receiver */
+    all,
+    /** All parameters, excluding kotlin's extension receiver */
+    excludingReceiver,
+    /** Only kotlin's extension receiver */
+    onlyReceiver,
 }

@@ -388,9 +388,9 @@ sealed class Action<IN, OUT> {
         }
 
         internal data class IntoMethods(
-            val inherited: Boolean,
+            val selection: MethodSelection,
         ) : Action<IterClasses, IterMethods>() {
-            override fun id() = "methods"
+            override fun id() = "methods(${selection.name})"
             override fun execute(ctx: Context, input: IterClasses): IterMethods {
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
                     return ctx.parents[input]!!
@@ -399,13 +399,31 @@ sealed class Action<IN, OUT> {
                 }
 
                 fun methodsOf(input: ClassNode): IterMethods {
-                    val inheritedMethods = if (inherited) inheritedMethodsOf(input) else emptyList()
-                    return (input.methods + inheritedMethods)
+                    val methods = when (selection) {
+                        MethodSelection.inherited -> input.methods + inheritedMethodsOf(input)
+                        MethodSelection.declaredAndAccessors -> input.methods
+                        else -> input.filteredMethods()
+                    }
+
+                    return methods
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
                 return input.flatMap(::methodsOf)
-                    .let { if (inherited) it.toSet() else it }
+                    .let { if (selection == MethodSelection.inherited) it.toSet() else it }
+            }
+
+            private fun ClassNode.filteredMethods(): List<MethodNode> {
+
+                return when (selection) {
+                    MethodSelection.declaredAndAccessors -> methods
+                    else -> methods.filter { mn ->
+                        !isKotlin
+                            || (isKotlin && mn.isKotlin)
+                            || mn.name == "<init>"
+                            || mn.name == "<clinit>"
+                    }
+                }
             }
         }
 
@@ -472,7 +490,7 @@ sealed class Action<IN, OUT> {
         internal data class IntoParameters(
             val selection: ParameterSelection
         ) : Action<IterMethods, IterParameters>() {
-            override fun id() = "parameters"
+            override fun id() = "parameters(${selection.name})"
             override fun execute(ctx: Context, input: IterMethods): IterParameters {
                 fun parametersOf(input: MethodNode): IterParameters {
                     return input.parameters
@@ -484,9 +502,9 @@ sealed class Action<IN, OUT> {
             }
 
             private fun parameterSelection(pn: ParameterNode) = when (selection) {
-                ParameterSelection.complete -> true
-                ParameterSelection.standard -> !pn.isReceiver
-                ParameterSelection.receiver -> pn.isReceiver
+                ParameterSelection.all -> true
+                ParameterSelection.excludingReceiver -> !pn.isReceiver
+                ParameterSelection.onlyReceiver -> pn.isReceiver
             }
         }
 

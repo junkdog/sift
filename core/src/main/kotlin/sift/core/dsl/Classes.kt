@@ -76,8 +76,23 @@ class Classes internal constructor(
      * iterates methods of current classes. When [inherited] is `true`,
      * fields inherited from super classes are included too.
      */
-    fun methods(inherited: Boolean = false, f: Methods.() -> Unit) {
-        val forkTo = Action.Class.IntoMethods(inherited) andThen Methods().also(f).action
+    @Deprecated("Use methods(selection: MethodSelection, f: Methods.() -> Unit) instead")
+    fun methods(
+        inherited: Boolean,
+        f: Methods.() -> Unit
+    ) {
+        val selection = MethodSelection.inherited
+            .takeIf { inherited }
+            ?: MethodSelection.declared
+
+        methods(selection, f)
+    }
+
+    fun methods(
+        selection: MethodSelection = MethodSelection.declared,
+        f: Methods.() -> Unit
+    ) {
+        val forkTo = Action.Class.IntoMethods(selection) andThen Methods().also(f).action
         action += Action.Fork(forkTo)
     }
 
@@ -94,4 +109,14 @@ class Classes internal constructor(
         val forkTo = Action.Class.IntoSuperclassSignature andThen Signature().also(f).action
         action += Action.Fork(forkTo)
     }
+}
+
+@Suppress("EnumEntryName")
+enum class MethodSelection {
+    /** All methods directly declared by the class, excluding Kotlin property accessors */
+    declared,
+    /** All declared methods and inherited methods */
+    inherited,
+    /** Declared methods, including Kotlin property accessors */
+    declaredAndAccessors,
 }

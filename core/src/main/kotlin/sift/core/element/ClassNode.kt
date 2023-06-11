@@ -20,6 +20,9 @@ class ClassNode private constructor(
 
     private val kotlinClass: KotlinClass? = KotlinClass.from(cn)
 
+    internal val isKotlin: Boolean
+        get() = kotlinClass != null
+
     val outerType: Type?
         get() = cn.innerClasses
             ?.findBy(InnerClassNode::name, cn.name)

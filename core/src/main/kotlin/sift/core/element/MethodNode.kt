@@ -20,6 +20,10 @@ class MethodNode private constructor(
     override val simpleName: String
         get() = kfn?.name ?: mn.name
 
+    /** returns false kotlin propert accessors, lambdas etc */
+    internal val isKotlin: Boolean
+        get() = kfn != null
+
     val owner: ClassNode
         get() = cn
 
