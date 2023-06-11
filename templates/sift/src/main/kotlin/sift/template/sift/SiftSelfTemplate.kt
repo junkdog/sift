@@ -5,8 +5,9 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
 import sift.core.api.AccessFlags.acc_public
 import sift.core.api.SiftTemplateDsl
+import sift.core.dsl.MethodSelection.inherited
+import sift.core.dsl.ParameterSelection.excludingReceiver
 import sift.core.dsl.template
-import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.entity.Entity
 import sift.core.terminal.Gruvbox.blue1
@@ -85,7 +86,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
 
             classesOf(E.scope) { e ->
-                methods(inherited = true) {
+                methods(inherited) {
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
@@ -94,7 +95,8 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                         property("name", readName()),
                     )
 
-                    // mark functions used for updating entity properties
+                    // mark functions used for updating entity properties;
+                    // property updating functions return Action over ValueNode:s
                     returns {
                         explodeTypeT("Action<_, _<T>>") {
                             filter("ValueNode")
@@ -102,7 +104,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                         }
                     }
 
-                    parameters {
+                    parameters(excludingReceiver) {
                         property(E.dsl, "params", readName(shorten = true))
                         property(E.dsl, "param-types", readType())
                     }
@@ -116,44 +118,28 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
     }
 
     override fun theme() = mapOf(
-        E.scope     to plain(orange1 + bold),
-        E.dsl       to DslStyle(orange2 + bold, blue2),
-        E.element   to plain(blue1),
-        E.action    to plain(blue2),
+        E.scope    to plain(orange1 + bold),
+        E.dsl      to DslStyle(orange2 + bold, blue2),
+//        E.dsl      to plain(orange2 + bold),
+        E.element  to plain(blue1),
+        E.action   to plain(blue2),
     )
 }
 
 private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Style {
 
-    private val extensionFunction = Regex("\\\$this\\\$\\w+_\\w{10}")
-
+    @Suppress("UNCHECKED_CAST")
     override fun format(
         e: Tree<EntityNode>,
         theme: Map<Entity.Type, Style>
     ): String {
         val fn = (e.value as EntityNode.Entity).entity
 
-        var params = (fn["params"] as List<String>? ?: listOf())
-
-        val isExtension = params.firstOrNull()?.matches(extensionFunction) == true
-        val extensionPrefix = if (isExtension) "${extensionType(fn)}." else ""
-
-        if (isExtension) {
-            params = params.drop(1)
-        }
-
         val icon = fn["icon"]?.first()?.toString() ?: ""
-        val name = fn["name"]?.first()
-            ?.toString()
-            ?.substringBefore("-")
-            ?.let { fnStyle("$extensionPrefix$it") } ?:  ""
-        val parameters = params.joinToString(fnStyle(", ")) { paramStyle(it) }
-        return "$icon$name${fnStyle("(")}$parameters${fnStyle(")")}"
-    }
+        val name = fn["name"]?.first()?.toString()?.let { fnStyle(it) } ?:  ""
+        val parameters = (fn["params"] as List<String>? ?: listOf())
+            .joinToString(fnStyle(", ")) { paramStyle(it) }
 
-    private fun extensionType(e: Entity): String {
-        return (e["param-types"]!!.first() as Type)
-            .simpleName
-            .replace(Regex("^String\$"), "Entity.Type")
+        return "$icon$name${fnStyle("(")}$parameters${fnStyle(")")}"
     }
 }

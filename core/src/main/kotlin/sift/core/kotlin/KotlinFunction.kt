@@ -27,6 +27,9 @@ internal class KotlinFunction(
 
     val descriptor: String = kmFunction.signature?.desc ?: "<unknown>"
 
+    val jvmName: String
+        get() = kmFunction.signature?.name ?: "<unknown>"
+
     val name: String = listOfNotNull(
         receiver?.simpleName,
         receiver?.let { "." },
@@ -34,11 +37,6 @@ internal class KotlinFunction(
     ).joinToString("")
 
     val parameters: List<KotlinParameter> = kmFunction.valueParameters.map(KotlinParameter::from)
-
-    fun matches(other: AsmMethodNode): Boolean {
-        return kmFunction.signature?.name == other.name
-            && kmFunction.signature?.desc == other.desc
-    }
 
     override fun toString(): String {
         return listOfNotNull(

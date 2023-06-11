@@ -16,7 +16,7 @@ internal class KotlinClass(
     val type: Type = kmClass.name.let(Type::from)
     val functions: Map<String, KotlinFunction> = kmClass.functions
         .map(::KotlinFunction)
-        .associateBy { it.name + it.descriptor }
+        .associateBy { it.jvmName + it.descriptor }
     val properties: Map<String, KotlinProperty> = kmClass.properties
         .map(::KotlinProperty)
         .associateBy(KotlinProperty::name)
