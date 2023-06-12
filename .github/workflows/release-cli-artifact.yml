@@ -53,3 +53,14 @@ jobs:
             sift-jvm.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: merge ${{ github.ref_name }} to main
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          
+          git checkout main
+          git merge ${RELEASE_VERSION}
+          git push
