@@ -1,7 +1,7 @@
 ## Upcoming Release
 
 ### Kotlin language support: selection enum for `methods()` and `parameters()`
-DSL functions `parameters() {}` and `properties()` now take an optional `ParameterSelection` and
+DSL functions `parameters() {}` and `properties() {}` now take an optional `ParameterSelection` and
 `MethodSelection` enum, in order to make it easier to iterate over the pertinent elements.
 
 The `ParameterSelection` enum can be used with the `parameters()` function. It provides the following options:

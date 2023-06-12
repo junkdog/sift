@@ -117,7 +117,7 @@ class Classes internal constructor(
 enum class MethodSelection {
     /** All methods directly declared by the class, excluding Kotlin property accessors */
     declared,
-    /** All declared methods and inherited methods */
+    /** All declared and inherited methods */
     inherited,
     /** Declared methods, including Kotlin property accessors */
     declaredAndAccessors,

@@ -3,6 +3,7 @@ package sift.core.kotlin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.core.asm.classNode
+import sift.core.dsl.Type
 
 class MetadataParserTest {
 
@@ -21,6 +22,19 @@ class MetadataParserTest {
 
                 "Function0<Unit>.lambdaExtension()"
             )
+    }
+
+    @Test
+    fun `recursive generic signature`() {
+        val dg = KotlinClass.from(classNode<DeepGenerics>())!!
+
+        val list = "kotlin.collections.List"
+        val set = "kotlin.collections.Set"
+        val map = "kotlin.collections.Map"
+
+        assertThat(dg.functions.values.first().receiver)
+            .isEqualTo(Type.from("$list<$set<$map<kotlin.String, kotlin.Int>>>"))
+
     }
 }
 
@@ -44,4 +58,8 @@ private class ExhibitA {
     companion object {
         fun bar(float: Float, byteArray: ByteArray) = Unit
     }
+}
+
+private class DeepGenerics {
+    fun List<Set<Map<String, Int>>>.yolo() = Unit
 }

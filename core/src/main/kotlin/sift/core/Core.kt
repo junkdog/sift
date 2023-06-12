@@ -39,13 +39,6 @@ fun <T> MutableList<T>.push(t: T) = add(t)
 fun stringWriter(f: StringWriter.() -> Unit): String = StringWriter().apply(f).toString()
 
 /** ensures [f] is only executed once, returning the original result on subsequent invocations */
-fun <T, U> memoize1(f: (T) -> U) = object : (T) -> U {
-    private var results: MutableMap<T, U> = mutableMapOf()
-
-    override operator fun invoke(t: T): U = results.getOrPut(t) { f(t) }
-}
-
-/** ensures [f] is only executed once, returning the original result on subsequent invocations */
 fun <T> memoize(f: () -> T) = object : () -> T {
     private var result: T? = null
 
