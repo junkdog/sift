@@ -8,7 +8,12 @@ import sift.core.dsl.Visibility
 internal class KotlinProperty(
     private val kmProperty: KmProperty
 ) {
-    val name: String = kmProperty.name
+    val name: String = listOfNotNull(
+        receiverType?.simpleName,
+        receiverType?.let { "." },
+        kmProperty.name,
+    ).joinToString("")
+
     val type: Type
         get() = kmProperty.returnType.let(Type::from)
 

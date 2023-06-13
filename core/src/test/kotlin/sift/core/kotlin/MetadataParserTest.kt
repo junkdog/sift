@@ -22,6 +22,12 @@ class MetadataParserTest {
 
                 "Function0<Unit>.lambdaExtension()"
             )
+        assertThat(exhibitA.properties.values.map(KotlinProperty::toString))
+            .containsExactlyInAnyOrder(
+                "propA",
+                "propB",
+                "String.propS",
+            )
     }
 
     @Test
@@ -36,6 +42,20 @@ class MetadataParserTest {
             .isEqualTo(Type.from("$list<$set<$map<kotlin.String, kotlin.Int>>>"))
 
     }
+
+    @Test
+    fun `recursive generic signature 2`() {
+        val dg = KotlinClass.from(classNode<DeepGenerics2<String>>())!!
+
+        val list = "kotlin.collections.List"
+        val set = "kotlin.collections.Set"
+        val map = "kotlin.collections.Map"
+
+        assertThat(dg.functions.values.first().receiver)
+            // generic arguments are currently always parsed as T; ergo T != T, necessarily
+            .isEqualTo(Type.from("$list<$set<$map<kotlin.String, T>>>"))
+
+    }
 }
 
 
@@ -44,6 +64,9 @@ private class ExhibitA {
     val propA: Char = 'a'
     val propB: Char
         get() = 'B'
+
+    val String.propS: Boolean
+        get() = true
 
     fun foo(string: String, int: Int = 2) = Unit
     infix fun foo(rhs: ExhibitA): ExhibitA = TODO()
@@ -62,4 +85,8 @@ private class ExhibitA {
 
 private class DeepGenerics {
     fun List<Set<Map<String, Int>>>.yolo() = Unit
+}
+
+private class DeepGenerics2<S> {
+    fun List<Set<Map<String, S>>>.yolo() = Unit
 }
