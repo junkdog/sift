@@ -4,7 +4,7 @@
 
 This update incorporates Kotlin language support:
 - Extension function names are rendered appropriately.
-- Kotlin value classes, formerly known as inline classes, now display the value class name instead of the underlying type.
+- Value classes, formerly known as inline classes, now display the value class name instead of the underlying type.
 - The enumeration of methods and parameters has been improved for relevance.
 - It's now possible to filter based on Kotlin's internal visibility modifier.
 - Visibility of properties now mirrors the associated getter method's visibility, instead of the backing field's private visibility.
