@@ -7,6 +7,7 @@ This update incorporates Kotlin language support:
 - Kotlin value classes, formerly known as inline classes, now display the value class name instead of the underlying type.
 - The enumeration of methods and parameters has been improved for relevance.
 - It's now possible to filter based on Kotlin's internal visibility modifier.
+- Visibility of properties now mirrors the associated getter method's visibility, instead of the backing field's private visibility.
 
 Kotlin support is achieved through the parsing of the `@kotlin.Metadata` class annotation, utilizing
 the [kotlin-reflect-lite][kotlin-reflect-lite] library. 
