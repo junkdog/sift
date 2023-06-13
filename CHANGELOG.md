@@ -1,6 +1,17 @@
 ## Upcoming Release
 
-### Kotlin language support: selection enum for `methods()` and `parameters()`
+### Kotlin language support
+
+This update incorporates Kotlin language support:
+- Extension function names are rendered appropriately.
+- Kotlin value classes, formerly known as inline classes, now display the value class name instead of the underlying type.
+- The enumeration of methods and parameters has been improved for relevance.
+- It's now possible to filter based on Kotlin's internal visibility modifier.
+
+Kotlin support is achieved through the parsing of the `@kotlin.Metadata` class annotation, utilizing
+the [kotlin-reflect-lite][kotlin-reflect-lite] library. 
+
+#### Selection enum for `methods()` and `parameters()`
 DSL functions `parameters() {}` and `properties() {}` now take an optional `ParameterSelection` and
 `MethodSelection` enum, in order to make it easier to iterate over the pertinent elements.
 
@@ -20,6 +31,8 @@ The `MethodSelection` can be used with `methods()`:
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.
+
+ [kotlin-reflect-lite]: https://github.com/Kotlin/kotlinx.reflect.lite
 
 
 ## sift-0.11.0 2023-06-06
