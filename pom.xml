@@ -20,7 +20,7 @@
     </licenses>
 
     <properties>
-        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
