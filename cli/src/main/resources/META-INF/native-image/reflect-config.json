@@ -149,7 +149,10 @@
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
-  "methods":[{"name":"<init>","parameterTypes":["com.github.ajalt.colormath.Color","com.github.ajalt.colormath.Color","boolean","boolean","boolean","boolean","boolean","boolean","java.lang.String","java.lang.String"] }]
+  "methods":[
+    {"name":"<init>","parameterTypes":["com.github.ajalt.colormath.Color","com.github.ajalt.colormath.Color","java.lang.Boolean","java.lang.Boolean","java.lang.Boolean","java.lang.Boolean","java.lang.Boolean","java.lang.Boolean","java.lang.String","java.lang.String"] }, 
+    {"name":"<init>","parameterTypes":["com.github.ajalt.colormath.Color","com.github.ajalt.colormath.Color","boolean","boolean","boolean","boolean","boolean","boolean","java.lang.String","java.lang.String"] }
+  ]
 },
 {
   "name":"com.sun.jna.CallbackProxy",
@@ -167,6 +170,9 @@
   "allDeclaredFields":true,
   "allDeclaredClasses":true,
   "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Boolean"
 },
 {
   "name":"java.lang.Character",
