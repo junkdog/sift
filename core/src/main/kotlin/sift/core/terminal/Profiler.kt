@@ -1,24 +1,20 @@
 package sift.core.terminal
 
 import com.github.ajalt.mordant.rendering.TextStyle
-import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.italic
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.Measurement
 import sift.core.api.MeasurementScope
-import sift.core.api.SystemModel
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
-import sift.core.terminal.Gruvbox.dark1
 import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.dark4
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
-import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Gruvbox.light3
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.terminal.Gruvbox.purple2

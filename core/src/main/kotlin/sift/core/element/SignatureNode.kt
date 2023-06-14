@@ -3,9 +3,10 @@ package sift.core.element
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
+import sift.core.dsl.Type
 
 class SignatureNode private constructor(
-    private val signature: TypeSignature,
+    val signature: TypeSignature,
 ) : Element {
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 
@@ -13,6 +14,9 @@ class SignatureNode private constructor(
 
     override val simpleName: String
         get() = signature.toString()
+
+    internal val type: Type
+        get() = Type.from(signature)
 
     val argType: ArgType
         get() = signature.type

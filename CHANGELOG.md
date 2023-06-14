@@ -29,9 +29,11 @@ The `MethodSelection` can be used with `methods()`:
 ### New/Tweaks
 - DSL: `filter(Visibility)` added to class, field and method scopes. For kotlin properties, field visibility
   is reported as the visibility of the property getter.
+- DSL/Signature: `readType()` added to signature scope. 
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.
+- DSL/Parameter: fix `readType()` serialization key colliding with `readType()` in class scope. 
 
  [kotlin-reflect-lite]: https://github.com/Kotlin/kotlinx.reflect.lite
 

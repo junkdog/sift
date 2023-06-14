@@ -22,6 +22,8 @@ import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.template.toTree
+import sift.core.terminal.TextTransformer
+import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.tree.debugTree
 import java.io.InputStream
 import kotlin.test.assertTrue
@@ -574,7 +576,7 @@ class DslTest {
 
         fun t(strategy: PropertyStrategy, expect: String) {
             classes {
-                entity(e, label("\${+props}"),
+                entity(e, label("\${props}"),
                     property("props", strategy, withValue("a")))
 
                 property(e, "props", strategy, withValue("a"))
@@ -1027,32 +1029,6 @@ class DslTest {
     }
 
     @Test
-    fun `readName for method should include receiver type name for extension functions`() {
-        val cns: List<ClassNode> = listOf(
-            classNode(EntityRegistrar::class),
-        )
-
-        val method = Entity.Type("method")
-
-        classes {
-            methods {
-                filter("<clinit>", invert = true)
-                filter("entity", invert = true)
-                entity(method, label("\${name}(\${+params:})"),
-                    property("name", readName())
-                )
-
-                parameters(excludingReceiver) { property(method, "params", readName()) }
-            }
-        }.expecting(cns, method, """
-            ── method
-               ├─ Entity.Type.set(key, children)
-               └─ label(pattern, ops)
-            """
-        )
-    }
-
-    @Test
     fun `parameter selections for kotlin extension functions`() {
         val cns: List<ClassNode> = listOf(
             classNode<ClassWithExtensionFunction>(),
@@ -1062,7 +1038,7 @@ class DslTest {
 
         classes {
             methods {
-                entity(method, label("extension: \${extension:false} \${name}(\${+params:})"),
+                entity(method, label("extension: \${extension:false} \${name}(\${params:})"),
                     property("name", readName())
                 )
 
@@ -1895,6 +1871,84 @@ class DslTest {
     }
 
     @Nested
+    inner class KotlinConstructsTests {
+
+        @Test
+        fun `value classes retain their declared name`() {
+            // @JvmInline
+            // value class Hello(val s: String)
+            //
+            // class KotlinClass1(
+            //     val greetings: List<Hello>
+            // ) {
+            //     fun Any.hi(greeting: Hello) = Unit
+            // }
+
+
+            val cns: List<ClassNode> = listOf(
+                classNode(KotlinClass1::class),
+            )
+
+            val m = Entity.Type("hello-method")
+            val f = Entity.Type("hello-field")
+
+            classes {
+                fields {
+                    entity(f, label("(f) \${name}: \${type}",
+                            // shorten signature types to simpleName-like
+                            replace(Regex("<([a-z.]+\\.)(\\w+)>"), "<\$2>")),
+                        property("name", readName()),
+                    )
+
+                    signature {
+                        property(f, "type", readType())
+                    }
+                }
+                methods {
+                    filter("<init>", invert = true) // omit constructors
+                    entity(m, label("(m) \${name}(\${params:})"),
+                        property("name", readName())
+                    )
+
+                    // register 'normal' parameters of extension method
+                    parameters(excludingReceiver) { property(m, "params", readName()) }
+                }
+            }.expecting(cns, listOf(m, f), """
+                ── hello-method + hello-field
+                   ├─ (f) greetings: List<Hello>
+                   └─ (m) Any.hi(greeting)
+                """
+            )
+        }
+
+        @Test
+        fun `readName for method should include receiver type name for extension functions`() {
+            val cns: List<ClassNode> = listOf(
+                classNode(EntityRegistrar::class),
+            )
+
+            val method = Entity.Type("method")
+
+            classes {
+                methods {
+                    filter("<clinit>", invert = true)
+                    filter("entity", invert = true)
+                    entity(method, label("\${name}(\${params:})"),
+                        property("name", readName())
+                    )
+
+                    parameters(excludingReceiver) { property(method, "params", readName()) }
+                }
+            }.expecting(cns, method, """
+                ── method
+                   ├─ Entity.Type.set(key, children)
+                   └─ label(pattern, ops)
+                """
+            )
+        }
+    }
+
+    @Nested
     inner class JavaConstructsTests {
 
         @Test
@@ -2082,4 +2136,15 @@ internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline
     }
 
     assertThat(t.cause).isInstanceOf(T::class.java)
+}
+
+
+
+@JvmInline
+value class Hello(val s: String)
+
+class KotlinClass1(
+    val greetings: List<Hello>
+) {
+    fun Any.hi(greeting: Hello) = Unit
 }

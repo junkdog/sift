@@ -34,6 +34,10 @@ class Signature internal constructor(
         action += Action.Signature.Filter(regex, invert)
     }
 
+    fun readType(): Action<IterSignatures, IterValues> {
+        return Action.Signature.ReadType
+    }
+
     fun typeArguments(f: Signature.() -> Unit) {
         val inner = Signature().also(f).action
         action += Action.Fork(Action.Signature.InnerTypeArguments andThen inner)

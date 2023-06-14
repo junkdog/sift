@@ -38,6 +38,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.Signature.Filter::class, name = "filter-signature"),
     JsonSubTypes.Type(Action.Signature.FilterNth::class, name = "signature-filter-nth"),
     JsonSubTypes.Type(Action.Signature.InnerTypeArguments::class, name = "type-arguments"),
+    JsonSubTypes.Type(Action.Signature.ReadType::class, name = "signature-read-type"),
     JsonSubTypes.Type(Action.Signature.SignatureScope::class, name = "signature-scope"),
 
     JsonSubTypes.Type(Action.Elements.ElementScope::class, name = "elements-scope"),
@@ -75,7 +76,7 @@ import sift.core.terminal.StringEditor
 
     JsonSubTypes.Type(Action.Parameter.ParameterScope::class, name = "parameter-scope"),
     JsonSubTypes.Type(Action.Parameter.ExplodeType::class, name = "explode-type"),
-    JsonSubTypes.Type(Action.Parameter.ReadType::class, name = "read-type"),
+    JsonSubTypes.Type(Action.Parameter.ReadType::class, name = "parameter-read-type"),
     JsonSubTypes.Type(Action.Parameter.IntoOuterScope::class, name = "parameter-parents"),
     JsonSubTypes.Type(Action.Parameter.IntoSignature::class, name = "parameter-signature"),
     JsonSubTypes.Type(Action.Parameter.FilterNth::class, name = "parameter-nth"),
@@ -217,6 +218,15 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Signature {
+        internal object ReadType : Action<IterSignatures, IterValues>() {
+            override fun id() = "read-type"
+            override fun execute(ctx: Context, input: IterSignatures): IterValues {
+                return input
+                    .map { sig -> ValueNode.from(sig.type, sig) }
+                    .onEach { ctx.scopeTransition(it.reference, it) }
+            }
+        }
+
         internal data class ExplodeType(val synthesize: Boolean) : Action<IterSignatures, IterClasses>() {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
