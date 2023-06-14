@@ -29,7 +29,9 @@ The `MethodSelection` can be used with `methods()`:
 ### New/Tweaks
 - DSL: `filter(Visibility)` added to class, field and method scopes. For kotlin properties, field visibility
   is reported as the visibility of the property getter.
-- DSL/Signature: `readType()` added to signature scope. 
+- DSL/Signature: `readType()` added to signature scope.
+- Entity label parameters now always return all values. Previously, only the initial value was utilized unless
+  the property name was prefixed with +.
 
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.

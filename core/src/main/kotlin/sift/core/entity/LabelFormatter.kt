@@ -15,14 +15,10 @@ sealed interface LabelFormatter : Entity.LabelFormatter {
                     val (key, defaultValue) = when (split.size) {
                         2    -> split
                         1    -> listOf(split.first(), "\${${split.first()}}")
-                        else -> error("':' can only occur once and is not escapable atm")
+                        else -> error("':' can only occur once and is not escapable")
                     }
 
-                    if (key.startsWith("+")) {
-                        entity[key.substring(1)]?.joinToString() ?: defaultValue
-                    } else {
-                        entity[key]?.first()?.toString() ?: defaultValue
-                    }
+                    entity[key]?.joinToString() ?: defaultValue
                 }.let { ops.fold(it) { acc, op -> op(acc) } }
         }
 

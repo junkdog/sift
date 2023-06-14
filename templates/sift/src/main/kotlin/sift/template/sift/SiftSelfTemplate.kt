@@ -91,7 +91,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
                     filter(acc_public)
-                    entity(E.dsl, label("\${icon:}\${name}(\${+params:})"),
+                    entity(E.dsl, label("\${icon:}\${name}(\${params:})"),
                         property("name", readName()),
                     )
 
