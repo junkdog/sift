@@ -1,8 +1,8 @@
-name: 🏗 build sift
+name: 🏗 build sift pull request
 
 on:
-  push:
-
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   build:
     name: Build and analyze
@@ -34,8 +34,5 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify -P coverage org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=junkdog_sift
+      - name: Build
+        run: mvn -B verify
