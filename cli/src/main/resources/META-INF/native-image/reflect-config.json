@@ -507,7 +507,11 @@
   ]
 },
 {
-  "name":"sift.core.api.Action$Class$ReadType"
+  "name":"sift.core.api.Action$Class$ReadType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sift.core.api.Action$Class$ToTemplateScope",
@@ -957,6 +961,9 @@
 },
 {
   "name":"sift.core.api.Action$Signature$ReadSignature"
+},
+{
+  "name":"sift.core.api.Action$Signature$ReadType"
 },
 {
   "name":"sift.core.api.Action$Signature$SignatureScope",
