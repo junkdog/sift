@@ -10,16 +10,12 @@ import sift.core.terminal.Style.Companion.plain
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = JpaTemplate.EntityTypes
-typealias A = JpaTemplate.Annotations
 typealias T = JpaTemplate.AsmTypes
 
 @Suppress("unused")
 class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
     override val entityTypes: Iterable<Entity.Type> = listOf(E.jpaMethod, E.jpaRepository)
     override val defaultType: Entity.Type = entityTypes.first()
-
-    object Annotations {
-    }
 
     object AsmTypes {
         val jpaRepository = "org.springframework.data.jpa.repository.JpaRepository".type
@@ -56,7 +52,7 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
                 // stubbing missing methods for entity registration:
                 // we don't have access to inherited jpa repo methods unless
-                // the library repo classes are passed to the pipeline.
+                // the library repo classes are included with the input classes.
                 invocationsOf(E.jpaRepository, synthesize = true) {
                     entity(E.jpaMethod)
                     outerScope("repository classes") {
