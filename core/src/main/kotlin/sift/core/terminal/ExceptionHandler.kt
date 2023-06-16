@@ -2,6 +2,7 @@ package sift.core.terminal
 
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.ajalt.mordant.rendering.TextStyles.underline
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.TemplateProcessingException
 import sift.core.api.Measurement
@@ -24,12 +25,18 @@ class ExceptionHandler(
                 printException(e.cause)
             } else {
                 printException(e.cause)
-                terminal.println(fg("Error during template processing: Use ${(light0 + bold)("--profile")} " +
-                    "option to identify the problematic operation."))
+                terminal.println(fg("Error occurred during template processing: Use ${(light0 + bold)("--profile")} " +
+                    "to identify the problematic operation."))
             }
+
         } else {
             printException(e)
         }
+
+        terminal.println()
+        terminal.println(fg("If you think this error is caused by a bug in sift, consider reporting it at " +
+            (bold + underline)("https://github.com/junkdog/sift/issues")
+        ))
     }
 
     private fun printException(e: Throwable) {
