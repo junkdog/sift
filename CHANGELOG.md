@@ -9,7 +9,7 @@ This update incorporates Kotlin language support:
 - It's now possible to filter based on Kotlin's internal visibility modifier.
 - Visibility of properties now mirrors the associated getter method's visibility, instead of the backing field's private visibility.
 
-Kotlin support is achieved through the parsing of the `@kotlin.Metadata` class annotation, utilizing
+Kotlin support is achieved through parsing `@kotlin.Metadata` class annotations, utilizing
 the [kotlin-reflect-lite][kotlin-reflect-lite] library. 
 
 #### Selection enum for `methods()` and `parameters()`
@@ -60,7 +60,8 @@ The `stylize` function wraps a `TextStyle` around the text. For example, `styliz
 is also how `--template sift` renders the function parameter names with a different color compared to the function name:
 
 ```kotlin
-property(E.dsl, "params", readName() andThen stylize(blue2))
+parameters(excludingReceiver) {
+    property(E.dsl, "params", readName() andThen stylize(blue2))
 ```
 
 The current list of `TextTransformer` functions are:
@@ -71,13 +72,13 @@ The current list of `TextTransformer` functions are:
 - `uuidSequence`: replaces UUID:s with sequentially assigned values, starting at 1.
 - `stylize`: applies a `TextStyle`, for example`(Gruvbox.orange2 + bold)`, to the text.
 
-
 ### New/Tweaks
 - DSL: `filter(Visibility)` added to class, field and method scopes. For kotlin properties, field visibility
   is reported as the visibility of the property getter.
 - DSL/Signature: `readType()` added to signature scope.
 - Entity label parameters now always return all values. Previously, only the initial value was utilized unless
   the property name was prefixed with +.
+
 
 ### Breaking changes
 - DSL: `editText()` has been renamed to `editor()`. This function is currently only used during graphviz dot generation,
