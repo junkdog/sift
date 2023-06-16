@@ -4,6 +4,7 @@ import sift.core.api.Action
 import sift.core.api.Iter
 import sift.core.api.IterValues
 import sift.core.element.Element
+import sift.core.element.ValueNode
 import sift.core.entity.Entity
 import sift.core.terminal.StringEditor
 import sift.core.terminal.TextTransformer
@@ -59,9 +60,8 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
     fun withValue(value: String): Action<Iter<ELEMENT>, IterValues>
     fun <E> withValue(value: E): Action<Iter<ELEMENT>, IterValues> where E : Enum<E>
 
-    fun editText(
-        vararg ops: TextTransformer
-    ): Action<Iter<ELEMENT>, IterValues>
+    /** internal function primarily used during graphviz dot generation */
+    fun editor(vararg ops: TextTransformer): Action<Iter<ELEMENT>, IterValues>
 
     /**
      * Reads the short form name of the element
@@ -77,11 +77,13 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
         field: String
     ): Action<Iter<ELEMENT>, IterValues>
 
+
     companion object {
         fun <ELEMENT: Element> scopedTo(
             action: Action.Chain<Iter<ELEMENT>>
         ): EntityPropertyRegistrar<ELEMENT> = EntityPropertyRegistrarImpl(action)
     }
+
 }
 
 private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
@@ -109,9 +111,9 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
         value: Any
     ): Action<Iter<ELEMENT>, IterValues> = Action.WithValue(value)
 
-    override fun editText(
+    override fun editor(
         vararg ops: TextTransformer
-    ): Action<Iter<ELEMENT>, IterValues> = Action.EditText(StringEditor(ops.toList()))
+    ): Action<Iter<ELEMENT>, IterValues> = Action.Editor(StringEditor(ops.toList()))
 
     override fun readName(
         shorten: Boolean
@@ -157,3 +159,10 @@ data class Property<T: Element>(
     val key: String,
     internal val action: Action<Iter<T>, IterValues>,
 )
+
+/** composes a new action by applying [transformer] to the value of this element */
+infix fun <ELEMENT : Element> Action<Iter<ELEMENT>, IterValues>.andThen(
+    transformer: TextTransformer
+): Action<Iter<ELEMENT>, IterValues> {
+    return this andThen Action.EditText(StringEditor(listOf(transformer)))
+}

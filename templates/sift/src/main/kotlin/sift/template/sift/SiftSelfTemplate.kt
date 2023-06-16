@@ -1,12 +1,13 @@
 package sift.template.sift
 
-import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
 import sift.core.api.AccessFlags.acc_public
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.dsl.ParameterSelection.excludingReceiver
+import sift.core.dsl.PropertyStrategy.*
+import sift.core.dsl.andThen
 import sift.core.dsl.template
 import sift.core.dsl.type
 import sift.core.entity.Entity
@@ -15,11 +16,9 @@ import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.template.SystemModelTemplate
-import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.plain
 import sift.core.terminal.TextTransformer.Companion.replace
-import sift.core.tree.EntityNode
-import sift.core.tree.Tree
+import sift.core.terminal.TextTransformer.Companion.stylize
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = SiftSelfTemplate.EntityTypes
@@ -85,31 +84,36 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 }
             }
 
-            classesOf(E.scope) { e ->
+            classesOf(E.scope) { scope ->
                 methods(inherited) {
                     filter(Regex("<init>|^get[A-Z]"), invert = true)
                     filter(Regex("set(Action|CurrentProperty)"), invert = true)
                     filter("\$default", invert = true)
                     filter(acc_public)
+
+                    // dsl functions per scope
                     entity(E.dsl, label("\${icon:}\${name}(\${params:})"),
                         property("name", readName()),
                     )
 
                     // mark functions used for updating entity properties;
-                    // property updating functions return Action over ValueNode:s
+                    // property updating functions output Action over ValueNode:s
                     returns {
                         explodeTypeT("Action<_, _<T>>") {
                             filter("ValueNode")
-                            property(E.dsl, "icon", withValue("⚙ "))
+                            // `strategy=unique` because every dsl property function is henceforth
+                            // associated with ValueNode; it would be prudent to maybe find another
+                            // approach in the future, which only inspected... but works for now (yolo)
+                            property(E.dsl, "icon", unique, withValue("⚙ "))
                         }
                     }
 
                     parameters(excludingReceiver) {
-                        property(E.dsl, "params", readName(shorten = true))
+                        property(E.dsl, "params", readName() andThen stylize(blue2))
                         property(E.dsl, "param-types", readType())
                     }
                 }
-                e["fns"] = E.dsl
+                scope["fns"] = E.dsl
             }
 
 //            E.dsl["actions"] = E.action.instantiations
@@ -119,27 +123,8 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
     override fun theme() = mapOf(
         E.scope    to plain(orange1 + bold),
-        E.dsl      to DslStyle(orange2 + bold, blue2),
-//        E.dsl      to plain(orange2 + bold),
+        E.dsl      to plain(orange2 + bold),
         E.element  to plain(blue1),
         E.action   to plain(blue2),
     )
-}
-
-private class DslStyle(val fnStyle: TextStyle, val paramStyle: TextStyle) : Style {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun format(
-        e: Tree<EntityNode>,
-        theme: Map<Entity.Type, Style>
-    ): String {
-        val fn = (e.value as EntityNode.Entity).entity
-
-        val icon = fn["icon"]?.first()?.toString() ?: ""
-        val name = fn["name"]?.first()?.toString()?.let { fnStyle(it) } ?:  ""
-        val parameters = (fn["params"] as List<String>? ?: listOf())
-            .joinToString(fnStyle(", ")) { paramStyle(it) }
-
-        return "$icon$name${fnStyle("(")}$parameters${fnStyle(")")}"
-    }
 }

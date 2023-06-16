@@ -26,7 +26,7 @@ class ValueNode private constructor(
 
     companion object {
         fun from(value: Any, reference: Element): ValueNode {
-            return ValueNode(value, reference)
+            return ValueNode(value, (reference as? ValueNode)?.reference ?: reference)
         }
     }
 }

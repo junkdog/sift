@@ -36,7 +36,7 @@ internal fun explodeTypeFromSignature(
                 dsl.explodeType(synthesize, f)
             }
             is TypeName.SimpleName -> {
-                dsl.filter(Regex("^.+\\.${self.constraint.name}\$"))
+                dsl.filter(Regex("^(.+\\.|)${self.constraint.name}<|\$"))
                 self.arguments
                     .filter(::containsT)
                     .forEach { arg -> dsl.typeArgument(arg.index) { recurse(this, arg) } }

@@ -90,6 +90,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.FilterVisible::class, name = "filter-visible"),
     JsonSubTypes.Type(Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(Action.WithValue::class, name = "with-value"),
+    JsonSubTypes.Type(Action.Editor::class, name = "editor"),
     JsonSubTypes.Type(Action.EditText::class, name = "edit-text"),
     JsonSubTypes.Type(Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(Action.Fork::class, name = "fork"),
@@ -110,7 +111,7 @@ sealed class Action<IN, OUT> {
     abstract fun id(): String
     internal abstract fun execute(ctx: Context, input: IN): OUT
 
-    infix fun <T> andThen(action: Action<OUT, T>): Action<IN, T> = Compose(this, action)
+    internal infix fun <T> andThen(action: Action<OUT, T>): Action<IN, T> = Compose(this, action)
 
     internal operator fun invoke(ctx: Context, input: IN): OUT {
         return ctx.measure(ctx, input, this)
@@ -260,11 +261,7 @@ sealed class Action<IN, OUT> {
         internal data class Filter(val regex: Regex, val invert: Boolean) : Action<IterSignatures, IterSignatures>() {
             override fun id() = "filter-signature($regex${" invert".takeIf { invert } ?: ""})"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
-                fun classNameOf(elem: SignatureNode): String? =
-                    (elem.argType as? ArgType.Plain)?.type?.name
-
-                return input
-                    .filter { classNameOf(it)?.let { desc -> (regex in desc) xor invert } == true }
+                return input.filter { ((regex in it.type.name) || (regex in it.type.simpleName) ) xor invert }
             }
         }
 
@@ -958,13 +955,28 @@ sealed class Action<IN, OUT> {
         override fun toString() = "WithValue($value)"
     }
 
+
+   class Editor<T : Element> internal constructor(
+        private val editor: StringEditor
+    ) : Action<Iter<T>, IterValues>() {
+        override fun id() = "editor$editor"
+        override fun execute(ctx: Context, input: Iter<T>): IterValues {
+            return input
+                .map { ValueNode.from(editor, it) }
+                .onEach { ctx.scopeTransition(it.reference, it) }
+        }
+
+        override fun toString() = "Editor$editor"
+    }
+
+
     class EditText<T : Element> internal constructor(
         private val editor: StringEditor
     ) : Action<Iter<T>, IterValues>() {
         override fun id() = "edit-text($editor)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             return input
-                .map { ValueNode.from(editor, it) }
+                .map { ValueNode.from(editor((it as? ValueNode)?.data ?: it), it) }
                 .onEach { ctx.scopeTransition(it.reference, it) }
         }
 
@@ -1104,22 +1116,19 @@ sealed class Action<IN, OUT> {
         override fun id() = "update-property($key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {
-                null -> {
-                    input.map { it to ctx.entityService[it.reference] }
-                        .forEach { (elem, e) -> e?.set(key, elem.data) }
-                }
-                else -> {
-                    runBlocking(Dispatchers.Default) {
-                        input.asFlow()
-                            .map { elem ->
-                                ctx.findRelatedEntities(elem, entity)
-                                    .associateWith { elem.data.ensureList }
-                            }
-                            .toList()
-                            .takeIf { it.isNotEmpty() }
-                            ?.reduce { acc, f -> acc + f }
-                            ?.let(::updateProperties)
-                    }
+                null -> input.map { it to ctx.entityService[it.reference] }
+                    .forEach { (elem, e) -> e?.let { updateProperties(it, elem.data.ensureList) } }
+
+                else -> runBlocking(Dispatchers.Default) {
+                    input.asFlow()
+                        .map { elem ->
+                            ctx.findRelatedEntities(elem, entity)
+                                .associateWith { elem.data.ensureList }
+                        }
+                        .toList()
+                        .takeIf { it.isNotEmpty() }
+                        ?.reduce { acc, f -> acc + f }
+                        ?.let(::updateProperties)
                 }
             }
 
@@ -1132,29 +1141,37 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        private fun updateProperties(entities: Map<Entity, List<Any>>) {
+        private fun updateProperties(e: Entity, properties: List<Any>) {
             when (strategy) {
-                PropertyStrategy.replace -> entities.forEach { (e, data) ->
+                PropertyStrategy.replace -> {
                     e -= key
-                    e[key] = data
+                    e[key] = properties
                 }
-                PropertyStrategy.append -> entities.forEach { (e, data) ->
-                    e[key] = data
+                PropertyStrategy.append -> {
+                    e[key] = properties
                 }
-                PropertyStrategy.prepend -> entities.forEach { (e, data) ->
+                PropertyStrategy.prepend -> {
                     val existing = e[key] ?: listOf()
                     e -= key
-                    e[key] = data + existing
+                    e[key] = properties + existing
                 }
-                PropertyStrategy.immutable -> entities.forEach { (e, data) ->
+                PropertyStrategy.immutable -> {
                     if (key !in e.properties) {
-                        e[key] = data
+                        e[key] = properties
                     }
                 }
-                PropertyStrategy.unique -> entities.forEach { (e, data) ->
-                    e[key] = data.filter { it !in e[key]!! }
+                PropertyStrategy.unique -> {
+                    e[key] = when (val existing = e[key]) {
+                        null -> properties.distinct()
+                        else -> properties.distinct() - existing
+//                        else -> properties.filter { it !in existing }
+                    }
                 }
             }
+        }
+
+        private fun updateProperties(entities: Map<Entity, List<Any>>) {
+            entities.forEach { (e, properties) -> updateProperties(e, properties) }
         }
     }
 

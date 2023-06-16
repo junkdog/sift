@@ -49,7 +49,7 @@ class LabelFormatterTemplate : SystemModelTemplate {
                 replace("abc", "def"),
                 replace("abc", "def"),
             ))
-            property(e, "dot-label-transform", editText(
+            property(e, "dot-label-transform", editor(
                 replace("abc", "def"),
                 dedupe(' '),
                 uuidSequence(),

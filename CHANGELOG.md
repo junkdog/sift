@@ -26,6 +26,52 @@ The `MethodSelection` can be used with `methods()`:
 - `inherited`: Includes all declared methods and inherited methods.
 - `declaredAndAccessors`: Similar to declared, but also includes Kotlin property accessors.
 
+### `property()` extraction with `andThen(TextTransformer)`
+Previously, the primary method for updating an entity label was to pass `TextTransformers` to `label()`. For instance:
+
+```kotlin
+annotatedBy(httpMethod)
+entity(E.endpoint,
+    label("\${http-method} /\${base-path:}/\${path:}",
+        dedupe('/')), // dedupe is a TextTransformer
+    ...
+```
+
+This approach served well for scenarios like substituting common paths/names or removing duplicate separators, but was
+somewhat cumbersome for handling finer, more intricate transformations.
+
+To address this, the `andThen` infix function has been introduced to enable direct transformation of entity properties:
+
+```kotlin
+classes {
+    entity(e, label("CLS \${name}"),
+        property("name",
+            readName() andThen replace(Regex("^CommonPrefix"), ""))
+    )
+}
+```
+
+In the example, `property("name")`, `readName()` extracts the class name, `andThen` applies `replace(Regex("^CommonPrefix"), "")`, 
+removing any starting "CommonPrefix" from the `name` property. 
+
+### New property TextTransformer function: `stylize(TextStyle)`
+
+The `stylize` function wraps a `TextStyle` around the text. For example, `stylize(Gruvbox.orange2 + bold)`. This
+is also how `--template sift` renders the function parameter names with a different color compared to the function name:
+
+```kotlin
+property(E.dsl, "params", readName() andThen stylize(blue2))
+```
+
+The current list of `TextTransformer` functions are:
+- `edit`: takes a list of text transformers and applies them in sequence. 
+- `dedupe`: removes duplicate instances of a specified character.
+- `replace`: replaces all occurrences of a specified string or regular expression with a given replacement string.
+- `idSequence`: replaces matches of a given regular expression with sequentially assigned values, starting at 1.
+- `uuidSequence`: replaces UUID:s with sequentially assigned values, starting at 1.
+- `stylize`: applies a `TextStyle`, for example`(Gruvbox.orange2 + bold)`, to the text.
+
+
 ### New/Tweaks
 - DSL: `filter(Visibility)` added to class, field and method scopes. For kotlin properties, field visibility
   is reported as the visibility of the property getter.
@@ -33,9 +79,15 @@ The `MethodSelection` can be used with `methods()`:
 - Entity label parameters now always return all values. Previously, only the initial value was utilized unless
   the property name was prefixed with +.
 
+### Breaking changes
+- DSL: `editText()` has been renamed to `editor()`. This function is currently only used during graphviz dot generation,
+  and will likely be removed in later releases.
+
 ### Fixes
 - SiftType `Type::simpleName` now correctly handles types with generic signatures.
 - DSL/Parameter: fix `readType()` serialization key colliding with `readType()` in class scope. 
+- DSL/Signature: `filter()` has been enhanced to check against both the full and simple name signatures for each type,
+  fixing the previous limitation of considering only the raw type.
 
  [kotlin-reflect-lite]: https://github.com/Kotlin/kotlinx.reflect.lite
 

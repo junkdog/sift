@@ -3,11 +3,7 @@ package sift.template.sbacqrs
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.Type
-import sift.core.dsl.type
-import sift.core.dsl.Classes
-import sift.core.dsl.Methods
-import sift.core.dsl.template
+import sift.core.dsl.*
 import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
@@ -234,8 +230,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     label = replace(Regex("Command\$"), "")
                 )
 
-                graphviz(
-                    E.query,
+                graphviz(E.query,
                     type = Dot.edge,
                     style = Style.dashed,
                     label = replace(Regex("Query\$"), ""),

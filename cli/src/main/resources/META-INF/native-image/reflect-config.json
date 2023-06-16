@@ -391,6 +391,7 @@
   "queryAllDeclaredConstructors":true,
   "methods":[
     {"name":"andThen","parameterTypes":["sift.core.api.Action"] }, 
+    {"name":"andThen$core","parameterTypes":["sift.core.api.Action"] }, 
     {"name":"invoke$core","parameterTypes":["sift.core.api.Context","java.lang.Object"] }
   ]
 },
@@ -551,6 +552,13 @@
 },
 {
   "name":"sift.core.api.Action$EditText",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["sift.core.terminal.StringEditor"] }]
+},
+{
+  "name":"sift.core.api.Action$Editor",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
@@ -1235,6 +1243,7 @@
   "methods":[
     {"name":"<init>","parameterTypes":["java.util.List"] }, 
     {"name":"getTransformers","parameterTypes":[] }, 
+    {"name":"invoke","parameterTypes":["java.lang.Object"] }, 
     {"name":"toString","parameterTypes":[] }
   ]
 },

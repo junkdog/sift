@@ -2,14 +2,10 @@ package sift.core.terminal
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.github.ajalt.mordant.rendering.TextStyle
 import java.util.*
 import java.util.regex.Pattern
 
-//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
-//@JsonSubTypes(
-//    JsonSubTypes.Type(TextTransformersWrapper::class, name = "transformers"),
-//)
-//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 internal class StringEditor(val transformers: List<TextTransformer>) {
     override fun toString(): String {
         fun format(transformer: TextTransformer): String = when (transformer) {
@@ -19,8 +15,11 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
             is TextEdit    -> "edit(${transformer.transformers.joinToString(transform = ::format)})"
         }
 
-        return transformers.joinToString(", ", "StringEditor(", ")", transform = ::format)
+        return transformers.joinToString(", ", "(", ")", transform = ::format)
     }
+
+    operator fun invoke(any: Any): String =
+        transformers.fold(any.toString()) { acc, transformer -> transformer(acc) }
 }
 
 // applied before styling
@@ -33,6 +32,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
 )
 sealed interface TextTransformer {
     operator fun invoke(s: String): String
+    operator fun invoke(any: Any): String = invoke(any.toString())
 
     companion object {
         fun edit(vararg transformers: TextTransformer): TextTransformer = TextEdit(transformers.toList())
@@ -41,6 +41,7 @@ sealed interface TextTransformer {
         fun uuidSequence(): TextTransformer = idSequence(uuidRegex)
         fun replace(text: String, with: String): TextTransformer = Replace(Pattern.quote(text).toRegex(), with)
         fun replace(regex: Regex, with: String): TextTransformer = Replace(regex, with)
+        fun stylize(style: TextStyle): TextTransformer = Replace(everythingRegex, style("\$0"))
     }
 }
 
@@ -82,4 +83,5 @@ private class Deduplicate(
 }
 
 private val uuidRegex = Regex("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")
+private val everythingRegex = Regex(".+")
 

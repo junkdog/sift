@@ -22,10 +22,12 @@ import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.template.toTree
-import sift.core.terminal.TextTransformer
+import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.replace
+import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.core.tree.debugTree
 import java.io.InputStream
+import java.util.UUID
 import kotlin.test.assertTrue
 
 class DslTest {
@@ -406,11 +408,11 @@ class DslTest {
         val expected = classes {
             methods {
                 returns {
-                    filter(Regex("^.+\\.Map\$"))
+                    filter(Regex("^(.+\\.|)Map<|\$"))
                     typeArgument(1) {                  //  List<Pair<Payload, Int>>
-                        filter(Regex("^.+\\.List\$"))
+                        filter(Regex("^(.+\\.|)List<|\$"))
                         typeArgument(0) {              // Pair<Payload, Int>
-                            filter(Regex("^.+\\.Pair\$"))
+                            filter(Regex("^(.+\\.|)Pair<|\$"))
                             typeArgument(0) {          // Payload
                                 explodeType(synthesize = true) {
                                     entity(payload)
@@ -575,12 +577,19 @@ class DslTest {
         val e = Entity.Type("e")
 
         fun t(strategy: PropertyStrategy, expect: String) {
-            classes {
-                entity(e, label("\${props}"),
-                    property("props", strategy, withValue("a")))
+            template {
+                classes {
+                    entity(
+                        e, label("\${props}"),
+                        property("props", strategy, withValue("a")),
+                        property("props", strategy, withValue("a"))
+                    )
 
-                property(e, "props", strategy, withValue("a"))
-                property(e, "props", strategy, withValue("b"))
+                }
+
+                classesOf(e) {
+                    property(e, "props", strategy, withValue("b"))
+                }
             }.expecting(listOf(classNode(SomeController::class)), e, """
                 ── e
                    └─ $expect
@@ -958,6 +967,28 @@ class DslTest {
                └─ GenericRepos::onlyString
                   └─ RepoT<String>
            """
+        )
+    }
+
+
+    @Test
+    fun `register and then edit entity properties`() {
+        class InputClass
+
+        val cns: List<ClassNode> = listOf(classNode(InputClass::class))
+        val e = Entity.Type("class")
+
+        classes {
+            entity(e, label("\${id} CLS \${name}"),
+                property("id",
+                    withValue("${UUID.randomUUID()}") andThen edit(uuidSequence(), replace("1", "FIRST"))),
+                property("name",
+                    readName() andThen replace(Regex(".+"), "REDACTED"))
+            )
+        }.expecting(cns, e, """
+            ── class
+               └─ FIRST CLS REDACTED
+            """
         )
     }
 

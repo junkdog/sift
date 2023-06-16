@@ -234,13 +234,13 @@ private val Entity.dotRank: Int
     get() = this["dot-rank"]?.firstOrNull() as Int? ?: 0
 
 private val Entity.dotLabel: String
-    get() = dotLabelTransformers.fold(label) { s, transform -> transform(s) }
+    get() = dotLabelTransformers(label)
 
 @Suppress("UNCHECKED_CAST")
-private val Entity.dotLabelTransformers: List<TextTransformer>
+private val Entity.dotLabelTransformers: StringEditor
     get() = (this["dot-label-transform"] as Iterable<StringEditor>?)
         ?.firstOrNull()
-        ?.transformers ?: listOf()
+        ?: StringEditor(listOf())
 
 private val Entity.dotArrowhead: String?
     get() = this["dot-arrowhead"]?.firstOrNull() as String?
