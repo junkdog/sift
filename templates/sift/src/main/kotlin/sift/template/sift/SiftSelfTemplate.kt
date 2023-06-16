@@ -101,10 +101,10 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                     returns {
                         explodeTypeT("Action<_, _<T>>") {
                             filter("ValueNode")
-                            // `strategy=unique` because every dsl property function is henceforth
-                            // associated with ValueNode; it would be prudent to maybe find another
-                            // approach in the future, which only inspected... but works for now (yolo)
-                            property(E.dsl, "icon", unique, withValue("⚙ "))
+                            // every dsl property function is henceforth associated with ValueNode;
+                            // it would be prudent to maybe find another approach in the future,
+                            // which only inspected w/o relating... but works for now (yolo)
+                            property(E.dsl, "icon", withValue("⚙ "))
                         }
                     }
 

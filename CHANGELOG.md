@@ -89,6 +89,8 @@ The current list of `TextTransformer` functions are:
 - DSL/Parameter: fix `readType()` serialization key colliding with `readType()` in class scope. 
 - DSL/Signature: `filter()` has been enhanced to check against both the full and simple name signatures for each type,
   fixing the previous limitation of considering only the raw type.
+- `PropertyStrategy.unique` now takes the set of its own input to ensure distinct values.
+- DSL/Signature: `explodeType()` and `explodeTypeT()` no longer output duplicate types.
 
  [kotlin-reflect-lite]: https://github.com/Kotlin/kotlinx.reflect.lite
 

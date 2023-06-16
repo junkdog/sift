@@ -237,7 +237,7 @@ sealed class Action<IN, OUT> {
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
-                return input.mapNotNull(::classOf)
+                return input.mapNotNull(::classOf).distinct()
             }
         }
 
