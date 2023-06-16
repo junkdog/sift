@@ -8,7 +8,6 @@ import sift.core.entity.Entity
 import sift.core.pop
 import sift.core.terminal.Gruvbox
 import sift.core.terminal.StringEditor
-import sift.core.terminal.TextTransformer
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 

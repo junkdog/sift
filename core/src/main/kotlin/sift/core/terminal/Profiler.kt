@@ -15,7 +15,6 @@ import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
-import sift.core.terminal.Gruvbox.light2
 import sift.core.terminal.Gruvbox.light3
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.terminal.Gruvbox.purple2
