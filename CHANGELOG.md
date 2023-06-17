@@ -1,6 +1,6 @@
 ## Upcoming Release
 
-## sift-0.11.0 2023-06-17
+## sift-0.12.0 2023-06-17
 
 ### Kotlin language support
 
