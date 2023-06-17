@@ -6,7 +6,7 @@ import sift.core.api.AccessFlags.acc_public
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.dsl.ParameterSelection.excludingReceiver
-import sift.core.dsl.PropertyStrategy.*
+import sift.core.dsl.SiftType
 import sift.core.dsl.andThen
 import sift.core.dsl.template
 import sift.core.dsl.type
@@ -65,22 +65,20 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
 
         scope("register dsl") {
-            // 'sift.core.api.Dsl' for sift < 0.7.0
-            listOf("sift.core.dsl", "sift.core.api.Dsl").forEach { dsl ->
-                classes {
-                    filter(dsl)
+            classes {
+                // 'sift.core.api.Dsl' for sift < 0.7.0
+                filter(Regex("sift\\.core\\.(dsl|api\\.Dsl)"))
 
-                    scope("scopes from annotated classes") {
-                        annotatedBy<SiftTemplateDsl>()
-                        entity(E.scope, label("\${name}", replace("Dsl.", "")),
-                            property("name", readName()))
-                    }
+                scope("scopes from annotated classes") {
+                    annotatedBy<SiftTemplateDsl>()
+                    entity(E.scope, label("\${name}"),
+                        property("name", readName() andThen(replace("Dsl.", ""))))
+                }
 
-                    scope("scopes from children of Core<Element>") {
-                        implements(Regex("Core").type)
-                        entity(E.scope, label("\${name}", replace("Dsl.", "")), // Dsl. prefix < 0.7.0
-                            property("name", readName()))
-                    }
+                scope("scopes from children of Core<Element>") {
+                    implements(Regex("Core").type)
+                    entity(E.scope, label("\${name}"), // Dsl. prefix < 0.7.0
+                        property("name", readName() andThen replace("Dsl.", "")))
                 }
             }
 
