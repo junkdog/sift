@@ -11,7 +11,7 @@ The selection enum definition for `methods(<selection>) {}` has been updated to 
 - `synthetic`: Matches synthetic methods, such as default-value functions in Kotlin.
 - `accessors`: Matches Kotlin's property getters and setters.
 
-It is possible to compose multiple selection options in the `methods()` function by using the + operator, like so:
+It is possible to compose multiple selection options in the `methods()` function by using the `+` operator, like so:
 `methods(declared + constructors) {}`.
 
 Note that constructors are no longer included by default.

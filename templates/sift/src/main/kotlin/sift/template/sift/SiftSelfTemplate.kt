@@ -58,14 +58,14 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
                 outerScope("scope") {
                     entity(E.element)
+                    E.element["actions"] = E.action
                 }
-                E.element["actions"] = E.action
             }
         }
 
 
         scope("register dsl") {
-            classes {
+            classes("register scopes") {
                 // 'sift.core.api.Dsl' for sift < 0.7.0
                 filter(Regex("sift\\.core\\.(dsl|api\\.Dsl)"))
 
@@ -82,7 +82,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 }
             }
 
-            classesOf(E.scope) { scope ->
+            classesOf("register functions", E.scope) { scope ->
                 methods(inherited) {
                     filter(Public)
 
