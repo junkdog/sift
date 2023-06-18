@@ -89,7 +89,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                 property("dot-id-as", withValue(ownerType)),
             )
 
-            parameters {
+            parameters("register $handledType handlers") {
                 parameter(0)  // 1st parameter is command|event|query
                 property(handler, "type", readType())
 
@@ -128,22 +128,20 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                     annotatedBy(A.aggregate)
                     registerAggregate(E.aggregate)
 
-                    scope("register member aggregates") {
-                        fields {
-                            annotatedBy(A.aggregateMember)
-                            signature {
-                                explodeTypeT("_<T>") { // e.g. list
-                                    registerAggregate(E.aggregateMember,
-                                        label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
+                    fields("register member aggregates") {
+                        annotatedBy(A.aggregateMember)
+                        signature {
+                            explodeTypeT("_<T>") { // e.g. list
+                                registerAggregate(E.aggregateMember,
+                                    label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
 
-                                    property(E.aggregateMember, "member", readName())
-                                }
-                                explodeTypeT("Map<_, T>") {
-                                    registerAggregate(E.aggregateMember,
-                                        label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
+                                property(E.aggregateMember, "member", readName())
+                            }
+                            explodeTypeT("Map<_, T>") {
+                                registerAggregate(E.aggregateMember,
+                                    label("\${aggregate}[\${member}]", replace("Aggregate[", "[")))
 
-                                    property(E.aggregateMember, "member", readName())
-                                }
+                                property(E.aggregateMember, "member", readName())
                             }
                         }
                     }
@@ -164,7 +162,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
                                         E.projection["events"] = E.eventHandler
                                     }
 
-                                    scope("register event sourcing handlers with project") {
+                                    scope("register event sourcing handlers with projection") {
                                         registerAxonHandlers(E.projection, A.queryHandler, E.query, E.queryHandler)
                                         E.projection["queries"] = E.queryHandler
                                     }

@@ -578,7 +578,7 @@ class DslTest {
 
         fun t(strategy: PropertyStrategy, expect: String) {
             template {
-                classes {
+                classes("$strategy") {
                     entity(
                         e, label("\${props}"),
                         property("props", strategy, withValue("a")),
@@ -642,15 +642,13 @@ class DslTest {
         // note that kotlin properties are not necessarily backed by actual fields
         classes {
             filter(Regex("ClassWithFields\$"))
-            scope("register field entities") {
-                fields {
-                    entity(field, label("\${name}"),
-                        property("name", readName()))
+            fields("register field entities") {
+                entity(field, label("\${name}"),
+                    property("name", readName()))
 
-                    explodeType {
-                        entity(foo)
-                        field["type"] = foo
-                    }
+                explodeType {
+                    entity(foo)
+                    field["type"] = foo
                 }
             }
         }.expecting(cns, field, """
@@ -667,8 +665,8 @@ class DslTest {
         val endpoint = Entity.Type("endpoint")
 
         template {
-            classes {
-                methods {
+            classes("all classes") {
+                methods("all methods") {
                     annotatedBy<Endpoint>()
                     entity(endpoint)
                 }
@@ -702,7 +700,7 @@ class DslTest {
             entity(et, label("\${a-parameter-type}"))
             methods {
                 filter(Regex("mixedTypes"))
-                parameters {
+                parameters("read parameter type") {
                     parameter(1)
                     property(et, "a-parameter-type", readType())
                 }
@@ -850,7 +848,7 @@ class DslTest {
         val et = Entity.Type("e")
 
         classes {
-             fields {
+             fields("for RepoInt") {
                 filter(Regex("RepoInt"))
                 signature {
                     entity(et)

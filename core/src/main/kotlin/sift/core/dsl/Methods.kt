@@ -89,9 +89,15 @@ class Methods internal constructor(
     fun parameters(
         selection: ParameterSelection = all,
         f: Parameters.() -> Unit
+    ) = parameters(null, selection, f)
+
+    fun parameters(
+        label: String?,
+        selection: ParameterSelection = all,
+        f: Parameters.() -> Unit
     ) {
         val forkTo = Parameters().also(f).action
-        action += Action.Fork(
+        action += Action.Fork(label,
             Action.Method.IntoParameters(selection) andThen forkTo
         )
     }

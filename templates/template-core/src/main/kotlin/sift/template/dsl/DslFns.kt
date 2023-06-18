@@ -63,7 +63,7 @@ fun Template.graphviz(
         shape?.let {          property(e, "dot-shape", withValue(it.name)) }
         style?.let {          property(e, "dot-style", withValue(it.name)) }
         arrowheadShape?.let { property(e, "dot-arrowhead", withValue(it)) }
-        edgeLabel?.let {      property(e, "dot-edge-label",      it()) }
+        edgeLabel?.let {      property(e, "dot-edge-label", it()) }
         label?.let {          property(e, "dot-label-transform", editor(it)) }
     }
 }

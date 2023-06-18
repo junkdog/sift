@@ -45,13 +45,13 @@ class Jdbi3Template : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
     override fun template() = template {
         classes {
-            methods {
+            methods("resolve JDBI3 SQL queries") {
                 annotatedBy(A.sqlQuery)
                 entity(E.sqlQuery, label("\${sql}"),
                     property("sql", readAnnotation(A.sqlQuery, "value"))
                 )
             }
-            methods {
+            methods("resolve JDBI3 SQL updates") {
                 annotatedBy(A.sqlUpdate)
                 entity(E.sqlUpdate, label("\${sql}"),
                     property("sql", readAnnotation(A.sqlUpdate, "value"))

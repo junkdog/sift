@@ -1,5 +1,10 @@
 ## Upcoming Release
 
+### New/Tweaks
+- DSL: added `label` overloads for `classes()`, `fields()`, `methods()`, `parameters()`, `classesOf()`, `fieldsOf()`,
+  `methodsOf()`, `parametersOf()`, `elementsOf()`. The label is displayed when running with `--profile`, under the
+  associated `fork` action.
+
 ## sift-0.12.0 2023-06-17
 
 ### Kotlin language support

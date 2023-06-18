@@ -29,7 +29,11 @@ class Classes internal constructor(
     }
 
     fun enums(f: Fields.() -> Unit) {
-        action += Action.Fork(
+        enums(null, f)
+    }
+
+    fun enums(label: String?, f: Fields.() -> Unit) {
+        action += Action.Fork(label,
             Action.Class.IntoEnumValues andThen Fields().also(f).action
         )
     }
@@ -83,8 +87,7 @@ class Classes internal constructor(
         inherited: Boolean,
         f: Methods.() -> Unit
     ) {
-        val selection = MethodSelection.inherited
-            .takeIf { inherited }
+        val selection = MethodSelection.inherited.takeIf { inherited }
             ?: MethodSelection.declared
 
         methods(selection, f)
@@ -94,8 +97,16 @@ class Classes internal constructor(
         selection: MethodSelection = MethodSelection.declared,
         f: Methods.() -> Unit
     ) {
+        methods(null, selection, f)
+    }
+
+    fun methods(
+        label: String?,
+        selection: MethodSelection = MethodSelection.declared,
+        f: Methods.() -> Unit
+    ) {
         val forkTo = Action.Class.IntoMethods(selection) andThen Methods().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label, forkTo)
     }
 
     /**
@@ -103,8 +114,12 @@ class Classes internal constructor(
      * fields inherited from super classes are included too.
      */
     fun fields(inherited: Boolean = false, f: Fields.() -> Unit) {
+        fields(null, inherited, f)
+    }
+
+    fun fields(label: String?, inherited: Boolean = false, f: Fields.() -> Unit) {
         val forkTo = Action.Class.IntoFields(inherited) andThen Fields().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label, forkTo)
     }
 
     fun superclass(f: Signature.() -> Unit) {

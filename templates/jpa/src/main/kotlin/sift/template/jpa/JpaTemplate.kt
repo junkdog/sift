@@ -42,13 +42,12 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
             scope("register JPA repositories") {
                 implements(T.jpaRepository)
                 entity(E.jpaRepository)
-                log("jpa repos")
 
                 // skipping registration of declared jpa methods as additional
                 // methods need to be resolved from invocations on the repo anyway.
             }
 
-            methods {
+            methods("resolve JPA methods from usage") {
 
                 // stubbing missing methods for entity registration:
                 // we don't have access to inherited jpa repo methods unless
