@@ -7,7 +7,6 @@ import sift.core.api.Action
 import sift.core.dsl.Type
 import sift.core.dsl.type
 import sift.core.dsl.Methods
-import sift.core.dsl.ScopeEntityPredicate
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.template
 import sift.core.graphviz.Dot
