@@ -94,7 +94,7 @@ class Classes internal constructor(
     }
 
     fun methods(
-        selection: MethodSelection = MethodSelection.declared,
+        selection: MethodSelectionFilter = MethodSelection.declared,
         f: Methods.() -> Unit
     ) {
         methods(null, selection, f)
@@ -102,7 +102,7 @@ class Classes internal constructor(
 
     fun methods(
         label: String?,
-        selection: MethodSelection = MethodSelection.declared,
+        selection: MethodSelectionFilter = MethodSelection.declared,
         f: Methods.() -> Unit
     ) {
         val forkTo = Action.Class.IntoMethods(selection) andThen Methods().also(f).action
@@ -126,14 +126,4 @@ class Classes internal constructor(
         val forkTo = Action.Class.IntoSuperclassSignature andThen Signature().also(f).action
         action += Action.Fork(forkTo)
     }
-}
-
-@Suppress("EnumEntryName")
-enum class MethodSelection {
-    /** All methods directly declared by the class, excluding Kotlin property accessors */
-    declared,
-    /** All declared and inherited methods */
-    inherited,
-    /** Declared methods, including Kotlin property accessors */
-    declaredAndAccessors,
 }

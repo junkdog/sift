@@ -14,7 +14,7 @@ import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
-import sift.core.dsl.MethodSelection.declaredAndAccessors
+import sift.core.dsl.MethodSelection.*
 import sift.core.dsl.ParameterSelection.onlyReceiver
 import sift.core.dsl.ParameterSelection.excludingReceiver
 import sift.core.dsl.ScopeEntityPredicate.ifExists
@@ -281,7 +281,6 @@ class DslTest {
             scope("enum usage") {
                 filter("Bobber")
                 methods {
-                    filterName("<init>", invert = true)
                     entity(bobber)
 
                     bobber["references"] = bobEnum.fieldAccess
@@ -302,7 +301,6 @@ class DslTest {
             scope("enum usage") {
                 filter("Bobber")
                 methods {
-                    filter("<init>", invert = true)
                     entity(bobber)
 
                     bobber["references"] = bobEnum.fieldAccess
@@ -324,7 +322,6 @@ class DslTest {
                 scope("dibbler") {
                     filter("Dibbler")
                     methods {
-                        filter("<init>", invert = true)
                         entity(dibbler)
                     }
                 }
@@ -826,6 +823,31 @@ class DslTest {
     }
 
     @Test
+    fun `filter internal constructor`() {
+        val cns = listOf(
+            classNode(Signature::class)
+        )
+
+        val ctor = Entity.Type("constructor")
+
+        classes {
+            methods(constructors) {
+                filter(Visibility.Internal)
+                entity(ctor, label("\${name}(\${params:})"),
+                    property("name", readName()))
+
+                parameters {
+                    property(ctor, "params", readName())
+                }
+            }
+        }.expecting(cns, ctor, """
+            ── constructor
+               └─ <init>(action)
+            """
+        )
+    }
+
+    @Test
     fun `register generic type from method parameters and fields`() {
         // interface RepoT<T>
         // abstract class AbstractRepoT<T>
@@ -1038,7 +1060,6 @@ class DslTest {
                 classes {
                     filter(Visibility.Internal)
                     methods {
-                        filter("<init>", invert = true)
                         filter(visibility)
                         entity(m, label("\${name}"), property("name", readName()))
                     }
@@ -1066,7 +1087,7 @@ class DslTest {
         val method = Entity.Type("method")
 
         classes {
-            methods {
+            methods(declared + constructors) {
                 entity(method, label("extension: \${extension:false} \${name}(\${params:})"),
                     property("name", readName())
                 )
@@ -1096,20 +1117,44 @@ class DslTest {
             }
         }.expecting(cns, method, """
             ── method
-               ├─ ClassWithExtensionFunction::<init>
                └─ ClassWithExtensionFunction::List<Foo>.hello
             """
         )
 
         classes {
-            methods(declaredAndAccessors) {
+            methods(declared + accessors) {
                 entity(method)
             }
         }.expecting(cns, method, """
             ── method
-               ├─ ClassWithExtensionFunction::<init>
                ├─ ClassWithExtensionFunction::List<Foo>.hello
                └─ ClassWithExtensionFunction::getFoo
+            """
+        )
+    }
+
+    @Test
+    fun `inherited method selection should include default methods from kotlin interfaces`() {
+        val cns = listOf(
+            classNode(KotlinClass2::class),
+            classNode(InterfaceWithDefaultMethod::class),
+        )
+
+        val m = Entity.Type("method")
+
+        classes {
+            filter("KotlinClass2")
+            methods(inherited) {
+                entity(m, label("\${name}(\${params:})"),
+                    property("name", readName()))
+
+                parameters {
+                    property(m, "params", readName())
+                }
+            }
+        }.expecting(cns, m, """
+            ── method
+               └─ foo()
             """
         )
     }
@@ -1474,7 +1519,6 @@ class DslTest {
         }.expecting(cns, method,
             """
             ── handler
-               ├─ HandlerOfFns::<init>
                ├─ HandlerOfFns::boo
                ├─ HandlerOfFns::dummy
                ├─ HandlerOfFns::invoker
@@ -1934,7 +1978,6 @@ class DslTest {
                     }
                 }
                 methods {
-                    filter("<init>", invert = true) // omit constructors
                     entity(m, label("(m) \${name}(\${params:})"),
                         property("name", readName())
                     )
@@ -2176,4 +2219,10 @@ class KotlinClass1(
     val greetings: List<Hello>
 ) {
     fun Any.hi(greeting: Hello) = Unit
+}
+
+class KotlinClass2 : InterfaceWithDefaultMethod
+
+interface InterfaceWithDefaultMethod {
+    fun foo(): Unit = Unit
 }

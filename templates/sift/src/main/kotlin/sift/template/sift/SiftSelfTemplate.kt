@@ -3,13 +3,13 @@ package sift.template.sift
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
 import sift.core.api.AccessFlags.acc_public
+import sift.core.api.AccessFlags.acc_synthetic
 import sift.core.api.SiftTemplateDsl
+import sift.core.dsl.*
+import sift.core.dsl.MethodSelection.declared
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.dsl.ParameterSelection.excludingReceiver
-import sift.core.dsl.SiftType
-import sift.core.dsl.andThen
-import sift.core.dsl.template
-import sift.core.dsl.type
+import sift.core.dsl.Visibility.Public
 import sift.core.entity.Entity
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -84,10 +84,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
             classesOf(E.scope) { scope ->
                 methods(inherited) {
-                    filter(Regex("<init>|^get[A-Z]"), invert = true)
-                    filter(Regex("set(Action|CurrentProperty)"), invert = true)
-                    filter("\$default", invert = true)
-                    filter(acc_public)
+                    filter(Public)
 
                     // dsl functions per scope
                     entity(E.dsl, label("\${icon:}\${name}(\${params:})"),

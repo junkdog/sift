@@ -6,6 +6,7 @@ import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 import sift.core.dsl.Type
+import sift.core.kotlin.KotlinCallable
 import sift.core.kotlin.KotlinFunction
 import sift.core.kotlin.KotlinParameter
 
@@ -42,7 +43,7 @@ class ParameterNode private constructor(
             cn: ClassNode,
             mn: MethodNode,
             asmMn: AsmMethodNode,
-            kfn: KotlinFunction?,
+            kfn: KotlinCallable?,
         ): List<ParameterNode> {
             val argumentTypes = AsmType.getArgumentTypes(asmMn.desc)
             val extensionFunctionOffset = kfn?.isExtension?.takeIf { it }?.let { 1 } ?: 0

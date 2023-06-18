@@ -87,7 +87,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.HasAnnotation::class, name = "has-annotation"),
     JsonSubTypes.Type(Action.EntityFilter::class, name = "entity-filter"),
     JsonSubTypes.Type(Action.FilterModifiers::class, name = "filter-modifiers"),
-    JsonSubTypes.Type(Action.FilterVisible::class, name = "filter-visible"),
+    JsonSubTypes.Type(Action.FilterVisibility::class, name = "filter-visible"),
     JsonSubTypes.Type(Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(Action.WithValue::class, name = "with-value"),
     JsonSubTypes.Type(Action.Editor::class, name = "editor"),
@@ -396,10 +396,12 @@ sealed class Action<IN, OUT> {
         }
 
         internal data class IntoMethods(
-            val selection: MethodSelection,
+            val selection: MethodSelectionFilter,
         ) : Action<IterClasses, IterMethods>() {
-            override fun id() = "methods(${selection.name})"
+            override fun id() = "methods(${selection})"
             override fun execute(ctx: Context, input: IterClasses): IterMethods {
+                val inheriting = selection.isInheriting
+
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
                     return ctx.parents[input]!!
                         .mapNotNull { (_, cn) ->  cn?.methods }
@@ -407,30 +409,19 @@ sealed class Action<IN, OUT> {
                 }
 
                 fun methodsOf(input: ClassNode): IterMethods {
-                    val methods = when (selection) {
-                        MethodSelection.inherited -> input.methods + inheritedMethodsOf(input)
-                        MethodSelection.declaredAndAccessors -> input.methods
-                        else -> input.filteredMethods()
+                    val methods = when (inheriting) {
+                        true -> input.methods + inheritedMethodsOf(input)
+                        false -> input.methods
                     }
 
                     return methods
+                        .filter(selection::invoke)
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
-                return input.flatMap(::methodsOf)
-                    .let { if (selection == MethodSelection.inherited) it.toSet() else it }
-            }
-
-            private fun ClassNode.filteredMethods(): List<MethodNode> {
-
-                return when (selection) {
-                    MethodSelection.declaredAndAccessors -> methods
-                    else -> methods.filter { mn ->
-                        !isKotlin
-                            || (isKotlin && mn.isKotlin)
-                            || mn.name == "<init>"
-                            || mn.name == "<clinit>"
-                    }
+                return when {
+                    inheriting -> input.flatMap(::methodsOf).distinct()
+                    else       -> input.flatMap(::methodsOf)
                 }
             }
         }
@@ -848,7 +839,7 @@ sealed class Action<IN, OUT> {
 
             when (format) {
                 LogFormat.Elements ->
-                    "$tag:\n${elements.joinToString(prefix = "    ", separator = "\n    ") { it.simpleName }}"
+                    "$tag:\n${elements.joinToString(prefix = "    ", separator = "\n    ") { "${it.simpleName} (hash: ${it.hashCode()})" }}"
                 LogFormat.Count ->
                     "$tag: ${elements.size} ${elements.first()::class.simpleName!!.lowercase()}" +
                         if (elements.first() is ClassNode) "es" else "s"
@@ -896,7 +887,7 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class FilterVisible<T : Element>(
+    internal data class FilterVisibility<T : Element>(
         val visibility: Visibility,
     ) : IsoAction<T>() {
         override fun id() = "filter-visibility(${visibility.name.lowercase()})"
