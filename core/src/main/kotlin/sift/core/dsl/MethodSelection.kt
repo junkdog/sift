@@ -4,7 +4,6 @@ import sift.core.api.AccessFlags.acc_synthetic
 import sift.core.dsl.MethodSelection.*
 import sift.core.element.MethodNode
 
-@Suppress("ClassName")
 sealed interface MethodSelectionFilter {
     operator fun invoke(mn: MethodNode): Boolean
 }
@@ -13,19 +12,25 @@ enum class MethodSelection : MethodSelectionFilter {
     /** Matches all constructors in a class. */
     constructors {
         override fun invoke(mn: MethodNode): Boolean {
-            return mn.normalMethod && mn.name == "<init>"
+            return mn.name == "<init>"
+        }
+    },
+    /** Matches class initialization blocks. */
+    staticInitializers {
+        override fun invoke(mn: MethodNode): Boolean {
+            return mn.name == "<clinit>"
         }
     },
     /** Matches all methods that are directly declared by the class, excluding constructors. */
     declared {
         override fun invoke(mn: MethodNode): Boolean {
-            return (mn.isKotlin || !mn.owner.isKotlin) && mn.normalMethod && mn.name != "<init>"
+            return (mn.isKotlin || !mn.owner.isKotlin) && mn.normalMethod
         }
     },
     /** Matches all declared and inherited methods, excluding constructors. */
     inherited {
         override fun invoke(mn: MethodNode): Boolean {
-            return mn.normalMethod && mn.name != "<init>"
+            return mn.normalMethod
         }
     },
     /** Matches synthetic methods, such as default-value functions in Kotlin. */
@@ -43,7 +48,7 @@ enum class MethodSelection : MethodSelectionFilter {
     };
 }
 
-internal class CompositeSelection(
+internal class MethodSelectionSet(
     val allow: Set<MethodSelection>
 ) : MethodSelectionFilter {
 
@@ -62,15 +67,15 @@ internal class CompositeSelection(
 }
 
 operator fun MethodSelectionFilter.plus(rhs: MethodSelection): MethodSelectionFilter = when (this) {
-    is CompositeSelection -> CompositeSelection(allow + rhs)
-    is MethodSelection -> CompositeSelection(setOf(this, rhs))
+    is MethodSelectionSet -> MethodSelectionSet(allow + rhs)
+    is MethodSelection -> MethodSelectionSet(setOf(this, rhs))
 }
 
 private val defaultDisalow = listOf(constructors, synthetic,  accessors)
 
 internal val MethodSelectionFilter.isInheriting: Boolean
     get() = this === inherited
-        || (this is CompositeSelection && inherited in allow)
+        || (this is MethodSelectionSet && inherited in allow)
 
 private val MethodNode.normalMethod: Boolean
-    get() = '$' !in name && '-' !in name
+    get() = '$' !in name && '-' !in name && !name.startsWith("<")

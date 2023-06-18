@@ -396,7 +396,7 @@ sealed class Action<IN, OUT> {
         }
 
         internal data class IntoMethods(
-            val selection: MethodSelectionFilter,
+            val selection: MethodSelectionSet,
         ) : Action<IterClasses, IterMethods>() {
             override fun id() = "methods(${selection})"
             override fun execute(ctx: Context, input: IterClasses): IterMethods {

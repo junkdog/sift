@@ -105,7 +105,10 @@ class Classes internal constructor(
         selection: MethodSelectionFilter = MethodSelection.declared,
         f: Methods.() -> Unit
     ) {
-        val forkTo = Action.Class.IntoMethods(selection) andThen Methods().also(f).action
+        val methodFilter = (selection as? MethodSelectionSet)
+            ?: MethodSelectionSet(setOf(selection as MethodSelection))
+
+        val forkTo = Action.Class.IntoMethods(methodFilter) andThen Methods().also(f).action
         action += Action.Fork(label, forkTo)
     }
 

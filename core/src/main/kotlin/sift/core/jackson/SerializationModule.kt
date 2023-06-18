@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.addDeserializer
 import com.fasterxml.jackson.module.kotlin.addSerializer
 import sift.core.api.Action
+import sift.core.dsl.MethodSelectionSet
 import sift.core.dsl.SiftType
 import sift.core.entity.Entity
 
@@ -16,3 +17,5 @@ fun serializationModule() = SimpleModule()
     .addDeserializer(SiftType::class, SiftTypeSerializer.Deserializer())
     .addSerializer(Action.WithValue::class, WithValueSerializer.Serializer())
     .addDeserializer(Action.WithValue::class, WithValueSerializer.Deserializer())
+    .addSerializer(MethodSelectionSet::class, MethodSelectionSetSerializer.Serializer())
+    .addDeserializer(MethodSelectionSet::class, MethodSelectionSetSerializer.Deserializer())

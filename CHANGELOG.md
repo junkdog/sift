@@ -5,6 +5,7 @@
 The selection enum definition for `methods(<selection>) {}` has been updated to include the following options: 
 
 - `constructors`: Matches all constructors in a class.
+- `staticInitializers`: Matches the class initializers.
 - `declared`: Matches all methods that are directly declared by the class, excluding constructors. This is the default filter.
 - `inherited`: Matches all declared and inherited methods, excluding constructors.
 - `synthetic`: Matches synthetic methods, such as default-value functions in Kotlin.

@@ -4,6 +4,8 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.entity.Entity
 import sift.core.api.Action
 import sift.core.dsl.*
+import sift.core.dsl.MethodSelection.constructors
+import sift.core.dsl.MethodSelection.declared
 import sift.core.entity.LabelFormatter
 import sift.core.graphviz.Dot
 import sift.core.graphviz.Shape
@@ -107,7 +109,7 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         ) {
             entity(aggregate, label)
 
-            methods {
+            methods(declared + constructors) {
                 scope("register command handlers with aggregate") {
                     registerAxonHandlers(aggregate, A.commandHandler, E.command, E.commandHandler)
                     aggregate["commands"] = E.commandHandler

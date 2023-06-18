@@ -483,9 +483,11 @@
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelection"] }, 
+    {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelectionSet"] }, 
     {"name":"<init>","parameterTypes":["boolean"] }, 
     {"name":"component1","parameterTypes":[] }, 
     {"name":"copy","parameterTypes":["sift.core.dsl.MethodSelection"] }, 
+    {"name":"copy","parameterTypes":["sift.core.dsl.MethodSelectionSet"] }, 
     {"name":"copy","parameterTypes":["boolean"] }, 
     {"name":"equals","parameterTypes":["java.lang.Object"] }, 
     {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
@@ -647,6 +649,9 @@
   "queryAllDeclaredMethods":true,
   "queryAllDeclaredConstructors":true,
   "methods":[{"name":"<init>","parameterTypes":["int","boolean"] }]
+},
+{
+  "name":"sift.core.api.Action$FilterVisibility"
 },
 {
   "name":"sift.core.api.Action$FilterVisible"
@@ -1111,10 +1116,17 @@
   ]
 },
 {
+  "name":"sift.core.dsl.MethodSelectionSet"
+},
+{
   "name":"sift.core.dsl.MethodSelection",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sift.core.dsl.MethodSelectionSet",
+  "queryAllDeclaredMethods":true
 },
 {
   "name":"sift.core.dsl.ParameterSelection",
