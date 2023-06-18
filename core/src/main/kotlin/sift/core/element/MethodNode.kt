@@ -9,19 +9,19 @@ import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
-import sift.core.kotlin.KotlinFunction
+import sift.core.kotlin.KotlinCallable
 
 class MethodNode private constructor(
     private val cn: ClassNode,
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
-    private val kfn: KotlinFunction?,
+    private val kfn: KotlinCallable?,
 ) : Element {
 
     override val simpleName: String
         get() = kfn?.name ?: mn.name
 
-    /** returns false kotlin propert accessors, lambdas etc */
+    /** returns false kotlin property accessors, lambdas etc */
     internal val isKotlin: Boolean
         get() = kfn != null
 
@@ -81,7 +81,7 @@ class MethodNode private constructor(
         internal fun from(
             cn: ClassNode,
             mn: AsmMethodNode,
-            kfn: KotlinFunction?
+            kfn: KotlinCallable?
         ): MethodNode {
             val ans = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
             return MethodNode(cn, mn, ans, kfn)

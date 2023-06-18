@@ -10,13 +10,20 @@ import sift.core.dsl.Type
 import sift.core.element.AsmAnnotationNode
 import sift.core.element.AsmClassNode
 
+
+
+private fun allLocalFunctionsOf(kmClass: KmClass): List<KotlinCallable> {
+    return kmClass.functions.map(::KotlinFunction) +
+        kmClass.constructors.map(::KotlinConstructor)
+}
+
 internal class KotlinClass(
     private val kmClass: KmClass,
 ) {
     val type: Type = kmClass.name.let(Type::from)
-    val functions: Map<String, KotlinFunction> = kmClass.functions
-        .map(::KotlinFunction)
+    val functions: Map<String, KotlinCallable> = allLocalFunctionsOf(kmClass)
         .associateBy { it.jvmName + it.descriptor }
+
     val properties: Map<String, KotlinProperty> = kmClass.properties
         .map(::KotlinProperty)
         .associateBy(KotlinProperty::name)

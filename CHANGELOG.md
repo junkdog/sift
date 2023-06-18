@@ -1,5 +1,20 @@
 ## Upcoming Release
 
+### Method selection filter
+
+The selection enum definition for `methods(<selection>) {}` has been updated to include the following options: 
+
+- `constructors`: Matches all constructors in a class.
+- `declared`: Matches all methods that are directly declared by the class, excluding constructors. This is the default filter.
+- `inherited`: Matches all declared and inherited methods, excluding constructors.
+- `synthetic`: Matches synthetic methods, such as default-value functions in Kotlin.
+- `accessors`: Matches Kotlin's property getters and setters.
+
+It is possible to compose multiple selection options in the `methods()` function by using the + operator, like so:
+`methods(declared + constructors) {}`.
+
+Note that constructors are no longer included by default.
+
 ### New/Tweaks
 - DSL: added `label` overloads for `classes()`, `fields()`, `methods()`, `parameters()`, `classesOf()`, `fieldsOf()`,
   `methodsOf()`, `parametersOf()`, `elementsOf()`. The label is displayed when running with `--profile`, under the

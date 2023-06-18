@@ -77,6 +77,8 @@ enum class AccessFlags(val flag: Int, internal vararg val scopes: Scope) {
 
     override fun toString(): String = name.lowercase()
 
+    fun check(bitmask: Int): Boolean = bitmask and flag != 0
+
     companion object {
         internal fun bitmaskOf(
             accessFlags: Iterable<AccessFlags>

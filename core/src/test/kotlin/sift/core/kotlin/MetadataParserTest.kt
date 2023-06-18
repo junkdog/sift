@@ -12,7 +12,7 @@ class MetadataParserTest {
 
         val exhibitA = KotlinClass.from(classNode<ExhibitA>())!!
 
-        assertThat(exhibitA.functions.values.map(KotlinFunction::toString))
+        assertThat(exhibitA.functions.values.map(KotlinCallable::toString))
             .containsExactlyInAnyOrder(
                 "foo(string, int)",
                 "infix foo(rhs)",
@@ -20,7 +20,8 @@ class MetadataParserTest {
                 "inline operator String.minus(rhs)",
                 "operator List<ExhibitA>.plus(rhs)",
 
-                "Function0<Unit>.lambdaExtension()"
+                "Function0<Unit>.lambdaExtension()",
+                "<init>()"
             )
         assertThat(exhibitA.properties.values.map(KotlinProperty::toString))
             .containsExactlyInAnyOrder(
