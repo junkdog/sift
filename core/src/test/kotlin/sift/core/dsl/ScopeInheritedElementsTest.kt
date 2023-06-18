@@ -57,7 +57,7 @@ class ScopeInheritedElementsTest {
             fields(inherited = true) {
                 entity(field)
             }
-            methods (inherited = true) {
+            methods (MethodSelection.inherited) {
                 // don't care about property getter or ctor
                 filter(Regex("^(get|<init>)"), invert = true)
 
