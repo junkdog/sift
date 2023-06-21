@@ -39,7 +39,7 @@ class Fields internal constructor(
     }
 
     override fun outerScope(label: String, f: Classes.() -> Unit) {
-        action += Action.Fork(
+        action += Action.Fork(label,
             Action.Field.IntoOuterScope andThen Classes().also(f).action
         )
     }

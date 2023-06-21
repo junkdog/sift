@@ -75,7 +75,7 @@ class Classes internal constructor(
         f: Classes.() -> Unit
     ) {
         val forkTo = Action.Class.IntoOuterClass andThen Classes().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label, forkTo)
     }
 
     /**

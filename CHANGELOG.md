@@ -18,8 +18,8 @@ Note that constructors are no longer included by default.
 
 ### New/Tweaks
 - DSL: added `label` overloads for `classes()`, `fields()`, `methods()`, `parameters()`, `classesOf()`, `fieldsOf()`,
-  `methodsOf()`, `parametersOf()`, `elementsOf()`. The label is displayed when running with `--profile`, under the
-  associated `fork` action.
+  `methodsOf()`, `parametersOf()`, `elementsOf()` and `outerScope()`. The label is displayed when running with
+  `--profile`, under the associated `fork` action.
 
 ## sift-0.12.0 2023-06-17
 

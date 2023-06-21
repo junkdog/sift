@@ -1152,11 +1152,8 @@ sealed class Action<IN, OUT> {
                     }
                 }
                 PropertyStrategy.unique -> {
-                    e[key] = when (val existing = e[key]) {
-                        null -> properties.distinct()
-                        else -> properties.distinct() - existing
-//                        else -> properties.filter { it !in existing }
-                    }
+                    @Suppress("ConvertArgumentToSet")
+                    e[key] = properties.distinct() - (e[key] ?: listOf())
                 }
             }
         }

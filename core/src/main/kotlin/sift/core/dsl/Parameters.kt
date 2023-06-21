@@ -53,7 +53,7 @@ class Parameters internal constructor(
 
     override fun outerScope(label: String, f: Methods.() -> Unit) {
         val forkTo = Action.Parameter.IntoOuterScope andThen Methods().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label, forkTo)
     }
 
     override fun filter(regex: Regex, invert: Boolean) {

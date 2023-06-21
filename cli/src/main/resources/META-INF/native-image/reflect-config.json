@@ -1116,9 +1116,6 @@
   ]
 },
 {
-  "name":"sift.core.dsl.MethodSelectionSet"
-},
-{
   "name":"sift.core.dsl.MethodSelection",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

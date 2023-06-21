@@ -70,7 +70,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
                             scope(method) {
                                 annotatedBy(httpMethod)
                                 entity(E.endpoint,
-                                    label("\${http-method} /\${base-path:}\${path:}", dedupe('/')),
+                                    label("\${http-method} /\${base-path:}/\${path:}", dedupe('/')),
                                     property("http-method", withValue(method)),
                                     property("path", readAnnotation(httpMethod, "value")),
                                 )

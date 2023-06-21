@@ -70,7 +70,7 @@ class Methods internal constructor(
         f: Classes.() -> Unit
     ) {
         val forkTo = Action.Method.IntoOuterScope andThen Classes().also(f).action
-        action += Action.Fork(forkTo)
+        action += Action.Fork(label, forkTo)
     }
 
     /** filter elements by name and owner  */
