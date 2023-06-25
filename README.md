@@ -10,7 +10,13 @@ which enables the tool to generate a comprehensive model of the system.
 
 The resulting system model is composed of entities that describe the system's structure and behavior.
 
-
+## Use Cases
+- **Refactoring**: Simplify refactoring by identifying dependencies and isolating components.
+- **Onboarding**: Help new team members understand the system's architecture quickly.
+- **Impact Analysis**: Use the `--diff` option to analyze the impact of new features or changes.
+- **Documentation**: Generate graphical or textual representations of your system for documentation purposes.
+- **Microservice Analysis**: Quickly understand interactions in a microservices environment.
+- 
 ## Features
 - CLI tool for building, querying, and [comparing][diff] system models from parsed .class files.
 - Declarative DSL for writing user-defined templates, optionally extending or combining existing templates.
@@ -18,6 +24,7 @@ The resulting system model is composed of entities that describe the system's st
 - Render system representations using Graphviz. Inline rendering for [kitty][kitty] supported via sift.sh|zsh.
 - Optionally built as a native binary using GraalVM's native-image, allowing for much faster execution times.
   This means that Sift can typically analyze most microservice-sized projects in under 0.5 seconds.
+
 
 ![sift spring-boot axon framework][orders-graph]
 
@@ -32,7 +39,6 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
  [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L127:L246
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
- [sift-render]: docs/images/sift-render-s.png
 
  [orders]: https://raw.githubusercontent.com/junkdog/sift/main/docs/images/sift-spring-axon-orders.png
  [orders-t]: docs/images/sift-spring-axon-orders_thumbnail.png
@@ -114,21 +120,18 @@ Examples:
   Model the system using the "spring-axon" template on the classes in the
   "my-spring-project" directory.
 
-  sift -t spring-axon -f . -F "Order(Created|Shipped)" --save feature-01.json
+  sift -t spring-axon -f . -F "Order(Created|Shipped)"
   Model the system using the "spring-axon" template on the current directory's
-  classes, filter nodes containing the regular expression "Order(Created|Shipped)",
-  and save the system model to "feature-01.json".
-
-  sift -t spring-axon -f . --diff feature-01.json
-  Compare the current design of the system using the "spring-axon" template on
-  the classes in the current directory against a previously saved system model
-  from "feature-01.json" and show the differences.
+  classes, filter nodes containing the regular expression "Order(Created|Shipped)".
 
   sift -t spring-axon -f . -F "Product" --render
   Model the system using the "spring-axon" template on the current directory's
   classes, filter the graph to show only nodes containing "Product", and render
   the result using graphviz's DOT language.
-
+  
+  sift -t sift -f "net.onedaybeard.sift:core:0.13.0" --diff "net.onedaybeard.sift:core:0.9.0"
+  Compare two different versions of the DSL API using the 'sift' template, specified
+  by their maven coordinates.
 ```
 
 ## System Model Templates and Entities

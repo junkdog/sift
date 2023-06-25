@@ -25,7 +25,6 @@ import sift.template.spi.SystemModelTemplateServiceProvider
 import sift.template.springboot.SpringBootTemplate
 
 
-typealias SBA = SpringBootTemplate.Annotation
 typealias SBE = SpringBootTemplate.EntityType
 
 typealias A = SpringBootAxonCqrsTemplate.Annotation

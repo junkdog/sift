@@ -48,9 +48,7 @@ import java.net.URI
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.*
-import kotlin.math.log
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.system.exitProcess
 
 
@@ -67,20 +65,18 @@ object SiftCli : CliktCommand(
           Model the system using the "spring-axon" template on the classes in the  
           "my-spring-project" directory.
         
-          ${fg("sift -t spring-axon -f . -F \"Order(Created|Shipped)\" --save feature-01.json")}
+          ${fg("sift -t spring-axon -f . -F \"Order(Created|Shipped)\"")}
           Model the system using the "spring-axon" template on the current directory's
-          classes, filter nodes containing the regular expression "Order(Created|Shipped)",
-          and save the system model to "feature-01.json".
+          classes, filter nodes containing the regular expression "Order(Created|Shipped)".
         
           ${fg("sift -t spring-axon -f . --diff feature-01.json")}
           Compare the current design of the system using the "spring-axon" template on
           the classes in the current directory against a previously saved system model
           from "feature-01.json" and show the differences.
           
-          ${fg("sift -t spring-axon -f . -F \"Product\" --render")}
-          Model the system using the "spring-axon" template on the current directory's 
-          classes, filter the graph to show only nodes containing "Product", and render
-          the result using graphviz's DOT language.
+          ${fg("sift -t sift -f \"net.onedaybeard.sift:core:0.13.0\" --diff \"net.onedaybeard.sift:core:0.9.0\"")}
+          Compare two different versions of the DSL API using the 'sift' template, specified
+          by their maven coordinates.
         ```
     """.trimIndent()
 ) {
@@ -227,7 +223,6 @@ object SiftCli : CliktCommand(
                 terminal.printTree(tree)
             }
         }
-
     }
 
     private fun validateParameterOptions() {
