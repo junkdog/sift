@@ -61,6 +61,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           
-          git checkout main
+          git checkout -t origin/main
           git merge ${RELEASE_VERSION}
           git push
