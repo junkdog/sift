@@ -4,13 +4,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.core.api.Action
 import sift.core.dsl.*
-import sift.core.dsl.MethodSelection.constructors
-import sift.core.dsl.MethodSelection.declared
+import sift.core.dsl.MethodSelection.*
 import sift.core.entity.Entity
+import sift.core.terminal.Gruvbox
 import sift.core.terminal.Style
 import sift.core.terminal.TextTransformer.Companion.dedupe
 import sift.core.terminal.TextTransformer.Companion.idSequence
 import sift.core.terminal.TextTransformer.Companion.replace
+import sift.core.terminal.TextTransformer.Companion.stylize
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 
 class DeserializedSystemModelTemplateTest {
@@ -79,8 +80,9 @@ class SomeTemplate : SystemModelTemplate {
                 property("int", withValue(1)),
                 property("yolo", withValue(Yolo.Foo)))
 
-            methods(declared + constructors) {
-                property(Entity.Type("controller"), "methods", readName())
+            methods(declared + constructors + staticInitializers) {
+                property(Entity.Type("controller"), "methods",
+                    readName() andThen stylize(Gruvbox.aqua1))
             }
         }
     }

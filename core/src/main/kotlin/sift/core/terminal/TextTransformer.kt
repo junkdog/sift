@@ -32,10 +32,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
 )
 sealed interface TextTransformer {
     operator fun invoke(s: String): String
-    operator fun invoke(any: Any): String = when (val v = any) {
-        is Collection<*> -> v.joinToString { invoke(it.toString()) }
-        else             -> invoke(v.toString())
-    }
+    operator fun invoke(any: Any): String = invoke(any.toString())
 
     companion object {
         fun edit(vararg transformers: TextTransformer): TextTransformer = TextEdit(transformers.toList())
