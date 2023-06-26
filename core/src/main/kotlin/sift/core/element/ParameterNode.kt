@@ -7,7 +7,6 @@ import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 import sift.core.dsl.Type
 import sift.core.kotlin.KotlinCallable
-import sift.core.kotlin.KotlinFunction
 import sift.core.kotlin.KotlinParameter
 
 class ParameterNode private constructor(

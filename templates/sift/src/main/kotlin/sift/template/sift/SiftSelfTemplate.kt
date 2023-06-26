@@ -2,11 +2,8 @@ package sift.template.sift
 
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
-import sift.core.api.AccessFlags.acc_public
-import sift.core.api.AccessFlags.acc_synthetic
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.*
-import sift.core.dsl.MethodSelection.declared
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.dsl.ParameterSelection.excludingReceiver
 import sift.core.dsl.Visibility.Public
