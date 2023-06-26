@@ -3,8 +3,9 @@ package sift.core.template
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.core.api.Action
-import sift.core.dsl.template
-import sift.core.dsl.type
+import sift.core.dsl.*
+import sift.core.dsl.MethodSelection.constructors
+import sift.core.dsl.MethodSelection.declared
 import sift.core.entity.Entity
 import sift.core.terminal.Style
 import sift.core.terminal.TextTransformer.Companion.dedupe
@@ -77,6 +78,10 @@ class SomeTemplate : SystemModelTemplate {
             entity(Entity.Type("controller"),
                 property("int", withValue(1)),
                 property("yolo", withValue(Yolo.Foo)))
+
+            methods(declared + constructors) {
+                property(Entity.Type("controller"), "methods", readName())
+            }
         }
     }
 
