@@ -470,6 +470,22 @@ class DslTest {
         )
     }
 
+    @Test
+    fun `text transformers are applied to individual elements`() {
+        val e = Entity.Type("e")
+
+        classes {
+            filter("SomeController")
+            entity(e, label("(\${v})"),
+                property("v", PropertyStrategy.replace,
+                    readAnnotation(RestController::values) andThen replace(Regex(".+"), "(\$0)"))
+            )
+        }.expecting(allCns, e, """
+            ── e
+               └─ ((a), (b), (c))
+        """.trimIndent())
+    }
+
     @Test @Disabled
     fun `read class and enum from annotation`() {
         TODO()

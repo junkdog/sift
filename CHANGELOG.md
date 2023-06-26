@@ -21,6 +21,13 @@ Note that constructors are no longer included by default.
   `methodsOf()`, `parametersOf()`, `elementsOf()` and `outerScope()`. The label is displayed when running with
   `--profile`, under the associated `fork` action.
 
+### Breaking changes
+- DSL: entity properties from `readAnnotation()` are now flattened if they are arrays.
+
+### Fixes
+- DSL: `property()` ignored `PropertyStrategy` when used together with `entity()` registration.
+
+
 ## sift-0.12.0 2023-06-17
 
 ### Kotlin language support

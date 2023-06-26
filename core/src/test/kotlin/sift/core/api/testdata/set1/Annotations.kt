@@ -2,7 +2,7 @@ package sift.core.api.testdata.set1
 
 import kotlin.reflect.KClass
 
-annotation class RestController
+annotation class RestController(val values: Array<String> = [])
 annotation class Endpoint(val path: String, val method: String)
 annotation class Handler
 annotation class Query

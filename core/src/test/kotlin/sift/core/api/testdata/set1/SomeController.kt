@@ -1,6 +1,6 @@
 package sift.core.api.testdata.set1
 
-@RestController
+@RestController(["a", "b", "c"])
 class SomeController {
     @Endpoint("/foo", "POST")
     fun create() = Unit

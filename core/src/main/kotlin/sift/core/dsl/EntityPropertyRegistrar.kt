@@ -71,6 +71,10 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
 
     fun annotatedBy(annotation: SiftType)
 
+    /**
+     * Reads the value of the [field] fields belonging to [annotation]. If the field
+     * is an array, the array is flattened when added to entity properties.
+     */
     fun readAnnotation(
         annotation: SiftType,
         field: String

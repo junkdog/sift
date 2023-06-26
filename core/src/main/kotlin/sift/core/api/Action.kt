@@ -924,14 +924,23 @@ sealed class Action<IN, OUT> {
     internal data class ReadAnnotation<T: Element>(val annotation: SiftType, val field: String) : Action<Iter<T>, IterValues>() {
         override fun id() = "read-annotation(${annotation.simpleName}::$field)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
-            fun readAnnotation(input: T): ValueNode? {
+            fun readAnnotation(input: T): List<ValueNode>? {
                 return input.annotations
                     .findBy(AnnotationNode::type, annotation::matches)
                     ?.let { an -> an[field] }
-                    ?.let { ValueNode.from(it, input) }
-                    ?.also { ctx.scopeTransition(input, it) }
+                    ?.concat()
+                    ?.map { ValueNode.from(it, input) }
+                    ?.onEach { ctx.scopeTransition(input, it) }
             }
-            return input.mapNotNull(::readAnnotation)
+
+            return input.mapNotNull(::readAnnotation).flatten()
+        }
+
+        companion object {
+            private fun Any.concat(): List<Any> = when (this) {
+                is List<*> -> toList().filterNotNull()
+                else       -> listOf(this)
+            }
         }
     }
 
@@ -1107,8 +1116,9 @@ sealed class Action<IN, OUT> {
         override fun id() = "update-property($key${", $entity".takeIf { entity != null } ?: ""})"
         override fun execute(ctx: Context, input: IterValues): IterValues {
             when (entity) {
-                null -> input.map { it to ctx.entityService[it.reference] }
-                    .forEach { (elem, e) -> e?.let { updateProperties(it, elem.data.ensureList) } }
+                null -> input
+                    .groupBy({ ctx.entityService[it.reference] }, ValueNode::data)
+                    .forEach { (e, values) -> e?.let { updateProperties(it, values) } }
 
                 else -> runBlocking(Dispatchers.Default) {
                     input.asFlow()
