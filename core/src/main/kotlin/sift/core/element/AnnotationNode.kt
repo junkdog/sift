@@ -10,6 +10,9 @@ class AnnotationNode private constructor(
 ) : Element, Trait.HasType {
     internal  lateinit var parent: Element
 
+    internal val root: AnnotationNode
+        get() = generateSequence(this) { it.parent as? AnnotationNode }.last()
+
     override val simpleName: String
         get() = an.type.simpleName
 

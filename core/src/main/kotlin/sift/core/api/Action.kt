@@ -270,9 +270,6 @@ sealed class Action<IN, OUT> {
 
                 return input.flatMap(::explode)
             }
-
-            private val AnnotationNode.root: AnnotationNode
-                get() = generateSequence(this) { it.parent as? AnnotationNode }.last()
         }
     }
 

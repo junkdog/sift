@@ -180,11 +180,11 @@ internal data class Context(
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
-        // TODO: if input is AnnotationNode, first resolve parent chain back to the annotated element
-
         // unpacking for property() elements; ref test for edge case:
         //     DslTest.`explode Payload in List field and associate property from the main class`
-        val input = (input as? ValueNode)?.reference ?: input
+        val input = (input as? ValueNode)?.reference
+            ?: (input as? AnnotationNode)?.root
+            ?: input
 
         // the most immediate path back to the root element
         val plain = tracesOf(input)
