@@ -13,6 +13,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
             is IdSequencer -> "id-sequence(${transformer.pattern.pattern})"
             is Replace     -> "replace(${transformer.regex.pattern} -> ${transformer.with})"
             is TextEdit    -> "edit(${transformer.transformers.joinToString(transform = ::format)})"
+            is ChangeCase  -> "change-case(${transformer.case.name})"
         }
 
         return transformers.joinToString(", ", "(", ")", transform = ::format)
@@ -29,6 +30,7 @@ internal class StringEditor(val transformers: List<TextTransformer>) {
     JsonSubTypes.Type(Deduplicate::class, name = "dedupe"),
     JsonSubTypes.Type(IdSequencer::class, name = "id-sequence"),
     JsonSubTypes.Type(Replace::class, name = "replace"),
+    JsonSubTypes.Type(ChangeCase::class, name = "change-case"),
 )
 sealed interface TextTransformer {
     operator fun invoke(s: String): String
@@ -42,6 +44,8 @@ sealed interface TextTransformer {
         fun replace(text: String, with: String): TextTransformer = Replace(Pattern.quote(text).toRegex(), with)
         fun replace(regex: Regex, with: String): TextTransformer = Replace(regex, with)
         fun stylize(style: TextStyle): TextTransformer = Replace(everythingRegex, style("\$0"))
+        fun uppercase(): TextTransformer = ChangeCase(ChangeCase.Convention.uppercase)
+        fun lowercase(): TextTransformer = ChangeCase(ChangeCase.Convention.lowercase)
     }
 }
 
@@ -51,6 +55,19 @@ private class TextEdit(val transformers: List<TextTransformer>) : TextTransforme
 
 private class Replace(val regex: Regex, val with: String) : TextTransformer {
     override fun invoke(s: String): String = regex.replace(s, with)
+}
+
+private class ChangeCase(val case: Convention): TextTransformer {
+    override fun invoke(s: String) = when (case) {
+        Convention.uppercase -> s.uppercase()
+        Convention.lowercase -> s.lowercase()
+    }
+
+    @Suppress("EnumEntryName")
+    enum class Convention {
+        uppercase,
+        lowercase
+    }
 }
 
 private class IdSequencer(val pattern: Regex, val group: Int) : TextTransformer {

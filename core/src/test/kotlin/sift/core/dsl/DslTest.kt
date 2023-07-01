@@ -25,7 +25,9 @@ import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.template.toTree
 import sift.core.terminal.TextTransformer.Companion.edit
+import sift.core.terminal.TextTransformer.Companion.lowercase
 import sift.core.terminal.TextTransformer.Companion.replace
+import sift.core.terminal.TextTransformer.Companion.uppercase
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.core.tree.debugTree
 import java.io.InputStream
@@ -499,12 +501,13 @@ class DslTest {
             classes {
                 entity(types, label("\${types}"),
                     property("types", readAnnotation(AnnoWithClasses::types)
-                        andThen replace(Regex("^.*\\.([A-Z][a-z]+)$"), "\$1"))
+                        andThen replace(Regex("^.*\\.([A-Z][a-z]+)$"), "\$1")
+                        andThen uppercase())
                 )
             }
         }.expecting(listOf(classNode<A>()), types, """
             ── types
-               └─ String, Map
+               └─ STRING, MAP
         """.trimIndent())
     }
 
@@ -541,7 +544,8 @@ class DslTest {
 
                             nested("bars") {
                                 explodeTypes("types", synthesize = true) {
-                                    entity(bars, label("bar: \${name}"), property("name", readName()))
+                                    entity(bars, label("bar: \${name}"),
+                                        property("name", readName() andThen lowercase()))
                                 }
                             }
                         }
@@ -550,8 +554,8 @@ class DslTest {
             }
         }.expecting(listOf(classNode<TestClass>()), listOf(cls, foos, bars), """
             ── cls + foos + bars
-               ├─ bar: Map
-               ├─ bar: String
+               ├─ bar: map
+               ├─ bar: string
                ├─ cls: Set
                ├─ foo: float
                └─ foo: int

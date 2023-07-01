@@ -33,6 +33,7 @@ It is possible to compose multiple selection options in the `methods()` function
 Note that constructors are no longer included by default.
 
 ### New/Tweaks
+- New property text transformers: `uppercase()` and `lowercase()`.
 - DSL: added `label` overloads for `classes()`, `fields()`, `methods()`, `parameters()`, `classesOf()`, `fieldsOf()`,
   `methodsOf()`, `parametersOf()`, `elementsOf()` and `outerScope()`. The label is displayed when running with
   `--profile`, under the associated `fork` action.
