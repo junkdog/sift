@@ -7,7 +7,7 @@ import sift.core.dsl.Type
 
 class SignatureNode private constructor(
     val signature: TypeSignature,
-) : Element {
+) : Element, Trait.HasType {
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 
     internal val inner: List<SignatureNode> by lazy { signature.args.map(::from) }
@@ -15,7 +15,7 @@ class SignatureNode private constructor(
     override val simpleName: String
         get() = signature.toString()
 
-    internal val type: Type
+    override val type: Type
         get() = Type.from(signature)
 
     val argType: ArgType

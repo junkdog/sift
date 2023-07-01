@@ -5,6 +5,7 @@ import sift.core.api.Action
 import sift.core.api.SystemModel
 import sift.core.dsl.Fields
 import sift.core.dsl.Methods
+import sift.core.dsl.annotatedBy
 import sift.core.dsl.template
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree

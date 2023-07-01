@@ -6,6 +6,7 @@ import com.github.ajalt.mordant.rendering.TextStyles.italic
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.Measurement
 import sift.core.api.MeasurementScope
+import sift.core.terminal.Gruvbox.aqua1
 import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue1
 import sift.core.terminal.Gruvbox.blue2
@@ -85,6 +86,7 @@ private val gradient = listOf(
 
 private fun MeasurementScope.style(): TextStyle = when (this) {
     MeasurementScope.Template    -> fg
+    MeasurementScope.Annotation  -> aqua1 + bold
     MeasurementScope.Class       -> aqua2
     MeasurementScope.Field       -> blue2
     MeasurementScope.Method      -> green2

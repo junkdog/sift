@@ -15,8 +15,11 @@ import sift.core.entity.Entity
 class Fields internal constructor(
     fields: Action<Iter<FieldNode>, Iter<FieldNode>> = Action.Field.FieldScope,
     action: Action.Chain<Iter<FieldNode>> = chainFrom(fields),
-) : Core<FieldNode>(action, AccessFlags.Scope.Field),
+) : Core<FieldNode>(action),
+    Annotatable<FieldNode>            by Annotatable.scopedTo(action),
     FilterableByVisibility<FieldNode> by FilterableByVisibility.scopedTo(action),
+    FilterableByAccessFlag<FieldNode> by FilterableByAccessFlag.scopedTo(action, AccessFlags.Scope.Field),
+    FilterableByType<FieldNode>       by FilterableByType.scopedTo(action),
     CommonOperations<FieldNode, Fields>,
     ParentOperations<ClassNode, Classes>
 {
@@ -46,13 +49,6 @@ class Fields internal constructor(
 
     override fun filter(regex: Regex, invert: Boolean) {
         action += Action.Field.Filter(regex, invert)
-    }
-
-    /**
-     * Filters fields to include only those with a type matching type.
-     */
-    fun filterType(type: SiftType) {
-        action += Action.Field.FilterType(type)
     }
 
     fun explodeType(synthesize: Boolean = false, f: Classes.() -> Unit) {

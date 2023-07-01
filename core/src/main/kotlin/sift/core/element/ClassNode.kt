@@ -16,7 +16,11 @@ import sift.core.kotlin.KotlinClass
 class ClassNode private constructor(
     private val cn: AsmClassNode,
     override val annotations: List<AnnotationNode>
-) : Element {
+) : Element, Trait.HasType {
+
+    init {
+        annotations.forEach { it.parent = this }
+    }
 
     internal val signature: ClassSignatureNode? = cn.signature()
 
@@ -52,7 +56,7 @@ class ClassNode private constructor(
         get() = signature?.extends
 
     // note: type-erased
-    val type: Type
+    override val type: Type
         get() = Type.from(cn.name)
 
     val formalTypeParameters: List<FormalTypeParameter>

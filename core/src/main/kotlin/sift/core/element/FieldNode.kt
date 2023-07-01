@@ -14,7 +14,11 @@ class FieldNode private constructor(
     private val fn: AsmFieldNode,
     private val kprop: KotlinProperty?,
     override val annotations: List<AnnotationNode>
-) : Element {
+) : Element, Trait.HasType {
+
+    init {
+        annotations.forEach { it.parent = this }
+    }
 
     override val simpleName: String
         get() = kprop?.name ?: fn.name
@@ -25,7 +29,7 @@ class FieldNode private constructor(
     val name: String
         get() = simpleName
 
-    val type: Type
+    override val type: Type
         get() = Type.fromTypeDescriptor(fn.desc)
 
     val isStatic: Boolean

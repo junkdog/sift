@@ -18,6 +18,10 @@ class MethodNode private constructor(
     private val kfn: KotlinCallable?,
 ) : Element {
 
+    init {
+        annotations.forEach { it.parent = this }
+    }
+
     override val simpleName: String
         get() = kfn?.name ?: mn.name
 
@@ -25,7 +29,7 @@ class MethodNode private constructor(
     internal val isKotlin: Boolean
         get() = kfn != null
 
-    val owner: ClassNode
+    internal val owner: ClassNode
         get() = cn
 
     val name: String

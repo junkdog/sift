@@ -18,10 +18,6 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
         filter(Regex.fromLiteral(string), invert)
     }
 
-    /**
-     * Filter elements that are decorated by [annotation]
-     */
-    fun annotatedBy(annotation: SiftType)
     fun readAnnotation(annotation: SiftType, field: String): Action<Iter<T>, IterValues>
 
     fun scope(label: String, f: SCOPE.() -> Unit)

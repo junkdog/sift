@@ -1,3 +1,5 @@
+@file:Suppress("unused", "NOTHING_TO_INLINE", "UNUSED_PARAMETER")
+
 package sift.core.kotlin
 
 import org.assertj.core.api.Assertions.assertThat
@@ -60,7 +62,7 @@ class MetadataParserTest {
 }
 
 
-@Suppress("unused")
+
 private class ExhibitA {
     val propA: Char = 'a'
     val propB: Char

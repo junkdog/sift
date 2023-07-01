@@ -14,8 +14,11 @@ import sift.core.entity.Entity
 class Classes internal constructor(
     source: IsoAction<ClassNode> = Action.Class.ClassScope,
     action: Action.Chain<Iter<ClassNode>> = chainFrom(source)
-) : Core<ClassNode>(action, AccessFlags.Scope.Class),
+) : Core<ClassNode>(action),
+    Annotatable<ClassNode>            by Annotatable.scopedTo(action),
+    FilterableByAccessFlag<ClassNode> by FilterableByAccessFlag.scopedTo(action, AccessFlags.Scope.Class),
     FilterableByVisibility<ClassNode> by FilterableByVisibility.scopedTo(action),
+    FilterableByType<ClassNode>       by FilterableByType.scopedTo(action),
     CommonOperations<ClassNode, Classes>,
     ParentOperations<ClassNode, Classes>
 {

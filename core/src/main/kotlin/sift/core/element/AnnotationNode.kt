@@ -1,23 +1,29 @@
 package sift.core.element
 
 import sift.core.AsmNodeHashcoder.idHash
-import sift.core.asm.readFieldAny
 import sift.core.asm.type
 import sift.core.combine
 import sift.core.dsl.Type
 
 class AnnotationNode private constructor(
     private val an: AsmAnnotationNode,
-) : Element {
+) : Element, Trait.HasType {
+    internal  lateinit var parent: Element
+
     override val simpleName: String
         get() = an.type.simpleName
 
-    val type: Type
+    override val type: Type
         get() = an.type
 
-    operator fun get(field: String): Any? {
-        return readFieldAny(field)(an)
+    private val values: Map<Any, Any?> by lazy {
+        (an.values ?: emptyList())
+            .chunked(2)
+            .associate { (k, v) -> k to remapAnnotationValue(v) }
+            .onEach {  }
     }
+
+    operator fun get(field: String): Any? = values[field]
 
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 
@@ -27,6 +33,14 @@ class AnnotationNode private constructor(
 
     override fun equals(other: Any?): Boolean {
         return an === (other as? AnnotationNode)?.an
+    }
+
+    private fun remapAnnotationValue(value: Any?): Any? = when (value) {
+        is List<*>           -> value.map(::remapAnnotationValue)
+        is Array<*>          -> value.map(::remapAnnotationValue)
+        is AsmAnnotationNode -> from(value).also { it.parent = this }
+        is AsmType           -> Type.from(value)
+        else                 -> value
     }
 
     companion object {

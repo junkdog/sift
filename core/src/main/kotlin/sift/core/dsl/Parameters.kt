@@ -12,8 +12,11 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Parameters internal constructor(
-    parameters: Action<Iter<ParameterNode>, Iter<ParameterNode>> = Action.Parameter.ParameterScope
-) : Core<ParameterNode>(chainFrom(parameters), AccessFlags.Scope.Parameter),
+    parameters: Action<Iter<ParameterNode>, Iter<ParameterNode>> = Action.Parameter.ParameterScope,
+    action: Action.Chain<Iter<ParameterNode>> = chainFrom(parameters)
+) : Core<ParameterNode>(action),
+    Annotatable<ParameterNode> by Annotatable.scopedTo(action),
+    FilterableByAccessFlag<ParameterNode> by FilterableByAccessFlag.scopedTo(action, AccessFlags.Scope.Parameter),
     CommonOperations<ParameterNode, Parameters>,
     ParentOperations<MethodNode, Methods>
 {

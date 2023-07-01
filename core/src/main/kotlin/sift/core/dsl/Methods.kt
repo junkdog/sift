@@ -16,7 +16,9 @@ import sift.core.entity.Entity
 class Methods internal constructor(
     methods: Action<Iter<MethodNode>, Iter<MethodNode>> = Action.Method.MethodScope,
     action: Action.Chain<IterMethods> = chainFrom(methods),
-) : Core<MethodNode>(action, AccessFlags.Scope.Method),
+) : Core<MethodNode>(action),
+    Annotatable<MethodNode> by Annotatable.scopedTo(action),
+    FilterableByAccessFlag<MethodNode> by FilterableByAccessFlag.scopedTo(action, AccessFlags.Scope.Method),
     FilterableByVisibility<MethodNode> by FilterableByVisibility.scopedTo(action),
     CommonOperations<MethodNode, Methods>,
     ParentOperations<ClassNode, Classes>
@@ -25,13 +27,11 @@ class Methods internal constructor(
         key: String,
         rhs: EntityResolution
     ) {
-        val resolver = when (rhs) {
+        action += Action.RegisterChildrenFromResolver(this, key, when (rhs) {
             is Instantiations -> EntityAssignmentResolver.FromInstantiationsOf(key, rhs.type)
-            is Invocations -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
-            is FieldAccess -> EntityAssignmentResolver.FromFieldAccessOf(key, rhs.type)
-        }
-
-        action += Action.RegisterChildrenFromResolver(this, key, resolver)
+            is Invocations    -> EntityAssignmentResolver.FromInvocationsOf(key, rhs.type)
+            is FieldAccess    -> EntityAssignmentResolver.FromFieldAccessOf(key, rhs.type)
+        })
     }
 
     operator fun EntityResolution.set(

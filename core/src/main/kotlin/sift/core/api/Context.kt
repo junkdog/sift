@@ -180,6 +180,8 @@ internal data class Context(
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
+        // TODO: if input is AnnotationNode, first resolve parent chain back to the annotated element
+
         // unpacking for property() elements; ref test for edge case:
         //     DslTest.`explode Payload in List field and associate property from the main class`
         val input = (input as? ValueNode)?.reference ?: input
@@ -371,6 +373,7 @@ data class Measurement(
 }
 
 enum class MeasurementScope(val id: String) {
+    Annotation("annotation-scope"),
     Template("template-scope"),
     Signature("signature-scope"),
     Class("class-scope"),

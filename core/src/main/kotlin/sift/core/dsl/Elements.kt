@@ -11,11 +11,12 @@ import sift.core.entity.Entity
  */
 @SiftTemplateDsl
 class Elements internal constructor(
-    elements: Action<Iter<Element>, Iter<Element>> = Action.Elements.ElementScope
-) : Core<Element>(chainFrom(elements), AccessFlags.Scope.TypeErased),
+    elements: Action<Iter<Element>, Iter<Element>> = Action.Elements.ElementScope,
+    action: Action.Chain<Iter<Element>> = chainFrom(elements)
+) : Core<Element>(action),
+    FilterableByAccessFlag<Element> by FilterableByAccessFlag.scopedTo(action, AccessFlags.Scope.TypeErased),
     CommonOperations<Element, Elements>
 {
-
     override fun filter(regex: Regex, invert: Boolean) {
         action += Action.Elements.Filter(regex, invert)
     }

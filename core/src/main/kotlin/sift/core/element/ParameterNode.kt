@@ -14,11 +14,16 @@ class ParameterNode private constructor(
     private val mn: MethodNode,
     private val kpn: KotlinParameter? = null,
     name: String,
-    val type: Type,
+    override val type: Type,
     val signature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
-) : Element {
+) : Element, Trait.HasType {
+
+    init {
+        annotations.forEach { it.parent = this }
+    }
+
     val name: String = kpn?.name ?: name
 
     val owner: MethodNode

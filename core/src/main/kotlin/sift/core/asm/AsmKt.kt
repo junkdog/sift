@@ -70,15 +70,15 @@ val AsmType.simpleName: String
     get() = simpleNameOf(this)
 
 private fun simpleNameOf(type: AsmType) = when (val name = type.className) {
-    "V" -> "Unit"
-    "Z" -> "Boolean"
-    "C" -> "Char"
-    "B" -> "Byte"
+    "V" -> "void"
+    "Z" -> "boolean"
+    "C" -> "char"
+    "B" -> "byte"
     "S" -> "String"
-    "I" -> "Int"
-    "F" -> "Float"
-    "D" -> "Double"
-    "J" -> "Long"
+    "I" -> "int"
+    "F" -> "float"
+    "D" -> "double"
+    "J" -> "long"
     else -> name
         .substringAfterLast(".")
         .replace("$", ".")

@@ -396,6 +396,21 @@
   ]
 },
 {
+  "name":"sift.core.api.Action$Annotations"
+},
+{
+  "name":"sift.core.api.Action$Annotations$AnnotationsScope"
+},
+{
+  "name":"sift.core.api.Action$Annotations$ExplodeTypes"
+},
+{
+  "name":"sift.core.api.Action$Annotations$Filter"
+},
+{
+  "name":"sift.core.api.Action$Annotations$NestedAnnotations"
+},
+{
   "name":"sift.core.api.Action$Chain",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -651,6 +666,13 @@
   "methods":[{"name":"<init>","parameterTypes":["int","boolean"] }]
 },
 {
+  "name":"sift.core.api.Action$FilterType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }]
+},
+{
   "name":"sift.core.api.Action$FilterVisibility"
 },
 {
@@ -686,6 +708,9 @@
     {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, 
     {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }
   ]
+},
+{
+  "name":"sift.core.api.Action$IntoAnnotations"
 },
 {
   "name":"sift.core.api.Action$Method"
@@ -855,6 +880,10 @@
     {"name":"id","parameterTypes":[] }, 
     {"name":"toString","parameterTypes":[] }
   ]
+},
+{
+  "name":"sift.core.api.Action$ReadAnnotation$Companion",
+  "methods":[{"name":"concat","parameterTypes":["java.lang.Object"] }]
 },
 {
   "name":"sift.core.api.Action$ReadName",

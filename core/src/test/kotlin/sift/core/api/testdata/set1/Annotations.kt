@@ -24,3 +24,17 @@ annotation class AnnoPrimitives(
     val float: Float,
     val double: Double,
 )
+
+annotation class AnnoWithClasses(
+    val types: Array<KClass<*>>,
+)
+
+annotation class NestingAnno(
+    val foos: Array<AnnoWithClasses>,
+    val bars: Array<AnnoWithClasses>,
+)
+
+annotation class DeepNestingAnno(
+    val cls: KClass<*>,
+    val root: NestingAnno,
+)

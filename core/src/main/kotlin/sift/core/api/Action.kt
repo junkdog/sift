@@ -34,6 +34,11 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.Template.MethodsOf::class, name = "methods-of"),
     JsonSubTypes.Type(Action.Template.ElementsOf::class, name = "elements-of"),
 
+    JsonSubTypes.Type(Action.Annotations.AnnotationScope::class, name = "annotation-scope"),
+    JsonSubTypes.Type(Action.Annotations.Filter::class, name = "filter-annotations"),
+    JsonSubTypes.Type(Action.Annotations.NestedAnnotations::class, name = "annotations-nested"),
+    JsonSubTypes.Type(Action.Annotations.ExplodeType::class, name = "annotations-explode-type"),
+
     JsonSubTypes.Type(Action.Signature.ExplodeType::class, name = "signature-explode-type"),
     JsonSubTypes.Type(Action.Signature.Filter::class, name = "filter-signature"),
     JsonSubTypes.Type(Action.Signature.FilterNth::class, name = "signature-filter-nth"),
@@ -69,7 +74,6 @@ import sift.core.terminal.StringEditor
 
     JsonSubTypes.Type(Action.Field.FieldScope::class, name = "field-scope"),
     JsonSubTypes.Type(Action.Field.Filter::class, name = "filter-field"),
-    JsonSubTypes.Type(Action.Field.FilterType::class, name = "filter-type-field"),
     JsonSubTypes.Type(Action.Field.ExplodeType::class, name = "field-explode-type"),
     JsonSubTypes.Type(Action.Field.IntoOuterScope::class, name = "field-parents"),
     JsonSubTypes.Type(Action.Field.IntoSignature::class, name = "field-signature"),
@@ -88,6 +92,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.EntityFilter::class, name = "entity-filter"),
     JsonSubTypes.Type(Action.FilterModifiers::class, name = "filter-modifiers"),
     JsonSubTypes.Type(Action.FilterVisibility::class, name = "filter-visible"),
+    JsonSubTypes.Type(Action.FilterType::class, name = "filter-type"),
     JsonSubTypes.Type(Action.ReadAnnotation::class, name = "read-annotation"),
     JsonSubTypes.Type(Action.WithValue::class, name = "with-value"),
     JsonSubTypes.Type(Action.Editor::class, name = "editor"),
@@ -215,6 +220,59 @@ sealed class Action<IN, OUT> {
                     else -> error("cannot filter elements of ${elem::class.simpleName}")
                 }
             }
+        }
+    }
+
+    internal object Annotations {
+        internal object AnnotationScope : Action<IterAnnotations, IterAnnotations>() {
+            override fun id() = "annotations-scope"
+            override fun execute(ctx: Context, input: IterAnnotations): IterAnnotations = input
+        }
+
+        internal data class Filter(val regex: Regex, val invert: Boolean) : Action<IterAnnotations, IterAnnotations>() {
+            override fun id() = "filter-annotations($regex${" invert".takeIf { invert } ?: ""})"
+            override fun execute(ctx: Context, input: IterAnnotations): IterAnnotations {
+                return input.filter { ((regex in it.type.name) || (regex in it.type.simpleName) ) xor invert }
+            }
+        }
+
+        internal data class NestedAnnotations(
+            val element: String
+        ) : Action<IterAnnotations, IterAnnotations>() {
+
+            override fun id() = "nested-annotations($element)"
+            override fun execute(ctx: Context, input: IterAnnotations): IterAnnotations {
+                return input.flatMap { it[element].toListOfType<AnnotationNode>() }
+            }
+        }
+
+        internal data class ExplodeType(
+            val element: String,
+            val synthesize: Boolean
+        ) : Action<IterAnnotations, IterClasses>() {
+            override fun id() = "explode-type($element)"
+            override fun execute(ctx: Context, input: IterAnnotations): IterClasses {
+                fun explodeType(an: AnnotationNode, type: Type): ClassNode? {
+                    var exploded = ctx.classByType[type]
+                    if (exploded == null && synthesize)
+                        exploded = ctx.synthesize(type)
+
+                    return exploded
+                        ?.also { ctx.scopeTransition(an.root, it) }
+                }
+
+                fun explode(an: AnnotationNode): Set<ClassNode> {
+                    return an[element]
+                        .toListOfType<Type>()
+                        .mapNotNull { explodeType(an, it) }
+                        .toSet()
+               }
+
+                return input.flatMap(::explode)
+            }
+
+            private val AnnotationNode.root: AnnotationNode
+                get() = generateSequence(this) { it.parent as? AnnotationNode }.last()
         }
     }
 
@@ -725,13 +783,6 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal data class FilterType(val type: SiftType) : IsoAction<FieldNode>() {
-            override fun id() = "filter-type(${type.simpleName})"
-            override fun execute(ctx: Context, input: IterFields): IterFields {
-                return input.filterBy(FieldNode::type, type::matches)
-            }
-        }
-
         class ExplodeType(val synthesize: Boolean = false): Action<IterFields, IterClasses>() {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
@@ -858,6 +909,29 @@ sealed class Action<IN, OUT> {
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
             return input
                 .filter { annotation in it.annotations.map(AnnotationNode::type) }
+        }
+    }
+
+    internal class IntoAnnotations<T : Element>(val filter: SiftType?) : Action<Iter<T>, IterAnnotations>() {
+        override fun id() = "annotations"
+        override fun execute(ctx: Context, input: Iter<T>): IterAnnotations {
+            fun annotationsOf(elem: T): List<AnnotationNode> {
+                return elem.annotations
+                    .filter { filter == null || it.type == filter }
+                    .onEach { ctx.scopeTransition(elem, it) }
+            }
+
+            return input.flatMap(::annotationsOf)
+        }
+    }
+
+    internal data class FilterType<T>(val type: SiftType) : IsoAction<T>()
+        where T : Element,
+              T : Trait.HasType
+    {
+        override fun id() = "filter-type(${type.simpleName})"
+        override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
+            return input.filterBy(Trait.HasType::type, type::matches)
         }
     }
 
@@ -1124,7 +1198,7 @@ sealed class Action<IN, OUT> {
                     input.asFlow()
                         .map { elem ->
                             ctx.findRelatedEntities(elem, entity)
-                                .associateWith { elem.data.ensureList }
+                                .associateWith { elem.data.toListOfType<Any>() }
                         }
                         .toList()
                         .takeIf { it.isNotEmpty() }
@@ -1229,7 +1303,17 @@ private inline fun <reified T : Element> Context.entities(
     return entitiesByType as Map<T, Entity>
 }
 
-
 @Suppress("UNCHECKED_CAST")
-private val Any.ensureList: List<Any>
-    get() = if (this is List<*>) this as List<Any> else listOf(this)
+internal inline fun <reified T> Any?.toListOfType(): List<T> {
+    return when (this) {
+        is List<*> -> when (size) {
+            0    -> emptyList()
+            else -> (this as List<T>)
+                .takeIf { firstOrNull() is T }
+                ?: Throw.illegalGenericCast(first()!!::class, T::class)
+        }
+        is T -> listOf(this)
+        null -> emptyList()
+        else -> Throw.illegalGenericCast(this::class, T::class)
+    }
+}

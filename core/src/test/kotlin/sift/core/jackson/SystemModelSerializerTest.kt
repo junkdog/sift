@@ -11,6 +11,7 @@ import sift.core.api.TemplateProcessor
 import sift.core.api.debugLog
 import sift.core.api.debugTrails
 import sift.core.asm.classNode
+import sift.core.dsl.annotatedBy
 import sift.core.dsl.classes
 import sift.core.entity.Entity
 

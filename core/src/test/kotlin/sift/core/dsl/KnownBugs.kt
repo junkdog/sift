@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.dsl
 
 import org.junit.jupiter.api.Disabled

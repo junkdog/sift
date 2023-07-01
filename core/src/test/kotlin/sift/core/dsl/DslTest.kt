@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package sift.core.dsl
 
 import org.assertj.core.api.Assertions.assertThat
@@ -66,8 +68,7 @@ class DslTest {
                 }
             }
         }.expecting(cns) { es ->
-            val entities = es[payload].values.toList()
-            assertThat(entities).hasSize(0)
+            assertThat(es[payload]).isEmpty()
         }
 
         classes {
@@ -320,7 +321,7 @@ class DslTest {
             classes {
 
                 scope("dibbler") {
-                    filter("Dibbler")
+                    filterType(Regex(".*\\.Dibbler").type)
                     methods {
                         entity(dibbler)
                     }
@@ -486,9 +487,75 @@ class DslTest {
         """.trimIndent())
     }
 
-    @Test @Disabled
-    fun `read class and enum from annotation`() {
-        TODO()
+    @Test
+    fun `classes encoded in annotations are reported as types`() {
+        @Handler // here to ensure that non-matching annotations are ignored
+        @AnnoWithClasses([String::class, Map::class])
+        class A
+
+        val types = Entity.Type("types")
+
+        template {
+            classes {
+                entity(types, label("\${types}"),
+                    property("types", readAnnotation(AnnoWithClasses::types)
+                        andThen replace(Regex("^.*\\.([A-Z][a-z]+)$"), "\$1"))
+                )
+            }
+        }.expecting(listOf(classNode<A>()), types, """
+            ── types
+               └─ String, Map
+        """.trimIndent())
+    }
+
+    @Test
+    fun `explode and register classes nested within annotations`() {
+
+        @DeepNestingAnno(
+            cls = Set::class,
+            root = NestingAnno(
+                foos = [AnnoWithClasses([Int::class, Float::class])],
+                bars = [AnnoWithClasses([String::class, Map::class])]
+            )
+        )
+        class TestClass
+
+
+        val cls = Entity.Type("cls")
+        val foos = Entity.Type("foos")
+        val bars = Entity.Type("bars")
+
+        template {
+            classes {
+                annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
+                    scope("first level: DeepNestingAnno") {
+                        explodeTypes("cls", synthesize = true) {
+                            entity(cls, label("cls: \${name}"), property("name", readName()))
+                        }
+                        nested("root") {
+                            nested("foos") {
+                                explodeTypes("types", synthesize = true) {
+                                    entity(foos, label("foo: \${name}"), property("name", readName()))
+                                }
+                            }
+
+                            nested("bars") {
+                                explodeTypes("types", synthesize = true) {
+                                    entity(bars, label("bar: \${name}"), property("name", readName()))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.expecting(listOf(classNode<TestClass>()), listOf(cls, foos, bars), """
+            ── cls + foos + bars
+               ├─ bar: Map
+               ├─ bar: String
+               ├─ cls: Set
+               ├─ foo: float
+               └─ foo: int
+        """.trimIndent())
     }
 
     @Test
@@ -830,11 +897,6 @@ class DslTest {
 
     @Test @Disabled
     fun `read annotation from generic parameter`() {
-        TODO()
-    }
-
-    @Test @Disabled
-    fun `read annotation from method parameter`() {
         TODO()
     }
 
@@ -2122,28 +2184,50 @@ class DslTest {
     @Nested
     inner class NegativeTests {
 
-    @Test
-    fun `entity types can only belong to one type of element`() {
-        val cns: List<ClassNode> = listOf(
-            classNode<MethodsWithTypes>(),
-        )
+        @Test
+        fun `annotation scope throws when operations expect a different element type`() {
 
-        val et = Entity.Type("class")
+            @DeepNestingAnno(
+                cls = Set::class,
+                root = NestingAnno(
+                    foos = [AnnoWithClasses([Int::class, Float::class])],
+                    bars = [AnnoWithClasses([String::class, Map::class])]
+                )
+            )
+            class TestClass
 
-        // works
-        classes {
-            // entity(et, property("type", readType()))
-            methods {
-                filter(Regex("mixedTypes"))
-                parameters {
-                    entity(et, property("type", readType()))
-                }
+            assertThrowsTemplateProcessingException<IllegalGenericCastException> {
+                template {
+                    classes {
+                        annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
+                            nested("cls") {} // expecting error: wrong element type
+                        }
+                    }
+                }.expecting(listOf(classNode<TestClass>())) {}
             }
-        }.expecting(cns) {}
 
-        assertThrowsTemplateProcessingException<IllegalEntityAssignmentException> {
+            assertThrowsTemplateProcessingException<IllegalGenericCastException> {
+                template {
+                    classes {
+                        annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
+                            explodeTypes("root") {} // expecting error: not a type
+                        }
+                    }
+                }.expecting(listOf(classNode<TestClass>())) {}
+            }
+        }
+
+        @Test
+        fun `entity types can only belong to one type of element`() {
+            val cns: List<ClassNode> = listOf(
+                classNode<MethodsWithTypes>(),
+            )
+
+            val et = Entity.Type("class")
+
+            // works
             classes {
-                entity(et, property("type", readType()))
+                // entity(et, property("type", readType()))
                 methods {
                     filter(Regex("mixedTypes"))
                     parameters {
@@ -2151,8 +2235,19 @@ class DslTest {
                     }
                 }
             }.expecting(cns) {}
+
+            assertThrowsTemplateProcessingException<IllegalEntityAssignmentException> {
+                classes {
+                    entity(et, property("type", readType()))
+                    methods {
+                        filter(Regex("mixedTypes"))
+                        parameters {
+                            entity(et, property("type", readType()))
+                        }
+                    }
+                }.expecting(cns) {}
+            }
         }
-    }
 
         @Test
         fun `element must not belong to multiple entities`() {
