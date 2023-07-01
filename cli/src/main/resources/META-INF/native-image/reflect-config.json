@@ -399,7 +399,13 @@
   "name":"sift.core.api.Action$Annotations"
 },
 {
+  "name":"sift.core.api.Action$Annotations$AnnotationScope"
+},
+{
   "name":"sift.core.api.Action$Annotations$AnnotationsScope"
+},
+{
+  "name":"sift.core.api.Action$Annotations$ExplodeType"
 },
 {
   "name":"sift.core.api.Action$Annotations$ExplodeTypes"
@@ -1251,6 +1257,9 @@
 {
   "name":"sift.core.jackson.SystemModelSerializer$Serializer",
   "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sift.core.terminal.ChangeCase"
 },
 {
   "name":"sift.core.terminal.Deduplicate",
