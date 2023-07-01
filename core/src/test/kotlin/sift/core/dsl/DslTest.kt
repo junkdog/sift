@@ -2203,7 +2203,8 @@ class DslTest {
             assertThrowsTemplateProcessingException<IllegalGenericCastException> {
                 template {
                     classes {
-                        annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
+                        annotations {
+                            filter("DeepNestingAnno")
                             nested("cls") {} // expecting error: wrong element type
                         }
                     }
