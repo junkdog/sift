@@ -11,7 +11,6 @@ import sift.core.terminal.Gruvbox.light2
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style.Companion.plain
 import sift.core.terminal.TextTransformer.Companion.dedupe
-import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.terminal.TextTransformer.Companion.uppercase
 import sift.template.dsl.graphviz
@@ -78,7 +77,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
                                 readName() andThen replace("Mapping", "") andThen uppercase())
                         }
 
-                        outerScope("read base path from @RequestMapping") {
+                        outerScope("read base path from class-level @RequestMapping") {
                             property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
                         }
 

@@ -911,7 +911,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal class IntoAnnotations<T : Element>(val filter: SiftType?) : Action<Iter<T>, IterAnnotations>() {
-        override fun id() = "annotations"
+        override fun id() = "annotations" + (filter?.simpleName?.let { "($it)" } ?: "")
         override fun execute(ctx: Context, input: Iter<T>): IterAnnotations {
             fun annotationsOf(elem: T): List<AnnotationNode> {
                 return elem.annotations

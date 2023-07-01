@@ -399,7 +399,11 @@
   "name":"sift.core.api.Action$Annotations"
 },
 {
-  "name":"sift.core.api.Action$Annotations$AnnotationScope"
+  "name":"sift.core.api.Action$Annotations$AnnotationScope",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sift.core.api.Action$Annotations$AnnotationsScope"
@@ -716,7 +720,15 @@
   ]
 },
 {
-  "name":"sift.core.api.Action$IntoAnnotations"
+  "name":"sift.core.api.Action$IntoAnnotations",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, 
+    {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, 
+    {"name":"id","parameterTypes":[] }
+  ]
 },
 {
   "name":"sift.core.api.Action$Method"
@@ -1182,6 +1194,9 @@
   "name":"sift.core.dsl.Type"
 },
 {
+  "name":"sift.core.element.AnnotationNode"
+},
+{
   "name":"sift.core.element.ClassNode"
 },
 {
@@ -1259,7 +1274,17 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sift.core.terminal.ChangeCase"
+  "name":"sift.core.terminal.ChangeCase",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["sift.core.terminal.ChangeCase$Convention"] }]
+},
+{
+  "name":"sift.core.terminal.ChangeCase$Convention",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"sift.core.terminal.Deduplicate",
