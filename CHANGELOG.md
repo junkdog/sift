@@ -5,10 +5,10 @@ The annotations scope enables working with annotations beyond reading top-level 
 to traverse nested annotations and to initiate a class scope from types referenced by annotations.
 
 `annotations(filter: SiftType?) {}` has been added to all scopes representing elements which can be annotated.
-The filter parameter is optional and defaults to null, hence, if not specified, all annotations get returned.
+The filter parameter is optional and defaults to `null`, hence, if not specified, all annotations get returned.
 
 Two unique functions are included within the annotations scope:
-- `nested(element)`: Iterates child annotations referenced by the specified element. The `element` parameter
+- `nested(element) {}`: Iterates child annotations referenced by the specified element. The `element` parameter
   corresponds to the name of the annotation element which nested annotations are to be accessed.
 - `explodeTypes(element, synthesize) {}`: Iterates over classes stored within a specific annotation element. The
   parameter `element` represents the name of the annotation element to be processed. `synthesize` is an optional
