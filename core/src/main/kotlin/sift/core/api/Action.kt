@@ -212,11 +212,12 @@ sealed class Action<IN, OUT> {
                     ?: return input
 
                 return when (val elem = elems.first()) {
-                    is ClassNode     -> Class.Filter(regex, invert).execute(ctx, elems as IterClasses)
-                    is FieldNode     -> Field.Filter(regex, invert).execute(ctx, elems as IterFields)
-                    is MethodNode    -> Method.Filter(regex, invert).execute(ctx, elems as IterMethods)
-                    is ParameterNode -> Parameter.Filter(regex, invert).execute(ctx, elems as IterParameters)
-                    is SignatureNode -> Signature.Filter(regex, invert).execute(ctx, elems as IterSignatures)
+                    is AnnotationNode -> Annotations.Filter(regex, invert).execute(ctx, elems as IterAnnotations)
+                    is ClassNode      -> Class.Filter(regex, invert).execute(ctx, elems as IterClasses)
+                    is FieldNode      -> Field.Filter(regex, invert).execute(ctx, elems as IterFields)
+                    is MethodNode     -> Method.Filter(regex, invert).execute(ctx, elems as IterMethods)
+                    is ParameterNode  -> Parameter.Filter(regex, invert).execute(ctx, elems as IterParameters)
+                    is SignatureNode  -> Signature.Filter(regex, invert).execute(ctx, elems as IterSignatures)
                     else -> error("cannot filter elements of ${elem::class.simpleName}")
                 }
             }
