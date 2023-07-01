@@ -1,5 +1,6 @@
 package sift.core.api
 
+import net.onedaybeard.collectionsby.findBy
 import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.tree.ClassNode
 import sift.core.TemplateProcessingException
@@ -48,8 +49,8 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
             .filter { "-scope" in it.value.action }
             .forEach { node ->
                 enumValues<MeasurementScope>()
-                    .firstBy(MeasurementScope::id, node.value.action)
-                    .let { scope -> node.value.scopeIn = scope }
+                    .findBy(MeasurementScope::id, node.value.action)
+                    ?.let { scope -> node.value.scopeIn = scope }
             }
 
         // mark scopes

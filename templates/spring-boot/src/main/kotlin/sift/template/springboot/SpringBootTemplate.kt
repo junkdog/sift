@@ -4,16 +4,16 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import sift.core.entity.Entity
 import sift.core.api.Action
-import sift.core.dsl.Type
-import sift.core.dsl.type
-import sift.core.dsl.Methods
+import sift.core.dsl.*
 import sift.core.dsl.ScopeEntityPredicate.ifExists
-import sift.core.dsl.template
 import sift.core.graphviz.Dot
 import sift.core.terminal.Gruvbox.light2
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style.Companion.plain
 import sift.core.terminal.TextTransformer.Companion.dedupe
+import sift.core.terminal.TextTransformer.Companion.edit
+import sift.core.terminal.TextTransformer.Companion.replace
+import sift.core.terminal.TextTransformer.Companion.uppercase
 import sift.template.dsl.graphviz
 import sift.template.spi.SystemModelTemplateServiceProvider
 
@@ -25,15 +25,16 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
 
     object Annotation {
         // spring
-        val controller = "org.springframework.stereotype.Controller".type
         val deleteMapping = "org.springframework.web.bind.annotation.DeleteMapping".type
         val getMapping = "org.springframework.web.bind.annotation.GetMapping".type
         val patchMapping = "org.springframework.web.bind.annotation.PatchMapping".type
         val postMapping = "org.springframework.web.bind.annotation.PostMapping".type
         val putMapping = "org.springframework.web.bind.annotation.PutMapping".type
+        val httpMapping = Regex("org.springframework.web.bind.annotation\\.[A-Z][^.]*Mapping").type
         val requestBody = "org.springframework.web.bind.annotation.RequestBody".type
         val requestMapping = "org.springframework.web.bind.annotation.RequestMapping".type
-        val restController = "org.springframework.web.bind.annotation.RestController".type
+
+        val restControllers = Regex("org.springframework.(stereotype.Controller|web.bind.annotation.RestController)").type
     }
 
     object EntityType {
@@ -60,49 +61,39 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
 
     override fun template(): Action<Unit, Unit> = template {
         classes {
-            fun registerController(controller: Type) {
-                scope("register controllers") {
-                    annotatedBy(controller)
-                    entity(E.controller)
+            scope("register controllers") {
+                annotatedBy(A.restControllers)
+                entity(E.controller)
 
-                    methods {
-                        fun Methods.registerEndpoints(method: String, httpMethod: Type) {
-                            scope(method) {
-                                annotatedBy(httpMethod)
-                                entity(E.endpoint,
-                                    label("\${http-method} /\${base-path:}/\${path:}", dedupe('/')),
-                                    property("http-method", withValue(method)),
-                                    property("path", readAnnotation(httpMethod, "value")),
-                                )
+                methods {
+                    scope("register endpoints") {
+                        annotatedBy(A.httpMapping) // matches any @.*Mapping
+                        entity(E.endpoint, label("\${http-method} /\${base-path:}/\${path:}", dedupe('/')),
+                            property("path", readAnnotation(A.httpMapping, "value")),
+                        )
 
-                                outerScope("read base path from @RequestMapping") {
-                                    property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
-                                }
-
-                                parameters {
-                                    annotatedBy(A.requestBody)
-                                    property(E.endpoint, "request-object", readType())
-                                }
-                            }
+                        annotations("extract http method name from annotation", A.httpMapping) {
+                            // @PostMapping -> POST, @DeleteMapping -> DELETE, etc
+                            property(E.endpoint, "http-method",
+                                readName() andThen replace("Mapping", "") andThen uppercase())
                         }
 
-                        // maps to EntityType.endpoint
-                        registerEndpoints("DELETE", A.deleteMapping)
-                        registerEndpoints("GET", A.getMapping)
-                        registerEndpoints("PATCH", A.patchMapping)
-                        registerEndpoints("POST", A.postMapping)
-                        registerEndpoints("PUT", A.putMapping)
-
-                        // not all controllers are REST controllers (@MessageMapping/rsocket endpoints)
-                        scope("attempt registering endpoints", ifExists, E.endpoint) {
-                           E.controller["endpoints"] = E.endpoint
+                        outerScope("read base path from @RequestMapping") {
+                            property(E.endpoint, "base-path", readAnnotation(A.requestMapping, "value"))
                         }
+
+                        parameters {
+                            annotatedBy(A.requestBody)
+                            property(E.endpoint, "request-object", readType())
+                        }
+                    }
+
+                    // not all controllers are REST controllers (@MessageMapping/rsocket endpoints)
+                    scope("attempt registering endpoints", ifExists, E.endpoint) {
+                       E.controller["endpoints"] = E.endpoint
                     }
                 }
             }
-
-            registerController(A.controller)
-            registerController(A.restController)
         }
 
         scope("dot graph property configuration") {

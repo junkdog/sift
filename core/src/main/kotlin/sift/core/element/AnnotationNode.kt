@@ -30,6 +30,8 @@ class AnnotationNode private constructor(
 
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 
+    override fun toString() = "@$simpleName"
+
     override fun hashCode(): Int {
         return idHash(an)
     }

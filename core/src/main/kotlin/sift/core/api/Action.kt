@@ -226,7 +226,7 @@ sealed class Action<IN, OUT> {
 
     internal object Annotations {
         internal object AnnotationScope : Action<IterAnnotations, IterAnnotations>() {
-            override fun id() = "annotations-scope"
+            override fun id() = "annotation-scope"
             override fun execute(ctx: Context, input: IterAnnotations): IterAnnotations = input
         }
 
@@ -915,7 +915,7 @@ sealed class Action<IN, OUT> {
         override fun execute(ctx: Context, input: Iter<T>): IterAnnotations {
             fun annotationsOf(elem: T): List<AnnotationNode> {
                 return elem.annotations
-                    .filter { filter == null || it.type == filter }
+                    .filter { filter?.matches(it.type) ?: true }
                     .onEach { ctx.scopeTransition(elem, it) }
             }
 
@@ -979,12 +979,13 @@ sealed class Action<IN, OUT> {
         override fun id() = "read-name"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun nameOf(elem: T): String = when (elem) {
-                is MethodNode    -> elem.name
-                is FieldNode     -> elem.name
-                is ParameterNode -> elem.name
-                is ClassNode     -> elem.innerName?.takeIf { shortened } ?: elem.simpleName
-                is SignatureNode -> elem.simpleName
-                else             -> error("$elem")
+                is AnnotationNode -> elem.type.simpleName
+                is MethodNode     -> elem.name
+                is FieldNode      -> elem.name
+                is ParameterNode  -> elem.name
+                is ClassNode      -> elem.innerName?.takeIf { shortened } ?: elem.simpleName
+                is SignatureNode  -> elem.simpleName
+                else              -> error("$elem")
             }
 
             return input
