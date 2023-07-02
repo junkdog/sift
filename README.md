@@ -16,7 +16,7 @@ The resulting system model is composed of entities that describe the system's st
 - **Impact Analysis**: Use the `--diff` option to analyze the impact of new features or changes.
 - **Documentation**: Generate graphical or textual representations of your system for documentation purposes.
 - **Microservice Analysis**: Quickly understand interactions in a microservices environment.
-- 
+ 
 ## Features
 - CLI tool for building, querying, and [comparing][diff] system models from parsed .class files.
 - Declarative DSL for writing user-defined templates, optionally extending or combining existing templates.
@@ -36,7 +36,7 @@ in https://github.com/eugenp/tutorials/tree/master/axon._
 
  [kitty]: https://sw.kovidgoyal.net/kitty/
 
- [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L127:L246
+ [spring-axon]: templates/spring-boot-axon-cqrs/src/main/kotlin/sift/template/sbacqrs/SpringBootAxonCqrsTemplate.kt#L124:L240
  [diff]: docs/images/sift-spring-axon-diff.png
  [graphviz]: docs/images/sift-spring-axon-render.png
 
@@ -198,7 +198,7 @@ such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
 
- [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L40:L64
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L40:L63
  [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:L61
 
 

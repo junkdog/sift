@@ -1,7 +1,6 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.findBy
-import net.onedaybeard.collectionsby.firstBy
 import org.objectweb.asm.tree.ClassNode
 import sift.core.TemplateProcessingException
 import sift.core.tree.Tree

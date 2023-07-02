@@ -1,5 +1,7 @@
 ## Upcoming Release
 
+## sift-0.13.0 2023-07-02
+
 ### Annotations scope
 The annotations scope enables working with annotations beyond reading top-level elements. It provides functions
 to traverse nested annotations and to initiate a class scope from types referenced by annotations.
