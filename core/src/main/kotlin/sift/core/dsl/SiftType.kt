@@ -24,7 +24,7 @@ sealed interface SiftType {
 class RegexType internal constructor(
     internal val match: Regex
 ): SiftType {
-    override val simpleName: String = match.pattern.substringAfterLast(".")
+    override val simpleName: String = match.pattern
     override fun matches(rhs: Type): Boolean = match.containsMatchIn(rhs.name)
     override fun hashCode(): Int = match.hashCode()
     override fun equals(other: Any?): Boolean = (other as? RegexType)?.match == match

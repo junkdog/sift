@@ -19,14 +19,14 @@ class AnnotationNode private constructor(
     override val type: Type
         get() = an.type
 
-    private val values: Map<Any, Any?> by lazy {
+    private val attributes: Map<Any, Any?> by lazy {
         (an.values ?: emptyList())
             .chunked(2)
             .associate { (k, v) -> k to remapAnnotationValue(v) }
             .onEach {  }
     }
 
-    operator fun get(field: String): Any? = values[field]
+    operator fun get(field: String): Any? = attributes[field]
 
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
 

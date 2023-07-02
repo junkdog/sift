@@ -5,6 +5,7 @@ import sift.core.dsl.ParameterSelection.all
 import sift.core.element.ClassNode
 import sift.core.element.MethodNode
 import sift.core.entity.Entity
+import kotlin.reflect.KProperty1
 
 /**
  * Methods scope.
@@ -144,6 +145,11 @@ class Methods internal constructor(
             Action.Method.IntoReturnSignature andThen Signature().also(f).action
         )
     }
+
+
+    inline fun <reified T : Annotation> readAnnotation(
+        field: KProperty1<T, *>
+    ): Action<IterMethods, IterValues> = readAnnotation(type<T>(), field.name)
 
     val Entity.Type.instantiations: EntityResolution
         get() = Instantiations(this)

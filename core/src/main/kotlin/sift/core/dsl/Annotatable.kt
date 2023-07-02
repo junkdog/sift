@@ -2,6 +2,7 @@ package sift.core.dsl
 
 import sift.core.api.Action
 import sift.core.api.Iter
+import sift.core.api.IterValues
 import sift.core.element.Element
 
 
@@ -22,6 +23,15 @@ interface Annotatable<ELEMENT : Element> {
         filter: SiftType? = null,
         f: Annotations.() -> Unit
     )
+
+    /**
+     * Reads the element value of the [attribute] name belonging to [annotation]. If the element value
+     * is an array, the array is flattened when added to entity properties.
+     */
+    fun readAnnotation(
+        annotation: SiftType,
+        attribute: String
+    ): Action<Iter<ELEMENT>, IterValues>
 
     companion object {
         internal fun <ELEMENT : Element> scopedTo(
@@ -45,6 +55,11 @@ private class AnnotatableImpl<ELEMENT : Element>(
         action += Action.Fork(label, Action.IntoAnnotations<ELEMENT>(filter)
             andThen Annotations().also(f).action)
     }
+
+    override fun readAnnotation(
+        annotation: SiftType,
+        attribute: String
+    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, attribute)
 }
 
 inline fun <reified T> Annotatable<*>.annotatedBy() {

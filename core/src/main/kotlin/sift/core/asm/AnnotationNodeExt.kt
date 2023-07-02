@@ -19,19 +19,19 @@ internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.findAnnota
 /** Reads value from annotation property where [R] is a primitive value or string */
 internal inline fun <reified T : Annotation, reified R> Iterable<AnnotationNode>.read(
     field: KProperty1<T, R>
-) = findAnnotation<T>()?.let { readField<R>(field.name) }
+) = findAnnotation<T>()?.let { readAttribute<R>(field.name) }
 
 /** Reads class value of annotation property as type */
 internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.readType(
     field: KProperty1<T, *>
-) = findAnnotation<T>()?.let { readField<Type>(field.name) }
+) = findAnnotation<T>()?.let { readAttribute<Type>(field.name) }
 
 /** Reads class values of annotation property as types */
 internal inline fun <reified T : Annotation> Iterable<AnnotationNode>.readTypes(
     field: KProperty1<T, Array<*>>
-) = findAnnotation<T>()?.let { readField<List<Type>>(field.name) }
+) = findAnnotation<T>()?.let { readAttribute<List<Type>>(field.name) }
 
-internal inline fun <reified T> readField(
+internal inline fun <reified T> readAttribute(
     name: String
 ): (AnnotationNode) -> T? = { an ->
     val values = an.values ?: listOf()
@@ -46,7 +46,7 @@ internal inline fun <reified T> readField(
     }
 }
 
-internal fun readFieldAny(
+internal fun readAttributeAny(
     name: String
 ): (AnnotationNode) -> Any? = { an ->
     val values = an.values ?: listOf()

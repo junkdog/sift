@@ -7,14 +7,17 @@ to traverse nested annotations and to initiate a class scope from types referenc
 `annotations(filter: SiftType?) {}` has been added to all scopes representing elements which can be annotated.
 The filter parameter is optional and defaults to `null`, hence, if not specified, all annotations get returned.
 
-Two unique functions are included within the annotations scope:
+Three unique functions are included within the annotations scope:
 - `nested(element) {}`: Iterates child annotations referenced by the specified element. The `element` parameter
   corresponds to the name of the annotation element which nested annotations are to be accessed.
 - `explodeTypes(element, synthesize) {}`: Iterates over classes stored within a specific annotation element. The
   parameter `element` represents the name of the annotation element to be processed. `synthesize` is an optional
   parameter, defaulting to `false`. When set to `true`, missing types are stubbed based on those stored within the
-  annotation element. `synthesize` is useful for stubbing classes not included in the input classes, providing a
+  annotation element. `synthesize` is useful for stubbing classes not included with the input classes, providing a
   mechanism to register entities over unknown types.
+- `readAttribute(attribute)`: operates similarly to `readAnnotation(type, attribute)`, but reads the attribute from
+  the currently scoped annotations instead of the specified type.
+  
 
 ### Method selection filter
 
@@ -44,6 +47,7 @@ Note that constructors are no longer included by default.
 ### Fixes
 - DSL: `property()` ignored `PropertyStrategy` when used together with `entity()` registration.
 - DSL: `readAnnotation()` now converts `org.objectweb.asm.Type` to `sift.core.dsl.Type` for fields containing class values.
+- DSL: `readAnnotation()` the `field` parameter is now more appropriately named 'attribute'.
 
 ## sift-0.12.0 2023-06-17
 

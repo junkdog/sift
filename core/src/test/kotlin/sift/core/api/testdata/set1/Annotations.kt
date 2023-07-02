@@ -10,8 +10,13 @@ annotation class Query
 enum class Yolo { Foo, Bar }
 
 annotation class AnnoType(
-    val yolo: Yolo,
+    val value: Int,
     val cls: KClass<*>
+)
+
+annotation class NodeAnno(
+    val value: Int,
+    val children: Array<NodeAnno>,
 )
 
 annotation class AnnoPrimitives(

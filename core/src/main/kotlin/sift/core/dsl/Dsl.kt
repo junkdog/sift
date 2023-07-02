@@ -1,8 +1,6 @@
 package sift.core.dsl
 
 import sift.core.api.Action
-import sift.core.api.Iter
-import sift.core.api.IterValues
 import sift.core.element.Element
 import sift.core.entity.Entity
 
@@ -17,8 +15,6 @@ interface CommonOperations<T : Element, SCOPE : Core<T>> {
     fun filter(string: String, invert: Boolean = false) {
         filter(Regex.fromLiteral(string), invert)
     }
-
-    fun readAnnotation(annotation: SiftType, field: String): Action<Iter<T>, IterValues>
 
     fun scope(label: String, f: SCOPE.() -> Unit)
     fun scope(

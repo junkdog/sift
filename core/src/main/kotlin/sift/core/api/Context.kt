@@ -179,12 +179,16 @@ internal data class Context(
         }.map(TypeClassNode::type)
     }
 
-    fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
-        // unpacking for property() elements; ref test for edge case:
-        //     DslTest.`explode Payload in List field and associate property from the main class`
-        val input = (input as? ValueNode)?.reference
+    private fun resolveTracedElement(input: Element): Element {
+        // to avoid excessive resource consumption, we avoid bookkeeping
+        // traces of elements that are intrinsically tied to other (traced) elements.
+        return (input as? ValueNode)?.reference?.let(::resolveTracedElement)
             ?: (input as? AnnotationNode)?.root
             ?: input
+    }
+
+    fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
+        val input = resolveTracedElement(input)
 
         // the most immediate path back to the root element
         val plain = tracesOf(input)

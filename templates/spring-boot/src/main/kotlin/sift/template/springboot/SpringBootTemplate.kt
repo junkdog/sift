@@ -33,7 +33,7 @@ class SpringBootTemplate : SystemModelTemplate, SystemModelTemplateServiceProvid
         val requestBody = "org.springframework.web.bind.annotation.RequestBody".type
         val requestMapping = "org.springframework.web.bind.annotation.RequestMapping".type
 
-        val restControllers = Regex("org.springframework.(stereotype.Controller|web.bind.annotation.RestController)").type
+        val restControllers = Regex("org.springframework.(stereotype.Controller|web.bind.annotation.RestController)$").type
     }
 
     object EntityType {

@@ -124,11 +124,11 @@ Examples:
   Model the system using the "spring-axon" template on the current directory's
   classes, filter nodes containing the regular expression "Order(Created|Shipped)".
 
-  sift -t spring-axon -f . -F "Product" --render
-  Model the system using the "spring-axon" template on the current directory's
-  classes, filter the graph to show only nodes containing "Product", and render
-  the result using graphviz's DOT language.
-  
+  sift -t spring-axon -f . --diff feature-01.json
+  Compare the current design of the system using the "spring-axon" template on
+  the classes in the current directory against a previously saved system model
+  from "feature-01.json" and show the differences.
+
   sift -t sift -f "net.onedaybeard.sift:core:0.13.0" --diff "net.onedaybeard.sift:core:0.9.0"
   Compare two different versions of the DSL API using the 'sift' template, specified
   by their maven coordinates.

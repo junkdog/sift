@@ -4,6 +4,7 @@ import sift.core.api.*
 import sift.core.element.ClassNode
 import sift.core.element.FieldNode
 import sift.core.entity.Entity
+import kotlin.reflect.KProperty1
 
 /**
  * Fields scope.
@@ -62,4 +63,8 @@ class Fields internal constructor(
         val forkTo = Signature().also(f).action
         action += Action.Fork(Action.Field.IntoSignature andThen forkTo)
     }
+
+    inline fun <reified T : Annotation> readAnnotation(
+        field: KProperty1<T, *>
+    ): Action<IterFields, IterValues> = readAnnotation(type<T>(), field.name)
 }

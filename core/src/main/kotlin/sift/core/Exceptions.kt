@@ -1,6 +1,7 @@
 package sift.core
 
 import sift.core.api.Measurement
+import sift.core.element.AnnotationNode
 import sift.core.element.Element
 import sift.core.entity.Entity
 import sift.core.tree.Tree
@@ -24,6 +25,11 @@ internal object Throw {
     fun entityNotRegistered(type: Entity.Type): Nothing {
         throw "'$type' is not a registered entity"
             .let(::EntityNotFoundException)
+    }
+
+    fun attributeValueNotSupported(annotationNode: AnnotationNode) {
+        throw "Entity properties cannot reference full annotations (${annotationNode.simpleName}), only annotation attributes are supported"
+            .let(::ReadAttributeOfAnnotationNotSupportedException)
     }
 
     fun unableToResolveParentRelation(parentType: Entity.Type, childType: Entity.Type): Nothing {
@@ -52,6 +58,10 @@ internal sealed class SiftModelException(
     message: String,
     cause: Throwable? = null
 ) : SiftException(message, cause)
+
+internal class ReadAttributeOfAnnotationNotSupportedException(
+    message: String,
+) : SiftException(message)
 
 @Suppress("CanBeParameter")
 internal class UnexpectedElementException(

@@ -5,7 +5,7 @@ import kotlinx.metadata.KmClass
 import kotlinx.metadata.jvm.KotlinClassMetadata
 import net.onedaybeard.collectionsby.findBy
 import sift.core.asm.annotations
-import sift.core.asm.readFieldAny
+import sift.core.asm.readAttributeAny
 import sift.core.dsl.Type
 import sift.core.element.AsmAnnotationNode
 import sift.core.element.AsmClassNode
@@ -47,12 +47,12 @@ internal class KotlinClass(
 @Suppress("UNCHECKED_CAST")
 private fun AsmAnnotationNode.toKotlinMetadata(): kotlin.Metadata {
     return kotlinx.metadata.jvm.Metadata(
-        kind = readFieldAny("k")(this) as Int,
-        metadataVersion = (readFieldAny("mv")(this) as List<Int>?)?.toIntArray(),
-        data1 = (readFieldAny("d1")(this) as List<String>?)?.toTypedArray(),
-        data2 = (readFieldAny("d2")(this) as List<String>?)?.toTypedArray(),
-        extraString = readFieldAny("xs")(this) as String?,
-        packageName = readFieldAny("pn")(this) as String?,
-        extraInt = readFieldAny("xi")(this) as Int?
+        kind = readAttributeAny("k")(this) as Int,
+        metadataVersion = (readAttributeAny("mv")(this) as List<Int>?)?.toIntArray(),
+        data1 = (readAttributeAny("d1")(this) as List<String>?)?.toTypedArray(),
+        data2 = (readAttributeAny("d2")(this) as List<String>?)?.toTypedArray(),
+        extraString = readAttributeAny("xs")(this) as String?,
+        packageName = readAttributeAny("pn")(this) as String?,
+        extraInt = readAttributeAny("xi")(this) as Int?
     )
 }

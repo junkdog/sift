@@ -4,6 +4,7 @@ import sift.core.api.*
 import sift.core.element.MethodNode
 import sift.core.element.ParameterNode
 import sift.core.entity.Entity
+import kotlin.reflect.KProperty1
 
 /**
  * Parameters scope.
@@ -73,4 +74,8 @@ class Parameters internal constructor(
 
         action += Action.Fork(explodeType andThen forkTo)
     }
+
+    inline fun <reified T : Annotation> readAnnotation(
+        field: KProperty1<T, *>
+    ): Action<IterParameters, IterValues> = readAnnotation(type<T>(), field.name)
 }

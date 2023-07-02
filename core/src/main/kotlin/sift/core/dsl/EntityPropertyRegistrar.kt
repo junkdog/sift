@@ -69,16 +69,6 @@ interface EntityPropertyRegistrar<ELEMENT : Element> {
         shorten: Boolean = false
     ): Action<Iter<ELEMENT>, IterValues>
 
-    /**
-     * Reads the value of the [field] fields belonging to [annotation]. If the field
-     * is an array, the array is flattened when added to entity properties.
-     */
-    fun readAnnotation(
-        annotation: SiftType,
-        field: String
-    ): Action<Iter<ELEMENT>, IterValues>
-
-
     companion object {
         fun <ELEMENT: Element> scopedTo(
             action: Action.Chain<Iter<ELEMENT>>
@@ -119,11 +109,6 @@ private class EntityPropertyRegistrarImpl<ELEMENT : Element>(
     override fun readName(
         shorten: Boolean
     ): Action<Iter<ELEMENT>, IterValues> = Action.ReadName(shorten)
-
-    override fun readAnnotation(
-        annotation: SiftType,
-        field: String
-    ): Action<Iter<ELEMENT>, IterValues> = Action.ReadAnnotation(annotation, field)
 
     override fun property(
         key: String,

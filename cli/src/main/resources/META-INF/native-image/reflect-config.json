@@ -421,6 +421,9 @@
   "name":"sift.core.api.Action$Annotations$NestedAnnotations"
 },
 {
+  "name":"sift.core.api.Action$Annotations$ReadAttribute"
+},
+{
   "name":"sift.core.api.Action$Chain",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,

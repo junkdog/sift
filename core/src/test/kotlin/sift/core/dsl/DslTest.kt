@@ -657,6 +657,31 @@ class DslTest {
     }
 
     @Test
+    fun `read annotation values from nested annotation scope`() {
+
+        @NodeAnno(value = 0, children = [
+            NodeAnno(value = 3, children = []),
+            NodeAnno(value = 5, children = [])])
+        class TestClass
+
+        val e = Entity.Type("e")
+
+        template {
+            classes {
+                entity(e, label("children: \${values}"))
+                annotations("sift.core.api.testdata.set1.NodeAnno".type) {
+                    nested("children") {
+                        property(e, "values", readAttribute("value"))
+                    }
+                }
+            }
+        }.expecting(listOf(classNode(TestClass::class)), e, """
+            ── e
+               └─ children: 3, 5
+        """)
+    }
+
+    @Test
     fun `validate property update strategies`() {
         val e = Entity.Type("e")
 
@@ -2216,6 +2241,17 @@ class DslTest {
                     classes {
                         annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
                             explodeTypes("root") {} // expecting error: not a type
+                        }
+                    }
+                }.expecting(listOf(classNode<TestClass>())) {}
+            }
+
+            assertThrowsTemplateProcessingException<ReadAttributeOfAnnotationNotSupportedException> {
+                template {
+                    classes {
+                        entity(Entity.Type("e"))
+                        annotations("sift.core.api.testdata.set1.DeepNestingAnno".type) {
+                            property(Entity.Type("e"), "invalid", readAttribute("root")) // expecting error: annotation
                         }
                     }
                 }.expecting(listOf(classNode<TestClass>())) {}

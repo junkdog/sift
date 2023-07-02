@@ -2,10 +2,8 @@ package sift.core.dsl
 
 import sift.core.api.Action
 import sift.core.api.Iter
-import sift.core.api.IterValues
 import sift.core.element.Element
 import sift.core.entity.Entity
-import kotlin.reflect.KProperty1
 
 abstract class Core<ELEMENT : Element>(
     internal val action: Action.Chain<Iter<ELEMENT>>,
@@ -21,8 +19,4 @@ abstract class Core<ELEMENT : Element>(
     fun filter(entity: Entity.Type) {
         action += Action.EntityFilter(entity)
     }
-
-    inline fun <reified T : Annotation> readAnnotation(
-        field: KProperty1<T, *>
-    ): Action<Iter<ELEMENT>, IterValues> = readAnnotation(type<T>(), field.name)
 }

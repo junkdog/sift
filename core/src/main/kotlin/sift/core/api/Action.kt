@@ -38,6 +38,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.Annotations.Filter::class, name = "filter-annotations"),
     JsonSubTypes.Type(Action.Annotations.NestedAnnotations::class, name = "annotations-nested"),
     JsonSubTypes.Type(Action.Annotations.ExplodeType::class, name = "annotations-explode-type"),
+    JsonSubTypes.Type(Action.Annotations.ReadAttribute::class, name = "read-attribute"),
 
     JsonSubTypes.Type(Action.Signature.ExplodeType::class, name = "signature-explode-type"),
     JsonSubTypes.Type(Action.Signature.Filter::class, name = "filter-signature"),
@@ -270,6 +271,31 @@ sealed class Action<IN, OUT> {
                }
 
                 return input.flatMap(::explode)
+            }
+        }
+
+        internal data class ReadAttribute(
+            val attribute: String,
+        ) : Action<IterAnnotations, IterValues>() {
+            override fun id() = "read-attribute($attribute)"
+            override fun execute(ctx: Context, input: IterAnnotations): IterValues {
+                fun readAttribute(an: AnnotationNode): ValueNode? {
+                    return an[attribute]
+                        ?.also(::verifySafeValue)
+                        ?.let { ValueNode.from(it, an) }
+                }
+
+                return input.mapNotNull(::readAttribute)
+            }
+
+            companion object {
+                private fun verifySafeValue(value: Any?) {
+                    when (value) {
+                        is List<*>        -> value.firstOrNull()?.let(::verifySafeValue)
+                        is AnnotationNode -> Throw.attributeValueNotSupported(value)
+                        else              -> Unit
+                    }
+                }
             }
         }
     }
@@ -994,13 +1020,13 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class ReadAnnotation<T: Element>(val annotation: SiftType, val field: String) : Action<Iter<T>, IterValues>() {
-        override fun id() = "read-annotation(${annotation.simpleName}::$field)"
+    internal data class ReadAnnotation<T: Element>(val annotation: SiftType, val attribute: String) : Action<Iter<T>, IterValues>() {
+        override fun id() = "read-annotation(${annotation.simpleName}::$attribute)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
             fun readAnnotation(input: T): List<ValueNode>? {
                 return input.annotations
-                    .findBy(AnnotationNode::type, annotation::matches)
-                    ?.let { an -> an[field] }
+                    .findBy(AnnotationNode::type, annotation::matches) // fixme: could be many matches
+                    ?.let { an -> an[attribute] }
                     ?.concat()
                     ?.map { ValueNode.from(it, input) }
                     ?.onEach { ctx.scopeTransition(input, it) }

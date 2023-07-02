@@ -3,6 +3,7 @@ package sift.core.dsl
 import sift.core.api.*
 import sift.core.element.ClassNode
 import sift.core.entity.Entity
+import kotlin.reflect.KProperty1
 
 /**
  * Classes scope.
@@ -132,4 +133,8 @@ class Classes internal constructor(
         val forkTo = Action.Class.IntoSuperclassSignature andThen Signature().also(f).action
         action += Action.Fork(forkTo)
     }
+
+    inline fun <reified T : Annotation> readAnnotation(
+        field: KProperty1<T, *>
+    ): Action<IterClasses, IterValues> = readAnnotation(type<T>(), field.name)
 }

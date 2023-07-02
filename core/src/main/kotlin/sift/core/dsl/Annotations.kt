@@ -42,6 +42,12 @@ class Annotations internal constructor(
         action += Action.Fork(forkTo)
     }
 
+    fun readAttribute(
+        attribute: String
+    ): Action<Iter<AnnotationNode>, IterValues> {
+        return Action.Annotations.ReadAttribute(attribute)
+    }
+
     override fun scope(label: String, f: Annotations.() -> Unit) {
         action += Action.Fork(label.takeIf(String::isNotEmpty), Annotations().also(f).action)
     }
