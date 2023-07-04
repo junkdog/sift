@@ -198,8 +198,9 @@ internal data class Context(
         // check if input element is contained in the trails of eligible entities
         val reverse = entityService[entity]
             .map { (elem, e) -> e to tracesOf(elem) }
+            .asSequence()
             .flatMap { (e, trails) -> trails.map { e to it } }
-            .filter { (_, trail) -> input in trail}
+            .filter { (_, trail) -> input in trail }
             .map { (e, _) -> e }
             .toSet()
 
@@ -288,11 +289,13 @@ internal data class Context(
 
     fun statistics(): Map<String, Int> = mapOf(
         "allClasses"                     to allClasses.size,
-        "elementTraces.keys"             to elementTraces.size,
-        "elementTraces.traces"           to elementTraces.values.flatten().size,
-        "elementTraces.traces.max"       to elementTraces.values.maxOf(List<ElementTrace>::size),
-        "elementTraces.traces.depth"     to elementTraces.values.flatten().maxOf { it.asIterable().count() },
-        "elementTraces.flatten"          to elementTraces.values.flatten().sumOf { it.asIterable().count() },
+        "associations.keys"              to elementTraces.size,
+        "associations.traces"            to elementTraces.values.flatten().size,
+        "associations.traces.max"        to elementTraces.values.maxOf(List<ElementTrace>::size),
+        "associations.traces.med"        to elementTraces.values.medianOf(List<ElementTrace>::size),
+        "associations.traces.depth.max"  to elementTraces.values.flatten().maxOf { it.asIterable().count() },
+        "associations.traces.depth.med"  to elementTraces.values.flatten().medianOf { it.asIterable().count() },
+        "associations.flatten"           to elementTraces.values.flatten().sumOf { it.asIterable().count() },
         "classByType"                    to classByType.size,
         "methodInvocationsCache"         to methodInvocationsCache.size,
         "methodInvocationsCache.flatten" to methodInvocationsCache.values.sumOf(Iterable<MethodNode>::count),
@@ -304,6 +307,10 @@ internal data class Context(
         "implementedInterfaces.flatten"  to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
     )
 }
+
+inline fun <T> Iterable<T>.medianOf(
+    selector: (T) -> Int
+): Int = with (map(selector)) { sorted()[size / 2] }
 
 private fun TypeSignature.toType(): Type {
     val generics = args

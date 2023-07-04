@@ -4,7 +4,7 @@ import sift.core.element.Element
 
 internal class ElementTrace private constructor(
     private val elements: List<Element>
-) : Sequence<Element> {
+) : Iterable<Element> {
     private val hash = elements.hashCode()
 
     constructor(visited: Element) : this(listOf(visited))
