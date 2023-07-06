@@ -45,24 +45,21 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
 
 
     override fun template() = template {
-        scope("register actions") {
-            classes {
-                filter("sift.core.api")
+        classes("register actions") {
+            filter("sift.core.api")
 
-                implements(type<Action<*, *>>())
-                filter(Regex("SimpleAction"), invert = true)
-                entity(E.action )
+            implements(type<Action<*, *>>())
+            filter(Regex("SimpleAction"), invert = true)
+            entity(E.action )
 
-                outerScope("scope") {
-                    entity(E.element)
-                    E.element["actions"] = E.action
-                }
+            outerScope("scope") {
+                entity(E.element)
+                E.element["actions"] = E.action
             }
         }
 
-
         scope("register dsl") {
-            classes("register scopes") {
+            classes("register dsl scopes") {
                 // 'sift.core.api.Dsl' for sift < 0.7.0
                 filter(Regex("sift\\.core\\.(dsl|api\\.Dsl)"))
 
