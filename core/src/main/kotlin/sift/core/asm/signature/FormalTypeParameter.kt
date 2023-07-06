@@ -7,6 +7,9 @@ data class FormalTypeParameter(
     val name: String,
     val extends: MutableList<TypeSignature> = mutableListOf(), // visitClassType of T
 ) {
+
+    override fun hashCode(): Int = toString().hashCode()
+
     override fun toString(): String {
         val filtered = extends.filterNotBy(TypeSignature::type, extendsAny)
 
@@ -15,6 +18,10 @@ data class FormalTypeParameter(
             1    -> " : ${filtered.first()}"
             else -> " : $filtered"
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is FormalTypeParameter && other.name == name
     }
 }
 

@@ -22,6 +22,8 @@ class MethodNode private constructor(
         annotations.forEach { it.parent = this }
     }
 
+    override var id: Int = -1
+
     override val simpleName: String
         get() = kfn?.name ?: mn.name
 
@@ -46,9 +48,8 @@ class MethodNode private constructor(
     val receiver: Type?
         get() = kfn?.receiver
 
-    val signature: MethodSignatureNode? by lazy {
+    private val signature: MethodSignatureNode? =
         mn.signature(cn.signature?.formalParameters ?: listOf())
-    }
 
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
@@ -64,10 +65,7 @@ class MethodNode private constructor(
             ?.let { Visibility.Internal }
             ?: Visibility.from(access)
 
-    fun returns(): SignatureNode? {
-        return signature?.returns
-            ?.let(SignatureNode::from)
-    }
+    val returns: SignatureNode? by lazy { signature?.returns?.let(SignatureNode::from) }
 
     private val hash = hash(cn) * 31 + idHash(mn)
 

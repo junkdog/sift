@@ -3,11 +3,15 @@ package sift.core.api
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.ClassNode
 import sift.core.TemplateProcessingException
+import sift.core.asm.resolveClassNodes
 import sift.core.tree.Tree
+import java.net.URI
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 class TemplateProcessor(classNodes: Iterable<ClassNode>) {
-    private val context: Context = Context(classNodes)
+    private val context: Context = Context.from(classNodes)
 
     fun execute(template: Action<Unit, Unit>, profile: Boolean): SystemModel {
         return process(template, profile).let(::SystemModel)
@@ -29,6 +33,7 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
         }
         context.updateEntityLabels()
         val end = System.nanoTime()
+        context.stats.templateProcessing = (end - start).nanoseconds
 
         onComplete(context)
 
@@ -71,6 +76,19 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
             root.execution = (end - start).nanoseconds
             root.action = "template"
             root.entites = context.entityService.allEntities().size
+        }
+    }
+
+    companion object {
+
+        @ExperimentalTime
+        fun from(source: String, mavenRepositories: List<URI>): TemplateProcessor {
+            val (cns, duration) = measureTimedValue {
+                resolveClassNodes(source, mavenRepositories)
+            }
+
+            return TemplateProcessor(cns)
+                .also { it.context.stats.parseAsmClassNodes = duration }
         }
     }
 }

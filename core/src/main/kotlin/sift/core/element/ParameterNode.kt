@@ -15,7 +15,7 @@ class ParameterNode private constructor(
     private val kpn: KotlinParameter? = null,
     name: String,
     override val type: Type,
-    val signature: TypeSignature?,
+    private val typeSignature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
 ) : Element, Trait.HasType {
@@ -24,10 +24,14 @@ class ParameterNode private constructor(
         annotations.forEach { it.parent = this }
     }
 
+    override var id: Int = -1
+
     val name: String = kpn?.name ?: name
 
     val owner: MethodNode
         get() = mn
+
+    val signature: SignatureNode? = typeSignature?.let(SignatureNode::from)
 
     private val hash = hash(cn, mn, name, type)
 

@@ -560,7 +560,7 @@ sealed class Action<IN, OUT> {
             override fun id() = "returns"
             override fun execute(ctx: Context, input: IterMethods): IterSignatures {
                 fun signatureOf(elem: MethodNode): SignatureNode? {
-                    return elem.returns()
+                    return elem.returns
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 
@@ -835,7 +835,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterParameters): IterSignatures {
                 fun signatureOf(elem: ParameterNode): SignatureNode? {
                     return elem.signature
-                        ?.let(SignatureNode::from)
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
 

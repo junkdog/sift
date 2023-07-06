@@ -15,7 +15,7 @@ class ClassWithGenericElements {
 
 class ClassWithGenericMethodParameters {
     fun payloads(payloadas: List<Payload>) = Unit
-    fun complexParameters(map: Map<String, List<Pair<Payload, Int>>>) = Unit
+    fun complexParameters(map: Map<String, List<Pair<String, Int>>>) = Unit
 
     fun thisShouldNotBreakStuff(): String = "Hello World"
 

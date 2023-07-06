@@ -6,7 +6,6 @@ import sift.core.AsmNodeHashcoder.idHash
 import sift.core.api.AccessFlags.acc_interface
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.FormalTypeParameter
-import sift.core.asm.signature.TypeSignature
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
 import sift.core.dsl.Type
@@ -21,6 +20,8 @@ class ClassNode private constructor(
     init {
         annotations.forEach { it.parent = this }
     }
+
+    override var id: Int = -1
 
     internal val signature: ClassSignatureNode? = cn.signature()
 
@@ -52,15 +53,11 @@ class ClassNode private constructor(
     val isEnum: Boolean
         get() = cn.superType?.rawType?.name == "java.lang.Enum"
 
-    val extends: TypeSignature?
-        get() = signature?.extends
+    val extends: SignatureNode? = signature?.extends?.let(SignatureNode::from)
 
     // note: type-erased
     override val type: Type
         get() = Type.from(cn.name)
-
-    val formalTypeParameters: List<FormalTypeParameter>
-        get() = signature?.formalParameters ?: listOf()
 
     val qualifiedName: String
         get() = type.name
@@ -93,7 +90,6 @@ class ClassNode private constructor(
     }
 
     override fun hashCode(): Int = hash
-    internal fun asAsmNode(): AsmClassNode = cn
 
     companion object {
         fun from(cn: AsmClassNode): ClassNode = ClassNode(

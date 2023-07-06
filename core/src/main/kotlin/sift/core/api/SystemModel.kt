@@ -14,6 +14,7 @@ import sift.core.tree.Tree
 import java.io.File
 import java.io.FileNotFoundException
 import java.net.URI
+import kotlin.time.ExperimentalTime
 
 @JsonSerialize(using = SystemModelSerializer.Serializer::class)
 @JsonDeserialize(using = SystemModelSerializer.Deserializer::class)
@@ -51,6 +52,7 @@ fun loadSystemModel(file: File): SystemModel {
         .readValue(file)
 }
 
+@OptIn(ExperimentalTime::class)
 fun resolveSystemModel(
     path: String,
     template: SystemModelTemplate?,
@@ -65,7 +67,7 @@ fun resolveSystemModel(
     } else {
         requireNotNull(template) { "unable to load $path as no template is specified" }
 
-        TemplateProcessor(resolveClassNodes(path, mavenRepostiories))
+        TemplateProcessor.from(path, mavenRepostiories)
             .process(template.template(), false)
             .let(::SystemModel)
     }

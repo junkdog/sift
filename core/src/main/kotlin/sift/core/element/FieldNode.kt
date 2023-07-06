@@ -20,6 +20,8 @@ class FieldNode private constructor(
         annotations.forEach { it.parent = this }
     }
 
+    override var id: Int = -1
+
     override val simpleName: String
         get() = kprop?.name ?: fn.name
 
@@ -49,8 +51,8 @@ class FieldNode private constructor(
 
     private val hash = hash(cn) * 31 + idHash(fn)
 
-    val returns: SignatureNode?
-        get() = fn.signature(cn.signature?.formalParameters ?: listOf())
+    val returns: SignatureNode? =
+        fn.signature(cn.signature?.formalParameters ?: listOf())
             ?.let(FieldSignatureNode::extends)
             ?.let(SignatureNode::from)
 

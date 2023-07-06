@@ -2094,7 +2094,7 @@ class DslTest {
                 }
             }.expecting(cns, listOf(m, f), """
                 ── hello-method + hello-field
-                   ├─ (f) greetings: List<Hello>
+                   ├─ (f) greetings: java.util.List<Hello>
                    └─ (m) Any.hi(greeting)
                 """
             )

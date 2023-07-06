@@ -135,13 +135,15 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.graalvm.nativeimage</groupId>
-                    <artifactId>native-image-maven-plugin</artifactId>
-                    <version>21.2.0</version>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>0.9.23</version>
+                    <extensions>true</extensions>
                     <executions>
                         <execution>
+                            <id>build-native</id>
                             <goals>
-                                <goal>native-image</goal>
+                                <goal>compile-no-fork</goal>
                             </goals>
                             <phase>package</phase>
                         </execution>
@@ -202,8 +204,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.graalvm.nativeimage</groupId>
-                        <artifactId>native-image-maven-plugin</artifactId>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
                         <configuration>
                             <buildArgs>
                                 --no-fallback
@@ -232,8 +234,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.graalvm.nativeimage</groupId>
-                        <artifactId>native-image-maven-plugin</artifactId>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
                         <configuration>
                             <buildArgs>
                                 --no-fallback

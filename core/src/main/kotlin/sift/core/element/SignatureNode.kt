@@ -4,11 +4,14 @@ import sift.core.AsmNodeHashcoder.hash
 import sift.core.asm.signature.ArgType
 import sift.core.asm.signature.TypeSignature
 import sift.core.dsl.Type
+import sift.core.dsl.type
 
 class SignatureNode private constructor(
     val signature: TypeSignature,
 ) : Element, Trait.HasType {
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
+
+    override var id: Int = -1
 
     internal val inner: List<SignatureNode> by lazy { signature.args.map(::from) }
 
@@ -16,7 +19,7 @@ class SignatureNode private constructor(
         get() = signature.toString()
 
     override val type: Type
-        get() = Type.from(signature)
+        get() = signature.toType()
 
     val argType: ArgType
         get() = signature.type
@@ -35,5 +38,24 @@ class SignatureNode private constructor(
 
     companion object {
         fun from(signature: TypeSignature): SignatureNode = SignatureNode(signature)
+    }
+}
+
+internal fun TypeSignature.toType(): Type {
+    val generics = args
+        .takeIf(List<TypeSignature>::isNotEmpty)
+        ?.map(TypeSignature::toType)
+        ?.joinToString(prefix = "<", postfix = ">")
+        ?: ""
+
+    return "${type.className()}$generics".type
+}
+
+
+private fun ArgType.className(): String {
+    return when (this) {
+        is ArgType.Array -> wrapped?.className() + "[]"
+        is ArgType.Plain -> type.internalName
+        is ArgType.Var   -> type.name
     }
 }

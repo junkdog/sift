@@ -15,7 +15,6 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
-import sift.core.asm.resolveClassNodes
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
@@ -50,8 +49,12 @@ import java.text.NumberFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.system.exitProcess
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
 
+@OptIn(ExperimentalTime::class)
 object SiftCli : CliktCommand(
     name = "sift",
     help = """
@@ -230,12 +233,12 @@ object SiftCli : CliktCommand(
             error("Cannot use --save with --load or --diff")
     }
 
+    @OptIn(ExperimentalTime::class)
     fun systemModel(): SystemModel {
         return if (serialization.load != null) {
             loadSystemModel(serialization.load!!)
         } else {
-            resolveClassNodes(template.classNodes!!, mavenRepositories)
-                .let(::TemplateProcessor)
+            TemplateProcessor.from(template.classNodes!!, mavenRepositories)
                 .execute(template.template!!.template(), template.profile)
         }
     }
@@ -429,8 +432,7 @@ object SiftCli : CliktCommand(
     private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
         val template = this.template.template!!
 
-        val sm: SystemModel = resolveClassNodes(this.template.classNodes!!, this.mavenRepositories)
-            .let(::TemplateProcessor)
+        val sm: SystemModel = TemplateProcessor.from(this.template.classNodes!!, this.mavenRepositories)
             .execute(template.template(), this.template.profile)
 
         return sm to template.toTree(sm, roots)
