@@ -87,7 +87,6 @@ internal class ElementAssociationRegistry(
     private fun sanitized(element: Element): Element {
         val traceable = resolveTracedElement(element)
         if (traceable.id == -1) {
-            // todo: thread-safety/assert single-threaded access
             traceable.id = tracedElements.size
             tracedElements += traceable
             traces += mutableListOf(mutableListOf(ElementTrace(traceable)))

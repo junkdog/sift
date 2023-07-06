@@ -59,7 +59,6 @@ fun resolveSystemModel(
     mavenRepostiories: List<URI>,
 ): SystemModel {
     return if (path.endsWith("json")) {
-        // todo: support URI:s
         val f = File(path)
         if (!f.exists()) throw FileNotFoundException(path)
 
