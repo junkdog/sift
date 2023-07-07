@@ -16,8 +16,8 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           version: 'latest'
-          java-version: '17'
-          components: 'native-image'
+          java-version: '17.0.7'
+          distribution: 'graalvm-community'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
 
@@ -61,6 +61,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           
+          git fetch --all
           git checkout -t origin/main
           git merge ${RELEASE_VERSION}
           git push
