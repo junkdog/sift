@@ -2334,6 +2334,36 @@ class DslTest {
         }
     }
 
+    @Test
+    fun `statistics happy path`() {
+        val cns = listOf(
+            classNode<HandlerFn>(),
+            classNode<Payload>(),
+            classNode<HandlerOfFns>(),
+        )
+
+        val handler = Entity.Type("handler")
+
+        val template = classes {
+            methods {
+                annotatedBy<HandlerFn>()
+                entity(handler)
+            }
+            methods {
+                invokes(handler)
+            }
+        }
+
+        TemplateProcessor(cns)
+            .execute(template, false)
+            .statistics()
+
+        // empty statistics are ok too
+        TemplateProcessor(listOf())
+            .execute(template, false)
+            .statistics()
+    }
+
     private fun Action<Unit, Unit>.expecting(f: (EntityService) -> Unit) {
         return expecting(allCns, f)
     }

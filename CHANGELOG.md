@@ -9,6 +9,8 @@ in turn, leads to much faster comparisons.
 ### Fixes
 - StackOverflowError when resolving formal type parameters of generic enum.
 - DSL: `readType()` of signatures could omit the package name when constructing the type.
+- Exception during `--statistics` on empty results.
+
 
 ## sift-0.13.0 2023-07-02
 

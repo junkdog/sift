@@ -77,10 +77,10 @@ internal class ElementAssociationRegistry(
         "associations.traces"            to traces.flatten().size,
         "associations.traces.p50"        to traces.p(50, List<ElementTrace>::size),
         "associations.traces.p90"        to traces.p(90, List<ElementTrace>::size),
-        "associations.traces.max"        to traces.maxOf(List<ElementTrace>::size),
+        "associations.traces.max"        to (traces.maxOfOrNull(List<ElementTrace>::size) ?: 0),
         "associations.traces.depth.p50"  to traces.flatten().p(50) { it.asIterable().count() },
         "associations.traces.depth.p90"  to traces.flatten().p(90) { it.asIterable().count() },
-        "associations.traces.depth.max"  to traces.flatten().maxOf { it.asIterable().count() },
+        "associations.traces.depth.max"  to (traces.flatten().maxOfOrNull { it.asIterable().count() } ?: 0),
         "associations.flatten"           to traces.flatten().sumOf { it.asIterable().count() },
     )
 
@@ -103,7 +103,7 @@ internal class ElementAssociationRegistry(
     ): Entity? = trail
         .filter { it in candidateElements }
         .map { this[tracedElements[it]] }
-        .firstOrNull() // TODO: verify that this can't be multiple entities<?>
+        .firstOrNull()
 }
 
 private fun resolveTracedElement(input: Element): Element {
@@ -118,6 +118,9 @@ private inline fun <T> Iterable<T>.p(
     percentile: Int,
     selector: (T) -> Int
 ): Int {
+    if (toList().isEmpty())
+        return 0
+
     val elements = map(selector).sorted()
     return elements[(elements.size * percentile * 0.01).toInt()]
 }
