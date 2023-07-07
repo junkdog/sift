@@ -1,10 +1,12 @@
 ## Upcoming Release
 
+## sift-0.14.0 2023-07-07
+
 ### Improved Element Tracking Performance
 The tracking of element associations during template execution in Sift has undergone substantial performance
 enhancements. Traced elements are now assigned unique integer identifiers, facilitating the replacement of 
-the previously tracked `List<Element>` with an `int[]`. This modification greatly improves cache locality, which
-in turn, leads to much faster comparisons.
+the previously tracked `List<Element>` with an `int[]`. This greatly improves cache locality, which in
+turn, leads to much faster comparisons.
 
 ### Fixes
 - StackOverflowError when resolving formal type parameters of generic enum.
