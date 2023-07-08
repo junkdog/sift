@@ -4,17 +4,18 @@ import sift.core.element.Element
 
 internal class ElementTrace private constructor(
     private val elements: IntArray,
+    private val bloomHash: ULong
 ) : Iterable<Int> {
-    private val hash = elements.contentHashCode()
-    private val bloomHash: ULong = elements.fold(0uL) { bloom, id -> bloom or id.bloomBit }
 
-    constructor(visited: Element) : this(intArrayOf(visited.id))
+    constructor(visited: Element) : this(intArrayOf(visited.id), visited.id.bloomBit)
 
     operator fun plus(element: Element): ElementTrace {
-        return ElementTrace(IntArray(elements.size + 1).also { dest ->
+        val ids = IntArray(elements.size + 1).also { dest ->
             dest[0] = element.id
             elements.copyInto(dest, 1)
-        })
+        }
+
+        return ElementTrace(ids, bloomHash or element.id.bloomBit)
     }
 
     override fun iterator(): Iterator<Int> = elements.iterator()
@@ -28,10 +29,10 @@ internal class ElementTrace private constructor(
     }
 
     override fun toString(): String = "ElementTrace(${elements.joinToString(separator = " < ") { it.toString() }})"
-    override fun hashCode(): Int = hash
+    override fun hashCode(): Int = elements.contentHashCode()
     override fun equals(other: Any?): Boolean {
         return other is ElementTrace
-            && other.hash == hash
+            && other.bloomHash == bloomHash
             && other.elements contentEquals elements
     }
 
