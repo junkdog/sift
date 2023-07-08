@@ -6,6 +6,7 @@ internal class ElementTrace private constructor(
     private val elements: IntArray,
 ) : Iterable<Int> {
     private val hash = elements.contentHashCode()
+    private val bloomHash: ULong = elements.fold(0uL) { bloom, id -> bloom or id.bloomBit }
 
     constructor(visited: Element) : this(intArrayOf(visited.id))
 
@@ -17,8 +18,14 @@ internal class ElementTrace private constructor(
     }
 
     override fun iterator(): Iterator<Int> = elements.iterator()
-    operator fun contains(other: ElementTrace): Boolean = elements.all { it in other.elements }
-    operator fun contains(element: Element): Boolean = element.id in elements
+    operator fun contains(other: ElementTrace): Boolean {
+        return (bloomHash and other.bloomHash) == bloomHash
+            && elements.all { it in other.elements }
+    }
+    operator fun contains(element: Element): Boolean {
+        return element.id.bloomBit and bloomHash != 0uL
+            && element.id in elements
+    }
 
     override fun toString(): String = "ElementTrace(${elements.joinToString(separator = " < ") { it.toString() }})"
     override fun hashCode(): Int = hash
@@ -30,6 +37,9 @@ internal class ElementTrace private constructor(
 
     /** finds the first matching element id in this trace */
     fun findElement(candidates: ElementSet): Int? {
+        if (candidates.bloomHash and bloomHash == 0uL)
+            return null
+
         val elems = elements
         for (i in 0..elems.lastIndex) {
             if (elems[i] in candidates) {
@@ -39,14 +49,4 @@ internal class ElementTrace private constructor(
 
         return null
     }
-}
-
-class SubsetIntIterator(
-    private val elements: IntArray,
-    private val lastIndex: Int,
-) : IntIterator() {
-    private var nextIndex = 0
-
-    override fun hasNext(): Boolean = lastIndex >= nextIndex
-    override fun nextInt(): Int = elements[nextIndex++]
 }

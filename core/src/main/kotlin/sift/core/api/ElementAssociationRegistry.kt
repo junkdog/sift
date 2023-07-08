@@ -13,7 +13,7 @@ internal class ElementAssociationRegistry(
     private val tracedElements: MutableList<Element> = mutableListOf()
 
     // entities registered to elements
-    private val registeredElements: MutableMap<Entity.Type, ElementSet> = mutableMapOf()
+    private val entityElements: MutableMap<Entity.Type, ElementSet> = mutableMapOf()
 
     fun allTraces(): List<List<Element>> = traces.flatten()
         .map { trace -> trace.map { id -> tracedElements[id] } }
@@ -41,14 +41,14 @@ internal class ElementAssociationRegistry(
 
     fun register(entity: Entity, element: Element): Element {
         return sanitized(element)
-            .also { registeredElements.getOrPut(entity.type, ::ElementSet) += it }
+            .also { entityElements.getOrPut(entity.type, ::ElementSet) += it }
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
         val tracedElement = sanitized(input)
 
         // the most immediate path back to the root element
-        val candidateElements = registeredElements[entity]
+        val candidateElements = entityElements[entity]
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
                 .mapNotNull { trace -> trace.findElement(candidateElements) }
