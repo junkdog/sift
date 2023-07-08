@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import sift.core.asm.resolveClassNodes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.jackson.SystemModelSerializer
@@ -56,7 +55,7 @@ fun loadSystemModel(file: File): SystemModel {
 fun resolveSystemModel(
     path: String,
     template: SystemModelTemplate?,
-    mavenRepostiories: List<URI>,
+    mavenRepositories: List<URI>,
 ): SystemModel {
     return if (path.endsWith("json")) {
         val f = File(path)
@@ -66,7 +65,7 @@ fun resolveSystemModel(
     } else {
         requireNotNull(template) { "unable to load $path as no template is specified" }
 
-        TemplateProcessor.from(path, mavenRepostiories)
+        TemplateProcessor.from(path, mavenRepositories)
             .process(template.template(), false)
             .let(::SystemModel)
     }

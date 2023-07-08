@@ -13,7 +13,7 @@ internal class ElementAssociationRegistry(
     private val tracedElements: MutableList<Element> = mutableListOf()
 
     // entities registered to elements
-    private val registeredElements: MutableMap<Entity.Type, MutableSet<Int>> = mutableMapOf()
+    private val registeredElements: MutableMap<Entity.Type, ElementSet> = mutableMapOf()
 
     fun allTraces(): List<List<Element>> = traces.flatten()
         .map { trace -> trace.map { id -> tracedElements[id] } }
@@ -40,11 +40,8 @@ internal class ElementAssociationRegistry(
     }
 
     fun register(entity: Entity, element: Element): Element {
-        val sanitized = sanitized(element)
-        registeredElements.getOrPut(entity.type) { mutableSetOf() }
-            .add(sanitized.id)
-
-        return sanitized
+        return sanitized(element)
+            .also { registeredElements.getOrPut(entity.type, ::ElementSet) += it }
     }
 
     fun findRelatedEntities(input: Element, entity: Entity.Type): Set<Entity> {
@@ -54,7 +51,9 @@ internal class ElementAssociationRegistry(
         val candidateElements = registeredElements[entity]
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
-                .mapNotNull { entityService.filter(it, candidateElements) }
+                .mapNotNull { trace -> trace.findElement(candidateElements) }
+                .map { tracedElements[it] }
+                .mapNotNull { entityService[it] }
                 .toSet()
 
             else -> emptySet()
@@ -96,14 +95,6 @@ internal class ElementAssociationRegistry(
     }
 
     private fun tracesOf(element: Element): MutableList<ElementTrace> = traces[element.id]
-
-    private fun EntityService.filter(
-        trail: ElementTrace,
-        candidateElements: Set<Int>
-    ): Entity? = trail
-        .filter { it in candidateElements }
-        .map { this[tracedElements[it]] }
-        .firstOrNull()
 }
 
 private fun resolveTracedElement(input: Element): Element {
