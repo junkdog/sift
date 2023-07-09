@@ -1172,8 +1172,6 @@ sealed class Action<IN, OUT> {
             runBlocking(Dispatchers.Default) {
                 ctx.entityService[parentType].entries
                     .asFlow()
-                    .buffer(5)
-//                    .flatMapConcat { it.asFlow() }
                     .flatMapConcat { (elem, parent) -> relations(elem, childType).map { parent to it } }
                     .toList()
                     .onEach { (parent, child) -> child.addChild("backtrack", parent) }
