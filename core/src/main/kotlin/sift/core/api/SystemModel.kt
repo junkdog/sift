@@ -56,6 +56,7 @@ fun resolveSystemModel(
     path: String,
     template: SystemModelTemplate?,
     mavenRepositories: List<URI>,
+    profile: Boolean,
 ): SystemModel {
     return if (path.endsWith("json")) {
         val f = File(path)
@@ -66,7 +67,7 @@ fun resolveSystemModel(
         requireNotNull(template) { "unable to load $path as no template is specified" }
 
         TemplateProcessor.from(path, mavenRepositories)
-            .process(template.template(), false)
+            .process(template.template(), profile)
             .let(::SystemModel)
     }
 }

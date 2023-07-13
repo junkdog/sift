@@ -4,7 +4,7 @@ import sift.core.element.Element
 
 internal class ElementTrace private constructor(
     private val elements: IntArray,
-    private val bloomHash: ULong
+    private val bloomMask: ULong
 ) : Iterable<Int> {
 
     constructor(visited: Element) : this(intArrayOf(visited.id), visited.id.bloomBit)
@@ -15,30 +15,30 @@ internal class ElementTrace private constructor(
             elements.copyInto(dest, 1)
         }
 
-        return ElementTrace(ids, bloomHash or element.id.bloomBit)
+        return ElementTrace(ids, bloomMask or element.id.bloomBit)
     }
 
     override fun iterator(): Iterator<Int> = elements.iterator()
     operator fun contains(other: ElementTrace): Boolean {
-        return (bloomHash and other.bloomHash) == bloomHash
+        return (bloomMask and other.bloomMask) == bloomMask
             && elements.all { it in other.elements }
     }
     operator fun contains(element: Element): Boolean {
-        return element.id.bloomBit and bloomHash != 0uL
+        return element.id.bloomBit and bloomMask != 0uL
             && element.id in elements
     }
 
-    override fun toString(): String = "ElementTrace(${elements.joinToString(separator = " < ") { it.toString() }})"
+    override fun toString(): String = "ElementTrace(${elements.joinToString { it.toString() }})"
     override fun hashCode(): Int = elements.contentHashCode()
     override fun equals(other: Any?): Boolean {
         return other is ElementTrace
-            && other.bloomHash == bloomHash
+            && other.bloomMask == bloomMask
             && other.elements contentEquals elements
     }
 
     /** finds the first matching element id in this trace */
     fun findElement(candidates: ElementSet): Int? {
-        if (candidates.bloomHash and bloomHash == 0uL)
+        if (candidates.bloomMask and bloomMask == 0uL)
             return null
 
         val elems = elements

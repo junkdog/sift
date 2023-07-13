@@ -29,6 +29,7 @@ import kotlin.time.measureTimedValue
 
 internal data class Context(
     val allClasses: MutableList<ClassNode>,
+    var profiling: Boolean = false
 ) {
     val entityService: EntityService = EntityService()
     val elementAssociations = ElementAssociationRegistry(entityService)
@@ -190,8 +191,12 @@ internal data class Context(
         }
     }
 
-    fun <IN, OUT> measure(ctx: Context, input: IN, action: Action<IN, OUT>): OUT {
+    fun <IN, OUT> execute(input: IN, action: Action<IN, OUT>): OUT = when {
+        profiling -> profiledExecute(input, action)
+        else      -> action.execute(this, input).also { flushTransitions() }
+    }
 
+    private fun <IN, OUT> profiledExecute(input: IN, action: Action<IN, OUT>): OUT {
         fun <T> sizeOf(any: T): Int = when (any) {
             is Iterable<*> -> any.toList().size
             is Unit        -> 0
@@ -207,6 +212,7 @@ internal data class Context(
             entites = 0,
             execution = 0.seconds
         )
+
         when (action) {
             is Action.Compose<*, *, *> -> Unit
             is Action.Chain<*>         -> Unit
@@ -222,13 +228,13 @@ internal data class Context(
         }
 
         val start = System.nanoTime().nanoseconds
-        val out = action.execute(ctx, input) // TODO: measureTimedValue
-        ctx.flushTransitions()
+        val out = action.execute(this, input)
+        flushTransitions()
         val end = System.nanoTime().nanoseconds
         measurement.apply {
             output = sizeOf(out)
             execution = end - start
-            entites = ctx.entityService.allEntities().size
+            entites = entityService.allEntities().size
         }
 
         return out
@@ -239,7 +245,8 @@ internal data class Context(
     }
 
     fun popMeasurementScope() {
-        measurementStack.removeLast()
+        if (profiling)
+            measurementStack.removeLast()
     }
 
     fun statistics(): Map<String, Int> = mapOf(

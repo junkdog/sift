@@ -50,8 +50,6 @@ import java.util.*
 import kotlin.math.max
 import kotlin.system.exitProcess
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
-import kotlin.time.measureTimedValue
 
 
 @OptIn(ExperimentalTime::class)
@@ -209,7 +207,7 @@ object SiftCli : CliktCommand(
             template.dumpSystemModel -> dumpEntities(terminal)
             template.profile -> profile(terminal)
             template.diff != null -> {
-                val other = resolveSystemModel(template.diff!!, template.template, mavenRepositories)
+                val other = resolveSystemModel(template.diff!!, template.template, mavenRepositories, template.profile)
                 val tree = diffHead(other, this.tree.treeRoot, template.template!!)
                 terminal.printTree(tree)
             }
@@ -430,12 +428,12 @@ object SiftCli : CliktCommand(
     }
 
     private fun buildTree(roots: List<Entity.Type>): Pair<SystemModel, Tree<EntityNode>> {
-        val template = this.template.template!!
+        val t = this.template.template!!
 
-        val sm: SystemModel = TemplateProcessor.from(this.template.classNodes!!, this.mavenRepositories)
-            .execute(template.template(), this.template.profile)
+        val sm: SystemModel = TemplateProcessor.from(template.classNodes!!, mavenRepositories)
+            .execute(t.template(), template.profile)
 
-        return sm to template.toTree(sm, roots)
+        return sm to t.toTree(sm, roots)
     }
 
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {

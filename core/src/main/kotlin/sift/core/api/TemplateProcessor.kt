@@ -22,6 +22,8 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
         profile: Boolean,
         onComplete: (Context) -> Unit = {}
     ): Context {
+        context.profiling = profile
+
         val start = System.nanoTime()
         try {
             template(context, Unit)
@@ -82,7 +84,10 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
     companion object {
 
         @ExperimentalTime
-        fun from(source: String, mavenRepositories: List<URI>): TemplateProcessor {
+        fun from(
+            source: String,
+            mavenRepositories: List<URI>,
+        ): TemplateProcessor {
             val (cns, duration) = measureTimedValue {
                 resolveClassNodes(source, mavenRepositories)
             }

@@ -2,10 +2,12 @@ package sift.core.api
 
 import sift.core.element.Element
 
+// tracks traced elements that are registered to entities; optimized lookup for
+// ElementAssociationRegistry::findRelatedEntities.
 internal class ElementSet {
     private var elements: IntArray = IntArray(10)
     private var nextIndex: Int = 0
-    var bloomHash: ULong = 0uL
+    var bloomMask: ULong = 0uL
         private set
 
     operator fun plusAssign(element: Element) {
@@ -13,7 +15,7 @@ internal class ElementSet {
             elements = elements.copyOf(elements.size * 3 / 2)
         }
 
-        bloomHash = bloomHash or element.id.bloomBit
+        bloomMask = bloomMask or element.id.bloomBit
         elements[nextIndex++] = element.id
     }
 
@@ -21,7 +23,7 @@ internal class ElementSet {
 
     @OptIn(ExperimentalStdlibApi::class)
     operator fun contains(elementId: Int): Boolean {
-        if (elementId.bloomBit and bloomHash == 0uL)
+        if (elementId.bloomBit and bloomMask == 0uL)
             return false
 
         for (i in 0..<nextIndex) {

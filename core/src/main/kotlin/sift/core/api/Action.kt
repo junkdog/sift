@@ -53,7 +53,6 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.Class.ClassScope::class, name = "class-scope"),
     JsonSubTypes.Type(Action.Class.Filter::class, name = "filter-class"),
     JsonSubTypes.Type(Action.Class.FilterImplemented::class, name = "implements"),
-    JsonSubTypes.Type(Action.Class.ToTemplateScope::class, name = "to-template-scope"),
     JsonSubTypes.Type(Action.Class.IntoEnumValues::class, name = "into-enum-values"),
     JsonSubTypes.Type(Action.Class.IntoMethods::class, name = "methods"),
     JsonSubTypes.Type(Action.Class.IntoOuterClass::class, name = "outer-class"),
@@ -120,7 +119,7 @@ sealed class Action<IN, OUT> {
     internal infix fun <T> andThen(action: Action<OUT, T>): Action<IN, T> = Compose(this, action)
 
     internal operator fun invoke(ctx: Context, input: IN): OUT {
-        return ctx.measure(ctx, input, this)
+        return ctx.execute(input, this)
     }
 
     internal object Template {
@@ -467,13 +466,6 @@ sealed class Action<IN, OUT> {
                 return input
                     .filter(ClassNode::isEnum)
                     .flatMap(::enumValuesOf)
-            }
-        }
-
-        internal object ToTemplateScope : Action<IterClasses, Unit>() {
-            override fun id() = "template-scope"
-            override fun execute(ctx: Context, input: IterClasses) {
-                return Template.TemplateScope.invoke(ctx, Unit)
             }
         }
 

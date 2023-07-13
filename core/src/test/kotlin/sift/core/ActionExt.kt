@@ -17,7 +17,7 @@ fun Action<Unit, Unit>.expecting(
     block: (EntityService) -> Unit
 ) {
     TemplateProcessor(cns)
-        .process(this, false, Context::debugTrails)
+        .process(this, true, Context::debugTrails)
         .entityService
         .also(block)
 }
