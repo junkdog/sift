@@ -9,13 +9,15 @@ import sift.core.entity.EntityService
 internal class ElementAssociationRegistry(
     val entityService: EntityService
 ) {
-    private val traces: MutableList<MutableList<ElementTrace>> = mutableListOf()
+//    private val traces: MutableList<MutableList<ElementTrace>> = mutableListOf()
+    private val traces: MutableList<ElementTraceSet> = mutableListOf()
     private val tracedElements: MutableList<Element> = mutableListOf()
 
     // entities registered to elements
     private val entityElements: MutableMap<Entity.Type, ElementSet> = mutableMapOf()
 
-    fun allTraces(): List<List<Element>> = traces.flatten()
+    fun allTraces(): List<List<Element>> = traces
+        .flatMap(ElementTraceSet::traces)
         .map { trace -> trace.map { id -> tracedElements[id] } }
 
     @Suppress("NAME_SHADOWING")
@@ -30,12 +32,12 @@ internal class ElementAssociationRegistry(
         val currentTraces = tracesOf(to)
 
         // resolve new traces; filter already scoped element traces
-        val transitions: List<ElementTrace> = tracesOf(from)
+        val transitions: List<ElementTrace> = tracesOf(from).traces
+            .filter { (it to to) !in currentTraces }
             .map { it + to }
-            .filter { it !in currentTraces }
 
         currentTraces
-            .also { trails -> trails.removeAll { o -> transitions.any { it in o } } }
+            .also { traces -> traces.removeAll(transitions) }
             .addAll(transitions)
     }
 
@@ -51,7 +53,7 @@ internal class ElementAssociationRegistry(
         val candidateElements = entityElements[entity]
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
-                .mapNotNull { trace -> trace.findElement(candidateElements) }
+                .firstTracedElements(candidateElements) // fixme: naming
                 .map { tracedElements[it] }
                 .mapNotNull { entityService[it] }
                 .toSet()
@@ -61,8 +63,7 @@ internal class ElementAssociationRegistry(
 
         // check if input element is contained in the trails of eligible entities
         val reverse = entityService[entity]
-            .map { (elem, e) -> e to tracesOf(elem) }
-            .asSequence()
+            .map { (elem, e) -> e to tracesOf(elem).traces }
             .flatMap { (e, trails) -> trails.map { e to it } }
             .filter { (_, trail) -> tracedElement in trail }
             .map { (e, _) -> e }
@@ -71,16 +72,18 @@ internal class ElementAssociationRegistry(
         return plain + reverse
     }
 
+    // FIXME: updaate trace statistics and labels
     fun statistics(): Map<String, Int> = mapOf(
         "associations.keys"              to traces.size,
-        "associations.traces"            to traces.flatten().size,
-        "associations.traces.p50"        to traces.p(50, List<ElementTrace>::size),
-        "associations.traces.p90"        to traces.p(90, List<ElementTrace>::size),
-        "associations.traces.max"        to (traces.maxOfOrNull(List<ElementTrace>::size) ?: 0),
-        "associations.traces.depth.p50"  to traces.flatten().p(50) { it.asIterable().count() },
-        "associations.traces.depth.p90"  to traces.flatten().p(90) { it.asIterable().count() },
-        "associations.traces.depth.max"  to (traces.flatten().maxOfOrNull { it.asIterable().count() } ?: 0),
-        "associations.flatten"           to traces.flatten().sumOf { it.asIterable().count() },
+//        "associations.traces"            to traces.flatMap { it.traces }.size,
+        "associations.traces"            to traces.flatMap { it.traces }.flatten().size,
+        "associations.traces.p50"        to traces.flatMap { it.traces }.p(50, ElementTrace::size),
+        "associations.traces.p90"        to traces.flatMap { it.traces }.p(90, ElementTrace::size),
+        "associations.traces.max"        to (traces.maxOfOrNull { it.traces.size } ?: 0),
+        "associations.traces.depth.p50"  to traces.flatMap { it.traces }.p(50) { it.asIterable().count() },
+        "associations.traces.depth.p90"  to traces.flatMap { it.traces }.p(90) { it.asIterable().count() },
+        "associations.traces.depth.max"  to (traces.flatMap { it.traces }.maxOfOrNull { it.asIterable().count() } ?: 0),
+        "associations.flatten"           to traces.flatMap { it.traces }.sumOf(ElementTrace::size),
     )
 
     private fun sanitized(element: Element): Element {
@@ -88,13 +91,13 @@ internal class ElementAssociationRegistry(
         if (traceable.id == -1) {
             traceable.id = tracedElements.size
             tracedElements += traceable
-            traces += mutableListOf(mutableListOf(ElementTrace(traceable)))
+            traces += ElementTraceSet().also { it += ElementTrace(traceable) }
         }
 
         return traceable
     }
 
-    private fun tracesOf(element: Element): MutableList<ElementTrace> = traces[element.id]
+    private fun tracesOf(element: Element): ElementTraceSet = traces[element.id]
 }
 
 private fun resolveTracedElement(input: Element): Element {
@@ -105,11 +108,11 @@ private fun resolveTracedElement(input: Element): Element {
         ?: input
 }
 
-private inline fun <T> Iterable<T>.p(
+private inline fun <T> List<T>.p(
     percentile: Int,
     selector: (T) -> Int
 ): Int {
-    if (toList().isEmpty())
+    if (isEmpty())
         return 0
 
     val elements = map(selector).sorted()

@@ -33,6 +33,8 @@ internal class ElementSet {
 
         return false
     }
+
+    val size: Int get() = nextIndex
 }
 
 internal val Int.bloomBit get() = 1uL shl (this % 64)
