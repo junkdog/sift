@@ -8,10 +8,8 @@ import sift.core.dsl.type
 
 class SignatureNode private constructor(
     val signature: TypeSignature,
-) : Element, Trait.HasType {
+) : Element(), Trait.HasType {
     override val annotations: List<AnnotationNode> = emptyList() // consider removal
-
-    override var id: Int = -1
 
     internal val inner: List<SignatureNode> by lazy { signature.args.map(::from) }
 

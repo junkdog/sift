@@ -18,13 +18,11 @@ class ParameterNode private constructor(
     private val typeSignature: TypeSignature?,
     override val annotations: List<AnnotationNode>,
     val source: Source
-) : Element, Trait.HasType {
+) : Element(), Trait.HasType {
 
     init {
         annotations.forEach { it.parent = this }
     }
-
-    override var id: Int = -1
 
     val name: String = kpn?.name ?: name
 

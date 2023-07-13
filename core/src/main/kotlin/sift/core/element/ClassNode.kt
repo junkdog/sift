@@ -5,7 +5,6 @@ import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.api.AccessFlags.acc_interface
 import sift.core.asm.signature.ClassSignatureNode
-import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
 import sift.core.dsl.Type
@@ -15,13 +14,11 @@ import sift.core.kotlin.KotlinClass
 class ClassNode private constructor(
     private val cn: AsmClassNode,
     override val annotations: List<AnnotationNode>
-) : Element, Trait.HasType {
+) : Element(), Trait.HasType {
 
     init {
         annotations.forEach { it.parent = this }
     }
-
-    override var id: Int = -1
 
     internal val signature: ClassSignatureNode? = cn.signature()
 

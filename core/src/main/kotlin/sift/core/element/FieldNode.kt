@@ -14,13 +14,11 @@ class FieldNode private constructor(
     private val fn: AsmFieldNode,
     private val kprop: KotlinProperty?,
     override val annotations: List<AnnotationNode>
-) : Element, Trait.HasType {
+) : Element(), Trait.HasType {
 
     init {
         annotations.forEach { it.parent = this }
     }
-
-    override var id: Int = -1
 
     override val simpleName: String
         get() = kprop?.name ?: fn.name

@@ -7,9 +7,7 @@ import sift.core.dsl.Type
 
 class AnnotationNode private constructor(
     private val an: AsmAnnotationNode,
-) : Element, Trait.HasType {
-
-    override var id: Int = -1
+) : Element(), Trait.HasType {
 
     internal  lateinit var parent: Element
 

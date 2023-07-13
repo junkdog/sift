@@ -16,13 +16,11 @@ class MethodNode private constructor(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
     private val kfn: KotlinCallable?,
-) : Element {
+) : Element() {
 
     init {
         annotations.forEach { it.parent = this }
     }
-
-    override var id: Int = -1
 
     override val simpleName: String
         get() = kfn?.name ?: mn.name

@@ -5,8 +5,7 @@ import sift.core.AsmNodeHashcoder.hash
 class ValueNode private constructor(
     val data: Any,
     internal val reference: Element
-) : Element {
-    override var id: Int = -1
+) : Element() {
 
     override val simpleName: String
         get() = "$data: ${reference.simpleName}"
