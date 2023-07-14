@@ -14,6 +14,9 @@ import sift.core.entity.Entity
 import sift.core.jackson.*
 import sift.core.terminal.Style
 import java.io.File
+import java.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.measureTimedValue
 
 @NoArgConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,6 +35,10 @@ internal class DeserializedSystemModelTemplate(
 
     override fun template() = pipeline
     override fun theme() = theme
+
+    companion object {
+        internal var deserializationTime: kotlin.time.Duration = 0.milliseconds
+    }
 }
 
 
@@ -55,16 +62,24 @@ private fun mapper() : ObjectMapper {
 }
 
 fun SystemModelTemplate.Companion.deserialize(json: String): SystemModelTemplate {
-    val mapper = mapper()
-    val tree = mapper.readTree(json)
-    return DeserializedSystemModelTemplate(
-        tree["name"].asText(),
-        tree["description"]?.asText() ?: "Deserialized ${tree["name"].asText()} template.",
-        Entity.Type(tree["root"].asText()),
-        (tree.get("entity-types") as ArrayNode).map(JsonNode::asText).map(Entity::Type),
-        mapper.convertValue<Action.Chain<Unit>>(tree.get("pipeline")),
-        mapper.convertValue<HashMap<String, Style>>(tree.get("theme")).map { (k, v) -> Entity.Type(k) to v }.toMap()
-    )
+
+    val (template, duration) = measureTimedValue {
+        val mapper = mapper()
+        val tree = mapper.readTree(json)
+
+        DeserializedSystemModelTemplate(
+            tree["name"].asText(),
+            tree["description"]?.asText() ?: "Deserialized ${tree["name"].asText()} template.",
+            Entity.Type(tree["root"].asText()),
+            (tree.get("entity-types") as ArrayNode).map(JsonNode::asText).map(Entity::Type),
+            mapper.convertValue<Action.Chain<Unit>>(tree.get("pipeline")),
+            mapper.convertValue<HashMap<String, Style>>(tree.get("theme")).map { (k, v) -> Entity.Type(k) to v }.toMap()
+        )
+    }
+
+    DeserializedSystemModelTemplate.deserializationTime = duration
+
+    return template
 }
 
 // save to ~/.local/share/sift/templates/${template.name}.json

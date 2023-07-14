@@ -433,7 +433,7 @@ object SiftCli : CliktCommand(
         val sm: SystemModel = TemplateProcessor.from(template.classNodes!!, mavenRepositories)
             .execute(t.template(), template.profile)
 
-        return sm to t.toTree(sm, roots)
+        return sm to buildTree(sm, roots)
     }
 
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {

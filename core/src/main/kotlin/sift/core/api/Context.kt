@@ -16,6 +16,7 @@ import sift.core.element.*
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
+import sift.core.template.DeserializedSystemModelTemplate
 import sift.core.terminal.Gruvbox
 import sift.core.tree.Tree
 import java.util.*
@@ -250,6 +251,7 @@ internal data class Context(
     }
 
     fun statistics(): Map<String, Int> = mapOf(
+        "timing.ms.deserializeTemplate"   to DeserializedSystemModelTemplate.deserializationTime.inWholeMilliseconds.toInt(),
         "timing.ms.parseAsmClassNodes"    to stats.parseAsmClassNodes.inWholeMilliseconds.toInt(),
         "timing.ms.parseSiftClassNodes"   to stats.parseSiftClassNodes.inWholeMilliseconds.toInt(),
         "timing.ms.templateProcessing"    to stats.templateProcessing.inWholeMilliseconds.toInt(),
