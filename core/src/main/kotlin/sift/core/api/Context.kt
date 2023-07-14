@@ -32,7 +32,7 @@ internal data class Context(
     var profiling: Boolean = false
 ) {
     val entityService: EntityService = EntityService()
-    val elementAssociations = ElementAssociationRegistry(entityService)
+    val elementAssociations = ElementTraceRegistry(entityService)
 
     private val labelFormatters: MutableMap<Entity, LabelFormatter> = mutableMapOf()
 

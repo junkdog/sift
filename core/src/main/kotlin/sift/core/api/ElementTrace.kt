@@ -3,7 +3,7 @@ package sift.core.api
 import sift.core.element.Element
 
 internal class ElementTrace private constructor(
-    private val elements: IntArray,
+    internal val elements: IntArray,
     internal val bloomMask: ULong
 ) : Iterable<Int> {
 

@@ -6,10 +6,9 @@ import sift.core.element.ValueNode
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 
-internal class ElementAssociationRegistry(
+internal class ElementTraceRegistry(
     val entityService: EntityService
 ) {
-//    private val traces: MutableList<MutableList<ElementTrace>> = mutableListOf()
     private val traces: MutableList<ElementTraceSet> = mutableListOf()
     private val tracedElements: MutableList<Element> = mutableListOf()
 
@@ -18,7 +17,7 @@ internal class ElementAssociationRegistry(
 
     fun allTraces(): List<List<Element>> = traces
         .flatMap(ElementTraceSet::traces)
-        .map { trace -> trace.map { id -> tracedElements[id] } }
+        .map { trace -> trace.elements.map { id -> tracedElements[id] } }
 
     @Suppress("NAME_SHADOWING")
     fun registerTransition(from: Element, to: Element) {
@@ -36,9 +35,7 @@ internal class ElementAssociationRegistry(
             .filter { (it to to) !in currentTraces }
             .map { it + to }
 
-        currentTraces
-            .also { traces -> traces.removeAll(transitions) }
-            .addAll(transitions)
+        currentTraces.addAll(transitions)
     }
 
     fun register(entity: Entity, element: Element): Element {
@@ -53,7 +50,7 @@ internal class ElementAssociationRegistry(
         val candidateElements = entityElements[entity]
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
-                .firstTracedElements(candidateElements) // fixme: naming
+                .findElementPerTrace(candidateElements)
                 .map { tracedElements[it] }
                 .mapNotNull { entityService[it] }
                 .toSet()
@@ -61,11 +58,11 @@ internal class ElementAssociationRegistry(
             else -> emptySet()
         }
 
-        // check if input element is contained in the trails of eligible entities
+        // check if input element is contained in the traces of eligible entities
         val reverse = entityService[entity]
             .map { (elem, e) -> e to tracesOf(elem).traces }
-            .flatMap { (e, trails) -> trails.map { e to it } }
-            .filter { (_, trail) -> tracedElement in trail }
+            .flatMap { (e, traces) -> traces.map { e to it } }
+            .filter { (_, trace) -> tracedElement in trace }
             .map { (e, _) -> e }
             .toSet()
 
@@ -74,16 +71,19 @@ internal class ElementAssociationRegistry(
 
     // FIXME: updaate trace statistics and labels
     fun statistics(): Map<String, Int> = mapOf(
-        "associations.keys"              to traces.size,
-//        "associations.traces"            to traces.flatMap { it.traces }.size,
-        "associations.traces"            to traces.flatMap { it.traces }.flatten().size,
-        "associations.traces.p50"        to traces.flatMap { it.traces }.p(50, ElementTrace::size),
-        "associations.traces.p90"        to traces.flatMap { it.traces }.p(90, ElementTrace::size),
-        "associations.traces.max"        to (traces.maxOfOrNull { it.traces.size } ?: 0),
-        "associations.traces.depth.p50"  to traces.flatMap { it.traces }.p(50) { it.asIterable().count() },
-        "associations.traces.depth.p90"  to traces.flatMap { it.traces }.p(90) { it.asIterable().count() },
-        "associations.traces.depth.max"  to (traces.flatMap { it.traces }.maxOfOrNull { it.asIterable().count() } ?: 0),
-        "associations.flatten"           to traces.flatMap { it.traces }.sumOf(ElementTrace::size),
+        "traced-elements"  to traces.size,
+        "traces"           to traces.sumOf { it.traces.size },
+        "traces.p50"       to traces.map(ElementTraceSet::traces).p(50, List<ElementTrace>::size),
+        "traces.p90"       to traces.map(ElementTraceSet::traces).p(90, List<ElementTrace>::size),
+        "traces.p95"       to traces.map(ElementTraceSet::traces).p(95, List<ElementTrace>::size),
+        "traces.p99"       to traces.map(ElementTraceSet::traces).p(99, List<ElementTrace>::size),
+        "traces.max"       to (traces.maxOfOrNull { it.traces.size } ?: 0),
+        "traces.depth.p50" to traces.flatMap(ElementTraceSet::traces).p(50, ElementTrace::size),
+        "traces.depth.p90" to traces.flatMap(ElementTraceSet::traces).p(90, ElementTrace::size),
+        "traces.depth.p95" to traces.flatMap(ElementTraceSet::traces).p(95, ElementTrace::size),
+        "traces.depth.p99" to traces.flatMap(ElementTraceSet::traces).p(99, ElementTrace::size),
+        "traces.depth.max" to (traces.flatMap(ElementTraceSet::traces).maxOfOrNull(ElementTrace::size) ?: 0),
+        "traces.flatten"   to traces.flatMap(ElementTraceSet::traces).sumOf(ElementTrace::size),
     )
 
     private fun sanitized(element: Element): Element {
