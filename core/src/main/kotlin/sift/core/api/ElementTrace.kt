@@ -5,7 +5,7 @@ import sift.core.element.Element
 internal class ElementTrace private constructor(
     internal val elements: IntArray,
     internal val bloomMask: ULong
-) : Iterable<Int> {
+) {
 
     constructor(visited: Element) : this(intArrayOf(visited.id), visited.id.bloomBit)
 
@@ -18,18 +18,17 @@ internal class ElementTrace private constructor(
         return ElementTrace(ids, bloomMask or element.id.bloomBit)
     }
 
-    override fun iterator(): Iterator<Int> = elements.iterator()
     operator fun contains(other: ElementTrace): Boolean {
-        return (bloomMask and other.bloomMask) == bloomMask
-            && elements.all { it in other.elements }
+        return (bloomMask and other.bloomMask) == other.bloomMask
+            && other.elements.all { it in elements }
     }
 
     operator fun contains(other: Pair<ElementTrace, Element>): Boolean {
         val (trace, element) = other
         val mask = trace.bloomMask or element.id.bloomBit
-        return (bloomMask and mask) == bloomMask
-            && elements.all { it in trace.elements }
-            && element.id in trace.elements
+        return (bloomMask and mask) == mask
+            && trace.elements.all { it in elements }
+            && element.id in elements
     }
 
     operator fun contains(element: Element): Boolean {

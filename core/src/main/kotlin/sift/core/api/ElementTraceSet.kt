@@ -19,7 +19,12 @@ internal class ElementTraceSet {
         _traces += trace
     }
 
-
+    /**
+     * Retrieves the first matching element from each [ElementTrace] contained in this set.
+     *
+     * @param candidates The set of candidate elements to match against.
+     * @return id:s of the first matching element from each `ElementTrace`.
+     */
     fun findElementPerTrace(candidates: ElementSet): List<Int> {
         return _traces
             .mapNotNull { trace -> trace.findElement(candidates) }
@@ -29,31 +34,27 @@ internal class ElementTraceSet {
         return _traces.any { candidateTrace in it }
     }
 
-    operator fun contains(candidateTrace: ElementTrace): Boolean {
-        return _traces.any { candidateTrace in it }
-    }
-
-    fun removeAll(remove: List<ElementTrace>) {
-        _traces.removeAll { trace -> remove.any { it in trace } }
-    }
-
     fun addAll(transitions: List<ElementTrace>) {
         val traces = _traces
+
         for (t in transitions) {
-            var replaced = false
-            for (i in traces.indices) {
-//                if (traces[i] in t) {
-                if (t in traces[i]) {
-                    traces[i] = t
-                    replaced = true
-                    break
+            var i = 0
+            while (i < traces.size) {
+                if (traces[i] in t) {
+                    traces.swap(i, traces.lastIndex)
+                    traces.removeLast()
+                } else {
+                    i++
                 }
             }
-
-            if (!replaced)
-                this += t
         }
-//        removeAll(transitions)
-//        transitions.forEach { this += it }
+
+        transitions.forEach { this += it }
     }
+}
+
+private fun <E> MutableList<E>.swap(a: Int, b: Int) {
+    val oldA = this[a]
+    this[a] = this[b]
+    this[b] = oldA
 }
