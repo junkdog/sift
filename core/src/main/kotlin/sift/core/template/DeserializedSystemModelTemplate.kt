@@ -14,7 +14,7 @@ import sift.core.entity.Entity
 import sift.core.jackson.*
 import sift.core.terminal.Style
 import java.io.File
-import java.time.Duration
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTimedValue
 
@@ -37,7 +37,7 @@ internal class DeserializedSystemModelTemplate(
     override fun theme() = theme
 
     companion object {
-        internal var deserializationTime: kotlin.time.Duration = 0.milliseconds
+        internal var deserializationTime: Duration = 0.milliseconds
     }
 }
 
