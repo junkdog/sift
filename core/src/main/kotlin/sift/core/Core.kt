@@ -54,4 +54,31 @@ fun <T, U> Iterable<T>.product(
     rhs: Iterable<U>
 ): List<Pair<T, U>> = flatMap { l -> rhs.map { r -> l to r } }
 
+fun <T> Iterable<T>.topologicalSort(parentsOf: (T) -> List<T>): List<T> {
+    val edges = associate { it to parentsOf(it) }
+
+    val unvisited = toMutableSet()
+    val visiting = mutableSetOf<T>()
+    val visited = mutableSetOf<T>()
+
+    val sortedNodes = mutableListOf<T>()
+
+    fun visit(node: T) {
+        when {
+            !unvisited.remove(node) -> return
+            !visiting.add(node)     -> error("cycle detected: $node") // return ?
+            else                    -> edges[node]?.forEach { visit(it) }
+        }
+        visiting.remove(node)
+        visited.add(node)
+        sortedNodes += node
+    }
+
+    while (unvisited.isNotEmpty()) {
+        visit(unvisited.iterator().next())
+    }
+
+    return sortedNodes
+}
+
 internal class SynthesisTemplate

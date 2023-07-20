@@ -13,6 +13,10 @@
     <packaging>jar</packaging>
     <name>sift template - jpa</name>
 
+    <properties>
+        <spring-boot.version>3.1.2</spring-boot.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.onedaybeard.sift</groupId>
@@ -30,6 +34,51 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>${spring-boot.version}</version>
+            <!-- manually unpacking required classes during inject-additional-classes execution -->
+<!--            <scope>provided</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>${spring-boot.version}</version>
+            <!-- manually unpacking required classes during inject-additional-classes execution -->
+<!--            <scope>provided</scope>-->
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>inject-additional-classes</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.springframework.data</groupId>
+                                    <artifactId>spring-data-commons</artifactId>
+                                    <version>${spring-boot.version}</version>
+                                    <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                    <includes>org/springframework/data/repository/CrudRepositoryExtensionsKt.class</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

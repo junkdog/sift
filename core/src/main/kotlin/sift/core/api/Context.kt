@@ -2,7 +2,6 @@ package sift.core.api
 
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.inverse
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
@@ -18,6 +17,7 @@ import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
 import sift.core.template.DeserializedSystemModelTemplate
 import sift.core.terminal.Gruvbox
+import sift.core.topologicalSort
 import sift.core.tree.Tree
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -44,52 +44,86 @@ internal data class Context(
     private val methodInvocationsCache: MutableMap<MethodNode, Iterable<MethodNode>> = ConcurrentHashMap()
     private val methodFieldAccessCache: MutableMap<MethodNode, Iterable<FieldNode>> = mutableMapOf()
 
+    private val injectedClasses: MutableList<ClassNode> = mutableListOf()
+
     val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
         .associateWith(classByType::parentsTypesOf)
         .toMutableMap()
-    val implementedInterfaces: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
-        .associateWith { cn ->
+    var implementedInterfaces: Map<ClassNode, List<TypeClassNode>> = allClasses
+        .associateWith { cn -> interfacesOf(cn) }
 
-            val found = mutableSetOf<TypeClassNode>()
-            fun recurse(node: ClassNode) {
-                val interfaces = node.signature?.implements?.map(TypeSignature::toType)
-                    ?: node.interfaces
+    private fun interfacesOf(cn: ClassNode): List<TypeClassNode> {
+        val found = mutableSetOf<TypeClassNode>()
+        fun recurse(node: ClassNode) {
+            val interfaces = node.signature?.implements?.map(TypeSignature::toType)
+                ?: node.interfaces
 
-                interfaces
-                    .map { TypeClassNode(it, classByType[it]) }
-                    .filter { it !in found }
-                    .onEach { found += it }
-                    .mapNotNull(TypeClassNode::cn)
-                    .forEach(::recurse)
-
-                parents[node]?.let { parents ->
-                    parents
-                        .onEach(found::add)
-                        .mapNotNull(TypeClassNode::cn)
-                        .onEach(::recurse)
-                }
-            }
-            recurse(cn)
-
-            found.toList()
+            interfaces
+                .map { TypeClassNode(it, classByType[it.rawType]) }
+                .filter { it !in found }
+                .onEach { found += it }
+                .mapNotNull(TypeClassNode::cn)
+                .forEach(::recurse)
         }
-        .toMutableMap()
 
+        fun recurseParents(node: ClassNode) {
+            parents[node]?.let { parents ->
+                parents
+                    .onEach(found::add)
+                    .mapNotNull(TypeClassNode::cn)
+                    .onEach(::recurseParents)
+            }
+        }
+
+        recurse(cn)
+        recurseParents(cn)
+
+        return found.toList()
+    }
 
     val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0, 0.milliseconds))
     private var measurementStack: MutableList<Tree<Measurement>> = mutableListOf(measurements)
     private var pushScopes: Int = 0
 
+    fun inject(cn: ClassNode) {
+        injectedClasses += cn
+    }
+
+    // NOP unless popping a synthesis scope with inject(cls) calls
+    fun flushInjectedClasses() {
+        if (injectedClasses.isEmpty())
+            return
+
+        val typeToCn = injectedClasses.associateBy(ClassNode::type)
+
+        // classes are injected in an order that respects their dependencies
+        injectedClasses.topologicalSort { cn ->
+            listOfNotNull(
+                cn.superType?.let { typeToCn[it] },
+                *cn.interfaces.mapNotNull { typeToCn[it] }.toTypedArray()
+            )
+        }.forEach(::registerClass)
+
+        methodInvocationsCache.clear()
+        injectedClasses.clear()
+
+        implementedInterfaces = allClasses.associateWith { cn -> interfacesOf(cn) }
+    }
+
     fun synthesize(type: Type): ClassNode {
         return classByType[type] ?: (classNode<SynthesisTemplate>()
             .also { cn -> cn.name = type.internalName }
             .let(ClassNode::from)
-            .apply {
-                allClasses += this
-                implementedInterfaces[this] = listOf()
-                parents[this] = listOf()
-                classByType[type] = this
-        })
+            .also { cn -> registerClass(cn) }
+        )
+    }
+
+    private fun registerClass(
+        cn: ClassNode,
+    ) {
+        allClasses += cn
+        classByType[cn.type] = cn
+        parents[cn] = classByType.parentsTypesOf(cn)
     }
 
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
@@ -137,15 +171,8 @@ internal data class Context(
     }
 
     private fun flushTransitions() {
-        when (bufferedTransitions.size) {
-            0       -> return
-            in 1..4 -> bufferedTransitions.forEach { (input, output) -> elementAssociations.registerTransition(input, output) }
-            else    -> runBlocking(Dispatchers.Default) {
-                bufferedTransitions.asFlow()
-                    .map { (input, output) -> elementAssociations.registerTransition(input, output) }
-                    .collect()
-            }
-        }
+        bufferedTransitions
+            .forEach { (input, output) -> elementAssociations.registerTransition(input, output) }
 
         bufferedTransitions.clear()
     }

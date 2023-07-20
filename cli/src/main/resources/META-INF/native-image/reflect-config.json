@@ -417,11 +417,11 @@
 },
 {
   "name":"kotlinx.coroutines.EventLoopImplBase",
-  "fields":[{"name":"_delayed"}, {"name":"_queue"}]
+  "fields":[{"name":"_delayed"}, {"name":"_isCompleted"}, {"name":"_queue"}]
 },
 {
   "name":"kotlinx.coroutines.JobSupport",
-  "fields":[{"name":"_state"}]
+  "fields":[{"name":"_parentHandle"}, {"name":"_state"}]
 },
 {
   "name":"kotlinx.coroutines.channels.AbstractSendChannel",
@@ -434,6 +434,10 @@
 {
   "name":"kotlinx.coroutines.internal.DispatchedContinuation",
   "fields":[{"name":"_reusableCancellableContinuation"}]
+},
+{
+  "name":"kotlinx.coroutines.internal.LimitedDispatcher",
+  "fields":[{"name":"runningWorkers"}]
 },
 {
   "name":"kotlinx.coroutines.internal.LockFreeLinkedListNode",
@@ -464,6 +468,9 @@
 },
 {
   "name":"org.objectweb.asm.tree.MethodNode"
+},
+{
+  "name":"org.springframework.data.repository.CrudRepositoryExtensionsKt"
 },
 {
   "name":"sift.core.api.Action",
@@ -724,6 +731,9 @@
   "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }]
 },
 {
+  "name":"sift.core.api.Action$InjectClass"
+},
+{
   "name":"sift.core.api.Action$IntoAnnotations",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -849,7 +859,7 @@
 },
 {
   "name":"sift.core.api.Action$ReadAnnotation$Companion",
-  "methods":[{"name":"concat","parameterTypes":["java.lang.Object"] }, {"name":"equals","parameterTypes":["java.lang.Object"] }, {"name":"hashCode","parameterTypes":[] }, {"name":"toString","parameterTypes":[] }]
+  "methods":[{"name":"concat","parameterTypes":["java.lang.Object"] }, {"name":"equals","parameterTypes":["java.lang.Object"] }, {"name":"execute$readAnnotation","parameterTypes":["sift.core.api.Action$ReadAnnotation","sift.core.api.Context","sift.core.element.Element"] }, {"name":"hashCode","parameterTypes":[] }, {"name":"toString","parameterTypes":[] }]
 },
 {
   "name":"sift.core.api.Action$ReadName",

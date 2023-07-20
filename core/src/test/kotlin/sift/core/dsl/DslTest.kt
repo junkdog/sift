@@ -12,13 +12,14 @@ import org.reflections.Reflections
 import sift.core.*
 import sift.core.api.*
 import sift.core.api.AccessFlags.*
+import sift.core.api.testdata.*
 import sift.core.api.testdata.set1.*
 import sift.core.api.testdata.set2.*
 import sift.core.api.testdata.set3.InlineMarker
 import sift.core.asm.classNode
 import sift.core.dsl.MethodSelection.*
-import sift.core.dsl.ParameterSelection.onlyReceiver
 import sift.core.dsl.ParameterSelection.excludingReceiver
+import sift.core.dsl.ParameterSelection.onlyReceiver
 import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
@@ -31,7 +32,7 @@ import sift.core.terminal.TextTransformer.Companion.uppercase
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.core.tree.debugTree
 import java.io.InputStream
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertTrue
 
 class DslTest {
@@ -222,7 +223,7 @@ class DslTest {
             property(payload, "field-owner", readName())
         }.expecting(listOf(classNode(FieldClass::class)), payload, """
             ── payload
-               └─ field-owner: FieldClass, signature: List<PayLoad>
+               └─ field-owner: FieldClass, signature: List<PayLoadAbc>
             """
         )
     }
@@ -1367,6 +1368,49 @@ class DslTest {
     }
 
     @Test
+    fun `enumerating inherited methods of interfaces`() {
+        val cns = listOf(FooIface::class, FooIfaceExt::class)
+            .map(::classNode)
+
+        val e = Entity.Type("e")
+
+        template {
+            classes {
+                implements("sift.core.api.testdata.FooIface".type)
+                methods(inherited) {
+                    entity(e, label("\${name}"), property("name", readName()))
+                }
+            }
+        }.expecting(cns, e, """
+            ── e
+               ├─ findById
+               ├─ save
+               ├─ saveAll
+               └─ yo
+            """
+        )
+    }
+
+    @Test
+    fun `inject class required for analysis`() {
+
+        val e = Entity.Type("e")
+
+        template {
+            synthesize {
+                inject(SomeController::class)
+            }
+            classes {
+                entity(e)
+            }
+        }.expecting(listOf(), e, """
+            ── e
+               └─ SomeController
+            """
+        )
+    }
+
+    @Test
     fun `synthesize missing classes for entity tagging`() {
 
         val cns = listOf(
@@ -1904,7 +1948,8 @@ class DslTest {
         val templateB = template {
             methodsOf(controller) {
                 annotatedBy<Endpoint>()
-                entity(endpoint, label("\${http-method} \${path}"),
+                entity(
+                    endpoint, label("\${http-method} \${path}"),
                     property("http-method", readAnnotation(Endpoint::method)),
                     property("path", readAnnotation(Endpoint::path)),
                 )
@@ -2074,9 +2119,13 @@ class DslTest {
 
             classes {
                 fields {
-                    entity(f, label("(f) \${name}: \${type}",
+                    entity(
+                        f,
+                        label(
+                            "(f) \${name}: \${type}",
                             // shorten signature types to simpleName-like
-                            replace(Regex("<([a-z.]+\\.)(\\w+)>"), "<\$2>")),
+                            replace(Regex("<([a-z.]+\\.)(\\w+)>"), "<\$2>")
+                        ),
                         property("name", readName()),
                     )
 
@@ -2369,7 +2418,6 @@ class DslTest {
     }
 }
 
-
 fun EntityService.toTree(roots: List<Entity.Type>): String {
     return SystemModel(this).toTree(roots).toString()
 }
@@ -2377,12 +2425,6 @@ fun EntityService.toTree(roots: List<Entity.Type>): String {
 fun resource(path: String): InputStream {
     return DslTest::class.java.getResourceAsStream(path)!!
 }
-
-private class FieldClass {
-    val payloads: List<PayLoad> = listOf()
-}
-
-private class PayLoad
 
 internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline f: () -> Unit) {
     val t = assertThrows<TemplateProcessingException> {
@@ -2392,19 +2434,3 @@ internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline
     assertThat(t.cause).isInstanceOf(T::class.java)
 }
 
-
-
-@JvmInline
-value class Hello(val s: String)
-
-class KotlinClass1(
-    val greetings: List<Hello>
-) {
-    fun Any.hi(greeting: Hello) = Unit
-}
-
-class KotlinClass2 : InterfaceWithDefaultMethod
-
-interface InterfaceWithDefaultMethod {
-    fun foo(): Unit = Unit
-}

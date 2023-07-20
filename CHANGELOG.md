@@ -5,10 +5,17 @@
 - A bloom-like filter for expediently discarding element traces during lookups.
 - Discarding traces which are subsets of other traces is now more efficient.
 
-
 ### New/Tweaks
+- Dsl.Synthesis: `inject(ByteArray|KClass|Class)` embeds the provided class into the template and adds it
+  to the set of input classes. This method is primarily used to introduce new classes to the system model
+  that are not originally part of the input classes. These could be shared code utility classes or any
+   other classes that augment the functionality or structural understanding of the system.
 - `--statistics` has been updated with template deserialization time amd additional data on element traces.
 
+### Fixes
+- DSL: `methods {}` now iterates methods for interfaces, even when there's no implementation.
+- Fix parsing the signature involving formal type parameters.
+- Resolving inherited methods from interfaces failed to traverse the hierarchy beyond the first interface.
 
 ## sift-0.14.0 2023-07-07
 

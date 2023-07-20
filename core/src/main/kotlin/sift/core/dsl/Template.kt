@@ -11,8 +11,8 @@ class Template internal constructor(
     /**
      * Stub missing classes and register them with entities.
      */
-    fun synthesize(f: Synthesize.() -> Unit) {
-        action += Synthesize().also(f).action
+    fun synthesize(label: String = "", f: Synthesize.() -> Unit) {
+        action += Action.Fork(label.takeIf(String::isNotEmpty), Synthesize().also(f).action)
     }
 
     /**

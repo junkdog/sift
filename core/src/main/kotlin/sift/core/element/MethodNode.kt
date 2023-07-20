@@ -46,7 +46,7 @@ class MethodNode private constructor(
     val receiver: Type?
         get() = kfn?.receiver
 
-    private val signature: MethodSignatureNode? =
+    internal val signature: MethodSignatureNode? =
         mn.signature(cn.signature?.formalParameters ?: listOf())
 
     val formalTypeParameters: List<FormalTypeParameter>

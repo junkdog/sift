@@ -29,4 +29,8 @@ internal class FormalTypeParameterVisitor(
     override fun visitTypeArgument() {
         sv?.visitTypeArgument()
     }
+
+    override fun visitTypeVariable(name: String) {
+        sv?.visitTypeVariable(name)
+    }
 }

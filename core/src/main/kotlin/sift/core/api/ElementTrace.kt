@@ -18,17 +18,17 @@ internal class ElementTrace private constructor(
         return ElementTrace(ids, bloomMask or element.id.bloomBit)
     }
 
-    operator fun contains(other: ElementTrace): Boolean {
-        return (bloomMask and other.bloomMask) == other.bloomMask
-            && other.elements.all { it in elements }
-    }
-
     operator fun contains(other: Pair<ElementTrace, Element>): Boolean {
         val (trace, element) = other
         val mask = trace.bloomMask or element.id.bloomBit
         return (bloomMask and mask) == mask
             && trace.elements.all { it in elements }
             && element.id in elements
+    }
+
+    operator fun contains(other: ElementTrace): Boolean {
+        return (bloomMask and other.bloomMask) == other.bloomMask
+            && other.elements.all { it in elements }
     }
 
     operator fun contains(element: Element): Boolean {

@@ -15,6 +15,7 @@ import org.objectweb.asm.tree.MethodInsnNode
 import sift.core.Throw
 import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
+import sift.core.api.Action.Class.IntoMethods.Companion.isSameMethod
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.dsl.*
@@ -100,6 +101,7 @@ import sift.core.terminal.StringEditor
     JsonSubTypes.Type(Action.ReadName::class, name = "read-name"),
     JsonSubTypes.Type(Action.Fork::class, name = "fork"),
     JsonSubTypes.Type(Action.ForkOnEntityExistence::class, name = "fork-conditional"),
+    JsonSubTypes.Type(Action.InjectClass::class, name = "inject-class"),
     JsonSubTypes.Type(Action.RegisterEntity::class, name = "entity"),
     JsonSubTypes.Type(Action.RegisterSynthesizedEntity::class, name = "synthesize-entity"),
     JsonSubTypes.Type(Action.RegisterChildren::class, name = "children"),
@@ -477,14 +479,25 @@ sealed class Action<IN, OUT> {
                 val inheriting = selection.isInheriting
 
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
-                    return ctx.parents[input]!!
+
+                    val implemented = ctx.parents[input]!!
                         .mapNotNull { (_, cn) ->  cn?.methods }
                         .flatten()
+
+                    val interfaceMethods = ctx.implementedInterfaces[input]
+                        ?.mapNotNull { (_, cn) -> cn?.methods }
+                        ?.flatten()
+                        ?.filter { mn -> implemented.none { mn.isSameMethod(it) } } // remove duplicates
+                        ?: listOf()
+
+                    return implemented + interfaceMethods
                 }
 
                 fun methodsOf(input: ClassNode): IterMethods {
                     val methods = when (inheriting) {
                         true -> input.methods + inheritedMethodsOf(input)
+                            .filter { mn -> input.methods.none { mn.isSameMethod(it) } }
+
                         false -> input.methods
                     }
 
@@ -496,6 +509,14 @@ sealed class Action<IN, OUT> {
                 return when {
                     inheriting -> input.flatMap(::methodsOf).distinct()
                     else       -> input.flatMap(::methodsOf)
+                }
+            }
+
+            companion object {
+                private fun MethodNode.isSameMethod(rhs: MethodNode): Boolean {
+                    return name == rhs.name
+                        && desc == rhs.desc
+                        && signature == rhs.signature
                 }
             }
         }
@@ -1083,6 +1104,7 @@ sealed class Action<IN, OUT> {
         override fun execute(ctx: Context, input: T): T {
             ctx.pushMeasurementScope()
             forked(ctx, input)
+            ctx.flushInjectedClasses() // NOP unless synthesis scope
             ctx.popMeasurementScope()
             return input
         }
@@ -1121,6 +1143,19 @@ sealed class Action<IN, OUT> {
 
             return input
         }
+    }
+
+    internal data class InjectClass(
+        val classBytes: ByteArray
+    ) : Action<Unit, Unit>() {
+        override fun id(): String = "inject-class(${classNode(classBytes).simpleName})"
+
+        override fun execute(ctx: Context, input: Unit) {
+            ctx.inject(ClassNode.from(classNode(classBytes)))
+        }
+
+        override fun equals(other: Any?): Boolean = ((other as? InjectClass)?.classBytes contentEquals classBytes)
+        override fun hashCode(): Int = classBytes.contentHashCode()
     }
 
     internal data class RegisterSynthesizedEntity(
@@ -1295,6 +1330,8 @@ private fun Int.hex(bytes: Int): String = toUInt().toString(16).padStart(bytes *
 internal fun <T> chainFrom(action: Action<T, T>) = Action.Chain(mutableListOf(action))
 
 
+private val AsmClassNode.simpleName: String
+    get() = Type.from(this).simpleName
 
 var debugLog = false
 
