@@ -54,7 +54,7 @@ internal data class Context(
 
     private fun interfacesOf(cn: ClassNode): List<TypeClassNode> {
         val found = mutableSetOf<TypeClassNode>()
-        fun recurse(node: ClassNode) {
+        fun recurseInterfaces(node: ClassNode) {
             val interfaces = node.signature?.implements?.map(TypeSignature::toType)
                 ?: node.interfaces
 
@@ -63,20 +63,21 @@ internal data class Context(
                 .filter { it !in found }
                 .onEach { found += it }
                 .mapNotNull(TypeClassNode::cn)
-                .forEach(::recurse)
+                .forEach(::recurseInterfaces)
         }
 
-        fun recurseParents(node: ClassNode) {
+        fun recurseSuperclasses(node: ClassNode) {
             parents[node]?.let { parents ->
                 parents
                     .onEach(found::add)
                     .mapNotNull(TypeClassNode::cn)
-                    .onEach(::recurseParents)
+                    .onEach(::recurseSuperclasses)
+                    .onEach(::recurseInterfaces)
             }
         }
 
-        recurse(cn)
-        recurseParents(cn)
+        recurseInterfaces(cn)
+        recurseSuperclasses(cn)
 
         return found.toList()
     }

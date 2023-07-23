@@ -28,16 +28,15 @@ import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 
-
-fun printProfile(
+fun generateProfilerView(
     terminal: Terminal,
     trace: Tree<Measurement>
-) {
+) : String {
     // print headers
-    terminal.println((fg + bold)("     exec  ety#    in      out"))
+    val headers = terminal.render((fg + bold)("     exec  ety#    in      out"))
 
     var lastEntityCount = 0
-    terminal.println(trace.toString(
+    val rows = terminal.render(trace.toString(
         format = { measurement ->
             measurement.scopeIn.style()(measurement.action.replace(Label.match, Label.style("\$1")))
         },
@@ -67,6 +66,16 @@ fun printProfile(
             }
         }
     ))
+
+    return "$headers\n$rows\n"
+}
+
+
+fun printProfile(
+    terminal: Terminal,
+    trace: Tree<Measurement>
+) {
+    return generateProfilerView(terminal, trace).let(terminal::println)
 }
 
 private object Label {

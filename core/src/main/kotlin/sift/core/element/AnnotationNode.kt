@@ -5,6 +5,7 @@ import sift.core.asm.type
 import sift.core.combine
 import sift.core.dsl.Type
 
+// TODO: copy annotation nodes when copying method node
 class AnnotationNode private constructor(
     private val an: AsmAnnotationNode,
 ) : Element(), Trait.HasType {

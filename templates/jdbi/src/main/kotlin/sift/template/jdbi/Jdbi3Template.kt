@@ -2,6 +2,9 @@ package sift.template.jdbi
 
 import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import sift.core.dsl.MethodSelection
+import sift.core.dsl.MethodSelection.abstractMethods
+import sift.core.dsl.andThen
 import sift.core.dsl.type
 import sift.core.dsl.template
 import sift.core.entity.Entity
@@ -11,6 +14,7 @@ import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style
+import sift.core.terminal.TextTransformer.Companion.replace
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias E = Jdbi3Template.EntityTypes
@@ -45,13 +49,14 @@ class Jdbi3Template : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
     override fun template() = template {
         classes {
-            methods("resolve JDBI3 SQL queries") {
+            methods("resolve JDBI3 SQL queries", abstractMethods) {
                 annotatedBy(A.sqlQuery)
                 entity(E.sqlQuery, label("\${sql}"),
-                    property("sql", readAnnotation(A.sqlQuery, "value"))
+                    property("sql", readAnnotation(A.sqlQuery, "value")
+                        andThen replace(Regex("\\s+"), " "))
                 )
             }
-            methods("resolve JDBI3 SQL updates") {
+            methods("resolve JDBI3 SQL updates", abstractMethods) {
                 annotatedBy(A.sqlUpdate)
                 entity(E.sqlUpdate, label("\${sql}"),
                     property("sql", readAnnotation(A.sqlUpdate, "value"))

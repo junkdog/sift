@@ -20,6 +20,9 @@ class ClassNode private constructor(
         annotations.forEach { it.parent = this }
     }
 
+    internal val asmClassNode: AsmClassNode
+        get() = cn
+
     internal val signature: ClassSignatureNode? = cn.signature()
 
     internal val isInterface: Boolean
@@ -40,12 +43,15 @@ class ClassNode private constructor(
             ?.findBy(InnerClassNode::name, cn.name)
             ?.innerName
 
-    val fields: List<FieldNode> = cn.fields
+    internal val fields: List<FieldNode> = cn.fields
         .map { fn -> FieldNode.from(this, fn, kotlinClass?.properties?.get(fn.name)) }
 
-    val methods: MutableList<MethodNode> = cn.methods
+    // declared methods
+    internal val methods: MutableList<MethodNode> = cn.methods
         .map { mn -> MethodNode.from(this, mn, kotlinClass?.functions?.get(mn.name + mn.desc)) }
         .toMutableList()
+
+    internal var inheritedMethods: List<MethodNode>? = null
 
     val isEnum: Boolean
         get() = cn.superType?.rawType?.name == "java.lang.Enum"

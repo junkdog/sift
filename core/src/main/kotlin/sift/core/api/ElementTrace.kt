@@ -23,12 +23,14 @@ internal class ElementTrace private constructor(
         val mask = trace.bloomMask or element.id.bloomBit
         return (bloomMask and mask) == mask
             && trace.elements.all { it in elements }
+//            && trace.elements.isSubArrayOf(elements)
             && element.id in elements
     }
 
     operator fun contains(other: ElementTrace): Boolean {
         return (bloomMask and other.bloomMask) == other.bloomMask
             && other.elements.all { it in elements }
+//            && other.elements.isSubArrayOf(elements)
     }
 
     operator fun contains(element: Element): Boolean {
@@ -63,3 +65,19 @@ internal class ElementTrace private constructor(
         get() = elements.size
 }
 
+
+
+fun IntArray.isSubArrayOf(rhs: IntArray): Boolean {
+    var i = 0
+    var j = 0
+
+    while (i < size && j < rhs.size) {
+        if (this[i] == rhs[j]) {
+            i++
+        }
+        j++
+    }
+
+    // If we've found all elements of 'a' in 'b', then i will have advanced to a.size
+    return i == size
+}

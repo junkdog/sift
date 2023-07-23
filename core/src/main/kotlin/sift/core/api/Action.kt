@@ -15,7 +15,6 @@ import org.objectweb.asm.tree.MethodInsnNode
 import sift.core.Throw
 import sift.core.UnexpectedElementException
 import sift.core.UniqueElementPerEntityViolation
-import sift.core.api.Action.Class.IntoMethods.Companion.isSameMethod
 import sift.core.asm.*
 import sift.core.asm.signature.ArgType
 import sift.core.dsl.*
@@ -480,23 +479,31 @@ sealed class Action<IN, OUT> {
 
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
 
-                    val implemented = ctx.parents[input]!!
-                        .mapNotNull { (_, cn) ->  cn?.methods }
-                        .flatten()
+                    // resolve inherited methods if they're not already resolved
+                    var inheritedMethods = input.inheritedMethods
+                    if (inheritedMethods == null) {
+                        val inherited =  ctx.parents[input]!!
+                            .mapNotNull { (_, cn) -> cn?.methods }
+                            .flatten()
+                            .map { mn -> mn.copyWithOwner(input) }
 
-                    val interfaceMethods = ctx.implementedInterfaces[input]
-                        ?.mapNotNull { (_, cn) -> cn?.methods }
-                        ?.flatten()
-                        ?.filter { mn -> implemented.none { mn.isSameMethod(it) } } // remove duplicates
-                        ?: listOf()
+                        val abstractMethods = ctx.implementedInterfaces[input]!!
+                            .mapNotNull { (_, cn) -> cn?.methods }
+                            .flatten()
+                            .map { mn -> mn.copyWithOwner(input) }
 
-                    return implemented + interfaceMethods
+                        inheritedMethods = (inherited + abstractMethods)
+                            .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
+                            .also { input.inheritedMethods = it }
+                    }
+
+                    return inheritedMethods
                 }
 
                 fun methodsOf(input: ClassNode): IterMethods {
                     val methods = when (inheriting) {
-                        true -> input.methods + inheritedMethodsOf(input)
-                            .filter { mn -> input.methods.none { mn.isSameMethod(it) } }
+                        true -> (input.methods + inheritedMethodsOf(input))
+                            .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
 
                         false -> input.methods
                     }

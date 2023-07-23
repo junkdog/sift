@@ -1,5 +1,3 @@
-@file:Suppress("UNUSED_PARAMETER")
-
 package sift.core.dsl
 
 import org.assertj.core.api.Assertions.assertThat
@@ -1268,6 +1266,67 @@ class DslTest {
     }
 
     @Test
+    fun `inherited methods are distinct from interface declarations and other implementors`() {
+
+
+        abstract class Base : Helloer {
+            fun bye() = Unit
+        }
+
+        abstract class AbstractBase : Base() {
+        }
+
+        class A : AbstractBase(), Helloer {
+            fun anA() = Unit
+            override fun hello() = Unit
+        }
+
+        class B : AbstractBase() {
+            fun anB() = Unit
+            override fun hello() = Unit
+        }
+
+        class C : AbstractBase() {
+            override fun hello() = Unit
+        }
+
+        val cns = listOf(Base::class, AbstractBase::class, A::class, B::class, C::class).map(::classNode)
+
+        val c = Entity.Type("class")
+        val m = Entity.Type("method")
+
+        template {
+            classes {
+                filter(acc_abstract, invert = true)
+                entity(c, label("\${name}"),
+                    property("name", readName() andThen replace(Regex(".+\\.(\\w+)$"), "\$1")))
+                methods(inherited + abstractMethods) {
+                    entity(m, label("\${outer}::\${name}"), property("name", readName()))
+                    c["fns"] = m
+
+                    outerScope("register method owner") {
+                        property(m, "outer", readName() andThen replace(Regex(".+\\.(\\w+)$"), "\$1"))
+                    }
+                }
+            }
+        }.expecting(cns, c, """
+            ── class
+               ├─ A
+               │  ├─ A::anA
+               │  ├─ A::bye
+               │  └─ A::hello
+               ├─ B
+               │  ├─ B::anB
+               │  ├─ B::bye
+               │  └─ B::hello
+               └─ C
+                  ├─ C::bye
+                  └─ C::hello
+            """
+        )
+    }
+
+    @Test
     fun `handle kotlin functions with noinline and crossinline parameters`() {
         val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set3")
             .getTypesAnnotatedWith(Metadata::class.java)
@@ -1377,7 +1436,7 @@ class DslTest {
         template {
             classes {
                 implements("sift.core.api.testdata.FooIface".type)
-                methods(inherited) {
+                methods(inherited + abstractMethods) {
                     entity(e, label("\${name}"), property("name", readName()))
                 }
             }
@@ -2158,7 +2217,7 @@ class DslTest {
             val method = Entity.Type("method")
 
             classes {
-                methods {
+                methods(abstractMethods) {
                     filter("<clinit>", invert = true)
                     filter("entity", invert = true)
                     entity(method, label("\${name}(\${params:})"),
@@ -2434,3 +2493,6 @@ internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline
     assertThat(t.cause).isInstanceOf(T::class.java)
 }
 
+interface Helloer {
+    fun hello()
+}

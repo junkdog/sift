@@ -1,9 +1,11 @@
 package sift.core.element
 
+import org.objectweb.asm.commons.SimpleRemapper
 import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.asSequence
+import sift.core.asm.copy
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.signature
@@ -29,14 +31,19 @@ class MethodNode private constructor(
     internal val isKotlin: Boolean
         get() = kfn != null
 
+    internal val isAbstract: Boolean
+        get() = mn.instructions.size() == 0
+
     internal val owner: ClassNode
         get() = cn
 
     val name: String
         get() = kfn?.name ?: mn.name
 
-    val desc: String
+    internal val desc: String
         get() = mn.desc
+    internal val rawSignature: String
+        get() = mn.signature ?: ""
 
     /** returns true if this function is a kotlin extension function */
     val isExtension: Boolean
@@ -76,6 +83,12 @@ class MethodNode private constructor(
     }
 
     override fun hashCode() = hash
+
+    internal fun copyWithOwner(cn: ClassNode): MethodNode {
+        val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
+        return MethodNode(cn, mn.copy(), anno, kfn)
+            .also { mn -> mn.id = -1 }
+    }
 
     companion object {
         internal fun from(

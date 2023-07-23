@@ -164,10 +164,7 @@ object SiftCli : CliktCommand(
             }
             statistics && template.template != null -> {
                 val sm = systemModel()
-                val format: (Any) -> String = numberFormatter()
-
-                sm.statistics().entries
-                    .joinToString("\n") { (k, v) -> "%-40s %8s".format(k, format(v)) }
+                sm.statistics().formatted
                     .let(terminal::println)
             }
             template.template == null -> {
@@ -359,11 +356,6 @@ object SiftCli : CliktCommand(
     }
 
     fun backtrackStyling(tree: Tree<EntityNode>, theme: Map<Entity.Type, Style>) {
-        // avoid styling sift template as it is a special case relating to not
-        // yet having a good way to deal with elements inherited by multiple classes
-        if (template.template is SiftSelfTemplate)
-            return
-
         fun e(node: Tree<EntityNode>?): EntityNode.Entity? {
             return when (val v = node?.value) {
                 is EntityNode.Entity -> v
@@ -570,6 +562,12 @@ fun templates(): Map<String, () -> SystemModelTemplate> {
 
     return (fromSpi + fromUserLocal).toSortedMap()
 }
+
+val Map<String, Int>.formatted: String
+    get() {
+        val format: (Any) -> String = numberFormatter()
+        return entries.joinToString("\n") { (k, v) -> "%-40s %8s".format(k, format(v)) }
+    }
 
 val defaultStyle = Style.Plain(fg)
 

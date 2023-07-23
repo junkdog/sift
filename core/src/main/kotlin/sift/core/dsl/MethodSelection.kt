@@ -45,6 +45,11 @@ enum class MethodSelection : MethodSelectionFilter {
             return mn.normalMethod && (!mn.isKotlin && mn.owner.isKotlin)
                 && (mn.name.startsWith("get") || mn.name.startsWith("set"))
         }
+    },
+    abstractMethods {
+        override fun invoke(mn: MethodNode): Boolean {
+            return mn.isAbstract && mn.normalMethod
+        }
     };
 }
 
@@ -53,10 +58,10 @@ internal class MethodSelectionSet(
 ) : MethodSelectionFilter {
 
     val disallow: List<MethodSelection> by lazy {
-        if (declared in allow || inherited in allow)
-            defaultDisalow - allow
+        if (declared in allow || inherited in allow || abstractMethods in allow)
+            defaultDisallow - allow
         else
-            defaultDisalow + declared - allow
+            defaultDisallow + declared - allow
     }
 
     override fun invoke(mn: MethodNode): Boolean {
@@ -71,7 +76,7 @@ operator fun MethodSelectionFilter.plus(rhs: MethodSelection): MethodSelectionFi
     is MethodSelection -> MethodSelectionSet(setOf(this, rhs))
 }
 
-private val defaultDisalow = listOf(constructors, synthetic,  accessors)
+private val defaultDisallow = listOf(constructors, synthetic,  accessors, abstractMethods)
 
 internal val MethodSelectionFilter.isInheriting: Boolean
     get() = this === inherited

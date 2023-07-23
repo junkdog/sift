@@ -4,7 +4,7 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import sift.core.api.Action
 import sift.core.api.SiftTemplateDsl
 import sift.core.dsl.*
-import sift.core.dsl.MethodSelection.inherited
+import sift.core.dsl.MethodSelection.*
 import sift.core.dsl.ParameterSelection.excludingReceiver
 import sift.core.dsl.Visibility.Public
 import sift.core.entity.Entity
@@ -66,7 +66,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
                 scope("scopes from annotated classes") {
                     annotatedBy<SiftTemplateDsl>()
                     entity(E.scope, label("\${name}"),
-                        property("name", readName() andThen(replace("Dsl.", ""))))
+                        property("name", readName() andThen replace("Dsl.", "")))
                 }
 
                 scope("scopes from children of Core<Element>") {
@@ -77,13 +77,19 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
 
             classesOf("register functions", E.scope) { scope ->
-                methods(inherited) {
+                // abstractMethods due to a known limitation in resolving implementations of
+                // delegated properties (e.g. sift.core.dsl.EntityRegistrarImpl)
+                methods(inherited + abstractMethods) {
                     filter(Public)
 
                     // dsl functions per scope
                     entity(E.dsl, label("\${icon:}\${name}(\${params:})"),
                         property("name", readName()),
                     )
+
+                    outerScope("register method owner") {
+                        property(E.dsl, "outer", readName())
+                    }
 
                     // mark functions used for updating entity properties;
                     // property updating functions output Action over ValueNode:s
