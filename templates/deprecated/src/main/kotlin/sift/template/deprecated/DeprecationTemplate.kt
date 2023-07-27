@@ -12,6 +12,8 @@ import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.template.SystemModelTemplate
 import sift.core.terminal.Style
+import sift.core.tree.add
+import sift.core.tree.addEntity
 import sift.template.spi.SystemModelTemplateServiceProvider
 
 typealias JavaDeprecated = java.lang.Deprecated
@@ -86,12 +88,12 @@ class DeprecationTemplate : SystemModelTemplate, SystemModelTemplateServiceProvi
     ): Tree<EntityNode> {
         return tree("deprecations") {
             if (klazz in sm)
-                add(klazz.id) { sm[klazz].forEach(::add) }
+                add(klazz.id) { sm[klazz].forEach(::addEntity) }
             if (referencing in sm)
                 add(referencing.id) {
                     sm[referencing].forEach { e ->
-                        add(e) {
-                            e.children("deprecated").forEach(::add)
+                        addEntity(e) {
+                            e.children("deprecated").forEach(::addEntity)
                         }
                     }
                 }

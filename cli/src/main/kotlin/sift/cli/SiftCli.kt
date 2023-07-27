@@ -20,27 +20,28 @@ import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
 import sift.core.template.SystemModelTemplate
 import sift.core.template.deserialize
-import sift.core.terminal.ExceptionHandler
+import sift.core.terminal.*
+import sift.core.terminal.Gruvbox.aqua1
 import sift.core.terminal.Gruvbox.aqua2
+import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.dark2
+import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
 import sift.core.terminal.Gruvbox.orange1
+import sift.core.terminal.Gruvbox.orange2
+import sift.core.terminal.Gruvbox.purple2
 import sift.core.terminal.Gruvbox.red2
-import sift.core.terminal.Style
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
-import sift.core.terminal.printProfile
-import sift.core.terminal.stripEmoji
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
 import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
 import sift.template.*
-import sift.template.sift.SiftSelfTemplate
 import sift.template.spi.SystemModelTemplateServiceProvider
 import java.io.File
 import java.net.URI
@@ -116,6 +117,20 @@ object SiftCli : CliktCommand(
         help = "Print log/logCount statements from the executed template.")
     .flag()
 
+    // todo: --column element-id
+    val debugElementId: Boolean by option("--debug-element-id",
+        help = "Print the elementId for each entity in the tree. Use the element id together with --debug-element-traces"
+    ).flag()
+
+    val debugInverseTrace: Boolean by option("--debug-inverse-trace",
+        help = "Print the inverse element trace for each entity in the tree. Use together with --debug-element-traces"
+    ).flag()
+
+    val debugElementTraces: List<Int> by option("--debug-element-trace",
+        help = "Print all element traces leading to the specified element ids",
+        metavar = "ELEMENT_ID"
+    ).int().multiple()
+
     val mavenRepositories: List<URI> by option("-m", "--maven-repository",
             help = "Additional maven repositories to use for downloading artifacts. Maven central " +
                    "(https://repo1.maven.org/maven2/) and local user repositories are always included.")
@@ -154,7 +169,7 @@ object SiftCli : CliktCommand(
             template.listEntityTypes && template.template != null -> {
                 when {
                     template.classNodes != null ->
-                        buildTree(tree.treeRoot).let { (pr, _) -> terminal.println(toString(template.template!!, pr)) }
+                        buildTree(tree.treeRoot).let { (sm, _) -> terminal.println(toString(template.template!!, sm)) }
 
                     serialization.load != null ->
                         terminal.println(toString(template.template!!, loadSystemModel(serialization.load!!)))
@@ -214,6 +229,33 @@ object SiftCli : CliktCommand(
 
                 terminal.printTree(tree)
             }
+            debugElementTraces.isNotEmpty() -> {
+                val tree = buildElementTraceTree(debugElementTraces.first())
+                val formattedTree = tree.toString(
+                    format = { node ->
+                         when (node.type) {
+                             "ClassNode"      -> aqua2
+                             "MethodNode"     -> green2
+                             "FieldNode"      -> blue2
+                             "ParameterNode"  -> purple2
+                             "SignatureNode"  -> orange2
+                             "AnnotationNode" -> aqua1 + bold
+                             else -> error("Unknown type: ${node.type}")
+                         }(node.label)
+                    },
+                    prefix = { node ->
+                        listOf(
+                            dark2(node.type.replace("Node", "").lowercase().padEnd(10)),
+                            aqua1((node.entityType?.toString() ?: "").padEnd(25)),
+                            dark3(node.elementId.toString().padStart(5)),
+                        ).joinToString("")
+                    })
+
+                when {
+                    "SynthesisTemplate" in formattedTree -> formattedTree.lines().drop(1).joinToString("\n")
+                    else -> formattedTree
+                }.let(terminal::println)
+            }
             else -> { // render tree from classes under path
                 val (sm, tree) = buildTree(this.tree.treeRoot)
                 serialization.save?.let { out -> saveSystemModel(sm, out) }
@@ -248,7 +290,7 @@ object SiftCli : CliktCommand(
 
         require(old.label == new.label)
         return Tree(DiffNode(Unchanged, new.value)).apply {
-            merge(this, old.children(), new.children())
+            diffMerge(this, old.children(), new.children())
         }
     }
 
@@ -260,7 +302,31 @@ object SiftCli : CliktCommand(
         filterTree(tree)
         backtrackStyling(tree, theme)
 
-        println(tree.toString(entityNodeFormatter()))
+        println(tree.toString(entityNodeFormatter(), Columns::elementId))
+    }
+
+    object Columns {
+        val all = allOf(listOf(
+            Columns::elementId,
+            Columns::elementType,
+            Columns::entityType,
+        ))
+
+        fun allOf(columns: List<(EntityNode) -> String>): (EntityNode) -> String {
+            return { node -> columns.joinToString(separator = " ") { it(node) } }
+        }
+
+        fun elementId(node: EntityNode): String {
+            return dark3((node["element-id"]?.toString() ?: "").padStart(4, ' '))
+        }
+
+        fun entityType(node: EntityNode): String {
+            return aqua1((node["entity-type"]?.toString() ?: "").padEnd(12, ' '))
+        }
+
+        fun elementType(node: EntityNode): String {
+            return dark2((node["element-type"]?.toString() ?: "").padEnd(8, ' '))
+        }
     }
 
     @JvmName("printTreeDiff")
@@ -428,6 +494,16 @@ object SiftCli : CliktCommand(
         return sm to buildTree(sm, roots)
     }
 
+    private fun buildElementTraceTree(elementId: Int): Tree<ElementNode> {
+        val t = this.template.template!!
+
+        val templateProcessor = TemplateProcessor.from(template.classNodes!!, mavenRepositories)
+        templateProcessor
+            .execute(t.template(), template.profile)
+
+        return templateProcessor.traceElementId(elementId, debugInverseTrace)
+    }
+
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {
         return template.template!!.toTree(sm, roots)
     }
@@ -438,10 +514,10 @@ object SiftCli : CliktCommand(
             .joinToString(separator = "\n") { label -> "${fg("-")} $label" }
     }
 
-    fun toString(template: SystemModelTemplate, pr: SystemModel): String {
+    fun toString(template: SystemModelTemplate, sm: SystemModel): String {
         val types = stylizedEntityTypes(template)
         return "${fg("entity types of ")}${(fg + bold)(template.name)}\n" + types
-            .map { (type, label) -> pr[type].size.toString().padStart(3) to label }
+            .map { (type, label) -> sm[type].size.toString().padStart(3) to label }
             .joinToString(separator = "\n") { (count, id) -> "${(fg + bold)(count)} $id" }
     }
 
@@ -452,7 +528,7 @@ object SiftCli : CliktCommand(
                 .entityTypes
                 .sortedBy(Entity.Type::id)
                 .map { Entity(it, it.id) }
-                .forEach(::add)
+                .forEach(::addEntity)
         }.also { stylize(it, template.theme()) }
             .children()
             .map { it as Tree<EntityNode.Entity> }

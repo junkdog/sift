@@ -61,6 +61,23 @@ internal class ElementTrace private constructor(
         return null
     }
 
+    fun findElements(candidates: ElementSet): List<Int> {
+        if (candidates.bloomMask and bloomMask == 0uL)
+            return listOf()
+
+        val found = mutableListOf<Int>()
+
+        val elems = elements
+        for (i in 0..elems.lastIndex) {
+            if (elems[i] in candidates) {
+                found += elems[i]
+//                return elems[i]
+            }
+        }
+
+        return found
+    }
+
     val size: Int
         get() = elements.size
 }

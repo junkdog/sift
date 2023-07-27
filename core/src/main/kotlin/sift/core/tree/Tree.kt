@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import com.github.ajalt.mordant.rendering.TextStyle
+import sift.core.pop
 import sift.core.terminal.Gruvbox
+import sift.core.tree.MergeOrigin.*
 
 @JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)
 @JsonIgnoreProperties("depth", "prev", "next")
@@ -62,6 +64,8 @@ class Tree<T>(val value: T) {
 
     fun walk(): TreeWalker<T> = TreeWalker(this)
 
+    fun copy(): Tree<T> = map { it }
+
     fun <U> map(f: (T) -> U): Tree<U> {
         return Tree(f(value)).also { tree ->
             children().map { it.map(f) }.forEach(tree::add)
@@ -113,3 +117,53 @@ class Tree<T>(val value: T) {
     }
 }
 
+fun <T: Any, S: Comparable<S>> merge(
+    root: T,
+    a: Tree<S>,
+    b: Tree<S>,
+    nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
+    transform: (S, MergeOrigin) -> T
+): Tree<T> = Tree(root).apply {
+    val lhs = if (a.value == root) a.children() else listOf(a)
+    val rhs = if (b.value == root) b.children() else listOf(b)
+    merge(lhs, rhs, nodeEquals, transform)
+}
+
+private fun <T, S: Comparable<S>> Tree<T>.merge(
+    a: List<Tree<S>>,
+    b: List<Tree<S>>,
+    nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
+    transform: (S, MergeOrigin) -> T
+) {
+    val lhs = a.reversed().toMutableList()
+    val rhs = b.reversed().toMutableList()
+
+    fun next(): MergeOp<S>? = when {
+        lhs.isEmpty() && rhs.isEmpty()      -> null
+        lhs.isEmpty()                       -> MergeOp(right, null,      rhs.pop())
+        rhs.isEmpty()                       -> MergeOp(left,  lhs.pop(), null)
+        nodeEquals(lhs.last(), rhs.last())  -> MergeOp(both,  lhs.pop(), rhs.pop())
+        lhs.last().value > rhs.last().value -> MergeOp(right, null,      rhs.pop())
+        else                                -> MergeOp(left,  lhs.pop(), null)
+    }
+
+    generateSequence(::next).forEach { op ->
+        when (op.state) {
+            left  -> add(op.lhs!!.map { transform(it, left) })
+            right -> add(op.rhs!!.map { transform(it, right) })
+            both  -> add(transform(op.lhs!!.value, both))
+                .also { child -> child.merge(op.lhs.children(), op.rhs!!.children(), nodeEquals, transform) }
+        }
+    }
+}
+
+private data class MergeOp<S : Comparable<S>>(
+    val state: MergeOrigin,
+    val lhs: Tree<S>?,
+    val rhs: Tree<S>?,
+)
+
+@Suppress("EnumEntryName")
+enum class MergeOrigin {
+    left, right, both
+}

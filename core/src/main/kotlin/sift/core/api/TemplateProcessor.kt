@@ -1,17 +1,26 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.findBy
-import org.objectweb.asm.tree.ClassNode
+import sift.core.SynthesisTemplate
 import sift.core.TemplateProcessingException
+import sift.core.asm.classNode
 import sift.core.asm.resolveClassNodes
+import sift.core.element.AsmClassNode
+import sift.core.element.ClassNode
+import sift.core.element.Element
+import sift.core.entity.Entity
+import sift.core.entity.EntityService
 import sift.core.tree.Tree
+import sift.core.tree.merge
 import java.net.URI
+import java.util.*
+import kotlin.Comparator
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-class TemplateProcessor(classNodes: Iterable<ClassNode>) {
-    private val context: Context = Context.from(classNodes)
+class TemplateProcessor(classNodes: Iterable<AsmClassNode>) {
+    internal val context: Context = Context.from(classNodes)
 
     fun execute(template: Action<Unit, Unit>, profile: Boolean): SystemModel {
         return process(template, profile).let(::SystemModel)
@@ -44,6 +53,7 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
 
         return context
     }
+
 
     private fun updateMeasurements(
         start: Long,
@@ -95,5 +105,54 @@ class TemplateProcessor(classNodes: Iterable<ClassNode>) {
             return TemplateProcessor(cns)
                 .also { it.context.stats.parseAsmClassNodes = duration }
         }
+    }
+}
+
+fun TemplateProcessor.traceElementId(elementId: Int, inverseTraces: Boolean): Tree<ElementNode> {
+    return tracesOfElementId(elementId)
+        .map { if (inverseTraces) it.reversed().intoTree() else it.intoTree() }
+        .let { trees -> elementTreeOf(trees, context.entityService) }
+}
+
+//private fun elementTreeOf(traces: List<Tree<Element>>, es: EntityService): Tree<ElementNode> {
+//    val cn = classNode(SynthesisTemplate::class) // dummy row, removed later
+//    return traces
+//        .fold(Tree<Element>(ClassNode.from(cn))) { tree, trace -> tree.mergeAdd(trace) }
+//        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id) }
+//}
+
+private fun elementTreeOf(traces: List<Tree<Element>>, es: EntityService): Tree<ElementNode> {
+    val root = ClassNode.from(classNode(SynthesisTemplate::class))
+    return traces
+        .fold(Tree<Element>(root)) { tree, trace -> merge(root, tree, trace, { a, b -> a.value.id == b.value.id }, {elem, _ -> elem }) }
+        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id) }
+}
+
+internal fun <T> List<T>.intoTree(): Tree<T> {
+    // todo: fold
+    val root = Tree(first())
+    var current = root
+
+    drop(1).forEach { element -> current = current.add(element) }
+    return root
+}
+
+private fun TemplateProcessor.tracesOfElementId(elementId: Int): List<List<Element>> {
+    return context.elementAssociations.tracesOf(elementId)
+}
+
+data class ElementNode(
+    val label: String,
+    val type: String,
+    val elementId: Int,
+    val entityType: Entity.Type?,
+    val entityId: UUID?,
+) : Comparator<ElementNode> {
+    override fun toString(): String {
+        return "$elementId: $label <<${type.replace("Node", "")}>>"
+    }
+
+    override fun compare(o1: ElementNode, o2: ElementNode): Int {
+        return o1.elementId.compareTo(o2.elementId)
     }
 }

@@ -10,7 +10,7 @@ internal class ElementTraceRegistry(
     val entityService: EntityService
 ) {
     private val traces: MutableList<ElementTraceSet> = mutableListOf()
-    private val tracedElements: MutableList<Element> = mutableListOf()
+    val tracedElements: MutableList<Element> = mutableListOf()
 
     // entities registered to elements
     private val entityElements: MutableMap<Entity.Type, ElementSet> = mutableMapOf()
@@ -18,6 +18,11 @@ internal class ElementTraceRegistry(
     fun allTraces(): List<List<Element>> = traces
         .flatMap(ElementTraceSet::traces)
         .map { trace -> trace.elements.map { id -> tracedElements[id] } }
+
+    fun tracesOf(elementId: Int): List<List<Element>> {
+        return traces[elementId].traces
+            .map { trace -> trace.elements.map { id -> tracedElements[id] } }
+    }
 
     @Suppress("NAME_SHADOWING")
     fun registerTransition(from: Element, to: Element) {

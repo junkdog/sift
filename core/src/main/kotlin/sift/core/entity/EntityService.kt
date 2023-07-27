@@ -18,6 +18,9 @@ class EntityService {
                 entityToElement[entity] = element
                 elementToEntity[element] = entity
                 entitiesByType.getOrPut(entity.type, ::mutableMapOf)[element] = entity
+
+                entity["element-id"] = element.id
+                entity["element-type"] = element::class.simpleName!!
             }
             existing.type == entity.type -> {
                 existing.label = entity.label

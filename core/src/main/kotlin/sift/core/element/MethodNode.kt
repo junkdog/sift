@@ -74,12 +74,15 @@ class MethodNode private constructor(
 
     private val hash = hash(cn) * 31 + idHash(mn)
 
-    override fun toString(): String = "$cn::$name"
+    fun toMethodRefString(): String = "$cn::$name"
+    override fun toString(): String = "$cn.$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
 
     override fun equals(other: Any?): Boolean {
-        return mn === (other as? MethodNode)?.mn
+        return other is MethodNode
+            && mn === other.mn
+            && cn == other.cn
     }
 
     override fun hashCode() = hash

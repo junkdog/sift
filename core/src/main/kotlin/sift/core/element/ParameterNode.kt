@@ -42,7 +42,7 @@ class ParameterNode private constructor(
 
     override fun equals(other: Any?): Boolean = this === other
     override fun hashCode(): Int = hash
-    override fun toString(): String = "$mn($name: ${type.simpleName})"
+    override fun toString(): String = "${mn.toMethodRefString()}($name: ${type.simpleName})"
 
     companion object {
         internal fun from(

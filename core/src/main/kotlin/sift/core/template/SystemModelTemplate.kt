@@ -7,6 +7,7 @@ import sift.core.terminal.Style
 import sift.core.tree.EntityNode
 import sift.core.tree.Tree
 import sift.core.tree.TreeDsl.Companion.tree
+import sift.core.tree.addEntity
 import sift.core.tree.buildTree
 
 interface SystemModelTemplate {
@@ -29,7 +30,7 @@ fun SystemModel.toTree(roots: List<Entity.Type>): Tree<EntityNode> {
     return tree(roots.joinToString(" + ")) {
         roots.forEach { root ->
             this@toTree[root].forEach { e ->
-                add(e) {
+                addEntity(e) {
                     buildTree(e)
                 }
             }

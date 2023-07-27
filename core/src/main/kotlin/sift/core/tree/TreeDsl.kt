@@ -1,34 +1,19 @@
 package sift.core.tree
 
 import sift.core.entity.Entity
+import sift.core.terminal.TextTransformer
+import sift.core.terminal.TextTransformer.Companion.uuidSequence
 
-class TreeDsl(private val hosted: Tree<EntityNode>) {
+class TreeDsl<T>(internal val hosted: Tree<T>, val uuidToId: TextTransformer) {
 
-    fun add(label: String, f: TreeDsl.() -> Unit) {
-        add(EntityNode.Label(label), f)
-    }
-
-    fun add(entity: Entity, f: TreeDsl.() -> Unit = {}) {
-        add(EntityNode.Entity(entity, entity.label), f)
-    }
-
-    fun add(entity: Tree<EntityNode>) {
+    fun add(entity: Tree<T>) {
         hosted.add(entity)
     }
 
-    private fun add(node: EntityNode, f: TreeDsl.() -> Unit) {
+    fun TreeDsl<T>.add(node: T, f: TreeDsl<T>.() -> Unit) {
         hosted.add(node)
-            .let(::TreeDsl)
+            .let { TreeDsl(it, uuidToId) }
             .also(f)
-    }
-
-    fun selfReferential(entity: Entity): Boolean {
-        val refId = listOfNotNull((hosted.parent?.value as? EntityNode.Entity)?.entity, entity)
-        return hosted.parents()
-            .mapNotNull { it.value as? EntityNode.Entity }
-            .map(EntityNode.Entity::entity)
-            .windowed(2)
-            .any { parentPair -> parentPair == refId }
     }
 
     companion object  {
@@ -37,32 +22,50 @@ class TreeDsl(private val hosted: Tree<EntityNode>) {
             label: String = "",
         ): Tree<EntityNode> {
             return tree(label) {
-                entities.forEach(::add)
+                entities.forEach(::addEntity)
             }
         }
 
-        fun tree(label: String, f: TreeDsl.() -> Unit): Tree<EntityNode> {
-            return TreeDsl(Tree(EntityNode.Label(label)))
-                .also(f)
-                .hosted
-        }
-
-        fun tree(delegated: Tree<EntityNode>, f: TreeDsl.() -> Unit): Tree<EntityNode> {
-            return TreeDsl(delegated)
+        fun tree(label: String, f: TreeDsl<EntityNode>.() -> Unit): Tree<EntityNode> {
+            return TreeDsl<EntityNode>(Tree(EntityNode.Label(label)), uuidSequence())
                 .also(f)
                 .hosted
         }
     }
 }
 
-fun TreeDsl.buildTree(
+
+
+fun TreeDsl<EntityNode>.selfReferential(entity: Entity): Boolean {
+    val refId = listOfNotNull((hosted.parent?.value as? EntityNode.Entity)?.entity, entity)
+    return hosted.parents()
+        .mapNotNull { it.value as? EntityNode.Entity }
+        .map(EntityNode.Entity::entity)
+        .windowed(2)
+        .any { parentPair -> parentPair == refId }
+}
+
+fun TreeDsl<EntityNode>.add(label: String, f: TreeDsl<EntityNode>.() -> Unit) {
+    add(EntityNode.Label(label), f)
+}
+
+fun TreeDsl<EntityNode>.addEntity(entity: Entity, f: TreeDsl<EntityNode>.() -> Unit = {}) {
+    EntityNode.Entity(entity, entity.label)
+        .also { e -> e["id"] = uuidToId(entity.id) }
+        .also { e -> e["element-id"] = entity["element-id"]!!.first() }
+        .also { e -> e["element-type"] = entity["element-type"]!!.first() }
+        .also { e -> e["entity-type"] = entity.type }
+        .also { e -> add(e, f) }
+}
+
+fun TreeDsl<EntityNode>.buildTree(
     e: Entity,
     vararg exceptChildren: String = arrayOf("sent-by", "backtrack")
 ) {
     (e.children() - exceptChildren.toSet()).forEach { key ->
         e.children(key).forEach { child: Entity ->
             if (!selfReferential(child)) {
-                add(child) { buildTree(child) }
+                addEntity(child) { buildTree(child) }
             }
         }
     }

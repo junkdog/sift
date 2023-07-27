@@ -13,7 +13,7 @@ data class DiffNode(
     }
 }
 
-fun merge(
+fun diffMerge(
     node: Tree<DiffNode>,
     a: List<Tree<EntityNode>>,
     b: List<Tree<EntityNode>>
@@ -21,13 +21,13 @@ fun merge(
     val old = a.reversed().toMutableList()
     val new = b.reversed().toMutableList()
 
-    fun next(): MergeOp? = when {
+    fun next(): MergeOpLegacy? = when {
         old.isEmpty() && new.isEmpty()      -> null
-        old.isEmpty()                       -> MergeOp(Added,     null,      new.pop())
-        new.isEmpty()                       -> MergeOp(Removed,   old.pop(), null)
-        nodeEquals(old.last(), new.last())  -> MergeOp(Unchanged, old.pop(), new.pop())
-        old.last().value > new.last().value -> MergeOp(Added,     null,      new.pop())
-        else                                -> MergeOp(Removed,   old.pop(), null)
+        old.isEmpty()                       -> MergeOpLegacy(Added,     null,      new.pop())
+        new.isEmpty()                       -> MergeOpLegacy(Removed,   old.pop(), null)
+        nodeEquals(old.last(), new.last())  -> MergeOpLegacy(Unchanged, old.pop(), new.pop())
+        old.last().value > new.last().value -> MergeOpLegacy(Added,     null,      new.pop())
+        else                                -> MergeOpLegacy(Removed,   old.pop(), null)
     }
 
     generateSequence(::next).forEach { op ->
@@ -35,11 +35,10 @@ fun merge(
             Added     -> node.add(op.new!!.map { DiffNode(Added, it) })
             Removed   -> node.add(op.old!!.map { DiffNode(Removed, it) })
             Unchanged -> node.add(DiffNode(Unchanged, op.new!!.value))
-                .also { child -> merge(child, op.old!!.children(), op.new.children()) }
+                .also { child -> diffMerge(child, op.old!!.children(), op.new.children()) }
         }
     }
 }
-
 
 private fun nodeEquals(
     a: Tree<EntityNode>?,
@@ -49,7 +48,7 @@ private fun nodeEquals(
     return a?.label == b?.label && type(a) == type(b)
 }
 
-private data class MergeOp(
+private data class MergeOpLegacy(
     val state: State,
     val old: Tree<EntityNode>?,
     val new: Tree<EntityNode>?,

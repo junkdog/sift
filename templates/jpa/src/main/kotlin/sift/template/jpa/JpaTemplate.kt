@@ -38,6 +38,20 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
     """.trimMargin()
 
     override fun template() = template {
+//        synthesize("embed repository interface classes") {
+            // level 0; base interface
+//            inject(Repository::class)
+//            inject(CrudRepository::class)
+//            inject(ListCrudRepository::class)
+//            inject(PagingAndSortingRepository::class)
+//            inject(ListPagingAndSortingRepository::class)
+//            inject(JpaRepository::class)
+//
+            // registers Repository::findByIdOrNull extension function; thereby enabling
+            // detection of the incorporated call to Repository::findById
+//            inject(Class.forName("org.springframework.data.repository.CrudRepositoryExtensionsKt"))
+//        }
+
         classes {
             scope("register JPA repositories") {
                 implements(T.jpaRepository)
@@ -45,6 +59,10 @@ class JpaTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider {
 
                 // skipping registration of declared jpa methods as additional
                 // methods need to be resolved from invocations on the repo anyway.
+//                methods(inherited) {
+//                    entity(E.jpaMethod)
+//                    E.jpaRepository["methods"] = E.jpaMethod
+//                }
             }
 
             methods("resolve JPA methods from usage") {

@@ -22,7 +22,6 @@ import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
-import sift.core.template.toTree
 import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.lowercase
 import sift.core.terminal.TextTransformer.Companion.replace
@@ -2472,13 +2471,14 @@ class DslTest {
             .statistics()
     }
 
+    @Test
+    fun `construct tree of traces leading to a specific element id`() {
+
+    }
+
     private fun Action<Unit, Unit>.expecting(f: (EntityService) -> Unit) {
         return expecting(allCns, f)
     }
-}
-
-fun EntityService.toTree(roots: List<Entity.Type>): String {
-    return SystemModel(this).toTree(roots).toString()
 }
 
 fun resource(path: String): InputStream {
