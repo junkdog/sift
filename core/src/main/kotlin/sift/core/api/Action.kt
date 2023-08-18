@@ -407,7 +407,8 @@ sealed class Action<IN, OUT> {
                     return (parentInterfaces + ctx.allInterfacesOf(elem, false))
                         .toSet()
                         .mapNotNull(resolveClassNode)
-                        .onEach { output -> ctx.scopeTransition(elem, output) }
+//                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                        .onEach { output -> ctx.scopeTransition(output, elem) }
                 }
 
                 fun interfacesOf(elem: ClassNode): Iterable<ClassNode> {
@@ -420,7 +421,8 @@ sealed class Action<IN, OUT> {
                     return (parentInterfaces + elem.interfaces)
                         .toSet()
                         .mapNotNull(resolveClassNode)
-                        .onEach { output -> ctx.scopeTransition(elem, output) }
+//                        .onEach { output -> ctx.scopeTransition(elem, output) }
+                        .onEach { output -> ctx.scopeTransition(output, elem) }
                 }
 
                 return when {
@@ -448,7 +450,8 @@ sealed class Action<IN, OUT> {
                 fun signatureOf(elem: ClassNode): SignatureNode? {
                     return elem.signature?.extends
                         ?.let(SignatureNode::from)
-                        ?.also { output -> ctx.scopeTransition(elem, output) }
+//                        ?.also { output -> ctx.scopeTransition(elem, output) }
+                        ?.also { output -> ctx.scopeTransition(output, elem) }
                 }
 
                 return input.mapNotNull(::signatureOf)
@@ -558,7 +561,8 @@ sealed class Action<IN, OUT> {
                     val outer = elem.outerType ?: return null
 
                     return ctx.classByType[outer]
-                        ?.also { ctx.scopeTransition(elem, it) }
+                        ?.also { ctx.scopeTransition(it, elem) }
+//                        ?.also { ctx.scopeTransition(elem, it) }
                 }
 
                 return input.mapNotNull(::outerClass)
@@ -613,7 +617,8 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 return input
-                    .map { m -> m.owner.also { ctx.scopeTransition(m, it) } }
+                    .map { m -> m.owner.also { ctx.scopeTransition(it, m) } }
+//                    .map { m -> m.owner.also { ctx.scopeTransition(m, it) } }
                     .toSet()
             }
         }
@@ -814,7 +819,8 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
-                    .map { f -> f.owner.also { ctx.scopeTransition(f, it) } }
+                    .map { f -> f.owner.also { ctx.scopeTransition(it, f) } }
+//                    .map { f -> f.owner.also { ctx.scopeTransition(f, it) } }
                     .toSet()
             }
         }
@@ -900,7 +906,8 @@ sealed class Action<IN, OUT> {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input
-                    .map { p -> p.owner.also { ctx.scopeTransition(p, it) } }
+                    .map { p -> p.owner.also { ctx.scopeTransition(it, p) } }
+//                    .map { p -> p.owner.also { ctx.scopeTransition(p, it) } }
                     .toSet()
             }
         }
