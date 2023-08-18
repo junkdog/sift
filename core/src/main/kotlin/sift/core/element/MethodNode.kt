@@ -75,7 +75,8 @@ class MethodNode private constructor(
     private val hash = hash(cn) * 31 + idHash(mn)
 
     fun toMethodRefString(): String = "$cn::$name"
-    override fun toString(): String = "$cn.$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
+    override fun toString(): String = toMethodRefString()
+//    override fun toString(): String = "$cn.$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
 

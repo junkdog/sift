@@ -20,7 +20,16 @@ internal class ElementTraceRegistry(
         .map { trace -> trace.elements.map { id -> tracedElements[id] } }
 
     fun tracesOf(elementId: Int): List<List<Element>> {
-        return traces[elementId].traces
+        return exhaustingTracesOf(elementId)
+//        return traces[elementId].traces
+//            .map { trace -> trace.elements.map { id -> tracedElements[id] } }
+    }
+
+    fun exhaustingTracesOf(elementId: Int): List<List<Element>> {
+        val elem =  tracedElements[elementId]
+        return traces
+            .flatMap { it.traces }
+            .filter { elem in it }
             .map { trace -> trace.elements.map { id -> tracedElements[id] } }
     }
 
@@ -55,7 +64,8 @@ internal class ElementTraceRegistry(
         val candidateElements = entityElements[entity]
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
-                .findElementPerTrace(candidateElements)
+                .findElementsPerTrace(candidateElements)
+//                .findElementPerTrace(candidateElements)
                 .map { tracedElements[it] }
                 .mapNotNull { entityService[it] }
                 .toSet()

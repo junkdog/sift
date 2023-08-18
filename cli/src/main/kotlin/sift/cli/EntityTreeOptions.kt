@@ -5,9 +5,11 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.enum
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import sift.core.entity.Entity
+import sift.core.tree.Column
 
 class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
     val maxDepth: Int? by option("-L", "--max-depth",
@@ -32,6 +34,12 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
             metavar = "REGEX",
             help = "Exclude nodes when label matches REGEX. (repeatable)")
         .convert { Regex(it) }
+        .multiple()
+
+    val columns: List<Column> by option("-c", "--column",
+            metavar = "COLUMN",
+            help = "Columns to display. (repeatable)")
+        .enum<Column>(key = Column::property)
         .multiple()
 
     val excludeTypes: List<Entity.Type> by option("-E", "--exclude-type",

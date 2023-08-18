@@ -30,6 +30,11 @@ internal class ElementTraceSet {
             .mapNotNull { trace -> trace.findElement(candidates) }
     }
 
+    fun findElementsPerTrace(candidates: ElementSet): List<Int> {
+        return _traces
+            .flatMap { trace -> trace.findElements(candidates) }
+    }
+
     operator fun contains(candidateTrace: Pair<ElementTrace, Element>): Boolean {
         return _traces.any { candidateTrace in it }
     }

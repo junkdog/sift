@@ -71,7 +71,6 @@ internal class ElementTrace private constructor(
         for (i in 0..elems.lastIndex) {
             if (elems[i] in candidates) {
                 found += elems[i]
-//                return elems[i]
             }
         }
 
@@ -83,16 +82,16 @@ internal class ElementTrace private constructor(
 }
 
 
-
 fun IntArray.isSubArrayOf(rhs: IntArray): Boolean {
+    if (size > rhs.size)
+        return false
+
     var i = 0
     var j = 0
 
     while (i < size && j < rhs.size) {
-        if (this[i] == rhs[j]) {
+        if (this[i] == rhs[j++])
             i++
-        }
-        j++
     }
 
     // If we've found all elements of 'a' in 'b', then i will have advanced to a.size

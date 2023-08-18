@@ -121,15 +121,16 @@ fun TemplateProcessor.traceElementId(elementId: Int, inverseTraces: Boolean): Tr
 //        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id) }
 //}
 
-private fun elementTreeOf(traces: List<Tree<Element>>, es: EntityService): Tree<ElementNode> {
+private fun TemplateProcessor.elementTreeOf(traces: List<Tree<Element>>, es: EntityService): Tree<ElementNode> {
     val root = ClassNode.from(classNode(SynthesisTemplate::class))
+    val traceCount: (Element) -> Int = { if (it.id != -1) context.elementAssociations.tracesOf(it.id).size else 0 }
     return traces
         .fold(Tree<Element>(root)) { tree, trace -> merge(root, tree, trace, { a, b -> a.value.id == b.value.id }, {elem, _ -> elem }) }
-        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id) }
+        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id, traceCount(elem)) }
 }
 
 internal fun <T> List<T>.intoTree(): Tree<T> {
-    // todo: fold
+    // todo: use fold
     val root = Tree(first())
     var current = root
 
@@ -147,12 +148,8 @@ data class ElementNode(
     val elementId: Int,
     val entityType: Entity.Type?,
     val entityId: UUID?,
+    val traces: Int
 ) : Comparator<ElementNode> {
-    override fun toString(): String {
-        return "$elementId: $label <<${type.replace("Node", "")}>>"
-    }
-
-    override fun compare(o1: ElementNode, o2: ElementNode): Int {
-        return o1.elementId.compareTo(o2.elementId)
-    }
+    override fun toString(): String = "$elementId: $label <<${type.replace("Node", "")}>>"
+    override fun compare(o1: ElementNode, o2: ElementNode): Int = o1.elementId.compareTo(o2.elementId)
 }

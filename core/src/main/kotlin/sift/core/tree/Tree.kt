@@ -3,9 +3,17 @@ package sift.core.tree
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import com.github.ajalt.mordant.rendering.BorderType
+import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.TextStyle
+import com.github.ajalt.mordant.table.Borders
+import com.github.ajalt.mordant.table.ColumnWidth
+import com.github.ajalt.mordant.table.ColumnWidth.Auto
+import com.github.ajalt.mordant.table.Table
+import com.github.ajalt.mordant.table.table
 import sift.core.pop
 import sift.core.terminal.Gruvbox
+import sift.core.terminal.Gruvbox.light2
 import sift.core.tree.MergeOrigin.*
 
 @JsonIdentityInfo(scope = Tree::class, generator = ObjectIdGenerators.IntSequenceGenerator::class)
@@ -81,7 +89,7 @@ class Tree<T>(val value: T) {
         prefix: (T) -> String = { "" },
         structure: TextStyle = Gruvbox.light2
     ): String {
-        fun print(
+        fun render(
             node: Tree<T>,
             indent: String,
             last: Boolean,
@@ -94,13 +102,13 @@ class Tree<T>(val value: T) {
             val nextIndent = indent + (if (last) "   " else "│  ")
             node.nodes.forEachIndexed { i, n ->
                 val isLast = i == node.nodes.lastIndex
-                print(n, nextIndent, isLast, out)
+                render(n, nextIndent, isLast, out)
             }
 
             return out
         }
 
-        return print(this, "", true, StringBuilder())
+        return render(this, "", true, StringBuilder())
             .also { it[it.indexOf('└')] = '─' }
             .toString()
     }
@@ -129,7 +137,7 @@ fun <T: Any, S: Comparable<S>> merge(
     merge(lhs, rhs, nodeEquals, transform)
 }
 
-private fun <T, S: Comparable<S>> Tree<T>.merge(
+private fun <T, S : Comparable<S>> Tree<T>.merge(
     a: List<Tree<S>>,
     b: List<Tree<S>>,
     nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
@@ -166,4 +174,67 @@ private data class MergeOp<S : Comparable<S>>(
 @Suppress("EnumEntryName")
 enum class MergeOrigin {
     left, right, both
+}
+
+fun Tree<EntityNode>.tabulate(
+    format: (EntityNode) -> String,
+    columns: List<Column>,
+): String {
+    val table = Table(columns)
+
+    fun render(
+        node: Tree<EntityNode>,
+        indent: String,
+        last: Boolean,
+    ) {
+        val row = mutableListOf<String>()
+
+        columns.map { col -> col.format(node.value) }
+            .forEach { c -> row += c }
+
+        val delim = if (last) '└' else '├'
+        row += "${light2("$indent$delim─")} ${format(node.value)}"
+        table += row
+
+        val nextIndent = indent + (if (last) "   " else "│  ")
+        node.children().forEachIndexed { i, n ->
+            val isLast = i == node.children().lastIndex
+            render(n, nextIndent, isLast)
+        }
+    }
+
+    render(this@tabulate, "", true)
+
+    return table.render()
+}
+
+private class Table(
+    val columns: List<Column>,
+) {
+    private val rows: MutableList<List<String>> = mutableListOf()
+    private val colWidths = IntArray(columns.size)
+
+    fun addRow(row: List<String>) {
+        colWidths.forEachIndexed { index, i -> colWidths[index] = maxOf(i, row[index].length) }
+        rows += row
+    }
+
+    fun render(): String {
+
+        fun renderRow(row: List<String>): String = row
+            .dropLast(1)
+            .mapIndexed { index, s -> columns[index].stylize(s, colWidths[index]) }
+            .joinToString(" ") + " ${row.last()}"
+
+        return rows.joinToString("\n") { row -> renderRow(row) }
+    }
+
+    operator fun plusAssign(row: List<String>) = addRow(row)
+
+    fun Column.stylize(s: String, width: Int): String {
+        return style(when (alignment) {
+            Align.LEFT  -> s.padEnd(width)
+            Align.RIGHT -> s.padStart(width)
+        })
+    }
 }

@@ -57,6 +57,7 @@ internal class MethodSelectionSet(
     val allow: Set<MethodSelection>
 ) : MethodSelectionFilter {
 
+    // fixme: disallow set should update more intelligently
     val disallow: List<MethodSelection> by lazy {
         if (declared in allow || inherited in allow || abstractMethods in allow)
             defaultDisallow - allow

@@ -26,13 +26,17 @@ import sift.core.terminal.Gruvbox.aqua2
 import sift.core.terminal.Gruvbox.blue2
 import sift.core.terminal.Gruvbox.dark2
 import sift.core.terminal.Gruvbox.dark3
+import sift.core.terminal.Gruvbox.dark4
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
+import sift.core.terminal.Gruvbox.green1
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
+import sift.core.terminal.Gruvbox.purple1
 import sift.core.terminal.Gruvbox.purple2
+import sift.core.terminal.Gruvbox.red1
 import sift.core.terminal.Gruvbox.red2
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
@@ -231,6 +235,10 @@ object SiftCli : CliktCommand(
             }
             debugElementTraces.isNotEmpty() -> {
                 val tree = buildElementTraceTree(debugElementTraces.first())
+
+                val etLength = tree.walk().maxOf { it.value.entityType?.toString()?.length ?: 0 }
+                val idLength = tree.walk().maxOf { it.value.elementId.toString().length }
+
                 val formattedTree = tree.toString(
                     format = { node ->
                          when (node.type) {
@@ -245,10 +253,15 @@ object SiftCli : CliktCommand(
                     },
                     prefix = { node ->
                         listOf(
+                            // element id
+                            dark3(node.elementId.toString().padStart(idLength)),
+                            // traces to element
+                            dark4(node.traces.toString().padStart(3)),
+                            // element type
                             dark2(node.type.replace("Node", "").lowercase().padEnd(10)),
-                            aqua1((node.entityType?.toString() ?: "").padEnd(25)),
-                            dark3(node.elementId.toString().padStart(5)),
-                        ).joinToString("")
+                            // entity type
+                            purple1((node.entityType?.toString() ?: "").padEnd(etLength)),
+                        ).joinToString(" ")
                     })
 
                 when {
@@ -302,31 +315,14 @@ object SiftCli : CliktCommand(
         filterTree(tree)
         backtrackStyling(tree, theme)
 
-        println(tree.toString(entityNodeFormatter(), Columns::elementId))
-    }
-
-    object Columns {
-        val all = allOf(listOf(
-            Columns::elementId,
-            Columns::elementType,
-            Columns::entityType,
-        ))
-
-        fun allOf(columns: List<(EntityNode) -> String>): (EntityNode) -> String {
-            return { node -> columns.joinToString(separator = " ") { it(node) } }
+        val cols = this@SiftCli.tree.columns.flatMap { col ->
+            when (col) {
+                Column.All -> enumValues<Column>().toList() - Column.All
+                else       -> listOf(col)
+            }
         }
 
-        fun elementId(node: EntityNode): String {
-            return dark3((node["element-id"]?.toString() ?: "").padStart(4, ' '))
-        }
-
-        fun entityType(node: EntityNode): String {
-            return aqua1((node["entity-type"]?.toString() ?: "").padEnd(12, ' '))
-        }
-
-        fun elementType(node: EntityNode): String {
-            return dark2((node["element-type"]?.toString() ?: "").padEnd(8, ' '))
-        }
+        println(tree.tabulate(entityNodeFormatter(), cols))
     }
 
     @JvmName("printTreeDiff")

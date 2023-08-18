@@ -4,7 +4,7 @@ package sift.template
 
 import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import sift.cli.formatted
 import sift.core.api.Action
@@ -43,7 +43,7 @@ private fun SystemModel.validateTree(
         .let(terminal::render)
         .lines().dropLast(1).joinToString("\n")
 
-    Assertions.assertThat(actual).isEqualTo(expected.trimIndent())
+    assertThat(actual).isEqualTo(expected.trimIndent())
 }
 
 private fun SystemModel.validateProfile(
@@ -55,7 +55,7 @@ private fun SystemModel.validateProfile(
         .map(String::zeroedMeasurements)
         .joinToString("\n")
 
-    Assertions.assertThat(actual)
+    assertThat(actual)
         .isEqualTo(expected
             .lines()
             .drop(1)
@@ -68,7 +68,7 @@ private val String.zeroedMeasurements: String get() = replace(matchTiming, "  0.
 private fun SystemModel.validateStatistics(
     statistics: String,
 ) {
-    Assertions.assertThat(statistics().formatted.stripTimingMeasurements)
+    assertThat(statistics().formatted.stripTimingMeasurements)
         .isEqualTo(statistics.trimIndent().stripTimingMeasurements)
 }
 
