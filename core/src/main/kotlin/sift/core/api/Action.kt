@@ -752,7 +752,8 @@ sealed class Action<IN, OUT> {
                 }
 
                 fun methodElementOf(invocation: Invocation): MethodNode? {
-                    val cn = ctx.classByType[invocation.type] ?: return null
+                    val cn = ctx.classByType[invocation.type]
+                        ?: return null
                     return when (synthesize) {
                         true -> ctx.synthesize(invocation.type, invocation.name, invocation.desc)
                         false -> cn.methods

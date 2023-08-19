@@ -37,7 +37,6 @@ class EntityTreeOptions : OptionGroup(name = "Entity tree/graph options") {
         .multiple()
 
     val columns: List<Column> by option("-c", "--column",
-            metavar = "COLUMN",
             help = "Columns to display. (repeatable)")
         .enum<Column>(key = Column::property)
         .multiple()

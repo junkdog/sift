@@ -33,7 +33,7 @@ class TemplateOptions : OptionGroup(name = "Template options") {
             help = "Print execution times and input/output for the executed template.")
         .flag()
 
-    val dumpSystemModel: Boolean by option("-X", "--dump-system-model",
+    val dumpSystemModel: Boolean by option("-D", "--dump-system-model",
             help = "Print all entities along with their properties and metadata.")
         .flag()
 }

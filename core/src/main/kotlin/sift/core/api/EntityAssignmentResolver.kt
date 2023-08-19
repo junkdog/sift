@@ -138,7 +138,7 @@ private fun registerInstantiations(
     parentKey: String,
     childKey: String
 ) {
-    val parent = ctx.entityService[elem]!!
+    val parent = ctx.entityService[elem] ?: ctx.entityService[elem.owner]!!
     ctx.methodsInvokedBy(elem)
         .asSequence()
         .flatMap { mn -> instantiations(mn, types) }
@@ -156,7 +156,7 @@ private fun registerInvocations(
     parentKey: String,
     childKey: String
 ) {
-    val parent = ctx.entityService[elem]!!
+    val parent = ctx.entityService[elem] ?: ctx.entityService[elem.owner]!!
     ctx.methodsInvokedBy(elem)
         .filter { mn -> mn in matched }
         .filter { mn -> elem != mn }

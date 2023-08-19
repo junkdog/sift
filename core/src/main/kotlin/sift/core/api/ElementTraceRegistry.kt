@@ -25,7 +25,7 @@ internal class ElementTraceRegistry(
 //            .map { trace -> trace.elements.map { id -> tracedElements[id] } }
     }
 
-    fun exhaustingTracesOf(elementId: Int): List<List<Element>> {
+    private fun exhaustingTracesOf(elementId: Int): List<List<Element>> {
         val elem =  tracedElements[elementId]
         return traces
             .flatMap { it.traces }

@@ -104,6 +104,7 @@ object SiftCli : CliktCommand(
     val tree by EntityTreeOptions()
     val graphviz by VisualizationOptions()
     val serialization by SerializationOptions()
+    val debug by DebugOptions()
 
     val ansi: AnsiLevel? by option("-a", "--ansi",
         help = "Override automatically detected ANSI support."
@@ -116,24 +117,6 @@ object SiftCli : CliktCommand(
     val version: Boolean by option("--version",
         help = "Print version and release date.")
     .flag()
-
-    val debug: Boolean by option("--debug",
-        help = "Print log/logCount statements from the executed template.")
-    .flag()
-
-    // todo: --column element-id
-    val debugElementId: Boolean by option("--debug-element-id",
-        help = "Print the elementId for each entity in the tree. Use the element id together with --debug-element-traces"
-    ).flag()
-
-    val debugInverseTrace: Boolean by option("--debug-inverse-trace",
-        help = "Print the inverse element trace for each entity in the tree. Use together with --debug-element-traces"
-    ).flag()
-
-    val debugElementTraces: List<Int> by option("--debug-element-trace",
-        help = "Print all element traces leading to the specified element ids",
-        metavar = "ELEMENT_ID"
-    ).int().multiple()
 
     val mavenRepositories: List<URI> by option("-m", "--maven-repository",
             help = "Additional maven repositories to use for downloading artifacts. Maven central " +
@@ -148,7 +131,7 @@ object SiftCli : CliktCommand(
     private val noAnsi = Terminal(AnsiLevel.NONE)
 
     override fun run() {
-        debugLog = debug
+        debugLog = debug.logs
 
         val terminal = Terminal(ansi)
         val exceptionHandler = ExceptionHandler(terminal, stacktrace)
@@ -233,11 +216,13 @@ object SiftCli : CliktCommand(
 
                 terminal.printTree(tree)
             }
-            debugElementTraces.isNotEmpty() -> {
-                val tree = buildElementTraceTree(debugElementTraces.first())
+            debug.elementTraces.isNotEmpty() -> {
+                // TODO: multiple element traces
+                val tree = buildElementTraceTree(debug.elementTraces.first())
 
                 val etLength = tree.walk().maxOf { it.value.entityType?.toString()?.length ?: 0 }
                 val idLength = tree.walk().maxOf { it.value.elementId.toString().length }
+                val propLength = tree.walk().maxOf { it.value.properties.joinToString(" ").length }
 
                 val formattedTree = tree.toString(
                     format = { node ->
@@ -260,7 +245,9 @@ object SiftCli : CliktCommand(
                             // element type
                             dark2(node.type.replace("Node", "").lowercase().padEnd(10)),
                             // entity type
-                            purple1((node.entityType?.toString() ?: "").padEnd(etLength)),
+                            aqua1((node.entityType?.toString() ?: "").padEnd(etLength)),
+                            // element properties
+                            purple1(node.properties.joinToString(" ").padEnd(propLength)),
                         ).joinToString(" ")
                     })
 
@@ -493,11 +480,9 @@ object SiftCli : CliktCommand(
     private fun buildElementTraceTree(elementId: Int): Tree<ElementNode> {
         val t = this.template.template!!
 
-        val templateProcessor = TemplateProcessor.from(template.classNodes!!, mavenRepositories)
-        templateProcessor
-            .execute(t.template(), template.profile)
-
-        return templateProcessor.traceElementId(elementId, debugInverseTrace)
+        return TemplateProcessor.from(template.classNodes!!, mavenRepositories)
+            .also { processor -> processor.execute(t.template(), template.profile) }
+            .traceElementId(elementId, debug.inverseTrace)
     }
 
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {

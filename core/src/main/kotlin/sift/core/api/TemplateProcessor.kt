@@ -1,13 +1,13 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.findBy
+import org.objectweb.asm.Opcodes
 import sift.core.SynthesisTemplate
 import sift.core.TemplateProcessingException
 import sift.core.asm.classNode
 import sift.core.asm.resolveClassNodes
+import sift.core.element.*
 import sift.core.element.AsmClassNode
-import sift.core.element.ClassNode
-import sift.core.element.Element
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.tree.Tree
@@ -126,8 +126,32 @@ private fun TemplateProcessor.elementTreeOf(traces: List<Tree<Element>>, es: Ent
     val traceCount: (Element) -> Int = { if (it.id != -1) context.elementAssociations.tracesOf(it.id).size else 0 }
     return traces
         .fold(Tree<Element>(root)) { tree, trace -> merge(root, tree, trace, { a, b -> a.value.id == b.value.id }, {elem, _ -> elem }) }
-        .map { elem -> ElementNode(elem.toString(), elem::class.simpleName!!, elem.id, es[elem]?.type, es[elem]?.id, traceCount(elem)) }
+        .map { elem -> ElementNode(elem, es[elem], traceCount(elem)) }
 }
+
+private fun Element.properties(): List<String> {
+    return when (this) {
+        is AnnotationNode -> listOfNotNull()
+        is ClassNode -> listOfNotNull(
+            "kotlin".takeIf { isKotlin },
+            "iface".takeIf { isInterface },
+            "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
+        )
+        is FieldNode -> listOfNotNull(
+            "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
+            "static".takeIf { access and Opcodes.ACC_STATIC != 0 },
+        )
+        is MethodNode -> listOfNotNull(
+            "abstract".takeIf { isAbstract },
+            "static".takeIf { access and Opcodes.ACC_STATIC != 0 },
+            "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
+        )
+        is ParameterNode -> listOfNotNull()
+        is SignatureNode -> listOfNotNull()
+        is ValueNode -> listOf()
+    }
+}
+
 
 internal fun <T> List<T>.intoTree(): Tree<T> {
     // todo: use fold
@@ -148,8 +172,19 @@ data class ElementNode(
     val elementId: Int,
     val entityType: Entity.Type?,
     val entityId: UUID?,
-    val traces: Int
+    val traces: Int,
+    val properties: List<String>
 ) : Comparator<ElementNode> {
+    constructor(element: Element, entity: Entity?, tracesToElement: Int) : this(
+        element.toString(),
+        element::class.simpleName!!,
+        element.id,
+        entity?.type,
+        entity?.id,
+        tracesToElement,
+        element.properties()
+    )
+
     override fun toString(): String = "$elementId: $label <<${type.replace("Node", "")}>>"
     override fun compare(o1: ElementNode, o2: ElementNode): Int = o1.elementId.compareTo(o2.elementId)
 }
