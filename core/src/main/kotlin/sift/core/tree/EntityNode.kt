@@ -8,9 +8,19 @@ sealed class EntityNode(var label: String) : Comparable<EntityNode> {
         label: String
     ) : EntityNode(label) {
         override fun toString() = label
+
+        override fun hashCode(): Int = entity.id.hashCode()
+        override fun equals(other: Any?): Boolean {
+            return (other as? Entity)?.entity?.id == entity.id
+        }
     }
 
-    class Label(label: String) : EntityNode(label)
+    class Label(label: String) : EntityNode(label) {
+        override fun hashCode(): Int = label.hashCode()
+        override fun equals(other: Any?): Boolean {
+            return (other as? Label)?.label == label
+        }
+    }
 
     operator fun set(property: String, value: Any) {
         properties[property] = value

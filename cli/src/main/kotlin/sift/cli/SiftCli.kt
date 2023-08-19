@@ -217,8 +217,11 @@ object SiftCli : CliktCommand(
                 terminal.printTree(tree)
             }
             debug.elementTraces.isNotEmpty() -> {
-                // TODO: multiple element traces
-                val tree = buildElementTraceTree(debug.elementTraces.first())
+                val tree = debug.elementTraces
+                    .map(::buildElementTraceTree)
+                    .reduce { a, b ->
+                        merge(a, b, { l, r -> l.value.elementId == r.value.elementId }) { node, _ -> node }
+                    }
 
                 val etLength = tree.walk().maxOf { it.value.entityType?.toString()?.length ?: 0 }
                 val idLength = tree.walk().maxOf { it.value.elementId.toString().length }
@@ -288,10 +291,10 @@ object SiftCli : CliktCommand(
         val (_, new) = buildTree(roots)
         val old = template.toTree(deserializedResult, roots)
 
-        require(old.label == new.label)
-        return Tree(DiffNode(Unchanged, new.value)).apply {
-            diffMerge(this, old.children(), new.children())
-        }
+        return merge(new, old,
+            nodeEquals = { a, b -> a.label == b.label },
+            transform = { node, origin -> DiffNode(origin.diffState, node)}
+        )
     }
 
     private fun Terminal.printTree(
@@ -631,3 +634,10 @@ val defaultStyle = Style.Plain(fg)
 fun main(args: Array<String>) {
     SiftCli.completionOption().main(args)
 }
+
+private val MergeOrigin.diffState: DiffNode.State
+    get() = when (this) {
+        MergeOrigin.left  -> State.Added
+        MergeOrigin.right -> State.Removed
+        MergeOrigin.both  -> State.Unchanged
+    }

@@ -3,14 +3,7 @@ package sift.core.tree
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
-import com.github.ajalt.mordant.rendering.BorderType
-import com.github.ajalt.mordant.rendering.TextAlign
 import com.github.ajalt.mordant.rendering.TextStyle
-import com.github.ajalt.mordant.table.Borders
-import com.github.ajalt.mordant.table.ColumnWidth
-import com.github.ajalt.mordant.table.ColumnWidth.Auto
-import com.github.ajalt.mordant.table.Table
-import com.github.ajalt.mordant.table.table
 import sift.core.pop
 import sift.core.terminal.Gruvbox
 import sift.core.terminal.Gruvbox.light2
@@ -126,14 +119,24 @@ class Tree<T>(val value: T) {
 }
 
 fun <T: Any, S: Comparable<S>> merge(
+    a: Tree<S>,
+    b: Tree<S>,
+    nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
+    transform: (S, MergeOrigin) -> T
+): Tree<T> = Tree(transform(a.value, both)).apply {
+    require(a.value == b.value) { "trees must share the same root node" }
+    merge(a.children(), b.children(), nodeEquals, transform)
+}
+
+fun <T: Any, S: Comparable<S>> merge(
     root: T,
     a: Tree<S>,
     b: Tree<S>,
     nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
     transform: (S, MergeOrigin) -> T
 ): Tree<T> = Tree(root).apply {
-    val lhs = if (a.value == root) a.children() else listOf(a)
-    val rhs = if (b.value == root) b.children() else listOf(b)
+    val lhs = if (transform(a.value, both) == root) a.children() else listOf(a)
+    val rhs = if (transform(b.value, both) == root) b.children() else listOf(b)
     merge(lhs, rhs, nodeEquals, transform)
 }
 

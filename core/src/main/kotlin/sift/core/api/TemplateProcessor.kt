@@ -174,7 +174,7 @@ data class ElementNode(
     val entityId: UUID?,
     val traces: Int,
     val properties: List<String>
-) : Comparator<ElementNode> {
+) : Comparator<ElementNode>, Comparable<ElementNode> {
     constructor(element: Element, entity: Entity?, tracesToElement: Int) : this(
         element.toString(),
         element::class.simpleName!!,
@@ -184,6 +184,10 @@ data class ElementNode(
         tracesToElement,
         element.properties()
     )
+
+    override fun compareTo(other: ElementNode): Int {
+        return compare(this, other)
+    }
 
     override fun toString(): String = "$elementId: $label <<${type.replace("Node", "")}>>"
     override fun compare(o1: ElementNode, o2: ElementNode): Int = o1.elementId.compareTo(o2.elementId)
