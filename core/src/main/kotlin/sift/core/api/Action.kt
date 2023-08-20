@@ -777,7 +777,7 @@ sealed class Action<IN, OUT> {
                     input.asFlow()
                         .flatMapConcat { mn -> resolveInvocations(mn) }
                             .toList()
-                            .distinctBy { (_, mn) -> mn }
+                            .distinct()
                             .onEach { (old, mn) -> ctx.scopeTransition(old, mn) }
                             .map { (_, mn) -> mn }
 

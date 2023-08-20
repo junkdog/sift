@@ -628,28 +628,28 @@ class DslTest {
                 .first()
                 .isEqualTo(
                     "Entity(SomethingAnnotated, type=klazz," +
-                        " bool=true, byte=3, char=\u0004, short=5, int=6, long=7, float=3.0, double=4.0)"
+                        " element-id=0, element-type=ClassNode, bool=true, byte=3, char=\u0004, short=5, int=6, long=7, float=3.0, double=4.0)"
                 )
             assertThat(entityService[field].values.map(Entity::toString))
                 .hasSize(1)
                 .first()
                 .isEqualTo(
                     "Entity(SomethingAnnotated.otherField, type=field," +
-                        " bool=false, byte=2, char=\u0003, short=4, int=5, long=6, float=2.0, double=3.0)"
+                        " element-id=5, element-type=FieldNode, bool=false, byte=2, char=\u0003, short=4, int=5, long=6, float=2.0, double=3.0)"
                 )
             assertThat(entityService[method].values.map(Entity::toString))
                 .hasSize(1)
                 .first()
                 .isEqualTo(
                     "Entity(SomethingAnnotated::foo, type=method," +
-                        " bool=true, byte=1, char=\u0002, short=3, int=4, long=5, float=1.0, double=2.0)"
+                        " element-id=1, element-type=MethodNode, bool=true, byte=1, char=\u0002, short=3, int=4, long=5, float=1.0, double=2.0)"
                 )
             assertThat(entityService[parameter].values.map(Entity::toString))
                 .hasSize(1)
                 .first()
                 .isEqualTo(
                     "Entity(SomethingAnnotated::foo(b: int), type=param," +
-                        " bool=false, byte=3, char=\u0004, short=5, int=6, long=7, float=3.0, double=4.0)"
+                        " element-id=3, element-type=ParameterNode, bool=false, byte=3, char=\u0004, short=5, int=6, long=7, float=3.0, double=4.0)"
                 )
         }
     }
@@ -1710,6 +1710,42 @@ class DslTest {
     }
 
     @Test
+    fun `invocationsOf should trace to all invoked elements`() {
+        val cns = listOf(SomeFactory::class, HandlerOfFns::class).map(::classNode)
+
+        val method = Entity.Type("handler")
+        val factory = Entity.Type("factory")
+
+        template {
+            classes("register factory") {
+                filter(Regex("SomeFactory\$"))
+                methods {
+                    entity(factory)
+                }
+            }
+
+            classes("register handlers") {
+                filter(Regex("HandlerOfFns\$"))
+                methods {
+                    entity(method)
+                    invocationsOf(factory) {
+                        method["factory"] = factory
+                    }
+                }
+            }
+        }.expecting(cns, method, """
+            ── handler
+               ├─ HandlerOfFns::boo
+               │  └─ SomeFactory::create
+               ├─ HandlerOfFns::dummy
+               ├─ HandlerOfFns::invoker
+               │  └─ SomeFactory::create
+               └─ HandlerOfFns::on
+            """
+        )
+    }
+
+    @Test
     fun `child assignment using dot-invocations`() {
         val cns = listOf(
             classNode<HandlerFn>(),
@@ -1725,8 +1761,7 @@ class DslTest {
 
                 method["invokes"] = method.invocations
             }
-        }.expecting(cns, method,
-            """
+        }.expecting(cns, method, """
             ── handler
                ├─ HandlerOfFns::boo
                ├─ HandlerOfFns::dummy
@@ -1959,8 +1994,8 @@ class DslTest {
 
             assertThat(invoker.first().children["invokes"]!!.map(Entity::toString))
                 .containsExactlyInAnyOrder(
-                    "Entity(HandlerOfFns::boo, type=handler)",
-                    "Entity(HandlerOfFns::on, type=handler)",
+                    "Entity(HandlerOfFns::on, type=handler, element-id=1, element-type=MethodNode)",
+                    "Entity(HandlerOfFns::boo, type=handler, element-id=2, element-type=MethodNode)",
                 )
         }
     }
@@ -2469,11 +2504,6 @@ class DslTest {
         TemplateProcessor(listOf())
             .execute(template, false)
             .statistics()
-    }
-
-    @Test
-    fun `construct tree of traces leading to a specific element id`() {
-        TODO()
     }
 
     private fun Action<Unit, Unit>.expecting(f: (EntityService) -> Unit) {
