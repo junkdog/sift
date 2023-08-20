@@ -108,9 +108,9 @@ class TemplateProcessor(classNodes: Iterable<AsmClassNode>) {
     }
 }
 
-fun TemplateProcessor.traceElementId(elementId: Int, inverseTraces: Boolean): Tree<ElementNode> {
+fun TemplateProcessor.traceElementId(elementId: Int, reversed: Boolean): Tree<ElementNode> {
     return tracesOfElementId(elementId)
-        .map { if (inverseTraces) it.reversed().intoTree() else it.intoTree() }
+        .map { if (reversed) it.reversed().intoTree() else it.intoTree() }
         .let { trees -> elementTreeOf(trees, context.entityService) }
 }
 

@@ -486,7 +486,7 @@ object SiftCli : CliktCommand(
 
         return TemplateProcessor.from(template.classNodes!!, mavenRepositories)
             .also { processor -> processor.execute(t.template(), template.profile) }
-            .traceElementId(elementId, debug.inverseTrace)
+            .traceElementId(elementId, !debug.inverseTrace)
     }
 
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {

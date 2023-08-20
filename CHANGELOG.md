@@ -4,6 +4,7 @@
 - Optimized element trace tracking for elements with registered entities.
 - A bloom-like filter for expediently discarding element traces during lookups.
 - Discarding traces which are subsets of other traces is now more efficient.
+- Considerably fewer traces are now generated during template execution.
 
 ### New/Tweaks
 - Dsl.Synthesis: `inject(ByteArray|KClass|Class)` embeds the provided class into the template and adds it
@@ -11,8 +12,18 @@
   that are not originally part of the input classes. These could be shared code utility classes or any
    other classes that augment the functionality or structural understanding of the system.
 - `--statistics` has been updated with template deserialization time amd additional data on element traces.
+- Added repeatable `--column` option to tree output. Valid columns identifiers: `all`, `element-id`, `element-type`,
+  `entity-type`.
+- `-x`/`--debug-element-trace` shows all traces associated with the requested element id. The element id can be
+  obtained from `--column element-id` or `--column all`. Elements traverse parent and child nodes when associating
+  entities with one another and when associating `property()` data with entities.
+
+ [sift-element-trace]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-element-trace.png
+
+### Breaking changes
 
 ### Fixes
+- DSL: fix `invocationsOf()` discarding traces when multiple multiple elements invoke the same method element.
 - DSL: `methods {}` now iterates methods for interfaces, even when there's no implementation.
 - Fix parsing the signature involving formal type parameters.
 - Resolving inherited methods from interfaces failed to traverse the hierarchy beyond the first interface.

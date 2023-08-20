@@ -76,18 +76,22 @@ Template options:
                                         (pointing to a JAR), or Maven coordinate.
   --profile                             Print execution times and input/output for the
                                         executed template.
-  -X, --dump-system-model               Print all entities along with their properties and
+  -D, --dump-system-model               Print all entities along with their properties and
                                         metadata.
 
 Entity tree/graph options:
-  -L, --max-depth INT             Max display depth of the tree.
-  -F, --filter REGEX              Filter nodes by label. (repeatable)
-  -S, --filter-context REGEX      Filter nodes by label, while also including sibling
-                                  nodes. (repeatable)
-  -e, --exclude REGEX             Exclude nodes when label matches REGEX. (repeatable)
-  -E, --exclude-type ENTITY_TYPE  Exclude entity types from tree. (repeatable)
-  -r, --tree-root ENTITY_TYPE     Tree built around requested entity type. (repeatable)
-  --no-emoji                      Disables printing emoji in entity labels.
+  -L, --max-depth INT                   Max display depth of the tree.
+  -F, --filter REGEX                    Filter nodes by label. (repeatable)
+  -S, --filter-context REGEX            Filter nodes by label, while also including
+                                        sibling nodes. (repeatable)
+  -e, --exclude REGEX                   Exclude nodes when label matches REGEX.
+                                        (repeatable)
+  -c, --column [all|element-id|element-type|entity-type]
+                                        Columns to display. (repeatable)
+  -E, --exclude-type ENTITY_TYPE        Exclude entity types from tree. (repeatable)
+  -r, --tree-root ENTITY_TYPE           Tree built around requested entity type.
+                                        (repeatable)
+  --no-emoji                            Disables printing emoji in entity labels.
 
 Visualization options:
   -R, --render                          Render entities with graphviz's DOT language.
@@ -99,13 +103,19 @@ Serialization options:
   -s, --save FILE_JSON  Save the resulting system model as json.
   --load FILE_JSON      Load a previously saved system model.
 
+Debug options:
+  --debug                               Print log/logCount statements from the executed
+                                        template.
+  -X, --debug-inverse-trace             Print the inverse element trace for the elements
+                                        specified with --debug-element-traces
+  -x, --debug-element-trace ELEMENT_ID  Print all element traces leading to the specified
+                                        elements
+
 Miscellaneous options:
   -a, --ansi [none|ansi16|ansi256|truecolor]
                                         Override automatically detected ANSI support.
   --stacktrace                          Print stacktrace to stderr if an error occurs
   --version                             Print version and release date.
-  --debug                               Print log/logCount statements from the executed
-                                        template.
   -m, --maven-repository VALUE          Additional maven repositories to use for
                                         downloading artifacts. Maven central
                                         (https://repo1.maven.org/maven2/) and local user
