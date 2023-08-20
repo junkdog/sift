@@ -46,21 +46,7 @@ internal class ElementTrace private constructor(
             && other.elements contentEquals elements
     }
 
-    /** finds the first matching element id in this trace */
-    fun findElement(candidates: ElementSet): Int? {
-        if (candidates.bloomMask and bloomMask == 0uL)
-            return null
-
-        val elems = elements
-        for (i in 0..elems.lastIndex) {
-            if (elems[i] in candidates) {
-                return elems[i]
-            }
-        }
-
-        return null
-    }
-
+    /** finds matching elements id in this trace */
     fun findElements(candidates: ElementSet): List<Int> {
         if (candidates.bloomMask and bloomMask == 0uL)
             return listOf()

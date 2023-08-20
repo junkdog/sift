@@ -4,6 +4,7 @@ package sift.core.dsl
 
 import org.junit.jupiter.api.Test
 import sift.core.asm.classNode
+import sift.core.dsl.MethodSelection.inherited
 import sift.core.entity.Entity
 import sift.core.expecting
 
@@ -57,7 +58,7 @@ class ScopeInheritedElementsTest {
             fields(inherited = true) {
                 entity(field)
             }
-            methods (MethodSelection.inherited) {
+            methods (inherited) {
                 // don't care about property getter or ctor
                 filter(Regex("^(get|<init>)"), invert = true)
 
@@ -68,9 +69,9 @@ class ScopeInheritedElementsTest {
         }.expecting(cns, cls, """
             ── class
                └─ Concrete
-                  ├─ Base::base
+                  ├─ Concrete::base
                   │  └─ Base.baseField
-                  ├─ BaseCore::fooCore
+                  ├─ Concrete::fooCore
                   │  ├─ Base.baseField
                   │  └─ BaseCore.coreField
                   └─ Concrete::concrete

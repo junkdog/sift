@@ -82,12 +82,12 @@ class FnsTest {
         }
 
         validateTree(a, b, """
-            ── root
-               └─ a
-                  └─ b
-                     └─ c
-                        ├─ d
-                        └─ e
+            ── 0
+               └─ 97
+                  └─ 98
+                     └─ 99
+                        ├─ 100
+                        └─ 101
         """)
     }
 }

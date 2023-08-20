@@ -208,8 +208,8 @@ such as those for [JPA][jpa] and [JDBI][jdbi], are notably shorter. User-defined
 can include multiple existing templates to better describe the underlying system while also
 keeping the resulting DSL concise.
 
- [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L40:L63
- [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L46:L61
+ [jpa]: templates/jpa/src/main/kotlin/sift/template/jpa/JpaTemplate.kt#L55:L79
+ [jdbi]: templates/jdbi/src/main/kotlin/sift/template/jdbi/Jdbi3Template.kt#L50:L66
 
 
 

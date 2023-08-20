@@ -10,7 +10,7 @@
     <name>examples</name>
 
     <properties>
-        <sift.version>0.14.0</sift.version>
+        <sift.version>0.15.0</sift.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.version>1.8.21</kotlin.version>

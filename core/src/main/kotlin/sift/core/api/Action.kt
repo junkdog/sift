@@ -407,7 +407,6 @@ sealed class Action<IN, OUT> {
                     return (parentInterfaces + ctx.allInterfacesOf(elem, false))
                         .toSet()
                         .mapNotNull(resolveClassNode)
-//                        .onEach { output -> ctx.scopeTransition(elem, output) }
                         .onEach { output -> ctx.scopeTransition(output, elem) }
                 }
 
@@ -421,7 +420,6 @@ sealed class Action<IN, OUT> {
                     return (parentInterfaces + elem.interfaces)
                         .toSet()
                         .mapNotNull(resolveClassNode)
-//                        .onEach { output -> ctx.scopeTransition(elem, output) }
                         .onEach { output -> ctx.scopeTransition(output, elem) }
                 }
 
@@ -450,7 +448,6 @@ sealed class Action<IN, OUT> {
                 fun signatureOf(elem: ClassNode): SignatureNode? {
                     return elem.signature?.extends
                         ?.let(SignatureNode::from)
-//                        ?.also { output -> ctx.scopeTransition(elem, output) }
                         ?.also { output -> ctx.scopeTransition(output, elem) }
                 }
 
@@ -506,7 +503,10 @@ sealed class Action<IN, OUT> {
                 fun methodsOf(input: ClassNode): IterMethods {
                     val methods = when (inheriting) {
                         true -> (input.methods + inheritedMethodsOf(input))
+                            .partition { !it.isAbstract }  // distinctBy should prioritize non-abstract methods
+                            .let { (impl, undef) -> impl + undef }
                             .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
+                            .onEach { println(it) }
 
                         false -> input.methods
                     }
@@ -562,7 +562,6 @@ sealed class Action<IN, OUT> {
 
                     return ctx.classByType[outer]
                         ?.also { ctx.scopeTransition(it, elem) }
-//                        ?.also { ctx.scopeTransition(elem, it) }
                 }
 
                 return input.mapNotNull(::outerClass)
@@ -618,7 +617,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 return input
                     .map { m -> m.owner.also { ctx.scopeTransition(it, m) } }
-//                    .map { m -> m.owner.also { ctx.scopeTransition(m, it) } }
                     .toSet()
             }
         }
@@ -821,7 +819,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
                     .map { f -> f.owner.also { ctx.scopeTransition(it, f) } }
-//                    .map { f -> f.owner.also { ctx.scopeTransition(f, it) } }
                     .toSet()
             }
         }
@@ -908,7 +905,6 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input
                     .map { p -> p.owner.also { ctx.scopeTransition(it, p) } }
-//                    .map { p -> p.owner.also { ctx.scopeTransition(p, it) } }
                     .toSet()
             }
         }
@@ -1073,9 +1069,7 @@ sealed class Action<IN, OUT> {
     class WithValue<T : Element>(val value: Any) : Action<Iter<T>, IterValues>() {
         override fun id() = "with-value($value)"
         override fun execute(ctx: Context, input: Iter<T>): IterValues {
-            return input
-                .map { ValueNode.from(value, it) }
-//                .onEach { ctx.scopeTransition(it.reference, it) } // can never refer to value nodes anyway
+            return input.map { ValueNode.from(value, it) }
         }
 
         override fun toString() = "WithValue($value)"

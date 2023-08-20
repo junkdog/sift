@@ -19,17 +19,6 @@ internal class ElementTraceSet {
         _traces += trace
     }
 
-    /**
-     * Retrieves the first matching element from each [ElementTrace] contained in this set.
-     *
-     * @param candidates The set of candidate elements to match against.
-     * @return id:s of the first matching element from each `ElementTrace`.
-     */
-    fun findElementPerTrace(candidates: ElementSet): List<Int> {
-        return _traces
-            .mapNotNull { trace -> trace.findElement(candidates) }
-    }
-
     fun findElementsPerTrace(candidates: ElementSet): List<Int> {
         return _traces
             .flatMap { trace -> trace.findElements(candidates) }

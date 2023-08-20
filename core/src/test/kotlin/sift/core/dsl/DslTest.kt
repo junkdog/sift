@@ -2242,6 +2242,40 @@ class DslTest {
             )
         }
 
+        @Test @Disabled("need to resolve generic type of inherited methods")
+        fun `methods from delegated instances are not duplicated`() {
+            class Hello : HelloG<String> {
+                override fun hello(): String = ""
+            }
+
+            class FooBar(hello: Helloer) : HelloG<String> {
+                override fun hello(): String = ""
+            }
+
+            val cns = listOf(
+                classNode(Hello::class),
+                classNode(HelloG::class),
+                classNode(FooBar::class),
+            )
+
+            val m = Entity.Type("hello-method")
+
+            template {
+                classes {
+                    filter(Regex("\\.FooBar"))
+                    methods(inherited + abstractMethods) {
+                        entity(m, label("\${name}()"),
+                            property("name", readName())
+                        )
+                    }
+                }
+            }.expecting(cns, m, """
+                ── hello-method
+                   └─ hello()
+                """
+            )
+        }
+
         @Test
         fun `readName for method should include receiver type name for extension functions`() {
             val cns: List<ClassNode> = listOf(
@@ -2525,4 +2559,8 @@ internal inline fun <reified T> assertThrowsTemplateProcessingException(noinline
 
 interface Helloer {
     fun hello()
+}
+
+interface HelloG<T> {
+    fun hello(): T
 }

@@ -717,16 +717,16 @@ parents.flatten                                 5
 implementedInterfaces                          34
 implementedInterfaces.flatten                   7
 traced-elements                               148
-traces                                      1 823
+traces                                        166
 traces.p50                                      1
-traces.p90                                     28
-traces.p95                                     49
-traces.p99                                     51
-traces.max                                     56
-traces.depth.p50                                7
-traces.depth.p90                                8
-traces.depth.p95                                8
+traces.p90                                      1
+traces.p95                                      2
+traces.p99                                      3
+traces.max                                      4
+traces.depth.p50                                3
+traces.depth.p90                                6
+traces.depth.p95                                7
 traces.depth.p99                                8
 traces.depth.max                                8
-traces.flatten                             12 047
+traces.flatten                                534
 """

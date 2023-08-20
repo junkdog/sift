@@ -154,7 +154,6 @@ private fun Element.properties(): List<String> {
 
 
 internal fun <T> List<T>.intoTree(): Tree<T> {
-    // todo: use fold
     val root = Tree(first())
     var current = root
 

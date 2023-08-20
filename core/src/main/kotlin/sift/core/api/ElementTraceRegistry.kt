@@ -65,7 +65,6 @@ internal class ElementTraceRegistry(
         val plain = when {
             candidateElements != null -> tracesOf(tracedElement)
                 .findElementsPerTrace(candidateElements)
-//                .findElementPerTrace(candidateElements)
                 .map { tracedElements[it] }
                 .mapNotNull { entityService[it] }
                 .toSet()
