@@ -29,9 +29,9 @@ import sift.core.terminal.Gruvbox.dark3
 import sift.core.terminal.Gruvbox.dark4
 import sift.core.terminal.Gruvbox.fg
 import sift.core.terminal.Gruvbox.gray
-import sift.core.terminal.Gruvbox.green1
 import sift.core.terminal.Gruvbox.green2
 import sift.core.terminal.Gruvbox.light0
+import sift.core.terminal.Gruvbox.light3
 import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.terminal.Gruvbox.purple1
@@ -240,9 +240,10 @@ object SiftCli : CliktCommand(
                          }(node.label)
                     },
                     prefix = { node ->
+                        val eId = if (node.elementId in debug.elementTraces) light3 + bold else dark3
                         listOf(
                             // element id
-                            dark3(node.elementId.toString().padStart(idLength)),
+                            eId(node.elementId.toString().padStart(idLength)),
                             // traces to element
                             dark4(node.traces.toString().padStart(3)),
                             // element type
