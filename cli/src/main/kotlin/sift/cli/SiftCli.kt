@@ -36,13 +36,11 @@ import sift.core.terminal.Gruvbox.orange1
 import sift.core.terminal.Gruvbox.orange2
 import sift.core.terminal.Gruvbox.purple1
 import sift.core.terminal.Gruvbox.purple2
-import sift.core.terminal.Gruvbox.red1
 import sift.core.terminal.Gruvbox.red2
 import sift.core.terminal.Style.Companion.diff
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import sift.core.tree.*
 import sift.core.tree.DiffNode.State
-import sift.core.tree.DiffNode.State.Unchanged
 import sift.core.tree.TreeDsl.Companion.tree
 import sift.core.tree.TreeDsl.Companion.treeOf
 import sift.template.*

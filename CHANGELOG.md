@@ -1,5 +1,8 @@
 ## Upcoming Release
 
+
+## sift-0.15.0 2023-08-21
+
 ### Further Performance Improvements to Traced(/Tracked) elements
 - Optimized element trace tracking for elements with registered entities.
 - A bloom-like filter for expediently discarding element traces during lookups.
