@@ -34,11 +34,6 @@
 - Fix parsing the signature involving formal type parameters.
 - Resolving inherited methods from interfaces failed to traverse the hierarchy beyond the first interface.
 
-### Known issues
-- The sift (self) template shows duplicate entries for some DSL functions. This is due to sift not properly
-  resolving the generic types of inherited methods, leading to failure to identify the abstract method
-  and the implementation as having the same method signature.
-
 
 ## sift-0.14.0 2023-07-07
 
