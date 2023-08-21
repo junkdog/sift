@@ -58,7 +58,7 @@ class ScopeInheritedElementsTest {
             fields(inherited = true) {
                 entity(field)
             }
-            methods (inherited) {
+            methods(inherited) {
                 // don't care about property getter or ctor
                 filter(Regex("^(get|<init>)"), invert = true)
 
@@ -71,13 +71,13 @@ class ScopeInheritedElementsTest {
                └─ Concrete
                   ├─ Concrete::base
                   │  └─ Base.baseField
-                  ├─ Concrete::fooCore
+                  ├─ Concrete::concrete
                   │  ├─ Base.baseField
-                  │  └─ BaseCore.coreField
-                  └─ Concrete::concrete
+                  │  ├─ BaseCore.coreField
+                  │  └─ Concrete.concreteField
+                  └─ Concrete::fooCore
                      ├─ Base.baseField
-                     ├─ BaseCore.coreField
-                     └─ Concrete.concreteField
+                     └─ BaseCore.coreField
             """
         )
     }

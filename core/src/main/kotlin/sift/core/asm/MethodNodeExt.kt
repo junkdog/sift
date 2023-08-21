@@ -1,7 +1,5 @@
 package sift.core.asm
 
-import org.objectweb.asm.commons.MethodRemapper
-import org.objectweb.asm.commons.Remapper
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.MethodNode
@@ -25,5 +23,5 @@ fun MethodNode.argumentTypes(): Array<Type> = AsmType.getArgumentTypes(desc)
 
 fun MethodNode.copy(): MethodNode {
     return MethodNode(access, name, desc, signature, exceptions?.toTypedArray() ?: arrayOf())
-        .also { mn -> mn.accept(this) }
+        .also { mn -> accept(mn) }
 }

@@ -173,9 +173,8 @@ internal data class Context(
 
     private fun flushTransitions() {
         bufferedTransitions
-            .forEach { (input, output) -> elementAssociations.registerTransition(input, output) }
-
-        bufferedTransitions.clear()
+            .onEach { (input, output) -> elementAssociations.registerTransition(input, output) }
+            .clear()
     }
 
     fun allInterfacesOf(cn: ClassNode, includeParents: Boolean = true): List<Type> {

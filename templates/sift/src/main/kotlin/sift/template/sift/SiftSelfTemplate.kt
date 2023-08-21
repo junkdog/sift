@@ -77,9 +77,7 @@ class SiftSelfTemplate : SystemModelTemplate, SystemModelTemplateServiceProvider
             }
 
             classesOf("register functions", E.scope) { scope ->
-                // abstractMethods due to a known limitation in resolving implementations of
-                // delegated properties (e.g. sift.core.dsl.EntityRegistrarImpl)
-                methods(inherited + abstractMethods) {
+                methods(inherited) {
                     filter(Public)
 
                     // dsl functions per scope

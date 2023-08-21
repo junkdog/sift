@@ -21,8 +21,6 @@ val SIFT = """
    │  ├─ property(key, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ ⚙ editor(ops)
    │  ├─ ⚙ readAttribute(attribute)
@@ -60,18 +58,14 @@ val SIFT = """
    │  ├─ methods(label, selection, f)
    │  ├─ methods(selection, f)
    │  ├─ outerScope(label, f)
-   │  ├─ outerScope(label, f)
    │  ├─ property(entity, key, extract)
    │  ├─ property(entity, key, strategy, extract)
    │  ├─ property(key, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ superclass(f)
    │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ readType()
@@ -98,8 +92,6 @@ val SIFT = """
    │  ├─ property(key, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ ⚙ editor(ops)
    │  ├─ ⚙ readName(shorten)
@@ -128,18 +120,14 @@ val SIFT = """
    │  ├─ log(tag)
    │  ├─ logCount(tag)
    │  ├─ outerScope(label, f)
-   │  ├─ outerScope(label, f)
    │  ├─ property(entity, key, extract)
    │  ├─ property(entity, key, strategy, extract)
    │  ├─ property(key, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ signature(f)
    │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ withValue(value)
@@ -173,7 +161,6 @@ val SIFT = """
    │  ├─ log(tag)
    │  ├─ logCount(tag)
    │  ├─ outerScope(label, f)
-   │  ├─ outerScope(label, f)
    │  ├─ parameters(label, selection, f)
    │  ├─ parameters(selection, f)
    │  ├─ property(entity, key, extract)
@@ -182,11 +169,8 @@ val SIFT = """
    │  ├─ property(key, strategy, extract)
    │  ├─ returns(f)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ withValue(value)
@@ -213,19 +197,15 @@ val SIFT = """
    │  ├─ log(tag)
    │  ├─ logCount(tag)
    │  ├─ outerScope(label, f)
-   │  ├─ outerScope(label, f)
    │  ├─ parameter(nth)
    │  ├─ property(entity, key, extract)
    │  ├─ property(entity, key, strategy, extract)
    │  ├─ property(key, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
-   │  ├─ scope(label, f)
-   │  ├─ scope(label, op, entity, f)
    │  ├─ scope(label, op, entity, f)
    │  ├─ signature(f)
    │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readAnnotation(annotation, attribute)
    │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ readType()
@@ -236,12 +216,8 @@ val SIFT = """
    ├─ Signature
    │  ├─ Entity.Type.set(key, children)
    │  ├─ entity(id, errorIfExists, properties)
-   │  ├─ entity(id, errorIfExists, properties)
-   │  ├─ entity(id, labelFormatter, errorIfExists, properties)
    │  ├─ entity(id, labelFormatter, errorIfExists, properties)
    │  ├─ entity(id, labelFormatter, properties)
-   │  ├─ entity(id, labelFormatter, properties)
-   │  ├─ entity(id, properties)
    │  ├─ entity(id, properties)
    │  ├─ explodeType(synthesize, f)
    │  ├─ explodeTypeT(signature, synthesize, f)
@@ -251,26 +227,16 @@ val SIFT = """
    │  ├─ log(tag)
    │  ├─ logCount(tag)
    │  ├─ property(entity, key, extract)
-   │  ├─ property(entity, key, extract)
-   │  ├─ property(entity, key, strategy, extract)
    │  ├─ property(entity, key, strategy, extract)
    │  ├─ property(key, extract)
-   │  ├─ property(key, extract)
-   │  ├─ property(key, strategy, extract)
    │  ├─ property(key, strategy, extract)
    │  ├─ scope(label, f)
    │  ├─ typeArgument(index, f)
    │  ├─ typeArguments(f)
    │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ editor(ops)
-   │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ readName(shorten)
    │  ├─ ⚙ readName()
    │  ├─ ⚙ readType()
-   │  ├─ ⚙ withValue(value)
-   │  ├─ ⚙ withValue(value)
-   │  ├─ ⚙ withValue(value)
-   │  ├─ ⚙ withValue(value)
    │  ├─ ⚙ withValue(value)
    │  ├─ ⚙ withValue(value)
    │  ├─ ⚙ withValue(value)
@@ -298,7 +264,7 @@ val SIFT = """
 
 val SIFT_PROFILE = """
      exec  ety#    in      out
-  0.00 ms   376     0 ->     0  ── template
+  0.00 ms   342     0 ->     0  ── template
   0.00 ms     0     0 ->     0     ├─ template-scope
                     0 ->     0     ├─ fork("register actions")
   0.00 ms     0     0 ->   544     │  ├─ classes
@@ -338,47 +304,47 @@ val SIFT_PROFILE = """
   0.00 ms    93     0 ->     9           ├─ classes-of(scope)
   0.00 ms    93     9 ->     9           ├─ class-scope
                     9 ->     9           ├─ fork
-  0.00 ms    93     9 ->   283           │  ├─ methods(inherited + abstractMethods)
-  0.00 ms    93   283 ->   283           │  ├─ method-scope
-  0.00 ms    93   283 ->   283           │  ├─ filter-visibility(public)
-  0.00 ms   376   283 ->   283           │  ├─ register-entity(dsl)
-                  283 ->   283           │  ├─ fork
-  0.00 ms   376   283 ->   283           │  │  ├─ read-name
-  0.00 ms   376   283 ->   283           │  │  └─ update-property(name)
-                  283 ->   283           │  ├─ fork("register method owner")
-  0.00 ms   376   283 ->     9           │  │  ├─ outer-class
-  0.00 ms   376     9 ->     9           │  │  ├─ class-scope
+  0.00 ms    93     9 ->   249           │  ├─ methods(inherited)
+  0.00 ms    93   249 ->   249           │  ├─ method-scope
+  0.00 ms    93   249 ->   249           │  ├─ filter-visibility(public)
+  0.00 ms   342   249 ->   249           │  ├─ register-entity(dsl)
+                  249 ->   249           │  ├─ fork
+  0.00 ms   342   249 ->   249           │  │  ├─ read-name
+  0.00 ms   342   249 ->   249           │  │  └─ update-property(name)
+                  249 ->   249           │  ├─ fork("register method owner")
+  0.00 ms   342   249 ->     9           │  │  ├─ outer-class
+  0.00 ms   342     9 ->     9           │  │  ├─ class-scope
                     9 ->     9           │  │  └─ fork
-  0.00 ms   376     9 ->     9           │  │     ├─ read-name
-  0.00 ms   376     9 ->     9           │  │     └─ update-property(outer, dsl)
-                  283 ->   283           │  ├─ fork
-  0.00 ms   376   283 ->   210           │  │  ├─ returns
-  0.00 ms   376   210 ->   210           │  │  ├─ signature-scope
-  0.00 ms   376   210 ->   210           │  │  ├─ filter-signature(^(.+\.|)Action<|${'$'})
-                  210 ->   210           │  │  └─ fork
-  0.00 ms   376   210 ->    61           │  │     ├─ filter-nth(1)
-  0.00 ms   376    61 ->    61           │  │     ├─ signature-scope
-                   61 ->    61           │  │     └─ fork
-  0.00 ms   376    61 ->    61           │  │        ├─ filter-nth(0)
-  0.00 ms   376    61 ->    61           │  │        ├─ signature-scope
-                   61 ->    61           │  │        └─ fork
-  0.00 ms   376    61 ->     1           │  │           ├─ explode-raw-type
-  0.00 ms   376     1 ->     1           │  │           ├─ class-scope
-  0.00 ms   376     1 ->     1           │  │           ├─ filter(ValueNode)
+  0.00 ms   342     9 ->     9           │  │     ├─ read-name
+  0.00 ms   342     9 ->     9           │  │     └─ update-property(outer, dsl)
+                  249 ->   249           │  ├─ fork
+  0.00 ms   342   249 ->   176           │  │  ├─ returns
+  0.00 ms   342   176 ->   176           │  │  ├─ signature-scope
+  0.00 ms   342   176 ->   176           │  │  ├─ filter-signature(^(.+\.|)Action<|${'$'})
+                  176 ->   176           │  │  └─ fork
+  0.00 ms   342   176 ->    51           │  │     ├─ filter-nth(1)
+  0.00 ms   342    51 ->    51           │  │     ├─ signature-scope
+                   51 ->    51           │  │     └─ fork
+  0.00 ms   342    51 ->    51           │  │        ├─ filter-nth(0)
+  0.00 ms   342    51 ->    51           │  │        ├─ signature-scope
+                   51 ->    51           │  │        └─ fork
+  0.00 ms   342    51 ->     1           │  │           ├─ explode-raw-type
+  0.00 ms   342     1 ->     1           │  │           ├─ class-scope
+  0.00 ms   342     1 ->     1           │  │           ├─ filter(ValueNode)
                     1 ->     1           │  │           └─ fork
-  0.00 ms   376     1 ->     1           │  │              ├─ with-value(⚙ )
-  0.00 ms   376     1 ->     1           │  │              └─ update-property(icon, dsl)
-                  283 ->   283           │  └─ fork
-  0.00 ms   376   283 ->   575           │     ├─ parameters(excludingReceiver)
-  0.00 ms   376   575 ->   575           │     ├─ parameter-scope
-                  575 ->   575           │     ├─ fork
-  0.00 ms   376   575 ->   575           │     │  ├─ read-name
-  0.00 ms   376   575 ->   575           │     │  ├─ edit-text((replace(.+ -> ${'$'}0)))
-  0.00 ms   376   575 ->   575           │     │  └─ update-property(params, dsl)
-                  575 ->   575           │     └─ fork
-  0.00 ms   376   575 ->   575           │        ├─ read-type
-  0.00 ms   376   575 ->   575           │        └─ update-property(param-types, dsl)
-  0.00 ms   376     9 ->     9           └─ register-children(scope[fns], dsl)
+  0.00 ms   342     1 ->     1           │  │              ├─ with-value(⚙ )
+  0.00 ms   342     1 ->     1           │  │              └─ update-property(icon, dsl)
+                  249 ->   249           │  └─ fork
+  0.00 ms   342   249 ->   493           │     ├─ parameters(excludingReceiver)
+  0.00 ms   342   493 ->   493           │     ├─ parameter-scope
+                  493 ->   493           │     ├─ fork
+  0.00 ms   342   493 ->   493           │     │  ├─ read-name
+  0.00 ms   342   493 ->   493           │     │  ├─ edit-text((replace(.+ -> ${'$'}0)))
+  0.00 ms   342   493 ->   493           │     │  └─ update-property(params, dsl)
+                  493 ->   493           │     └─ fork
+  0.00 ms   342   493 ->   493           │        ├─ read-type
+  0.00 ms   342   493 ->   493           │        └─ update-property(param-types, dsl)
+  0.00 ms   342     9 ->     9           └─ register-children(scope[fns], dsl)
 """
 
 val SIFT_STATS = """
@@ -392,17 +358,17 @@ parents                                       544
 parents.flatten                               467
 implementedInterfaces                         544
 implementedInterfaces.flatten                 734
-traced-elements                             1 284
-traces                                      1 344
+traced-elements                             1 114
+traces                                      1 164
 traces.p50                                      1
 traces.p90                                      1
 traces.p95                                      1
 traces.p99                                      1
-traces.max                                     61
+traces.max                                     51
 traces.depth.p50                                3
 traces.depth.p90                                4
 traces.depth.p95                                5
 traces.depth.p99                                6
 traces.depth.max                                6
-traces.flatten                              4 004
+traces.flatten                              3 438
 """

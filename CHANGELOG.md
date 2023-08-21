@@ -17,7 +17,7 @@
 - `-x`/`--debug-element-trace` shows all traces associated with the requested element id. The element id can be
   obtained from `--column element-id` or `--column all`. Elements traverse parent and child nodes when associating
   entities with one another and when associating `property()` data with entities.
-  ![sift-element-trace][sift-element-trace]
+  ![inspecting traces of ProductCountIncrementEvent][sift-element-trace]
 - `-X`/`--debug-inverse-trace` reverses the element trace, used together with `--debug-element-trace`.
 
  [sift-element-trace]: https://raw.githubusercontent.com/junkdog/sift/dev/docs/images/sift-element-trace.png

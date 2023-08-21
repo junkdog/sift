@@ -493,7 +493,7 @@ sealed class Action<IN, OUT> {
                             .map { mn -> mn.copyWithOwner(input) }
 
                         inheritedMethods = (inherited + abstractMethods)
-                            .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
+                            .preferImplementations()
                             .also { input.inheritedMethods = it }
                     }
 
@@ -502,12 +502,7 @@ sealed class Action<IN, OUT> {
 
                 fun methodsOf(input: ClassNode): IterMethods {
                     val methods = when (inheriting) {
-                        true -> (input.methods + inheritedMethodsOf(input))
-                            .partition { !it.isAbstract }  // distinctBy should prioritize non-abstract methods
-                            .let { (impl, undef) -> impl + undef }
-                            .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
-                            .onEach { println(it) }
-
+                        true -> (input.methods + inheritedMethodsOf(input)).preferImplementations()
                         false -> input.methods
                     }
 
@@ -516,17 +511,14 @@ sealed class Action<IN, OUT> {
                         .onEach { output -> ctx.scopeTransition(input, output) }
                 }
 
-                return when {
-                    inheriting -> input.flatMap(::methodsOf).distinct()
-                    else       -> input.flatMap(::methodsOf)
-                }
+                return input.flatMap(::methodsOf)
             }
 
             companion object {
-                private fun MethodNode.isSameMethod(rhs: MethodNode): Boolean {
-                    return name == rhs.name
-                        && desc == rhs.desc
-                        && signature == rhs.signature
+                private fun List<MethodNode>.preferImplementations(): List<MethodNode> {
+                    return partition { !it.isAbstract }
+                        .let { (impl, undef) -> impl + undef }
+                        .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
                 }
             }
         }
