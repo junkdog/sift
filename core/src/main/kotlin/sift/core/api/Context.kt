@@ -1,7 +1,5 @@
 package sift.core.api
 
-import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.inverse
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
@@ -16,7 +14,6 @@ import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
 import sift.core.template.DeserializedSystemModelTemplate
-import sift.core.terminal.Gruvbox
 import sift.core.topologicalSort
 import sift.core.tree.Tree
 import java.util.*
@@ -383,45 +380,6 @@ enum class MeasurementScope(val id: String) {
     TypeErased("element-scope"),
     Exception("exception-scope"), // used as marker when an exception is thrown
     FromContext("")
-}
-
-internal fun Context.debugTrails() {
-    val colWidth = elementAssociations.allTraces()
-        .flatten()
-        .map(Element::toString)
-        .maxOfOrNull(String::length) ?: 0
-
-    elementAssociations.allTraces()
-        .map { it.debugString(this, colWidth) }
-        .forEach(::println)
-}
-
-private fun List<Element>.debugString(
-    context: Context,
-    colWidth: Int = 20
-): String {
-    return joinToString(" ") { e ->
-        if (e in context.entityService) {
-            inverse(e.stylized(colWidth))
-        } else {
-            e.stylized(colWidth)
-        }
-    }
-}
-
-private fun Element.stylized(width: Int): String {
-    val s = toString()
-    val lastIndex = minOf(width - 1, s.lastIndex)
-
-    return (when (this) {
-        is AnnotationNode -> Gruvbox.aqua2
-        is ClassNode      -> Gruvbox.yellow2
-        is FieldNode      -> Gruvbox.purple2
-        is MethodNode     -> Gruvbox.green2
-        is ParameterNode  -> Gruvbox.orange2
-        is SignatureNode  -> Gruvbox.blue2
-        is ValueNode      -> Gruvbox.gray245
-    } + bold)(s.substring(0..lastIndex).padEnd(width))
 }
 
 internal data class TypeClassNode(

@@ -1,16 +1,11 @@
 package sift.core.api
 
 import net.onedaybeard.collectionsby.findBy
-import sift.core.SynthesisTemplate
 import sift.core.TemplateProcessingException
-import sift.core.asm.classNode
 import sift.core.asm.resolveClassNodes
 import sift.core.element.*
 import sift.core.element.AsmClassNode
-import sift.core.entity.EntityService
-import sift.core.tree.ElementNode
 import sift.core.tree.Tree
-import sift.core.tree.merge
 import java.net.URI
 import java.util.*
 import kotlin.time.Duration.Companion.nanoseconds
@@ -105,32 +100,3 @@ class TemplateProcessor(classNodes: Iterable<AsmClassNode>) {
         }
     }
 }
-
-fun TemplateProcessor.traceElementId(elementId: Int, reversed: Boolean): Tree<ElementNode> {
-    return tracesOfElementId(elementId)
-        .map { if (reversed) it.reversed().intoTree() else it.intoTree() }
-        .let { trees -> elementTreeOf(trees, context.entityService) }
-}
-
-private fun TemplateProcessor.elementTreeOf(traces: List<Tree<Element>>, es: EntityService): Tree<ElementNode> {
-    val root = ClassNode.from(classNode(SynthesisTemplate::class))
-    val traceCount: (Element) -> Int = { if (it.id != -1) context.elementAssociations.tracesOf(it.id).size else 0 }
-    return traces
-        .fold(Tree<Element>(root)) { tree, trace -> merge(root, tree, trace, { a, b -> a.value.id == b.value.id }, {elem, _ -> elem }) }
-        .map { elem -> ElementNode(elem, es[elem], traceCount(elem)) }
-}
-
-
-
-internal fun <T> List<T>.intoTree(): Tree<T> {
-    val root = Tree(first())
-    var current = root
-
-    drop(1).forEach { element -> current = current.add(element) }
-    return root
-}
-
-private fun TemplateProcessor.tracesOfElementId(elementId: Int): List<List<Element>> {
-    return context.elementAssociations.tracesOf(elementId)
-}
-

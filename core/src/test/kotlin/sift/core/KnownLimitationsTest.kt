@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
+import sift.core.api.debug.debugTraces
 import sift.core.api.testdata.set1.Payload
 import sift.core.api.testdata.set2.HandlerFn
 import sift.core.api.testdata.set2.HandlerOfFns
@@ -68,7 +69,7 @@ class KnownLimitationsTest {
         block: (EntityService) -> Unit
     ) {
         TemplateProcessor(cns)
-            .process(this, false, Context::debugTrails)
+            .process(this, false, Context::debugTraces)
             .entityService
             .also(block)
     }
