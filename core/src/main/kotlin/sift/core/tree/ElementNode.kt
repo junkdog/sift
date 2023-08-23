@@ -1,6 +1,8 @@
 package sift.core.tree
 
 import org.objectweb.asm.Opcodes
+import sift.core.asm.signature.ArgType
+import sift.core.asm.signature.FormalTypeParameter
 import sift.core.element.*
 import sift.core.entity.Entity
 import java.util.*
@@ -13,7 +15,8 @@ data class ElementNode(
     val entityType: Entity.Type?,
     val entityId: UUID?,
     val traces: Int,
-    val properties: List<String>
+    val properties: List<String>,
+    val formalTypeParameters: List<String>,
 ) : Comparator<ElementNode>, Comparable<ElementNode> {
     constructor(element: Element, entity: Entity?, tracesToElement: Int) : this(
         element.toString(),
@@ -22,7 +25,8 @@ data class ElementNode(
         entity?.type,
         entity?.id,
         tracesToElement,
-        element.properties()
+        element.properties(),
+        element.formalTypeParameters()
     )
 
     override fun compareTo(other: ElementNode): Int {
@@ -32,6 +36,16 @@ data class ElementNode(
     override fun toString(): String = "$elementId: $label <<${type.replace("Node", "")}>>"
     override fun compare(o1: ElementNode, o2: ElementNode): Int = o1.elementId.compareTo(o2.elementId)
 }
+
+private fun Element.formalTypeParameters(): List<String> = when (this) {
+    is AnnotationNode -> null
+    is ClassNode      -> signature?.formalParameters
+    is FieldNode      -> signature?.formalParameters
+    is MethodNode     -> signature?.formalParameters
+    is ParameterNode  -> null // todo: generic parameters
+    is SignatureNode  -> (argType as? ArgType.Var)?.type?.let(::listOf)
+    is ValueNode      -> null
+}?.map(FormalTypeParameter::toString) ?: listOf()
 
 private fun Element.properties(): List<String> {
     return when (this) {

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.objectweb.asm.tree.ClassNode
 import org.reflections.Reflections
 import sift.core.*
@@ -22,6 +23,7 @@ import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.junit.LogActiveTestExtension
 import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.lowercase
 import sift.core.terminal.TextTransformer.Companion.replace
@@ -32,6 +34,7 @@ import java.io.InputStream
 import java.util.*
 import kotlin.test.assertTrue
 
+@ExtendWith(LogActiveTestExtension::class)
 class DslTest {
 
     init {
@@ -1681,18 +1684,14 @@ class DslTest {
         val fn = Entity.Type("repo-method")
 
         template {
-            classes {
-                log("pre-repository")
+            classes("register repo") {
                 implements(type<Repo>())
-                log("repository")
                 entity(repo)
             }
 
-            classes {
+            classes("register repo methods from synthesized methods") {
                 methods {
-                    log("inspect")
-                    invocationsOf(repo, synthesize = true) {
-                        log("invoked")
+                    invocationsOf(repo, synthesize = false) {
                         entity(fn)
                         repo["methods"] = fn
                     }

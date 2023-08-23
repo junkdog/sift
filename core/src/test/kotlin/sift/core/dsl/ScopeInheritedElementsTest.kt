@@ -3,11 +3,14 @@
 package sift.core.dsl
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.asm.classNode
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.entity.Entity
 import sift.core.expecting
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 class ScopeInheritedElementsTest {
     val cns = listOf(
         classNode(Concrete::class),

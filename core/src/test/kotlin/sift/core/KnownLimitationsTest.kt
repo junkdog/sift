@@ -3,6 +3,7 @@ package sift.core
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
 import sift.core.api.debug.debugTraces
@@ -14,8 +15,10 @@ import sift.core.dsl.annotatedBy
 import sift.core.dsl.classes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.junit.LogActiveTestExtension
 
 @Disabled
+@ExtendWith(LogActiveTestExtension::class)
 class KnownLimitationsTest {
 
     init {

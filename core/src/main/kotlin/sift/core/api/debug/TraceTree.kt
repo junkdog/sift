@@ -24,6 +24,7 @@ internal fun Context.elementTraceTreeOf(elementIds: List<Int>): String {
     val etLength = tree.walk().maxOf { it.value.entityType?.toString()?.length ?: 0 }
     val idLength = tree.walk().maxOf { it.value.elementId.toString().length }
     val propLength = tree.walk().maxOf { it.value.properties.joinToString(" ").length }
+    val genericsLength = tree.walk().maxOf { it.value.formalTypeParameters.joinToString(", ").length }
 
     val formattedTree = tree.toString(
         format = { node ->
@@ -50,6 +51,8 @@ internal fun Context.elementTraceTreeOf(elementIds: List<Int>): String {
                 Gruvbox.aqua1((node.entityType?.toString() ?: "").padEnd(etLength)),
                 // element properties
                 Gruvbox.purple1(node.properties.joinToString(" ").padEnd(propLength)),
+                // formal type parameters
+                Gruvbox.orange2(node.formalTypeParameters.joinToString(", ").padEnd(genericsLength)),
             ).joinToString(" ")
         })
 

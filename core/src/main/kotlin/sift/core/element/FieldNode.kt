@@ -49,10 +49,11 @@ class FieldNode private constructor(
 
     private val hash = hash(cn) * 31 + idHash(fn)
 
-    val returns: SignatureNode? =
-        fn.signature(cn.signature?.formalParameters ?: listOf())
-            ?.let(FieldSignatureNode::extends)
-            ?.let(SignatureNode::from)
+    internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf())
+
+    val returns: SignatureNode? = signature
+        ?.let(FieldSignatureNode::extends)
+        ?.let(SignatureNode::from)
 
     override fun equals(other: Any?): Boolean {
         return fn === (other as? FieldNode)?.fn
