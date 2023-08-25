@@ -314,6 +314,12 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
                 fun classOf(elem: SignatureNode): ClassNode? {
+                    val t = when (val arg = elem.argType) {
+                        is ArgType.Array -> TODO("recurse: $arg")
+                        is ArgType.Plain -> arg.type
+                        is ArgType.Var -> TODO("resolve formal type parameter: ${arg.type}")
+                    }
+
                     val type = (elem.argType as? ArgType.Plain)?.type ?: return null
                     return (ctx.classByType[type] ?: if (synthesize) ctx.synthesize(type) else null)
                         ?.also { output -> ctx.scopeTransition(elem, output) }

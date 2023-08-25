@@ -274,7 +274,7 @@ object SiftCli : CliktCommand(
                 Column.All -> enumValues<Column>().toList() - Column.All
                 else       -> listOf(col)
             }
-        }
+        }.distinct()
 
         println(tree.tabulate(entityNodeFormatter(), cols))
     }

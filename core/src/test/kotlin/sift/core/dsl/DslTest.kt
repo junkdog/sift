@@ -51,9 +51,6 @@ class DslTest {
         // annotations (junk)
         classNode<Endpoint>(),
         classNode<RestController>(),
-
-        // more junk
-        classNode<DslTest>()
     )
 
     @Test
@@ -2184,6 +2181,58 @@ class DslTest {
                     foo["bars"] = bar
                 }
             }.expecting { }
+        }
+    }
+
+    @Nested
+    inner class MoreAdvancedGenericsTests {
+        private val cns = listOf(
+            classNode(AbstractGenerics1::class),
+            classNode(Generics1a::class),
+            classNode(Generics1b::class),
+            classNode(Generics1c::class),
+        )
+
+        @Test
+        fun `resolve inherited generic method`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics1a"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics1a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Int
+                """
+            )
         }
     }
 

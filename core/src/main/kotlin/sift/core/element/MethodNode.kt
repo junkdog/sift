@@ -1,6 +1,5 @@
 package sift.core.element
 
-import org.objectweb.asm.commons.SimpleRemapper
 import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
@@ -18,6 +17,7 @@ class MethodNode private constructor(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
     private val kfn: KotlinCallable?,
+    private val originalCn: ClassNode? = null // when method is inherited
 ) : Element() {
 
     init {
@@ -54,7 +54,7 @@ class MethodNode private constructor(
         get() = kfn?.receiver
 
     internal val signature: MethodSignatureNode? =
-        mn.signature(cn.signature?.formalParameters ?: listOf())
+        mn.signature((originalCn ?: cn).signature?.formalParameters ?: listOf())
 
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
@@ -90,7 +90,7 @@ class MethodNode private constructor(
 
     internal fun copyWithOwner(cn: ClassNode): MethodNode {
         val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
-        return MethodNode(cn, mn.copy(), anno, kfn)
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn ?: this.cn)
             .also { mn -> mn.id = -1 }
     }
 
