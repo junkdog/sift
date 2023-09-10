@@ -3,6 +3,8 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.api.AccessFlags
+import sift.core.api.AccessFlags.acc_annotation
 import sift.core.api.AccessFlags.acc_interface
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.signature
@@ -27,6 +29,9 @@ class ClassNode private constructor(
 
     internal val isInterface: Boolean
         get() = acc_interface.check(access)
+
+    internal val isAnnotation: Boolean
+        get() = acc_annotation.check(access)
 
     private val kotlinClass: KotlinClass? = KotlinClass.from(cn)
 

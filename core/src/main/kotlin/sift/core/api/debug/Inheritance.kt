@@ -16,7 +16,7 @@ internal fun Context.debugInheritanceTrees(): String {
     val tree = Tree(TypeClassNode(type(SynthesisTemplate::class), ClassNode.from(classNode(SynthesisTemplate::class))))
     inheritance.values.forEach(tree::add)
 
-    val idLength = tree.walk().drop(1).maxOf { it.value.elementId.toString().length }
+    val idLength = tree.walk().drop(1).maxOf { it.value.elementId.length }
     val etLength = tree.walk().drop(1).maxOf { it.value.properties.length }
     val genericsLength = tree.walk().drop(1).maxOf { it.value.formalTypeParameters.length }
 
@@ -25,7 +25,7 @@ internal fun Context.debugInheritanceTrees(): String {
         prefix = { node ->
             listOf(
                 // element id
-                dark3(node.elementId.toString().padStart(idLength)),
+                dark3(node.elementId.padStart(idLength)),
                 // element type
                 dark2(node.properties.padEnd(etLength)),
                 // formal type parameters
@@ -38,13 +38,14 @@ internal fun Context.debugInheritanceTrees(): String {
 
 private val TypeClassNode.properties: String
     get() = listOfNotNull(
-        "iface".takeIf { isInterface },
+        "anno".takeIf { cn?.isAnnotation == true },
+        "iface".takeIf { isInterface && cn?.isAnnotation != true },
         "class".takeIf { !isInterface },
         "undef".takeIf { cn == null },
     ).joinToString(" ")
 
-private val TypeClassNode.elementId: Int
-    get() = cn?.id ?: -1
+private val TypeClassNode.elementId: String
+    get() = cn?.id?.toString() ?: ""
 
 private val TypeClassNode.formalTypeParameters: String
     get() = (cn?.signature?.formalParameters ?: listOf()).joinToString(", ")

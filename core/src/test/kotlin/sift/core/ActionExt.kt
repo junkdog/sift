@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
 import sift.core.api.Context
+import sift.core.api.debug.debugInheritanceTrees
 import sift.core.api.debug.debugTraces
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
@@ -17,6 +18,7 @@ fun Action<Unit, Unit>.expecting(
 ) {
     TemplateProcessor(cns)
         .process(this, true, Context::debugTraces)
+        .also { it.debugInheritanceTrees().let(::println) }
         .entityService
         .also(block)
 }
