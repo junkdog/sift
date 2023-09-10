@@ -1,5 +1,6 @@
 package sift.core.api
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
@@ -22,7 +23,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 internal data class Context(
@@ -46,37 +46,33 @@ internal data class Context(
     val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
         .associateWith(classByType::parentsTypesOf)
         .toMutableMap()
-    var implementedInterfaces: Map<ClassNode, List<TypeClassNode>> = allClasses
-        .associateWith { cn -> interfacesOf(cn) }
+    // todo: consider lazy memoization
+    val inheritance: MutableMap<ClassNode, Tree<TypeClassNode>> = allClasses
+        .associateWithTo(ConcurrentHashMap(), ::inheritanceTreeOf)
 
-    private fun interfacesOf(cn: ClassNode): List<TypeClassNode> {
-        val found = mutableSetOf<TypeClassNode>()
-        fun recurseInterfaces(node: ClassNode) {
-            val interfaces = node.signature?.implements?.map(TypeSignature::toType)
+    private fun inheritanceTreeOf(cn: ClassNode): Tree<TypeClassNode> {
+
+        fun recurseInterfaces(tree: Tree<TypeClassNode>, node: ClassNode?) {
+            node ?: return
+
+            val interfaces = node
+                .signature?.implements?.map(TypeSignature::toType)
                 ?: node.interfaces
 
             interfaces
-                .map { TypeClassNode(it, classByType[it.rawType]) }
-                .filter { it !in found }
-                .onEach { found += it }
-                .mapNotNull(TypeClassNode::cn)
-                .forEach(::recurseInterfaces)
+                .map { TypeClassNode(it, classByType[it.rawType], true) }
+                .forEach { tcn -> recurseInterfaces(tree.add(tcn), tcn.cn) }
         }
 
-        fun recurseSuperclasses(node: ClassNode) {
-            parents[node]?.let { parents ->
-                parents
-                    .onEach(found::add)
-                    .mapNotNull(TypeClassNode::cn)
-                    .onEach(::recurseSuperclasses)
-                    .onEach(::recurseInterfaces)
-            }
+        fun recurseSuperclasses(tree: Tree<TypeClassNode>, node: ClassNode?) {
+            parents.getOrDefault(node ?: return, listOf())
+                .forEach { tcn -> recurseInterfaces(tree.add(tcn), tcn.cn) }
         }
 
-        recurseInterfaces(cn)
-        recurseSuperclasses(cn)
-
-        return found.toList()
+        return Tree(TypeClassNode(cn.type, cn, cn.isInterface)).apply {
+            recurseSuperclasses(this, cn)
+            recurseInterfaces(this, cn)
+        }
     }
 
     val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0, 0.milliseconds))
@@ -105,7 +101,8 @@ internal data class Context(
         methodInvocationsCache.clear()
         injectedClasses.clear()
 
-        implementedInterfaces = allClasses.associateWith { cn -> interfacesOf(cn) }
+        inheritance.clear()
+        allClasses.associateWithTo(inheritance, ::inheritanceTreeOf)
     }
 
     fun synthesize(type: Type): ClassNode {
@@ -122,6 +119,14 @@ internal data class Context(
         allClasses += cn
         classByType[cn.type] = cn
         parents[cn] = classByType.parentsTypesOf(cn)
+    }
+
+    // builds method invocation cache (prep for future thread safety
+    fun cacheMethodInvocations(methods: Iterable<MethodNode>) {
+//        runBlocking(dispatcher) {
+//            methods.asFlow().collect(::methodsInvokedBy)
+//        }
+        methods.forEach(::methodsInvokedBy)
     }
 
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
@@ -175,14 +180,16 @@ internal data class Context(
     }
 
     fun allInterfacesOf(cn: ClassNode, includeParents: Boolean = true): List<Type> {
-        val allImplemented = implementedInterfaces[cn] ?: listOf()
+        val allImplemented = inheritance[cn]
+            ?.walk()
+            ?.drop(1) // self
+            ?.map(Tree<TypeClassNode>::value)
+            ?.toList()
+            ?: return listOf()
 
         return when {
             includeParents -> allImplemented
-            else -> {
-                val parents = (parents[cn] ?: listOf())
-                allImplemented - parents
-            }
+            else           -> allImplemented.filter(TypeClassNode::isInterface)
         }.map(TypeClassNode::type)
     }
 
@@ -287,8 +294,8 @@ internal data class Context(
         "methodFieldCache.flatten"        to methodFieldAccessCache.values.sumOf(Iterable<FieldNode>::count),
         "parents"                         to parents.size,
         "parents.flatten"                 to parents.values.sumOf(Iterable<TypeClassNode>::count),
-        "implementedInterfaces"           to implementedInterfaces.size,
-        "implementedInterfaces.flatten"   to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
+//        "implementedInterfaces"           to implementedInterfaces.size,
+//        "implementedInterfaces.flatten"   to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
     ) + elementAssociations.statistics()
 
     data class Statistics(
@@ -300,7 +307,6 @@ internal data class Context(
     val stats = Statistics()
 
     companion object {
-        @OptIn(ExperimentalTime::class)
         fun from(classes: Iterable<AsmClassNode>): Context {
             val (cns, ms) = measureTimedValue { mapClassNodes(classes) }
             return Context(cns.toMutableList())
@@ -308,10 +314,12 @@ internal data class Context(
 
         }
 
-        private fun mapClassNodes(cns: Iterable<AsmClassNode>): List<ClassNode> = runBlocking {
-            cns.asFlow()
-                .map(ClassNode::from)
-                .toList()
+        private fun mapClassNodes(cns: Iterable<AsmClassNode>): List<ClassNode> {
+            return runBlocking(Dispatchers.IO) {
+                cns.asFlow()
+                    .map(ClassNode::from)
+                    .toList()
+            }
         }
     }
 }
@@ -339,10 +347,10 @@ private fun Map<Type, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNo
     fun Map<Type, ClassNode>.next(tcn: TypeClassNode): TypeClassNode? {
         val parentType = tcn.cn?.parentType ?: return null
         val parent = get(parentType.rawType)
-        return TypeClassNode(parentType, parent)
+        return TypeClassNode(parentType, parent, false)
     }
 
-    return generateSequence(TypeClassNode(cn.type, cn)) { tcn -> next(tcn) }
+    return generateSequence(TypeClassNode(cn.type, cn, cn.isInterface)) { tcn -> next(tcn) }
         .drop(1)
         .toList()
 }
@@ -384,5 +392,8 @@ enum class MeasurementScope(val id: String) {
 
 internal data class TypeClassNode(
     val type: Type,
-    val cn: ClassNode?
-)
+    val cn: ClassNode?,
+    val isInterface: Boolean
+) {
+    override fun toString(): String = "${"? ".takeIf { cn == null } ?: ""}${type.simpleName}"
+}

@@ -96,7 +96,7 @@ private fun classesJar(root: File): List<ClassNode> {
 }
 
 private fun classesDir(root: File): List<ClassNode> {
-    return runBlocking(Dispatchers.Default) {
+    return runBlocking(Dispatchers.IO) {
         root.walk()
             .filter { it.extension == "class" }
             .map(File::readBytes)

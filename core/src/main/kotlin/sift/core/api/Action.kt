@@ -24,6 +24,7 @@ import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.jackson.NoArgConstructor
 import sift.core.terminal.StringEditor
+import sift.core.tree.Tree
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
@@ -488,19 +489,16 @@ sealed class Action<IN, OUT> {
                     // resolve inherited methods if they're not already resolved
                     var inheritedMethods = input.inheritedMethods
                     if (inheritedMethods == null) {
-                        val inherited =  ctx.parents[input]!!
-                            .mapNotNull { (_, cn) -> cn?.methods }
-                            .flatten()
+                        inheritedMethods = ctx.inheritance[input]!!
+                            .walk()
+                            .drop(1) // root node is same as `input`
+                            .map(Tree<TypeClassNode>::value)
+                            .mapNotNull(TypeClassNode::cn)
+                            .toList()
+                            .flatMap(ClassNode::methods)
                             .map { mn -> mn.copyWithOwner(input) }
-
-                        val abstractMethods = ctx.implementedInterfaces[input]!!
-                            .mapNotNull { (_, cn) -> cn?.methods }
-                            .flatten()
-                            .map { mn -> mn.copyWithOwner(input) }
-
-                        inheritedMethods = (inherited + abstractMethods)
-                            .preferImplementations()
                             .also { input.inheritedMethods = it }
+                            .preferImplementations()
                     }
 
                     return inheritedMethods
@@ -653,7 +651,9 @@ sealed class Action<IN, OUT> {
                     .mapNotNull(::resolveFieldNode)
                     .onEach { output -> ctx.scopeTransition(elem, output) }
 
-                return input.flatMap(::fieldsOf)
+                return input
+                    .also(ctx::cacheMethodInvocations)
+                    .flatMap(::fieldsOf)
             }
         }
 
@@ -675,6 +675,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input
+                    .also(ctx::cacheMethodInvocations)
                     .flatMap(::introspect)
             }
 
@@ -698,6 +699,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input
+                    .also(ctx::cacheMethodInvocations)
                     .filter { introspect(it).isNotEmpty() }
             }
         }
@@ -769,6 +771,7 @@ sealed class Action<IN, OUT> {
                         .map { elem to it }
                 }
 
+                ctx.cacheMethodInvocations(input)
                 return runBlocking(Dispatchers.Default) {
                     input.asFlow()
                         .flatMapConcat { mn -> resolveInvocations(mn) }
