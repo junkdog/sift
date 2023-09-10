@@ -65,8 +65,11 @@ internal data class Context(
         }
 
         fun recurseSuperclasses(tree: Tree<TypeClassNode>, node: ClassNode?) {
-            parents.getOrDefault(node ?: return, listOf())
-                .forEach { tcn -> recurseInterfaces(tree.add(tcn), tcn.cn) }
+            var ptr = tree
+            for (tcn in parents.getOrDefault(node ?: return, listOf())) {
+                ptr = ptr.add(tcn)
+                recurseInterfaces(ptr, tcn.cn)
+            }
         }
 
         return Tree(TypeClassNode(cn.type, cn, cn.isInterface)).apply {
@@ -395,5 +398,6 @@ internal data class TypeClassNode(
     val cn: ClassNode?,
     val isInterface: Boolean
 ) {
-    override fun toString(): String = "${"? ".takeIf { cn == null } ?: ""}${type.simpleName}"
+    constructor(type: Type, cn: ClassNode) : this(type, cn, cn.isInterface)
+    override fun toString(): String = type.simpleName
 }
