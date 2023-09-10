@@ -2,12 +2,15 @@ package sift.core.terminal
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import sift.core.junit.LogActiveTestExtension
 import sift.core.terminal.TextTransformer.Companion.dedupe
 import sift.core.terminal.TextTransformer.Companion.idSequence
 import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 import java.util.*
 
+@ExtendWith(LogActiveTestExtension::class)
 class TextTransformerTest {
 
     @Test

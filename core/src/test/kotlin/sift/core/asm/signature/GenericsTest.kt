@@ -6,14 +6,17 @@ import net.onedaybeard.collectionsby.firstBy
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import sift.core.asm.classNode
 import sift.core.dsl.resource
+import sift.core.junit.LogActiveTestExtension
 import kotlin.reflect.KClass
 
+@ExtendWith(LogActiveTestExtension::class)
 class GenericsTest {
 
     @Test

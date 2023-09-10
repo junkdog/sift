@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.api.AccessFlags.acc_final
 import sift.core.api.Context
 import sift.core.api.SystemModel
@@ -14,7 +15,9 @@ import sift.core.asm.classNode
 import sift.core.dsl.annotatedBy
 import sift.core.dsl.classes
 import sift.core.entity.Entity
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 class SystemModelSerializerTest {
 
     @Test
