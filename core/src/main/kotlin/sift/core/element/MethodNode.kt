@@ -59,7 +59,7 @@ class MethodNode private constructor(
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
-    val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn, kfn)
+    val parameters: List<ParameterNode> by lazy { ParameterNode.from(cn, this, mn, kfn) }
 
     val access: Int
         get() = mn.access
@@ -72,7 +72,7 @@ class MethodNode private constructor(
 
     val returns: SignatureNode? by lazy { signature?.returns?.let(SignatureNode::from) }
 
-    private val hash = hash(cn) * 31 + idHash(mn)
+    private val hash = hash(cn, originalCn) * 31 + idHash(mn)
 
     fun toMethodRefString(): String = "$cn::$name"
     override fun toString(): String = toMethodRefString()
@@ -84,6 +84,7 @@ class MethodNode private constructor(
         return other is MethodNode
             && mn === other.mn
             && cn == other.cn
+            && originalCn == other.originalCn
     }
 
     override fun hashCode() = hash

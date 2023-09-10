@@ -1,5 +1,6 @@
 ## Upcoming Release
 
+- Faster template processing by lazily parsing method parameters. 
 
 ## sift-0.15.0 2023-08-21
 
