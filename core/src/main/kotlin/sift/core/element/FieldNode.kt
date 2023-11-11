@@ -15,7 +15,8 @@ class FieldNode private constructor(
     private val fn: AsmFieldNode,
     private val kprop: KotlinProperty?,
     override val annotations: List<AnnotationNode>,
-    internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf())
+    internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf()),
+    private val originalCn: ClassNode? = null, // when field is inherited
 ) : Element(), Trait.HasType {
 
     init {
@@ -64,7 +65,7 @@ class FieldNode private constructor(
     override fun toString(): String = "$cn.$name"
 
     internal fun copyWithOwner(cn: ClassNode): FieldNode {
-        return FieldNode(cn, fn, kprop, annotations, signature)
+        return FieldNode(cn, fn, kprop, annotations, signature, this.cn)
             .also { fn -> fn.id = -1 }
     }
 

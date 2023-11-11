@@ -43,12 +43,12 @@ class ScopeInheritedElementsTest {
                ├─ Base
                │  └─ Base.baseField
                ├─ BaseCore
-               │  ├─ Base.baseField
+               │  ├─ BaseCore.baseField
                │  └─ BaseCore.coreField
                └─ Concrete
-                  ├─ Base.baseField
-                  ├─ BaseCore.coreField
-                  └─ Concrete.concreteField
+                  ├─ Concrete.baseField
+                  ├─ Concrete.concreteField
+                  └─ Concrete.coreField
             """
         )
     }
@@ -73,14 +73,14 @@ class ScopeInheritedElementsTest {
             ── class
                └─ Concrete
                   ├─ Concrete::base
-                  │  └─ Base.baseField
+                  │  └─ Concrete.baseField
                   ├─ Concrete::concrete
-                  │  ├─ Base.baseField
-                  │  ├─ BaseCore.coreField
+                  │  ├─ Concrete.baseField
+                  │  ├─ Concrete.coreField
                   │  └─ Concrete.concreteField
                   └─ Concrete::fooCore
-                     ├─ Base.baseField
-                     └─ BaseCore.coreField
+                     ├─ Concrete.baseField
+                     └─ Concrete.coreField
             """
         )
     }
