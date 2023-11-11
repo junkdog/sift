@@ -2192,6 +2192,9 @@ class DslTest {
             classNode(Generics1a::class),
             classNode(Generics1b::class),
             classNode(Generics1c::class),
+            classNode(Generics2::class),
+            classNode(Generics2a::class),
+            classNode(Generics2aa::class),
         )
 
         @Test
@@ -2234,6 +2237,90 @@ class DslTest {
                          └─ returns: Integer
                 """
             )
+        }
+
+        @Test
+        fun `deep resolve inherited generic method`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics2a$"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType(synthesize = true) {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType(synthesize = true) {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics2a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Integer
+                """
+            )
+        }
+
+        @Test
+        fun `resolve generic type from field`() {
+//            val c = Entity.Type("class")
+//            val f = Entity.Type("field")
+//            val t = Entity.Type("field-type")
+//
+//            template {
+//                classes {
+//                    filter(Regex("Generics1a"))
+//                    entity(c, label("\${name}"), property("name", readName()))
+//
+//                    methods(inherited) {
+//                        entity(m, label("method: \${name}"), property("name", readName()))
+//                        c["methods"] = m
+//
+//                        parameters {
+//                            parameter(0)
+//                            explodeType(synthesize = true) {
+//                                entity(p, label("param: \${name}"), property("name", readName()))
+//                                m["parameters"] = p
+//                            }
+//                        }
+//
+//                        returns {
+//                            explodeType(synthesize = true) {
+//                                entity(r, label("returns: \${name}"), property("name", readName()))
+//                                m["returns"] = r
+//                            }
+//                        }
+//                    }
+//                }
+//            }.expecting(cns, c, """
+//                ── class
+//                   └─ Generics1a
+//                      └─ method: foo
+//                         ├─ param: String
+//                         └─ returns: Integer
+//                """
+//            )
+
         }
     }
 

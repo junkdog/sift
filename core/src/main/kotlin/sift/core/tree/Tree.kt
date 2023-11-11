@@ -63,7 +63,9 @@ class Tree<T>(val value: T) {
     override fun equals(other: Any?) = (other as? Tree<*>)?.value == value
     override fun hashCode() = value.hashCode()
 
-    fun walk(): TreeWalker<T> = TreeWalker(this)
+    fun walk(
+        traversalType: TraversalType = TraversalType.DEPTH_FIRST
+    ): Sequence<Tree<T>> = TreeWalker(this, traversalType)
 
     fun copy(): Tree<T> = map { it }
 

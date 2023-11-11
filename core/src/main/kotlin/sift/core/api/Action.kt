@@ -490,6 +490,7 @@ sealed class Action<IN, OUT> {
                     var inheritedMethods: List<MethodNode>? = input.inheritedMethods
                     if (inheritedMethods == null) {
                         inheritedMethods = ctx.inheritance[input.type]!!
+                            .also(Tree<TypeClassNode>::resolveGenerics)
                             .walk()
                             .drop(1) // root node is same as `input`
                             .toList()

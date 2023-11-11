@@ -21,3 +21,7 @@ abstract class AbstractGenerics1<T, R> : AbstractBaseGenerics<T>(), GenericInter
 class Generics1a : AbstractGenerics1<String, Int>()
 abstract class Generics1b<U> : AbstractGenerics1<U, String>()
 abstract class Generics1c<T> : AbstractGenerics1<String, T>()
+
+open class Generics2<T2, R2> : AbstractGenerics1<T2, R2>()
+open class Generics2aa<T2A, R2A> : Generics2<T2A, R2A>()
+class Generics2a : Generics2aa<String, Int>()
