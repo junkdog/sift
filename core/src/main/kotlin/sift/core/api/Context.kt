@@ -400,7 +400,7 @@ internal data class TypeClassNode(
     val type: Type,
     val cn: ClassNode?,
     val isInterface: Boolean,
-    var generics: List<TypeParameter> = listOf()
+    var generics: List<TypeParameter>? = null
 ) {
     constructor(type: Type, cn: ClassNode)
         : this(type, cn, cn.isInterface)
@@ -408,6 +408,10 @@ internal data class TypeClassNode(
 }
 
 internal fun Tree<TypeClassNode>.resolveGenerics() {
+    // only need to resolve generics once
+    if (value.generics != null)
+        return
+
     fun update(node: Tree<TypeClassNode>) {
         val propagatedGenerics = node.parent?.value?.generics ?: listOf()
         var genericTypes = node.genericTypes()
@@ -427,13 +431,13 @@ internal fun Tree<TypeClassNode>.resolveGenerics() {
 // with resolved generic types methods
 internal fun Tree<TypeClassNode>.methods(): List<MethodNode> {
     val cn = value.cn ?: return listOf()
-    val ftps = value.generics.associateBy(TypeParameter::name)
+    val ftps = value.generics!!.associateBy(TypeParameter::name)
     return cn.methods.map { mn -> mn.specialize(ftps)  }
 }
 
 internal fun Tree<TypeClassNode>.fields(): List<FieldNode> {
     val cn = value.cn ?: return listOf()
-    val ftps = value.generics.associateBy(TypeParameter::name)
+    val ftps = value.generics!!.associateBy(TypeParameter::name)
     return cn.fields.map { fn -> fn.specialize(ftps) }
 }
 

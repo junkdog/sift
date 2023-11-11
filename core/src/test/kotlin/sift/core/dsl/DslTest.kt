@@ -2195,6 +2195,8 @@ class DslTest {
             classNode(Generics2::class),
             classNode(Generics2a::class),
             classNode(Generics2aa::class),
+            classNode(Generics3a::class),
+            classNode(Generics3::class),
         )
 
         @Test
@@ -2232,6 +2234,48 @@ class DslTest {
             }.expecting(cns, c, """
                 ── class
                    └─ Generics1a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Integer
+                """
+            )
+        }
+
+        @Test
+        fun `resolve inherited generic with different type parameters`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics3a"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType(synthesize = true) {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType(synthesize = true) {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics3a
                       └─ method: foo
                          ├─ param: String
                          └─ returns: Integer
