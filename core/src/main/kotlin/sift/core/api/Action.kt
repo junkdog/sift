@@ -532,9 +532,19 @@ sealed class Action<IN, OUT> {
             override fun id() = "fields(${"inherited".takeIf { inherited } ?: ""})"
             override fun execute(ctx: Context, input: IterClasses): IterFields {
                 fun inheritedFieldsOf(input: ClassNode): IterFields {
-                    return ctx.parents[input]!!
-                        .mapNotNull { (_, cn) ->  cn?.fields }
-                        .flatten()
+                    if (input.inheritedFields != null)
+                        return input.inheritedFields!!
+
+                    input.inheritedFields = ctx.inheritance[input.type]!!
+                        .also(Tree<TypeClassNode>::resolveGenerics)
+                        .walk()
+                        .drop(1) // root node is same as `input`
+                        .toList()
+                        .flatMap(Tree<TypeClassNode>::fields)
+                        .map { fn -> fn.copyWithOwner(input) }
+                        .also { input.inheritedFields = it }
+
+                    return input.inheritedFields!!
                 }
 
                 fun fieldsOf(input: ClassNode): IterFields {

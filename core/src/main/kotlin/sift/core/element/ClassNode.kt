@@ -57,6 +57,7 @@ class ClassNode private constructor(
         .toMutableList()
 
     internal var inheritedMethods: List<MethodNode>? = null
+    internal var inheritedFields: List<FieldNode>? = null
 
     val isEnum: Boolean
         get() = cn.superType?.name == "java.lang.Enum"

@@ -431,6 +431,12 @@ internal fun Tree<TypeClassNode>.methods(): List<MethodNode> {
     return cn.methods.map { mn -> mn.specialize(ftps)  }
 }
 
+internal fun Tree<TypeClassNode>.fields(): List<FieldNode> {
+    val cn = value.cn ?: return listOf()
+    val ftps = value.generics.associateBy(TypeParameter::name)
+    return cn.fields.map { fn -> fn.specialize(ftps) }
+}
+
 //private val Tree<TypeClassNode>.genericTypes: Map<String, BoundTypeParameter>
 private fun Tree<TypeClassNode>.genericTypes(): Map<String, TypeParameter> {
     val signature = value.cn?.signature ?: return mapOf()

@@ -4,6 +4,7 @@ import org.objectweb.asm.Opcodes.*
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
 import sift.core.asm.signature.FieldSignatureNode
+import sift.core.asm.signature.TypeParameter
 import sift.core.asm.signature.signature
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
@@ -13,7 +14,8 @@ class FieldNode private constructor(
     private val cn: ClassNode,
     private val fn: AsmFieldNode,
     private val kprop: KotlinProperty?,
-    override val annotations: List<AnnotationNode>
+    override val annotations: List<AnnotationNode>,
+    internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf())
 ) : Element(), Trait.HasType {
 
     init {
@@ -49,8 +51,6 @@ class FieldNode private constructor(
 
     private val hash = hash(cn) * 31 + idHash(fn)
 
-    internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf())
-
     val returns: SignatureNode? = signature
         ?.let(FieldSignatureNode::extends)
         ?.let(SignatureNode::from)
@@ -62,6 +62,16 @@ class FieldNode private constructor(
     override fun hashCode(): Int = hash
 
     override fun toString(): String = "$cn.$name"
+
+    internal fun copyWithOwner(cn: ClassNode): FieldNode {
+        return FieldNode(cn, fn, kprop, annotations, signature)
+            .also { fn -> fn.id = -1 }
+    }
+
+    internal fun specialize(typeParameters: Map<String, TypeParameter>): FieldNode {
+        return FieldNode(cn, fn, kprop, annotations, signature?.specialize(typeParameters))
+            .also { fn -> fn.id = -1 }
+    }
 
     companion object {
         internal fun from(cn: ClassNode, fn: AsmFieldNode, kp: KotlinProperty?): FieldNode {

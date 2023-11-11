@@ -15,6 +15,8 @@ class ConcreteClass2 : GenericClass<Float>(), GenericInterface<String, Float>
 abstract class AbstractBaseGenerics<BASE_T>
 
 abstract class AbstractGenerics1<T, R> : AbstractBaseGenerics<T>(), GenericInterface<T, R> {
+    var bar: T? = null
+
     fun foo(t: T): R? = TODO()
 }
 

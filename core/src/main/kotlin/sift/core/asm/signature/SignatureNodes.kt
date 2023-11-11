@@ -59,7 +59,14 @@ internal data class ClassSignatureNode(
 data class FieldSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: TypeSignature
-)
+) {
+    internal fun specialize(typeParameters: Map<String, TypeParameter>): FieldSignatureNode {
+        return copy(
+            formalParameters = formalParameters.map { it.specialize(typeParameters) }, // maybe not needed?
+            extends = extends.specialize(typeParameters)
+        )
+    }
+}
 
 data class MethodSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
