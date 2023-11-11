@@ -14,9 +14,9 @@ data class FormalTypeParameter(
     val name: String,
     val extends: MutableList<TypeSignature> = mutableListOf(), // visitClassType of T
 ) {
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): FormalTypeParameter {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): FormalTypeParameter {
         return copy(
-            extends = extends.map { it.specialize(typeParameters) }.toMutableList()
+            extends = extends.map { it.reify(typeParameters) }.toMutableList()
         )
     }
 

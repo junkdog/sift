@@ -68,8 +68,8 @@ class FieldNode private constructor(
             .also { fn -> fn.id = -1 }
     }
 
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): FieldNode {
-        return FieldNode(cn, fn, kprop, annotations, signature?.specialize(typeParameters))
+    internal fun reify(typeParameters: Map<String, TypeParameter>): FieldNode {
+        return FieldNode(cn, fn, kprop, annotations, signature?.reify(typeParameters))
             .also { fn -> fn.id = -1 }
     }
 

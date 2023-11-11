@@ -8,7 +8,7 @@ data class TypeSignature(
     val bound: MetaType,
     val args: MutableList<TypeSignature> = mutableListOf(),
 ) {
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): TypeSignature {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): TypeSignature {
         fun substitute(argType: ArgType): ArgType {
             return when (argType) {
                 is ArgType.Plain -> argType
@@ -20,7 +20,7 @@ data class TypeSignature(
 
         return copy(
             argType = substitute(argType),
-            args = args.map { arg -> arg.specialize(typeParameters) }.toMutableList()
+            args = args.map { arg -> arg.reify(typeParameters) }.toMutableList()
         )
     }
 

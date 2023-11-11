@@ -432,13 +432,13 @@ internal fun Tree<TypeClassNode>.resolveGenerics() {
 internal fun Tree<TypeClassNode>.methods(): List<MethodNode> {
     val cn = value.cn ?: return listOf()
     val ftps = value.generics!!.associateBy(TypeParameter::name)
-    return cn.methods.map { mn -> mn.specialize(ftps)  }
+    return cn.methods.map { mn -> mn.reify(ftps)  }
 }
 
 internal fun Tree<TypeClassNode>.fields(): List<FieldNode> {
     val cn = value.cn ?: return listOf()
     val ftps = value.generics!!.associateBy(TypeParameter::name)
-    return cn.fields.map { fn -> fn.specialize(ftps) }
+    return cn.fields.map { fn -> fn.reify(ftps) }
 }
 
 //private val Tree<TypeClassNode>.genericTypes: Map<String, BoundTypeParameter>

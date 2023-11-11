@@ -60,10 +60,10 @@ data class FieldSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: TypeSignature
 ) {
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): FieldSignatureNode {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): FieldSignatureNode {
         return copy(
-            formalParameters = formalParameters.map { it.specialize(typeParameters) }, // maybe not needed?
-            extends = extends.specialize(typeParameters)
+            formalParameters = formalParameters.map { it.reify(typeParameters) }, // maybe not needed?
+            extends = extends.reify(typeParameters)
         )
     }
 }
@@ -73,11 +73,11 @@ data class MethodSignatureNode(
     val methodParameters: List<TypeSignature>,
     val returns: TypeSignature,
 ) {
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): MethodSignatureNode {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): MethodSignatureNode {
         return copy(
-            formalParameters = formalParameters.map { it.specialize(typeParameters) }, // maybe not needed?
-            methodParameters = methodParameters.map { it.specialize(typeParameters) },
-            returns = returns.specialize(typeParameters)
+            formalParameters = formalParameters.map { it.reify(typeParameters) }, // maybe not needed?
+            methodParameters = methodParameters.map { it.reify(typeParameters) },
+            returns = returns.reify(typeParameters)
         )
     }
 }

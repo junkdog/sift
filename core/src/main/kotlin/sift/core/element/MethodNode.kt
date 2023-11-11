@@ -93,9 +93,9 @@ class MethodNode private constructor(
             .also { mn -> mn.id = -1 }
     }
 
-    internal fun specialize(typeParameters: Map<String, TypeParameter>): MethodNode {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): MethodNode {
         val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
-        return MethodNode(cn, mn.copy(), anno, kfn, originalCn, signature?.specialize(typeParameters))
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn, signature?.reify(typeParameters))
             .also { mn -> mn.id = -1 }
     }
 
