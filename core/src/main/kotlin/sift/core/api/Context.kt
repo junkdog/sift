@@ -8,6 +8,8 @@ import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
 import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
+import sift.core.asm.signature.ArgType
+import sift.core.asm.signature.BoundTypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.dsl.Type
 import sift.core.element.*
@@ -23,6 +25,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
 internal data class Context(
@@ -44,11 +47,11 @@ internal data class Context(
     private val injectedClasses: MutableList<ClassNode> = mutableListOf()
 
     val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
-        .associateWith(classByType::parentsTypesOf)
+        .associateWith(classByType::parentTypesOf)
         .toMutableMap()
     // todo: consider lazy memoization
-    val inheritance: MutableMap<ClassNode, Tree<TypeClassNode>> = allClasses
-        .associateWithTo(ConcurrentHashMap(), ::inheritanceTreeOf)
+    val inheritance: MutableMap<Type, Tree<TypeClassNode>> = allClasses
+        .associateByTo(ConcurrentHashMap(), ClassNode::type, ::inheritanceTreeOf)
 
     private fun inheritanceTreeOf(cn: ClassNode): Tree<TypeClassNode> {
 
@@ -105,7 +108,7 @@ internal data class Context(
         injectedClasses.clear()
 
         inheritance.clear()
-        allClasses.associateWithTo(inheritance, ::inheritanceTreeOf)
+        allClasses.associateByTo(inheritance, ClassNode::type, ::inheritanceTreeOf)
     }
 
     fun synthesize(type: Type): ClassNode {
@@ -121,7 +124,7 @@ internal data class Context(
     ) {
         allClasses += cn
         classByType[cn.type] = cn
-        parents[cn] = classByType.parentsTypesOf(cn)
+        parents[cn] = classByType.parentTypesOf(cn)
     }
 
     // builds method invocation cache (prep for future thread safety
@@ -183,7 +186,7 @@ internal data class Context(
     }
 
     fun allInterfacesOf(cn: ClassNode, includeParents: Boolean = true): List<Type> {
-        val allImplemented = inheritance[cn]
+        val allImplemented = inheritance[cn.type]
             ?.walk()
             ?.drop(1) // self
             ?.map(Tree<TypeClassNode>::value)
@@ -346,7 +349,7 @@ internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity
 private val ClassNode.parentType: Type?
     get() = extends?.type ?: superType
 
-private fun Map<Type, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
+private fun Map<Type, ClassNode>.parentTypesOf(cn: ClassNode): List<TypeClassNode> {
     fun Map<Type, ClassNode>.next(tcn: TypeClassNode): TypeClassNode? {
         val parentType = tcn.cn?.parentType ?: return null
         val parent = get(parentType.rawType)
@@ -400,4 +403,53 @@ internal data class TypeClassNode(
 ) {
     constructor(type: Type, cn: ClassNode) : this(type, cn, cn.isInterface)
     override fun toString(): String = type.simpleName
+
+    fun copyMethodsWithOwner(owner: ClassNode): List<MethodNode> {
+        cn ?: return listOf()
+
+        return cn.methods.map { mn -> mn.copyWithOwner(owner) } ?: listOf()
+    }
 }
+
+// with resolved generic types methods
+internal fun Tree<TypeClassNode>.methods(): List<MethodNode> {
+    val cn = value.cn ?: return listOf()
+    val ftps = genericTypes
+    return cn.methods.map { mn -> mn.specialize(ftps)  }
+}
+
+//private val Tree<TypeClassNode>.genericTypes: Map<String, BoundTypeParameter>
+private val Tree<TypeClassNode>.genericTypes: Map<String, TypeParameter>
+    get() {
+        val signature = value.cn?.signature ?: return mapOf()
+
+//        fun update(ftp: FormalTypeParameter): FormalTypeParameter {
+//            return when (ftp) {
+//
+//            }
+//        }
+
+        val innerTypes: List<Type> = value.type.innerTypes
+        val ftps = signature.formalParameters
+            .mapIndexed { i, ftp -> TypeParameter(ftp.name, innerTypes[i], ftp.extends.map { it.toType() }) }
+            .associateBy(TypeParameter::name)
+
+        // todo: fix or can we ignore interfaces?
+        val interfaces = signature.implements
+            .flatMap(TypeSignature::args)
+            .mapNotNull { it.argType as? ArgType.Var }
+
+        return ftps
+//        val parameters = signature.formalParameters.ma
+        // todo: interfaces (ArgType.var)
+//        return signature.copy(
+//            extends = signature.extends.argType
+//        )
+    }
+
+
+internal data class TypeParameter(
+    val name: String,
+    val bound: Type,
+    val constraint: List<Type>
+)

@@ -22,6 +22,13 @@ interface InterfaceWithDefaultMethod {
 }
 
 
+class FooImplExt : FooIfaceExt<String, Int> {
+    override fun <S : String> yo(entity: S): S = TODO()
+    override fun <S : String> save(entity: S): S = TODO()
+    override fun <S : String> saveAll(entities: Iterable<S>?): Iterable<S> = TODO()
+    override fun findById(id: Int): String? = TODO()
+}
+
 interface FooIfaceExt<T, ID> : FooIface<T, ID> {
     fun <S : T> yo(entity: S): S
 }

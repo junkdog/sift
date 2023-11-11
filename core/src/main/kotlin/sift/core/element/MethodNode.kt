@@ -3,6 +3,7 @@ package sift.core.element
 import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.api.TypeParameter
 import sift.core.asm.asSequence
 import sift.core.asm.copy
 import sift.core.asm.signature.FormalTypeParameter
@@ -17,7 +18,8 @@ class MethodNode private constructor(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
     private val kfn: KotlinCallable?,
-    private val originalCn: ClassNode? = null // when method is inherited
+    private val originalCn: ClassNode? = null, // when method is inherited
+    internal val signature: MethodSignatureNode? = defaultSignature(originalCn ?: cn, mn)
 ) : Element() {
 
     init {
@@ -53,9 +55,6 @@ class MethodNode private constructor(
     val receiver: Type?
         get() = kfn?.receiver
 
-    internal val signature: MethodSignatureNode? =
-        mn.signature((originalCn ?: cn).signature?.formalParameters ?: listOf())
-
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
@@ -76,7 +75,6 @@ class MethodNode private constructor(
 
     fun toMethodRefString(): String = "$cn::$name"
     override fun toString(): String = toMethodRefString()
-//    override fun toString(): String = "$cn.$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
 
@@ -91,7 +89,13 @@ class MethodNode private constructor(
 
     internal fun copyWithOwner(cn: ClassNode): MethodNode {
         val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
-        return MethodNode(cn, mn.copy(), anno, kfn, originalCn ?: this.cn)
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn ?: this.cn, signature)
+            .also { mn -> mn.id = -1 }
+    }
+
+    internal fun specialize(typeParameters: Map<String, TypeParameter>): MethodNode {
+        val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn, signature?.specialize(typeParameters))
             .also { mn -> mn.id = -1 }
     }
 
@@ -105,4 +109,8 @@ class MethodNode private constructor(
             return MethodNode(cn, mn, ans, kfn)
         }
     }
+}
+
+private fun defaultSignature(cn: ClassNode, mn: AsmMethodNode): MethodSignatureNode? {
+    return mn.signature(cn.signature?.formalParameters ?: listOf())
 }

@@ -12,10 +12,10 @@ class ConcreteClass1 : GenericClass<String>()
 class ConcreteClass2 : GenericClass<Float>(), GenericInterface<String, Float>
 
 
-abstract class AbstractGenerics1<T, R> {
-    fun hello(t: T): R? {
-        return t.toString() as? R
-    }
+abstract class AbstractBaseGenerics<BASE_T>
+
+abstract class AbstractGenerics1<T, R> : AbstractBaseGenerics<T>(), GenericInterface<T, R> {
+    fun foo(t: T): R? = TODO()
 }
 
 class Generics1a : AbstractGenerics1<String, Int>()

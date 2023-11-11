@@ -52,6 +52,7 @@ private fun Element.properties(): List<String> {
         is AnnotationNode -> listOfNotNull()
         is ClassNode -> listOfNotNull(
             "kotlin".takeIf { isKotlin },
+            "enum".takeIf { isEnum },
             "iface".takeIf { isInterface },
             "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
         )

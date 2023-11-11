@@ -1,13 +1,7 @@
 package sift.core
 
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
-import org.objectweb.asm.util.Textifier
-import org.objectweb.asm.util.TraceClassVisitor
-import org.objectweb.asm.util.TraceMethodVisitor
 import sift.core.collections.MultiIterable
 import sift.core.collections.MutableMultiIterable
-import java.io.PrintWriter
 import java.io.StringWriter
 
 fun <T> anyOf(vararg predicates: (T) -> Boolean): (T) -> Boolean = { t -> predicates.any { it(t) } }
@@ -22,16 +16,6 @@ fun <T> combine(vararg iterables: MutableIterable<T>?): MutableIterable<T>
 /** Combines multiple nullable [Iterable] into one */
 fun <T> combine(vararg iterables: Iterable<T>?): Iterable<T>
     = MultiIterable(iterables.toList())
-
-fun ClassNode.toDebugString(): String = stringWriter {
-    accept(TraceClassVisitor(PrintWriter(this)))
-}
-
-fun MethodNode.toDebugString(): String = stringWriter {
-    val printer = Textifier()
-    accept(TraceMethodVisitor(printer))
-    printer.print(PrintWriter(this))
-}
 
 fun <T> MutableList<T>.pop() = removeLast()
 fun <T> MutableList<T>.push(t: T) = add(t)

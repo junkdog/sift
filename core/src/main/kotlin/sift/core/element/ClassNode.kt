@@ -59,7 +59,7 @@ class ClassNode private constructor(
     internal var inheritedMethods: List<MethodNode>? = null
 
     val isEnum: Boolean
-        get() = cn.superType?.rawType?.name == "java.lang.Enum"
+        get() = cn.superType?.name == "java.lang.Enum"
 
     val extends: SignatureNode? = signature?.extends?.let(SignatureNode::from)
 

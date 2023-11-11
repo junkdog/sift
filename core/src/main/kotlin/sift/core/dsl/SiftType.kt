@@ -64,6 +64,9 @@ class Type private constructor(
     val isGeneric: Boolean
         get() = signature.args.isNotEmpty()
 
+    val innerTypes: List<Type>
+        get() = signature.args.map(::from)
+
     override val simpleName: String
         get() = when {
             isPrimitive -> name
@@ -107,17 +110,19 @@ class Type private constructor(
         internal fun from(cn: AsmClassNode) = from(cn.name)
         internal fun from(signature: TypeSignature): Type {
             fun fromType(argType: ArgType): String = when (argType) {
-                is ArgType.Array -> fromType(argType.wrapped!!)
-                is ArgType.Plain -> argType.type.name
-                is ArgType.Var   -> argType.type.name
+                is ArgType.Array      -> fromType(argType.wrapped!!)
+                is ArgType.Plain      -> argType.type.name
+                is ArgType.Var        -> argType.type.name
+                is ArgType.BoundVar   -> argType.type.name
             }
 
             val inner = signature.args
                 .takeIf(MutableList<TypeSignature>::isNotEmpty)
-                ?.joinToString(prefix = "<", postfix = ">") { fromType(it.type) }
+                ?.joinToString(prefix = "<", postfix = ">") { fromType(it.argType) }
                 ?: ""
 
-            return from("${signature.type}$inner")
+            val type = (signature.argType as? ArgType.Plain)?.type ?: signature.argType
+            return from("$type$inner")
         }
     }
 }

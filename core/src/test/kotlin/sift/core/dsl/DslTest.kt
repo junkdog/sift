@@ -2187,6 +2187,7 @@ class DslTest {
     @Nested
     inner class MoreAdvancedGenericsTests {
         private val cns = listOf(
+            classNode(AbstractBaseGenerics::class),
             classNode(AbstractGenerics1::class),
             classNode(Generics1a::class),
             classNode(Generics1b::class),
@@ -2211,14 +2212,14 @@ class DslTest {
 
                         parameters {
                             parameter(0)
-                            explodeType {
+                            explodeType(synthesize = true) {
                                 entity(p, label("param: \${name}"), property("name", readName()))
                                 m["parameters"] = p
                             }
                         }
 
                         returns {
-                            explodeType {
+                            explodeType(synthesize = true) {
                                 entity(r, label("returns: \${name}"), property("name", readName()))
                                 m["returns"] = r
                             }
@@ -2230,7 +2231,7 @@ class DslTest {
                    └─ Generics1a
                       └─ method: foo
                          ├─ param: String
-                         └─ returns: Int
+                         └─ returns: Integer
                 """
             )
         }

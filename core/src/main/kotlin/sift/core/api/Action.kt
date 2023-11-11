@@ -315,13 +315,13 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
                 fun classOf(elem: SignatureNode): ClassNode? {
-                    val t = when (val arg = elem.argType) {
+                    val type = when (val arg = elem.argType) {
                         is ArgType.Array -> TODO("recurse: $arg")
                         is ArgType.Plain -> arg.type
-                        is ArgType.Var -> TODO("resolve formal type parameter: ${arg.type}")
+                        is ArgType.Var -> return null //TODO("resolve formal type parameter: ${arg.type}")
+                        is ArgType.BoundVar -> arg.type
                     }
 
-                    val type = (elem.argType as? ArgType.Plain)?.type ?: return null
                     return (ctx.classByType[type] ?: if (synthesize) ctx.synthesize(type) else null)
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
@@ -487,15 +487,13 @@ sealed class Action<IN, OUT> {
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
 
                     // resolve inherited methods if they're not already resolved
-                    var inheritedMethods = input.inheritedMethods
+                    var inheritedMethods: List<MethodNode>? = input.inheritedMethods
                     if (inheritedMethods == null) {
-                        inheritedMethods = ctx.inheritance[input]!!
+                        inheritedMethods = ctx.inheritance[input.type]!!
                             .walk()
                             .drop(1) // root node is same as `input`
-                            .map(Tree<TypeClassNode>::value)
-                            .mapNotNull(TypeClassNode::cn)
                             .toList()
-                            .flatMap(ClassNode::methods)
+                            .flatMap(Tree<TypeClassNode>::methods)
                             .map { mn -> mn.copyWithOwner(input) }
                             .also { input.inheritedMethods = it }
                             .preferImplementations()
@@ -716,6 +714,7 @@ sealed class Action<IN, OUT> {
                         is ArgType.Array -> typeOf(arg.wrapped!!)
                         is ArgType.Plain -> arg.type
                         is ArgType.Var -> TODO("typeOf not implemented for formal type variables")
+                        is ArgType.BoundVar -> arg.type
                     }
                 }
 
@@ -879,10 +878,10 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterClasses {
                fun explode(param: ParameterNode): ClassNode? {
-
-                   var exploded = ctx.classByType[param.type]
+                   val resolvedType = param.signature?.type ?: param.type
+                   var exploded = ctx.classByType[resolvedType]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(param.type)
+                       exploded = ctx.synthesize(resolvedType)
 
                    return exploded
                        ?.also { ctx.scopeTransition(param, it) }
@@ -896,8 +895,8 @@ sealed class Action<IN, OUT> {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { ValueNode.from(it.type, it) }
-                    .onEach { ctx.scopeTransition(it.reference, it) }
+                    .map { pn -> ValueNode.from(pn.signature?.type ?: pn.type, pn) }
+                    .onEach { pn -> ctx.scopeTransition(pn.reference, pn) }
             }
         }
 
