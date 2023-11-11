@@ -1,6 +1,5 @@
 package sift.core.asm.signature
 
-import sift.core.api.TypeParameter
 import sift.core.dsl.Type
 
 data class TypeSignature(
@@ -22,7 +21,6 @@ data class TypeSignature(
         return copy(
             argType = substitute(argType),
             args = args.map { arg -> arg.specialize(typeParameters) }.toMutableList()
-//            args = args.map { arg -> arg.copy(argType = substitute(arg.argType)) }.toMutableList()
         )
     }
 
@@ -56,13 +54,12 @@ sealed interface ArgType {
     }
 }
 
-//    val type: Type
-//        get() = when (this) {
-//            is Plain -> type
-//            is Var   -> Type.from(type.name)
-//            is Array -> wrapped?.type ?: Type.from("java.lang.Object")
-//        }
-
 enum class MetaType {
     GenericType, Class, Interface, Array, Undefined
 }
+
+internal data class TypeParameter(
+    val name: String,
+    val bound: Type,
+    val constraint: List<Type>
+)

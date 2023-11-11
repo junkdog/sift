@@ -1,7 +1,6 @@
 package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.filterNotBy
-import sift.core.api.TypeParameter
 import sift.core.dsl.Type
 import sift.core.dsl.type
 

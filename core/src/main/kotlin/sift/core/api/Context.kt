@@ -9,7 +9,7 @@ import sift.core.Throw.entityTypeAlreadyBoundToElementType
 import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
 import sift.core.asm.signature.ArgType
-import sift.core.asm.signature.BoundTypeParameter
+import sift.core.asm.signature.TypeParameter
 import sift.core.asm.signature.TypeSignature
 import sift.core.dsl.Type
 import sift.core.element.*
@@ -423,12 +423,6 @@ private val Tree<TypeClassNode>.genericTypes: Map<String, TypeParameter>
     get() {
         val signature = value.cn?.signature ?: return mapOf()
 
-//        fun update(ftp: FormalTypeParameter): FormalTypeParameter {
-//            return when (ftp) {
-//
-//            }
-//        }
-
         val innerTypes: List<Type> = value.type.innerTypes
         val ftps = signature.formalParameters
             .mapIndexed { i, ftp -> TypeParameter(ftp.name, innerTypes[i], ftp.extends.map { it.toType() }) }
@@ -440,16 +434,5 @@ private val Tree<TypeClassNode>.genericTypes: Map<String, TypeParameter>
             .mapNotNull { it.argType as? ArgType.Var }
 
         return ftps
-//        val parameters = signature.formalParameters.ma
-        // todo: interfaces (ArgType.var)
-//        return signature.copy(
-//            extends = signature.extends.argType
-//        )
     }
 
-
-internal data class TypeParameter(
-    val name: String,
-    val bound: Type,
-    val constraint: List<Type>
-)

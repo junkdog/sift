@@ -3,11 +3,11 @@ package sift.core.element
 import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
-import sift.core.api.TypeParameter
 import sift.core.asm.asSequence
 import sift.core.asm.copy
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
+import sift.core.asm.signature.TypeParameter
 import sift.core.asm.signature.signature
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility

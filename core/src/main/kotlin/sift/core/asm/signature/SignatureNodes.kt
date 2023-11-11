@@ -5,12 +5,8 @@ import org.objectweb.asm.signature.SignatureReader
 import org.objectweb.asm.signature.SignatureVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
-import sift.core.api.TypeParameter
-import sift.core.dsl.Type
 import sift.core.element.AsmMethodNode
 
-
-// todo; param signature node
 
 internal fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
     signature ?: return null
