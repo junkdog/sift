@@ -42,13 +42,13 @@ private fun TypeClassNode.toDebugString(): String {
     val className = toString()
     val methods = (cn ?: return fg(className))
         .methods
-        .map(MethodNode::toDebugString)
+        .map(MethodNode::debugString)
         .joinToString(" ")
 
     return "${fg(className)} ${dark3(methods)}"
 }
 
-private fun MethodNode.toDebugString(): String =
+private fun MethodNode.debugString(): String =
     "$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
 
 private val TypeClassNode.properties: String

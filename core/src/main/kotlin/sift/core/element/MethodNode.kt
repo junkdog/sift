@@ -9,6 +9,7 @@ import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
 import sift.core.asm.signature.TypeParameter
 import sift.core.asm.signature.signature
+import sift.core.asm.toDebugString
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinCallable
@@ -18,7 +19,7 @@ class MethodNode private constructor(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
     private val kfn: KotlinCallable?,
-    private val originalCn: ClassNode? = null, // when method is inherited
+    internal val originalCn: ClassNode? = null, // when method is inherited
     internal val signature: MethodSignatureNode? = defaultSignature(originalCn ?: cn, mn)
 ) : Element() {
 
@@ -77,6 +78,8 @@ class MethodNode private constructor(
     override fun toString(): String = toMethodRefString()
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
+
+    internal fun toDebugString(): String = mn.toDebugString()
 
     override fun equals(other: Any?): Boolean {
         return other is MethodNode

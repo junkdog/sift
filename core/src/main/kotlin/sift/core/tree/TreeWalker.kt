@@ -18,13 +18,11 @@ internal class TreeWalker<T>(val root: Tree<T>, val traversal: TraversalType) : 
             return value
         }
 
-        private fun prepareNext(): Tree<T>? {
-            return when (traversal) {
-                TraversalType.DEPTH_FIRST -> buffer.removeLastOrNull()
-                    ?.also { node -> buffer.addAll(node.children().reversed()) }
-                TraversalType.BREADTH_FIRST -> buffer.removeFirstOrNull()
-                    ?.also { node -> buffer.addAll(node.children()) }
-            }
+        private fun prepareNext(): Tree<T>? = when (traversal) {
+            TraversalType.DEPTH_FIRST -> buffer.removeLastOrNull()
+                ?.also { node -> buffer += node.children().reversed() }
+            TraversalType.BREADTH_FIRST -> buffer.removeFirstOrNull()
+                ?.also { node -> buffer += node.children() }
         }
     }
 }

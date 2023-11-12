@@ -76,8 +76,8 @@ class ScopeInheritedElementsTest {
                   │  └─ Concrete.baseField
                   ├─ Concrete::concrete
                   │  ├─ Concrete.baseField
-                  │  ├─ Concrete.coreField
-                  │  └─ Concrete.concreteField
+                  │  ├─ Concrete.concreteField
+                  │  └─ Concrete.coreField
                   └─ Concrete::fooCore
                      ├─ Concrete.baseField
                      └─ Concrete.coreField

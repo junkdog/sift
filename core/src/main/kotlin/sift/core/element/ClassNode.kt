@@ -3,12 +3,12 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
-import sift.core.api.AccessFlags
 import sift.core.api.AccessFlags.acc_annotation
 import sift.core.api.AccessFlags.acc_interface
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
+import sift.core.asm.toDebugString
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinClass
@@ -93,6 +93,7 @@ class ClassNode private constructor(
     private val hash = idHash(cn)
 
     override fun toString() = simpleName
+    internal fun toDebugString(): String = cn.toDebugString()
 
     override fun equals(other: Any?): Boolean {
         return cn === (other as? ClassNode)?.cn

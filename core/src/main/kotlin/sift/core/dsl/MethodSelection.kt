@@ -31,6 +31,7 @@ enum class MethodSelection : MethodSelectionFilter {
     inherited {
         override fun invoke(mn: MethodNode): Boolean {
             return mn.normalMethod
+                && (mn.originalCn == null || mn.visibility >= Visibility.Protected)
         }
     },
     /** Matches synthetic methods, such as default-value functions in Kotlin. */
