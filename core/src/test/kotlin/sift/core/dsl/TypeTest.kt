@@ -2,14 +2,17 @@ package sift.core.dsl
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.api.*
 import sift.core.api.testdata.set2.Repo
 import sift.core.asm.classNode
 import sift.core.element.AsmType
 import sift.core.element.ClassNode
+import sift.core.junit.LogActiveTestExtension
 import kotlin.reflect.KClass
 
 
+@ExtendWith(LogActiveTestExtension::class)
 class TypeTest {
 
     init {

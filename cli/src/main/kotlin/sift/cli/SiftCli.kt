@@ -15,6 +15,7 @@ import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
 import sift.core.api.*
+import sift.core.api.debug.elementTraceTreeOf
 import sift.core.entity.Entity
 import sift.core.graphviz.DiagramGenerator
 import sift.core.jackson.*
@@ -215,48 +216,12 @@ object SiftCli : CliktCommand(
                 terminal.printTree(tree)
             }
             debug.elementTraces.isNotEmpty() -> {
-                val tree = debug.elementTraces
-                    .map(::buildElementTraceTree)
-                    .reduce { a, b ->
-                        merge(a, b, { l, r -> l.value.elementId == r.value.elementId }) { node, _ -> node }
-                    }
+                val t = template.template!!
 
-                val etLength = tree.walk().maxOf { it.value.entityType?.toString()?.length ?: 0 }
-                val idLength = tree.walk().maxOf { it.value.elementId.toString().length }
-                val propLength = tree.walk().maxOf { it.value.properties.joinToString(" ").length }
-
-                val formattedTree = tree.toString(
-                    format = { node ->
-                         when (node.type) {
-                             "ClassNode"      -> aqua2
-                             "MethodNode"     -> green2
-                             "FieldNode"      -> blue2
-                             "ParameterNode"  -> purple2
-                             "SignatureNode"  -> orange2
-                             "AnnotationNode" -> aqua1 + bold
-                             else -> error("Unknown type: ${node.type}")
-                         }(node.label)
-                    },
-                    prefix = { node ->
-                        val eId = if (node.elementId in debug.elementTraces) light3 + bold else dark3
-                        listOf(
-                            // element id
-                            eId(node.elementId.toString().padStart(idLength)),
-                            // traces to element
-                            dark4(node.traces.toString().padStart(3)),
-                            // element type
-                            dark2(node.type.replace("Node", "").lowercase().padEnd(10)),
-                            // entity type
-                            aqua1((node.entityType?.toString() ?: "").padEnd(etLength)),
-                            // element properties
-                            purple1(node.properties.joinToString(" ").padEnd(propLength)),
-                        ).joinToString(" ")
-                    })
-
-                when {
-                    "SynthesisTemplate" in formattedTree -> formattedTree.lines().drop(1).joinToString("\n")
-                    else -> formattedTree
-                }.let(terminal::println)
+                TemplateProcessor.from(template.classNodes!!, mavenRepositories)
+                    .also { processor -> processor.execute(t.template(), template.profile) }
+                    .elementTraceTreeOf(debug.elementTraces)
+                    .let(terminal::println)
             }
             else -> { // render tree from classes under path
                 val (sm, tree) = buildTree(this.tree.treeRoot)
@@ -309,7 +274,7 @@ object SiftCli : CliktCommand(
                 Column.All -> enumValues<Column>().toList() - Column.All
                 else       -> listOf(col)
             }
-        }
+        }.distinct()
 
         println(tree.tabulate(entityNodeFormatter(), cols))
     }
@@ -477,14 +442,6 @@ object SiftCli : CliktCommand(
             .execute(t.template(), template.profile)
 
         return sm to buildTree(sm, roots)
-    }
-
-    private fun buildElementTraceTree(elementId: Int): Tree<ElementNode> {
-        val t = this.template.template!!
-
-        return TemplateProcessor.from(template.classNodes!!, mavenRepositories)
-            .also { processor -> processor.execute(t.template(), template.profile) }
-            .traceElementId(elementId, !debug.inverseTrace)
     }
 
     private fun buildTree(sm: SystemModel, roots: List<Entity.Type>): Tree<EntityNode> {

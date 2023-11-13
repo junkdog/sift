@@ -7,7 +7,7 @@ import sift.core.api.Iter
 import sift.core.element.Element
 
 /** Element visiblity modifier. Note that [Internal] corresponds to kotlin's `internal` modifier. */
-enum class Visibility {
+enum class Visibility : Comparable<Visibility> {
     Private,
     PackagePrivate,
     Protected,

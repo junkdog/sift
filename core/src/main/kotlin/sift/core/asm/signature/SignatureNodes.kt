@@ -8,13 +8,11 @@ import org.objectweb.asm.tree.FieldNode
 import sift.core.element.AsmMethodNode
 
 
-// todo; param signature node
-
 internal fun ClassNode.signature(wrap: SignatureVisitor? = null): ClassSignatureNode? {
     signature ?: return null
 
     return SignatureParser(Opcodes.ASM9, wrap)
-        .also { SignatureReader(signature).accept(it) }
+        .also(SignatureReader(signature)::accept)
         .asClassSignatureNode
 }
 
@@ -25,7 +23,7 @@ internal fun FieldNode.signature(
     signature ?: return null
 
     return SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
-        .also { SignatureReader(signature).accept(it) }
+        .also(SignatureReader(signature)::accept)
         .asFieldSignatureNode
 }
 
@@ -37,11 +35,12 @@ internal fun AsmMethodNode.signature(
 
     return try {
         SignatureParser(formalTypeParams, Opcodes.ASM9, wrap)
-            .also { SignatureReader(signature).accept(it) }
+            .also(SignatureReader(signature)::accept)
             .asMethodSignatureNode
     } catch (e: SignatureParsingException) {
         // FIXME: callsite-aware signatures not handled at the moment
         // currently ignored
+        TODO("yolo")
         null
     }
 }
@@ -60,13 +59,28 @@ internal data class ClassSignatureNode(
 data class FieldSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val extends: TypeSignature
-)
+) {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): FieldSignatureNode {
+        return copy(
+            formalParameters = formalParameters.map { it.reify(typeParameters) }, // maybe not needed?
+            extends = extends.reify(typeParameters)
+        )
+    }
+}
 
 data class MethodSignatureNode(
     val formalParameters: List<FormalTypeParameter>,
     val methodParameters: List<TypeSignature>,
     val returns: TypeSignature,
-)
+) {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): MethodSignatureNode {
+        return copy(
+            formalParameters = formalParameters.map { it.reify(typeParameters) }, // maybe not needed?
+            methodParameters = methodParameters.map { it.reify(typeParameters) },
+            returns = returns.reify(typeParameters)
+        )
+    }
+}
 
 data class TypeSignatureNode(
     val formalParameters: List<FormalTypeParameter>,

@@ -567,6 +567,10 @@
   "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelection"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelectionSet"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.MethodSelectionSet","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, {"name":"<init>","parameterTypes":["boolean"] }, {"name":"andThen$core","parameterTypes":["sift.core.api.Action"] }, {"name":"component1","parameterTypes":[] }, {"name":"copy","parameterTypes":["sift.core.dsl.MethodSelection"] }, {"name":"copy","parameterTypes":["sift.core.dsl.MethodSelectionSet"] }, {"name":"copy","parameterTypes":["boolean"] }, {"name":"equals","parameterTypes":["java.lang.Object"] }, {"name":"execute$core","parameterTypes":["sift.core.api.Context","java.lang.Iterable"] }, {"name":"filteredMethods","parameterTypes":["sift.core.element.ClassNode"] }, {"name":"hashCode","parameterTypes":[] }, {"name":"id","parameterTypes":[] }, {"name":"invoke$core","parameterTypes":["sift.core.api.Context","java.lang.Object"] }, {"name":"toString","parameterTypes":[] }]
 },
 {
+  "name":"sift.core.api.Action$Class$IntoMethods$Companion",
+  "methods":[{"name":"execute$inheritedMethodsOf","parameterTypes":["sift.core.api.Context","sift.core.element.ClassNode"] }, {"name":"execute$methodsOf","parameterTypes":["boolean","sift.core.api.Action$Class$IntoMethods","sift.core.api.Context","sift.core.element.ClassNode"] }]
+},
+{
   "name":"sift.core.api.Action$Class$IntoOuterClass",
   "allDeclaredFields":true,
   "queryAllDeclaredMethods":true,
@@ -704,7 +708,11 @@
   "methods":[{"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType","int","kotlin.jvm.internal.DefaultConstructorMarker"] }]
 },
 {
-  "name":"sift.core.api.Action$FilterVisibility"
+  "name":"sift.core.api.Action$FilterVisibility",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["sift.core.dsl.Visibility"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.Visibility","int","kotlin.jvm.internal.DefaultConstructorMarker"] }]
 },
 {
   "name":"sift.core.api.Action$FilterVisible"
@@ -1092,6 +1100,16 @@
 },
 {
   "name":"sift.core.dsl.Type"
+},
+{
+  "name":"sift.core.dsl.Visibility",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"sift.core.dsl.Visibility$Companion",
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"sift.core.element.AnnotationNode"

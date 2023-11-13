@@ -1,7 +1,6 @@
 package sift.core.api
 
-import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.ajalt.mordant.rendering.TextStyles.inverse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
@@ -16,7 +15,6 @@ import sift.core.entity.Entity
 import sift.core.entity.EntityService
 import sift.core.entity.LabelFormatter
 import sift.core.template.DeserializedSystemModelTemplate
-import sift.core.terminal.Gruvbox
 import sift.core.topologicalSort
 import sift.core.tree.Tree
 import java.util.*
@@ -25,7 +23,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 internal data class Context(
@@ -47,39 +44,38 @@ internal data class Context(
     private val injectedClasses: MutableList<ClassNode> = mutableListOf()
 
     val parents: MutableMap<ClassNode, List<TypeClassNode>> = allClasses
-        .associateWith(classByType::parentsTypesOf)
+        .associateWith(classByType::parentTypesOf)
         .toMutableMap()
-    var implementedInterfaces: Map<ClassNode, List<TypeClassNode>> = allClasses
-        .associateWith { cn -> interfacesOf(cn) }
+    // todo: consider lazy memoization
+    val inheritance: MutableMap<Type, Tree<TypeClassNode>> = allClasses
+        .associateByTo(ConcurrentHashMap(), ClassNode::type, ::inheritanceTreeOf)
 
-    private fun interfacesOf(cn: ClassNode): List<TypeClassNode> {
-        val found = mutableSetOf<TypeClassNode>()
-        fun recurseInterfaces(node: ClassNode) {
-            val interfaces = node.signature?.implements?.map(TypeSignature::toType)
+    private fun inheritanceTreeOf(cn: ClassNode): Tree<TypeClassNode> {
+
+        fun recurseInterfaces(tree: Tree<TypeClassNode>, node: ClassNode?) {
+            node ?: return
+
+            val interfaces = node
+                .signature?.implements?.map(TypeSignature::toType)
                 ?: node.interfaces
 
             interfaces
-                .map { TypeClassNode(it, classByType[it.rawType]) }
-                .filter { it !in found }
-                .onEach { found += it }
-                .mapNotNull(TypeClassNode::cn)
-                .forEach(::recurseInterfaces)
+                .map { TypeClassNode(it, classByType[it.rawType], true) }
+                .forEach { tcn -> recurseInterfaces(tree.add(tcn), tcn.cn) }
         }
 
-        fun recurseSuperclasses(node: ClassNode) {
-            parents[node]?.let { parents ->
-                parents
-                    .onEach(found::add)
-                    .mapNotNull(TypeClassNode::cn)
-                    .onEach(::recurseSuperclasses)
-                    .onEach(::recurseInterfaces)
+        fun recurseSuperclasses(tree: Tree<TypeClassNode>, node: ClassNode?) {
+            var ptr = tree
+            for (tcn in parents.getOrDefault(node ?: return, listOf())) {
+                ptr = ptr.add(tcn)
+                recurseInterfaces(ptr, tcn.cn)
             }
         }
 
-        recurseInterfaces(cn)
-        recurseSuperclasses(cn)
-
-        return found.toList()
+        return Tree(TypeClassNode(cn.type, cn, cn.isInterface)).apply {
+            recurseSuperclasses(this, cn)
+            recurseInterfaces(this, cn)
+        }
     }
 
     val measurements: Tree<Measurement> = Tree(Measurement(".", Template, Template, 0, 0, 0, 0.milliseconds))
@@ -108,7 +104,8 @@ internal data class Context(
         methodInvocationsCache.clear()
         injectedClasses.clear()
 
-        implementedInterfaces = allClasses.associateWith { cn -> interfacesOf(cn) }
+        inheritance.clear()
+        allClasses.associateByTo(inheritance, ClassNode::type, ::inheritanceTreeOf)
     }
 
     fun synthesize(type: Type): ClassNode {
@@ -124,7 +121,15 @@ internal data class Context(
     ) {
         allClasses += cn
         classByType[cn.type] = cn
-        parents[cn] = classByType.parentsTypesOf(cn)
+        parents[cn] = classByType.parentTypesOf(cn)
+    }
+
+    // builds method invocation cache (prep for future thread safety
+    fun cacheMethodInvocations(methods: Iterable<MethodNode>) {
+//        runBlocking(dispatcher) {
+//            methods.asFlow().collect(::methodsInvokedBy)
+//        }
+        methods.forEach(::methodsInvokedBy)
     }
 
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
@@ -132,8 +137,28 @@ internal data class Context(
     }
 
     fun fieldAccessBy(mn: MethodNode): Iterable<FieldNode> {
+        // update field owner if it is inherited
+        fun ClassNode.inheritFieldNode(fn: FieldNode, implemented: Set<Type>): FieldNode {
+            val fieldOwner = fn.owner.type
+            return when {
+                inheritedFields == null    -> fn
+                fieldOwner == type         -> fn
+                fieldOwner !in implemented -> fn
+                else -> inheritedFields!!.first { it.name == fn.name }
+            }
+        }
+
         return methodFieldAccessCache.getOrPut(mn) {
+            // all interfaces/classes implemented by the method's class
+            val implemented = inheritance[mn.owner.type.rawType]!! // fixme: when generic types are implemented
+                .walk()
+                .drop(1) // self
+                .map(Tree<TypeClassNode>::value)
+                .map(TypeClassNode::type)
+                .toSet()
+
             fieldAccessBy(methodsInvokedBy(mn), classByType)
+                .map { fn -> mn.owner.inheritFieldNode(fn, implemented) }
         }
     }
 
@@ -178,14 +203,16 @@ internal data class Context(
     }
 
     fun allInterfacesOf(cn: ClassNode, includeParents: Boolean = true): List<Type> {
-        val allImplemented = implementedInterfaces[cn] ?: listOf()
+        val allImplemented = inheritance[cn.type]
+            ?.walk()
+            ?.drop(1) // self
+            ?.map(Tree<TypeClassNode>::value)
+            ?.toList()
+            ?: return listOf()
 
         return when {
             includeParents -> allImplemented
-            else -> {
-                val parents = (parents[cn] ?: listOf())
-                allImplemented - parents
-            }
+            else           -> allImplemented.filter(TypeClassNode::isInterface)
         }.map(TypeClassNode::type)
     }
 
@@ -290,8 +317,8 @@ internal data class Context(
         "methodFieldCache.flatten"        to methodFieldAccessCache.values.sumOf(Iterable<FieldNode>::count),
         "parents"                         to parents.size,
         "parents.flatten"                 to parents.values.sumOf(Iterable<TypeClassNode>::count),
-        "implementedInterfaces"           to implementedInterfaces.size,
-        "implementedInterfaces.flatten"   to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
+//        "implementedInterfaces"           to implementedInterfaces.size,
+//        "implementedInterfaces.flatten"   to implementedInterfaces.values.sumOf(Iterable<TypeClassNode>::count),
     ) + elementAssociations.statistics()
 
     data class Statistics(
@@ -303,7 +330,6 @@ internal data class Context(
     val stats = Statistics()
 
     companion object {
-        @OptIn(ExperimentalTime::class)
         fun from(classes: Iterable<AsmClassNode>): Context {
             val (cns, ms) = measureTimedValue { mapClassNodes(classes) }
             return Context(cns.toMutableList())
@@ -311,10 +337,12 @@ internal data class Context(
 
         }
 
-        private fun mapClassNodes(cns: Iterable<AsmClassNode>): List<ClassNode> = runBlocking {
-            cns.asFlow()
-                .map(ClassNode::from)
-                .toList()
+        private fun mapClassNodes(cns: Iterable<AsmClassNode>): List<ClassNode> {
+            return runBlocking(Dispatchers.IO) {
+                cns.asFlow()
+                    .map(ClassNode::from)
+                    .toList()
+            }
         }
     }
 }
@@ -338,14 +366,14 @@ internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity
 private val ClassNode.parentType: Type?
     get() = extends?.type ?: superType
 
-private fun Map<Type, ClassNode>.parentsTypesOf(cn: ClassNode): List<TypeClassNode> {
+private fun Map<Type, ClassNode>.parentTypesOf(cn: ClassNode): List<TypeClassNode> {
     fun Map<Type, ClassNode>.next(tcn: TypeClassNode): TypeClassNode? {
         val parentType = tcn.cn?.parentType ?: return null
         val parent = get(parentType.rawType)
-        return TypeClassNode(parentType, parent)
+        return TypeClassNode(parentType, parent, false)
     }
 
-    return generateSequence(TypeClassNode(cn.type, cn)) { tcn -> next(tcn) }
+    return generateSequence(TypeClassNode(cn.type, cn, cn.isInterface)) { tcn -> next(tcn) }
         .drop(1)
         .toList()
 }
@@ -384,47 +412,3 @@ enum class MeasurementScope(val id: String) {
     Exception("exception-scope"), // used as marker when an exception is thrown
     FromContext("")
 }
-
-internal fun Context.debugTrails() {
-    val colWidth = elementAssociations.allTraces()
-        .flatten()
-        .map(Element::toString)
-        .maxOfOrNull(String::length) ?: 0
-
-    elementAssociations.allTraces()
-        .map { it.debugString(this, colWidth) }
-        .forEach(::println)
-}
-
-private fun List<Element>.debugString(
-    context: Context,
-    colWidth: Int = 20
-): String {
-    return joinToString(" ") { e ->
-        if (e in context.entityService) {
-            inverse(e.stylized(colWidth))
-        } else {
-            e.stylized(colWidth)
-        }
-    }
-}
-
-private fun Element.stylized(width: Int): String {
-    val s = toString()
-    val lastIndex = minOf(width - 1, s.lastIndex)
-
-    return (when (this) {
-        is AnnotationNode -> Gruvbox.aqua2
-        is ClassNode      -> Gruvbox.yellow2
-        is FieldNode      -> Gruvbox.purple2
-        is MethodNode     -> Gruvbox.green2
-        is ParameterNode  -> Gruvbox.orange2
-        is SignatureNode  -> Gruvbox.blue2
-        is ValueNode      -> Gruvbox.gray245
-    } + bold)(s.substring(0..lastIndex).padEnd(width))
-}
-
-internal data class TypeClassNode(
-    val type: Type,
-    val cn: ClassNode?
-)

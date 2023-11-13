@@ -1,17 +1,29 @@
 package sift.core.asm.signature
 
 import net.onedaybeard.collectionsby.filterNotBy
+import sift.core.dsl.Type
 import sift.core.dsl.type
+
+data class BoundTypeParameter(
+    val name: String,
+    val boundType: Type,
+    val extends: MutableList<TypeSignature> = mutableListOf(), // visitClassType of T
+)
 
 data class FormalTypeParameter(
     val name: String,
     val extends: MutableList<TypeSignature> = mutableListOf(), // visitClassType of T
 ) {
+    internal fun reify(typeParameters: Map<String, TypeParameter>): FormalTypeParameter {
+        return copy(
+            extends = extends.map { it.reify(typeParameters) }.toMutableList()
+        )
+    }
 
     override fun hashCode(): Int = toString().hashCode()
 
     override fun toString(): String {
-        val filtered = extends.filterNotBy(TypeSignature::type, extendsAny)
+        val filtered = extends.filterNotBy(TypeSignature::argType, extendsAny)
 
         return name + when (filtered.size) {
             0    -> ""

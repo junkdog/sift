@@ -4,10 +4,13 @@ import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.terminal.Terminal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import sift.core.api.intoTree
+import org.junit.jupiter.api.extension.ExtendWith
+import sift.core.api.debug.intoTree
+import sift.core.junit.LogActiveTestExtension
 import sift.core.terminal.stripEmoji
 import sift.core.tree.merge
 
+@ExtendWith(LogActiveTestExtension::class)
 class FnsTest {
     @Test
     fun `no emoji - happy path`() {

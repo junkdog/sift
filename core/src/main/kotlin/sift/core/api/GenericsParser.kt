@@ -58,7 +58,7 @@ internal fun parseSignature(signature: String): TypeSignature {
 
 private fun parseGenericType(
     signature: String
-): GenericType = GenericsParser(signature).parseType(0)
+): GenericType = GenericsParser(signature).parseType()
 
 private sealed interface TypeName {
     data class SimpleName(val name: String) : TypeName {
@@ -101,7 +101,7 @@ private class GenericType(val index: Int, val constraint: TypeName, val argument
 private class GenericsParser(val input: String) {
     private var index = 0
 
-    fun parseType(index: Int): GenericType {
+    fun parseType(index: Int = 0): GenericType {
         val name = parseTypeName()
         val arguments = mutableListOf<GenericType>()
         if (at('<')) {

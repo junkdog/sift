@@ -62,6 +62,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val matched: Map<MethodNode, Entity> = ctx.coercedMethodsOf(type)
             elements
+                .also(ctx::cacheMethodInvocations)
                 .forEach { registerInvocations(ctx, it, matched, "backtrack", key) }
         }
     }
@@ -79,6 +80,7 @@ sealed class EntityAssignmentResolver<T: Element> {
         ) {
             val matched: Map<MethodNode, Entity> = ctx.coercedMethodsOf(type)
             elements
+                .also(ctx::cacheMethodInvocations)
                 .forEach { registerInvocations(ctx, it, matched, key, "backtrack") }
         }
     }
@@ -100,6 +102,7 @@ sealed class EntityAssignmentResolver<T: Element> {
                 .toSet()
 
             elements
+                .also(ctx::cacheMethodInvocations)
                 .forEach { registerInstantiations(ctx, it, types, "backtrack", key) }
         }
     }
@@ -122,6 +125,7 @@ sealed class EntityAssignmentResolver<T: Element> {
                 .toSet()
 
             elements
+                .also(ctx::cacheMethodInvocations)
                 .forEach { registerInstantiations(ctx, it, types, key, "backtrack") }
         }
     }

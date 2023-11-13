@@ -3,11 +3,14 @@
 package sift.core.dsl
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.asm.classNode
 import sift.core.dsl.MethodSelection.inherited
 import sift.core.entity.Entity
 import sift.core.expecting
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 class ScopeInheritedElementsTest {
     val cns = listOf(
         classNode(Concrete::class),
@@ -40,12 +43,12 @@ class ScopeInheritedElementsTest {
                ├─ Base
                │  └─ Base.baseField
                ├─ BaseCore
-               │  ├─ Base.baseField
+               │  ├─ BaseCore.baseField
                │  └─ BaseCore.coreField
                └─ Concrete
-                  ├─ Base.baseField
-                  ├─ BaseCore.coreField
-                  └─ Concrete.concreteField
+                  ├─ Concrete.baseField
+                  ├─ Concrete.concreteField
+                  └─ Concrete.coreField
             """
         )
     }
@@ -70,14 +73,14 @@ class ScopeInheritedElementsTest {
             ── class
                └─ Concrete
                   ├─ Concrete::base
-                  │  └─ Base.baseField
+                  │  └─ Concrete.baseField
                   ├─ Concrete::concrete
-                  │  ├─ Base.baseField
-                  │  ├─ BaseCore.coreField
-                  │  └─ Concrete.concreteField
+                  │  ├─ Concrete.baseField
+                  │  ├─ Concrete.concreteField
+                  │  └─ Concrete.coreField
                   └─ Concrete::fooCore
-                     ├─ Base.baseField
-                     └─ BaseCore.coreField
+                     ├─ Concrete.baseField
+                     └─ Concrete.coreField
             """
         )
     }

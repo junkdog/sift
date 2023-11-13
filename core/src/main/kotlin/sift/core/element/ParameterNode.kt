@@ -3,7 +3,6 @@ package sift.core.element
 import org.objectweb.asm.tree.LocalVariableNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.asm.signature.TypeSignature
-import sift.core.asm.signature.signature
 import sift.core.asm.simpleName
 import sift.core.dsl.Type
 import sift.core.kotlin.KotlinCallable
@@ -74,7 +73,8 @@ class ParameterNode private constructor(
                 }
             }
 
-            val signatures = asmMn.signature(mn.formalTypeParameters)?.methodParameters
+            val signatures = mn.signature?.methodParameters
+//            val signatures = asmMn.signature(mn.formalTypeParameters)?.methodParameters
 
             return when {
                 // no parameters to resolve

@@ -2,9 +2,12 @@ package sift.core.api
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.asm.classNode
 import sift.core.element.ClassNode
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 internal class TraceTest {
     val elements = generateSequence { ClassNode.from(classNode(TraceTest::class)) }
         .onEachIndexed { index, elem -> elem.id = index }

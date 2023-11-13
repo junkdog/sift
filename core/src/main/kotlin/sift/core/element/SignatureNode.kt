@@ -20,7 +20,7 @@ class SignatureNode private constructor(
         get() = signature.toType()
 
     val argType: ArgType
-        get() = signature.type
+        get() = signature.argType
 
     override fun equals(other: Any?): Boolean {
         return other is SignatureNode
@@ -46,14 +46,15 @@ internal fun TypeSignature.toType(): Type {
         ?.joinToString(prefix = "<", postfix = ">")
         ?: ""
 
-    return "${type.className()}$generics".type
+    return "${argType.className()}$generics".type
 }
 
 
 private fun ArgType.className(): String {
     return when (this) {
-        is ArgType.Array -> wrapped?.className() + "[]"
-        is ArgType.Plain -> type.internalName
-        is ArgType.Var   -> type.name
+        is ArgType.Array      -> wrapped?.className() + "[]"
+        is ArgType.Plain      -> type.internalName
+        is ArgType.Var        -> type.name
+        is ArgType.BoundVar   -> type.name
     }
 }

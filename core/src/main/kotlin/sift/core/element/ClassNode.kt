@@ -3,10 +3,12 @@ package sift.core.element
 import net.onedaybeard.collectionsby.findBy
 import org.objectweb.asm.tree.InnerClassNode
 import sift.core.AsmNodeHashcoder.idHash
+import sift.core.api.AccessFlags.acc_annotation
 import sift.core.api.AccessFlags.acc_interface
 import sift.core.asm.signature.ClassSignatureNode
 import sift.core.asm.signature.signature
 import sift.core.asm.superType
+import sift.core.asm.toDebugString
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinClass
@@ -27,6 +29,9 @@ class ClassNode private constructor(
 
     internal val isInterface: Boolean
         get() = acc_interface.check(access)
+
+    internal val isAnnotation: Boolean
+        get() = acc_annotation.check(access)
 
     private val kotlinClass: KotlinClass? = KotlinClass.from(cn)
 
@@ -52,9 +57,10 @@ class ClassNode private constructor(
         .toMutableList()
 
     internal var inheritedMethods: List<MethodNode>? = null
+    internal var inheritedFields: List<FieldNode>? = null
 
     val isEnum: Boolean
-        get() = cn.superType?.rawType?.name == "java.lang.Enum"
+        get() = cn.superType?.name == "java.lang.Enum"
 
     val extends: SignatureNode? = signature?.extends?.let(SignatureNode::from)
 
@@ -87,6 +93,7 @@ class ClassNode private constructor(
     private val hash = idHash(cn)
 
     override fun toString() = simpleName
+    internal fun toDebugString(): String = cn.toDebugString()
 
     override fun equals(other: Any?): Boolean {
         return cn === (other as? ClassNode)?.cn

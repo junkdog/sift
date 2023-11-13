@@ -356,8 +356,6 @@ methodFieldCache                                0
 methodFieldCache.flatten                        0
 parents                                       544
 parents.flatten                               467
-implementedInterfaces                         544
-implementedInterfaces.flatten                 734
 traced-elements                             1 114
 traces                                      1 164
 traces.p50                                      1

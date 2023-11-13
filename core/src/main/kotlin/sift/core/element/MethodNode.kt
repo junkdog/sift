@@ -1,6 +1,5 @@
 package sift.core.element
 
-import org.objectweb.asm.commons.SimpleRemapper
 import org.objectweb.asm.tree.AbstractInsnNode
 import sift.core.AsmNodeHashcoder.hash
 import sift.core.AsmNodeHashcoder.idHash
@@ -8,7 +7,9 @@ import sift.core.asm.asSequence
 import sift.core.asm.copy
 import sift.core.asm.signature.FormalTypeParameter
 import sift.core.asm.signature.MethodSignatureNode
+import sift.core.asm.signature.TypeParameter
 import sift.core.asm.signature.signature
+import sift.core.asm.toDebugString
 import sift.core.dsl.Type
 import sift.core.dsl.Visibility
 import sift.core.kotlin.KotlinCallable
@@ -18,6 +19,8 @@ class MethodNode private constructor(
     private val mn: AsmMethodNode,
     override val annotations: List<AnnotationNode>,
     private val kfn: KotlinCallable?,
+    internal val originalCn: ClassNode? = null, // when method is inherited
+    internal val signature: MethodSignatureNode? = defaultSignature(originalCn ?: cn, mn)
 ) : Element() {
 
     init {
@@ -53,13 +56,10 @@ class MethodNode private constructor(
     val receiver: Type?
         get() = kfn?.receiver
 
-    internal val signature: MethodSignatureNode? =
-        mn.signature(cn.signature?.formalParameters ?: listOf())
-
     val formalTypeParameters: List<FormalTypeParameter>
         get() = signature?.formalParameters ?: listOf()
 
-    val parameters: List<ParameterNode> = ParameterNode.from(cn, this, mn, kfn)
+    val parameters: List<ParameterNode> by lazy { ParameterNode.from(cn, this, mn, kfn) }
 
     val access: Int
         get() = mn.access
@@ -72,25 +72,33 @@ class MethodNode private constructor(
 
     val returns: SignatureNode? by lazy { signature?.returns?.let(SignatureNode::from) }
 
-    private val hash = hash(cn) * 31 + idHash(mn)
+    private val hash = hash(cn, originalCn) * 31 + idHash(mn)
 
     fun toMethodRefString(): String = "$cn::$name"
     override fun toString(): String = toMethodRefString()
-//    override fun toString(): String = "$cn.$name(${parameters.joinToString { "${it.name}: ${it.type.simpleName}" }})"
 
     fun instructions(): Sequence<AbstractInsnNode> = mn.asSequence()
+
+    internal fun toDebugString(): String = mn.toDebugString()
 
     override fun equals(other: Any?): Boolean {
         return other is MethodNode
             && mn === other.mn
             && cn == other.cn
+            && originalCn == other.originalCn
     }
 
     override fun hashCode() = hash
 
     internal fun copyWithOwner(cn: ClassNode): MethodNode {
         val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
-        return MethodNode(cn, mn.copy(), anno, kfn)
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn ?: this.cn, signature)
+            .also { mn -> mn.id = -1 }
+    }
+
+    internal fun reify(typeParameters: Map<String, TypeParameter>): MethodNode {
+        val anno = AnnotationNode.from(mn.visibleAnnotations, mn.invisibleAnnotations)
+        return MethodNode(cn, mn.copy(), anno, kfn, originalCn, signature?.reify(typeParameters))
             .also { mn -> mn.id = -1 }
     }
 
@@ -104,4 +112,8 @@ class MethodNode private constructor(
             return MethodNode(cn, mn, ans, kfn)
         }
     }
+}
+
+private fun defaultSignature(cn: ClassNode, mn: AsmMethodNode): MethodSignatureNode? {
+    return mn.signature(cn.signature?.formalParameters ?: listOf())
 }

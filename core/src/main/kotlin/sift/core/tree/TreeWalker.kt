@@ -1,8 +1,13 @@
 package sift.core.tree
 
-class TreeWalker<T>(val root: Tree<T>) : Sequence<Tree<T>> {
+enum class TraversalType {
+    DEPTH_FIRST,
+    BREADTH_FIRST
+}
+
+internal class TreeWalker<T>(val root: Tree<T>, val traversal: TraversalType) : Sequence<Tree<T>> {
     override fun iterator() = object : Iterator<Tree<T>> {
-        val stack: MutableList<Tree<T>> = mutableListOf(root)
+        val buffer: MutableList<Tree<T>> = ArrayDeque(listOf(root))
         var nextValue: Tree<T>? = prepareNext()
 
         override fun hasNext() = nextValue != null
@@ -13,11 +18,11 @@ class TreeWalker<T>(val root: Tree<T>) : Sequence<Tree<T>> {
             return value
         }
 
-        private fun prepareNext(): Tree<T>? {
-            // need to add children in reverse, so that last() during walk()
-            // returns the last child of the last node
-            return stack.removeLastOrNull()
-                ?.also { stack.addAll(it.children().reversed()) }
+        private fun prepareNext(): Tree<T>? = when (traversal) {
+            TraversalType.DEPTH_FIRST -> buffer.removeLastOrNull()
+                ?.also { node -> buffer += node.children().reversed() }
+            TraversalType.BREADTH_FIRST -> buffer.removeFirstOrNull()
+                ?.also { node -> buffer += node.children() }
         }
     }
 }

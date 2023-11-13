@@ -4,17 +4,20 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.api.AccessFlags.acc_final
 import sift.core.api.Context
 import sift.core.api.SystemModel
 import sift.core.api.TemplateProcessor
+import sift.core.api.debug.debugTraces
 import sift.core.api.debugLog
-import sift.core.api.debugTrails
 import sift.core.asm.classNode
 import sift.core.dsl.annotatedBy
 import sift.core.dsl.classes
 import sift.core.entity.Entity
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 class SystemModelSerializerTest {
 
     @Test
@@ -47,7 +50,7 @@ class SystemModelSerializerTest {
         }
 
         val sm = TemplateProcessor(cns)
-            .process(template, false, Context::debugTrails)
+            .process(template, false, Context::debugTraces)
             .entityService
             .let(::SystemModel)
 

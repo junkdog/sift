@@ -63,7 +63,9 @@ class Tree<T>(val value: T) {
     override fun equals(other: Any?) = (other as? Tree<*>)?.value == value
     override fun hashCode() = value.hashCode()
 
-    fun walk(): TreeWalker<T> = TreeWalker(this)
+    fun walk(
+        traversalType: TraversalType = TraversalType.DEPTH_FIRST
+    ): Sequence<Tree<T>> = TreeWalker(this, traversalType)
 
     fun copy(): Tree<T> = map { it }
 
@@ -122,7 +124,7 @@ fun <T: Any, S: Comparable<S>> merge(
     a: Tree<S>,
     b: Tree<S>,
     nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
-    transform: (S, MergeOrigin) -> T
+    transform: (S, MergeOrigin) -> T = { s, _ -> s as T }
 ): Tree<T> = Tree(transform(a.value, both)).apply {
     require(a.value == b.value) { "trees must share the same root node" }
     merge(a.children(), b.children(), nodeEquals, transform)
@@ -133,7 +135,7 @@ fun <T: Any, S: Comparable<S>> merge(
     a: Tree<S>,
     b: Tree<S>,
     nodeEquals: (Tree<S>, Tree<S>) -> Boolean = { l, r -> l.value == r.value },
-    transform: (S, MergeOrigin) -> T
+    transform: (S, MergeOrigin) -> T = { s, _ -> s as T }
 ): Tree<T> = Tree(root).apply {
     val lhs = if (transform(a.value, both) == root) a.children() else listOf(a)
     val rhs = if (transform(b.value, both) == root) b.children() else listOf(b)

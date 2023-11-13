@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.objectweb.asm.tree.ClassNode
 import org.reflections.Reflections
 import sift.core.*
@@ -22,6 +23,7 @@ import sift.core.dsl.ScopeEntityPredicate.ifExists
 import sift.core.dsl.ScopeEntityPredicate.ifExistsNot
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.junit.LogActiveTestExtension
 import sift.core.terminal.TextTransformer.Companion.edit
 import sift.core.terminal.TextTransformer.Companion.lowercase
 import sift.core.terminal.TextTransformer.Companion.replace
@@ -32,6 +34,7 @@ import java.io.InputStream
 import java.util.*
 import kotlin.test.assertTrue
 
+@ExtendWith(LogActiveTestExtension::class)
 class DslTest {
 
     init {
@@ -48,9 +51,6 @@ class DslTest {
         // annotations (junk)
         classNode<Endpoint>(),
         classNode<RestController>(),
-
-        // more junk
-        classNode<DslTest>()
     )
 
     @Test
@@ -1681,18 +1681,14 @@ class DslTest {
         val fn = Entity.Type("repo-method")
 
         template {
-            classes {
-                log("pre-repository")
+            classes("register repo") {
                 implements(type<Repo>())
-                log("repository")
                 entity(repo)
             }
 
-            classes {
+            classes("register repo methods from synthesized methods") {
                 methods {
-                    log("inspect")
-                    invocationsOf(repo, synthesize = true) {
-                        log("invoked")
+                    invocationsOf(repo, synthesize = false) {
                         entity(fn)
                         repo["methods"] = fn
                     }
@@ -2185,6 +2181,178 @@ class DslTest {
                     foo["bars"] = bar
                 }
             }.expecting { }
+        }
+    }
+
+    @Nested
+    inner class MoreAdvancedGenericsTests {
+        private val cns = listOf(
+            classNode(AbstractBaseGenerics::class),
+            classNode(AbstractGenerics1::class),
+            classNode(Generics1a::class),
+            classNode(Generics1b::class),
+            classNode(Generics1c::class),
+            classNode(Generics2::class),
+            classNode(Generics2a::class),
+            classNode(Generics2aa::class),
+            classNode(Generics3a::class),
+            classNode(Generics3::class),
+        )
+
+        @Test
+        fun `resolve inherited generic method`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics1a"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType(synthesize = true) {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType(synthesize = true) {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics1a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Integer
+                """
+            )
+        }
+
+        @Test
+        fun `resolve inherited generic with different type parameters`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics3a"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType(synthesize = true) {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType(synthesize = true) {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics3a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Integer
+                """
+            )
+        }
+
+        @Test
+        fun `deep resolve inherited generic method`() {
+            val c = Entity.Type("class")
+            val m = Entity.Type("method")
+            val p = Entity.Type("parameter")
+            val r = Entity.Type("return")
+
+            template {
+                classes {
+                    filter(Regex("Generics2a$"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    methods(inherited) {
+                        entity(m, label("method: \${name}"), property("name", readName()))
+                        c["methods"] = m
+
+                        parameters {
+                            parameter(0)
+                            explodeType(synthesize = true) {
+                                entity(p, label("param: \${name}"), property("name", readName()))
+                                m["parameters"] = p
+                            }
+                        }
+
+                        returns {
+                            explodeType(synthesize = true) {
+                                entity(r, label("returns: \${name}"), property("name", readName()))
+                                m["returns"] = r
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics2a
+                      └─ method: foo
+                         ├─ param: String
+                         └─ returns: Integer
+                """
+            )
+        }
+
+        @Test
+        fun `resolve generic type from inherited field`() {
+            val c = Entity.Type("class")
+            val f = Entity.Type("field")
+            val t = Entity.Type("field-type")
+
+            template {
+                classes {
+                    filter(Regex("Generics1a"))
+                    entity(c, label("\${name}"), property("name", readName()))
+
+                    fields(inherited = true) {
+                        filter("bar")
+                        entity(f, label("\${name}: \${type}"), property("name", readName()))
+                        c["fields"] = f
+                        signature {
+                            explodeType(synthesize = true) {
+                                property(f, "type", readName())
+                            }
+                        }
+                    }
+                }
+            }.expecting(cns, c, """
+                ── class
+                   └─ Generics1a
+                      └─ bar: String
+                """
+            )
         }
     }
 

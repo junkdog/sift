@@ -3,8 +3,10 @@ package sift.core
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.objectweb.asm.tree.ClassNode
 import sift.core.api.*
+import sift.core.api.debug.debugTraces
 import sift.core.api.testdata.set1.Payload
 import sift.core.api.testdata.set2.HandlerFn
 import sift.core.api.testdata.set2.HandlerOfFns
@@ -13,8 +15,10 @@ import sift.core.dsl.annotatedBy
 import sift.core.dsl.classes
 import sift.core.entity.Entity
 import sift.core.entity.EntityService
+import sift.core.junit.LogActiveTestExtension
 
 @Disabled
+@ExtendWith(LogActiveTestExtension::class)
 class KnownLimitationsTest {
 
     init {
@@ -68,7 +72,7 @@ class KnownLimitationsTest {
         block: (EntityService) -> Unit
     ) {
         TemplateProcessor(cns)
-            .process(this, false, Context::debugTrails)
+            .process(this, false, Context::debugTraces)
             .entityService
             .also(block)
     }

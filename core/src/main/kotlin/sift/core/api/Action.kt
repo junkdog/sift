@@ -24,6 +24,7 @@ import sift.core.entity.Entity
 import sift.core.entity.LabelFormatter
 import sift.core.jackson.NoArgConstructor
 import sift.core.terminal.StringEditor
+import sift.core.tree.Tree
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "@type")
 @JsonSubTypes(
@@ -124,12 +125,12 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Template {
-        internal object TemplateScope : Action<Unit, Unit>() {
+        internal data object TemplateScope : Action<Unit, Unit>() {
             override fun id() = "template-scope"
             override fun execute(ctx: Context, input: Unit): Unit = input
         }
 
-        internal object InstrumentClasses : Action<Unit, IterClasses>() {
+        internal data object InstrumentClasses : Action<Unit, IterClasses>() {
             override fun id() = "classes"
             override fun execute(ctx: Context, input: Unit): IterClasses {
                 return ctx.allClasses
@@ -196,7 +197,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Elements {
-        internal object ElementScope : Action<Iter<Element>, Iter<Element>>() {
+        internal data object ElementScope : Action<Iter<Element>, Iter<Element>>() {
             override fun id() = "element-scope"
             override fun execute(ctx: Context, input: Iter<Element>): Iter<Element> = input
         }
@@ -226,7 +227,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Annotations {
-        internal object AnnotationScope : Action<IterAnnotations, IterAnnotations>() {
+        internal data object AnnotationScope : Action<IterAnnotations, IterAnnotations>() {
             override fun id() = "annotation-scope"
             override fun execute(ctx: Context, input: IterAnnotations): IterAnnotations = input
         }
@@ -301,7 +302,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Signature {
-        internal object ReadType : Action<IterSignatures, IterValues>() {
+        internal data object ReadType : Action<IterSignatures, IterValues>() {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterSignatures): IterValues {
                 return input
@@ -314,7 +315,13 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-raw-type"
             override fun execute(ctx: Context, input: IterSignatures): IterClasses {
                 fun classOf(elem: SignatureNode): ClassNode? {
-                    val type = (elem.argType as? ArgType.Plain)?.type ?: return null
+                    val type = when (val arg = elem.argType) {
+                        is ArgType.Array -> TODO("recurse: $arg")
+                        is ArgType.Plain -> arg.type
+                        is ArgType.Var -> return null //TODO("resolve formal type parameter: ${arg.type}")
+                        is ArgType.BoundVar -> arg.type
+                    }
+
                     return (ctx.classByType[type] ?: if (synthesize) ctx.synthesize(type) else null)
                         ?.also { output -> ctx.scopeTransition(elem, output) }
                 }
@@ -323,12 +330,12 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object SignatureScope : Action<IterSignatures, IterSignatures>() {
+        internal data object SignatureScope : Action<IterSignatures, IterSignatures>() {
             override fun id() = "signature-scope"
             override fun execute(ctx: Context, input: IterSignatures) = input
         }
 
-        internal object InnerTypeArguments : Action<IterSignatures, IterSignatures>() {
+        internal data object InnerTypeArguments : Action<IterSignatures, IterSignatures>() {
             override fun id() = "inner-type-arguments"
             override fun execute(ctx: Context, input: IterSignatures): IterSignatures {
                 fun argumentsOf(elem: SignatureNode): Iterable<SignatureNode> {
@@ -347,7 +354,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object ReadSignature : Action<IterSignatures, IterValues>() {
+        internal data object ReadSignature : Action<IterSignatures, IterValues>() {
             override fun id() = "read-name"
             override fun execute(ctx: Context, input: IterSignatures): IterValues {
                 return input
@@ -437,12 +444,12 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object ClassScope : Action<IterClasses, IterClasses>() {
+        internal data object ClassScope : Action<IterClasses, IterClasses>() {
             override fun id() = "class-scope"
             override fun execute(ctx: Context, input: IterClasses): IterClasses = input
         }
 
-        internal object IntoSuperclassSignature : Action<IterClasses, IterSignatures>() {
+        internal data object IntoSuperclassSignature : Action<IterClasses, IterSignatures>() {
             override fun id() = "into-superclass-signature"
             override fun execute(ctx: Context, input: IterClasses): IterSignatures {
                 fun signatureOf(elem: ClassNode): SignatureNode? {
@@ -455,7 +462,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoEnumValues : Action<IterClasses, IterFields>() {
+        internal data object IntoEnumValues : Action<IterClasses, IterFields>() {
             override fun id() = "into-enum-values"
             override fun execute(ctx: Context, input: IterClasses): IterFields {
                 fun enumValuesOf(elem: ClassNode): List<FieldNode> {
@@ -480,21 +487,17 @@ sealed class Action<IN, OUT> {
                 fun inheritedMethodsOf(input: ClassNode): IterMethods {
 
                     // resolve inherited methods if they're not already resolved
-                    var inheritedMethods = input.inheritedMethods
+                    var inheritedMethods: List<MethodNode>? = input.inheritedMethods
                     if (inheritedMethods == null) {
-                        val inherited =  ctx.parents[input]!!
-                            .mapNotNull { (_, cn) -> cn?.methods }
-                            .flatten()
+                        inheritedMethods = ctx.inheritance[input.type]!!
+                            .also(Tree<TypeClassNode>::resolveGenerics)
+                            .walk()
+                            .drop(1) // root node is same as `input`
+                            .toList()
+                            .flatMap(Tree<TypeClassNode>::methods)
                             .map { mn -> mn.copyWithOwner(input) }
-
-                        val abstractMethods = ctx.implementedInterfaces[input]!!
-                            .mapNotNull { (_, cn) -> cn?.methods }
-                            .flatten()
-                            .map { mn -> mn.copyWithOwner(input) }
-
-                        inheritedMethods = (inherited + abstractMethods)
-                            .preferImplementations()
                             .also { input.inheritedMethods = it }
+                            .preferImplementations()
                     }
 
                     return inheritedMethods
@@ -529,9 +532,19 @@ sealed class Action<IN, OUT> {
             override fun id() = "fields(${"inherited".takeIf { inherited } ?: ""})"
             override fun execute(ctx: Context, input: IterClasses): IterFields {
                 fun inheritedFieldsOf(input: ClassNode): IterFields {
-                    return ctx.parents[input]!!
-                        .mapNotNull { (_, cn) ->  cn?.fields }
-                        .flatten()
+                    if (input.inheritedFields != null)
+                        return input.inheritedFields!!
+
+                    input.inheritedFields = ctx.inheritance[input.type]!!
+                        .also(Tree<TypeClassNode>::resolveGenerics)
+                        .walk()
+                        .drop(1) // root node is same as `input`
+                        .toList()
+                        .flatMap(Tree<TypeClassNode>::fields)
+                        .map { fn -> fn.copyWithOwner(input) }
+                        .also { input.inheritedFields = it }
+
+                    return input.inheritedFields!!
                 }
 
                 fun fieldsOf(input: ClassNode): IterFields {
@@ -546,7 +559,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoOuterClass : Action<IterClasses, IterClasses>() {
+        internal data object IntoOuterClass : Action<IterClasses, IterClasses>() {
             override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterClasses): IterClasses {
                 fun outerClass(elem: ClassNode): ClassNode? {
@@ -560,7 +573,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object ReadType : Action<IterClasses, IterValues>() {
+        internal data object ReadType : Action<IterClasses, IterValues>() {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterClasses): IterValues {
                 return input
@@ -571,7 +584,7 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Method {
-        internal object IntoReturnSignature : Action<IterMethods, IterSignatures>() {
+        internal data object IntoReturnSignature : Action<IterMethods, IterSignatures>() {
             override fun id() = "returns"
             override fun execute(ctx: Context, input: IterMethods): IterSignatures {
                 fun signatureOf(elem: MethodNode): SignatureNode? {
@@ -604,7 +617,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoOuterScope : Action<IterMethods, IterClasses>() {
+        internal data object IntoOuterScope : Action<IterMethods, IterClasses>() {
             override fun id() = "outer-class"
             override fun execute(ctx: Context, input: IterMethods): IterClasses {
                 return input
@@ -613,7 +626,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object MethodScope : Action<IterMethods, IterMethods>() {
+        internal data object MethodScope : Action<IterMethods, IterMethods>() {
             override fun id() = "method-scope"
             override fun execute(ctx: Context, input: IterMethods): IterMethods = input
         }
@@ -632,7 +645,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        object FieldAccess : Action<IterMethods, IterFields>() {
+        data object FieldAccess : Action<IterMethods, IterFields>() {
             override fun id() = "field-access"
             override fun execute(ctx: Context, input: IterMethods): IterFields {
                 fun resolveFieldNode(ins: FieldInsnNode): FieldNode? = ctx
@@ -647,7 +660,9 @@ sealed class Action<IN, OUT> {
                     .mapNotNull(::resolveFieldNode)
                     .onEach { output -> ctx.scopeTransition(elem, output) }
 
-                return input.flatMap(::fieldsOf)
+                return input
+                    .also(ctx::cacheMethodInvocations)
+                    .flatMap(::fieldsOf)
             }
         }
 
@@ -669,6 +684,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input
+                    .also(ctx::cacheMethodInvocations)
                     .flatMap(::introspect)
             }
 
@@ -692,6 +708,7 @@ sealed class Action<IN, OUT> {
                 }
 
                 return input
+                    .also(ctx::cacheMethodInvocations)
                     .filter { introspect(it).isNotEmpty() }
             }
         }
@@ -708,6 +725,7 @@ sealed class Action<IN, OUT> {
                         is ArgType.Array -> typeOf(arg.wrapped!!)
                         is ArgType.Plain -> arg.type
                         is ArgType.Var -> TODO("typeOf not implemented for formal type variables")
+                        is ArgType.BoundVar -> arg.type
                     }
                 }
 
@@ -763,6 +781,7 @@ sealed class Action<IN, OUT> {
                         .map { elem to it }
                 }
 
+                ctx.cacheMethodInvocations(input)
                 return runBlocking(Dispatchers.Default) {
                     input.asFlow()
                         .flatMapConcat { mn -> resolveInvocations(mn) }
@@ -788,12 +807,12 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Field {
-        internal object FieldScope : Action<IterFields, IterFields>() {
+        internal data object FieldScope : Action<IterFields, IterFields>() {
             override fun id() = "field-scope"
             override fun execute(ctx: Context, input: IterFields): IterFields = input
         }
 
-        internal object IntoSignature : Action<IterFields, IterSignatures>() {
+        internal data object IntoSignature : Action<IterFields, IterSignatures>() {
             override fun id() = "field-into-signature"
             override fun execute(ctx: Context, input: IterFields): IterSignatures {
                 fun signatureOf(elem: FieldNode): SignatureNode? {
@@ -806,7 +825,7 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object IntoOuterScope : Action<IterFields, IterClasses>() {
+        internal data object IntoOuterScope : Action<IterFields, IterClasses>() {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterFields): IterClasses {
                 return input
@@ -841,12 +860,12 @@ sealed class Action<IN, OUT> {
     }
 
     internal object Parameter {
-        internal object ParameterScope : Action<IterParameters, IterParameters>() {
+        internal data object ParameterScope : Action<IterParameters, IterParameters>() {
             override fun id() = "parameter-scope"
             override fun execute(ctx: Context, input: IterParameters): IterParameters = input
         }
 
-        internal object IntoSignature : Action<IterParameters, IterSignatures>() {
+        internal data object IntoSignature : Action<IterParameters, IterSignatures>() {
             override fun id() = "parameter-into-signature"
             override fun execute(ctx: Context, input: IterParameters): IterSignatures {
                 fun signatureOf(elem: ParameterNode): SignatureNode? {
@@ -870,10 +889,10 @@ sealed class Action<IN, OUT> {
             override fun id() = "explode-type(${"synthesize".takeIf { synthesize } ?: ""})"
             override fun execute(ctx: Context, input: IterParameters): IterClasses {
                fun explode(param: ParameterNode): ClassNode? {
-
-                   var exploded = ctx.classByType[param.type]
+                   val resolvedType = param.signature?.type ?: param.type
+                   var exploded = ctx.classByType[resolvedType]
                    if (exploded == null && synthesize)
-                       exploded = ctx.synthesize(param.type)
+                       exploded = ctx.synthesize(resolvedType)
 
                    return exploded
                        ?.also { ctx.scopeTransition(param, it) }
@@ -883,16 +902,16 @@ sealed class Action<IN, OUT> {
             }
         }
 
-        internal object ReadType : Action<IterParameters, IterValues>() {
+        internal data object ReadType : Action<IterParameters, IterValues>() {
             override fun id() = "read-type"
             override fun execute(ctx: Context, input: IterParameters): IterValues {
                 return input
-                    .map { ValueNode.from(it.type, it) }
-                    .onEach { ctx.scopeTransition(it.reference, it) }
+                    .map { pn -> ValueNode.from(pn.signature?.type ?: pn.type, pn) }
+                    .onEach { pn -> ctx.scopeTransition(pn.reference, pn) }
             }
         }
 
-        internal object IntoOuterScope : Action<IterParameters, IterMethods>() {
+        internal data object IntoOuterScope : Action<IterParameters, IterMethods>() {
             override fun id() = "outer"
             override fun execute(ctx: Context, input: IterParameters): IterMethods {
                 return input

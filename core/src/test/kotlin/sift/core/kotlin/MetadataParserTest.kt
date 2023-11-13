@@ -4,9 +4,12 @@ package sift.core.kotlin
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.asm.classNode
 import sift.core.dsl.Type
+import sift.core.junit.LogActiveTestExtension
 
+@ExtendWith(LogActiveTestExtension::class)
 class MetadataParserTest {
 
     @Test

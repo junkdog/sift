@@ -20,13 +20,14 @@
     </licenses>
 
     <properties>
-        <kotlin.version>1.9.10</kotlin.version>
+
+        <kotlin.version>1.9.20</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <dokka.version>1.8.20</dokka.version>
+        <dokka.version>1.9.10</dokka.version>
         <dokka.skip>true</dokka.skip>
         <dokka.format>html</dokka.format>
 
@@ -262,7 +263,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.4.1</version>
+                        <version>3.6.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

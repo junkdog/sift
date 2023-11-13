@@ -2,10 +2,12 @@ package sift.core.template
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import sift.core.api.Action
 import sift.core.dsl.*
 import sift.core.dsl.MethodSelection.*
 import sift.core.entity.Entity
+import sift.core.junit.LogActiveTestExtension
 import sift.core.terminal.Gruvbox
 import sift.core.terminal.Style
 import sift.core.terminal.TextTransformer.Companion.dedupe
@@ -14,6 +16,7 @@ import sift.core.terminal.TextTransformer.Companion.replace
 import sift.core.terminal.TextTransformer.Companion.stylize
 import sift.core.terminal.TextTransformer.Companion.uuidSequence
 
+@ExtendWith(LogActiveTestExtension::class)
 class DeserializedSystemModelTemplateTest {
     @Test
     fun `save-load serializer`() {
