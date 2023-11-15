@@ -20,7 +20,6 @@
     </licenses>
 
     <properties>
-
         <kotlin.version>1.9.20</kotlin.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
