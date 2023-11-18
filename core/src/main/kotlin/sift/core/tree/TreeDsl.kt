@@ -52,11 +52,13 @@ fun TreeDsl<EntityNode>.add(label: String, f: TreeDsl<EntityNode>.() -> Unit) {
 fun TreeDsl<EntityNode>.addEntity(entity: Entity, f: TreeDsl<EntityNode>.() -> Unit = {}) {
     EntityNode.Entity(entity, entity.label)
         .also { e -> e["id"] = uuidToId(entity.id) }
-        .also { e -> e["element-id"] = entity["element-id"]!!.first() }
-        .also { e -> e["element-type"] = entity["element-type"]!!.first() }
+        .also { e -> if ("element-id" in entity)   e["element-id"] = entity["element-id"]!!.first() }
+        .also { e -> if ("element-type" in entity) e["element-type"] = entity["element-type"]!!.first() }
         .also { e -> e["entity-type"] = entity.type }
         .also { e -> add(e, f) }
 }
+
+private operator fun Entity.contains(key: String): Boolean = this[key] != null
 
 fun TreeDsl<EntityNode>.buildTree(
     e: Entity,
