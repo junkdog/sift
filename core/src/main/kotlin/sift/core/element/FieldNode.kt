@@ -16,7 +16,7 @@ class FieldNode private constructor(
     private val kprop: KotlinProperty?,
     override val annotations: List<AnnotationNode>,
     internal val signature: FieldSignatureNode? = fn.signature(cn.signature?.formalParameters ?: listOf()),
-    private val originalCn: ClassNode? = null, // when field is inherited
+    internal val originalCn: ClassNode? = null, // when field is inherited
 ) : Element(), Trait.HasType {
 
     init {

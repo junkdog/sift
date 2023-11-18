@@ -2022,6 +2022,44 @@ class DslTest {
     }
 
     @Test
+    fun `correctly identify relations when scanning instantiations with invocations-of`() {
+        val cns = listOf(
+            classNode<HandlerFn>(),
+            classNode<Payload>(),
+            classNode<HandlerOfFns>(),
+        )
+
+        val handler = Entity.Type("handler")
+        val data = Entity.Type("data")
+
+        classes {
+            scope("scan handler") {
+                methods {
+                    annotatedBy<HandlerFn>()
+                    entity(handler)
+
+                    parameters {
+                        parameter(0)
+                        explodeType {
+                            entity(data)
+                        }
+                    }
+
+                    instantiationsOf(data) {
+                        data["sent-by"] = handler
+                    }
+                }
+            }
+        }.expecting(cns) { es ->
+            assertThat((es[data].values.first().children["sent-by"]!!.map(Entity::toString)))
+                .containsExactlyInAnyOrder(
+                    "Entity(HandlerOfFns::on, type=handler, element-id=1, element-type=MethodNode)",
+                    "Entity(HandlerOfFns::boo, type=handler, element-id=2, element-type=MethodNode)",
+                )
+        }
+    }
+
+    @Test
     fun `associate controller as parent of endpoints`() {
         val controller = Entity.Type("controller")
         val endpoint = Entity.Type("endpoint")
@@ -2435,31 +2473,60 @@ class DslTest {
             )
         }
 
-        @Test @Disabled("need to resolve generic type of inherited methods")
-        fun `methods from delegated instances are not duplicated`() {
-            class Hello : HelloG<String> {
-                override fun hello(): String = ""
+        @Test
+        fun `delegated methods`() {
+            class Greeting
+
+            class Hello : HelloG<Greeting> {
+                override fun hello(): Greeting = Greeting()
             }
 
-            class FooBar(hello: Helloer) : HelloG<String> {
-                override fun hello(): String = ""
+            class FooBar(hello: Hello) : HelloG<Greeting> by hello
+
+            class FooBarOverrideDelegate(hello: Hello) : HelloG<Greeting> by hello {
+                override fun hello(): Greeting = TODO("no greeting instantiated")
             }
 
             val cns = listOf(
                 classNode(Hello::class),
                 classNode(HelloG::class),
+                classNode(Greeting::class),
                 classNode(FooBar::class),
+                classNode(FooBarOverrideDelegate::class),
             )
 
             val m = Entity.Type("hello-method")
+            val greet = Entity.Type("greeting")
 
             template {
                 classes {
-                    filter(Regex("\\.FooBar"))
-                    methods(inherited + abstractMethods) {
-                        entity(m, label("\${name}()"),
-                            property("name", readName())
-                        )
+                    filter("Greeting")
+                    entity(greet, label("Greeting"))
+                }
+                classes {
+                    filter(Regex("\\.FooBar$"))
+                    methods(inherited) {
+                        entity(m, label("\${name}()"), property("name", readName()))
+                        m["instantiates"] = greet.instantiations
+                    }
+                }
+            }.expecting(cns, m, """
+                ── hello-method
+                   └─ hello()
+                      └─ Greeting
+                """
+            )
+
+            template {
+                classes {
+                    filter("Greeting")
+                    entity(greet, label("Greeting"))
+                }
+                classes {
+                    filter(Regex("\\.FooBarOverrideDelegate"))
+                    methods(inherited) {
+                        entity(m, label("\${name}()"), property("name", readName()))
+                        m["instantiates"] = greet.instantiations
                     }
                 }
             }.expecting(cns, m, """

@@ -59,9 +59,11 @@ private fun Element.properties(): List<String> {
         is FieldNode -> listOfNotNull(
             "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
             "static".takeIf { access and Opcodes.ACC_STATIC != 0 },
+            "inherited".takeIf { originalCn != null },
         )
         is MethodNode -> listOfNotNull(
             "abstract".takeIf { isAbstract },
+            "inherited".takeIf { originalCn != null },
             "static".takeIf { access and Opcodes.ACC_STATIC != 0 },
             "synth".takeIf { access and Opcodes.ACC_SYNTHETIC != 0 },
         )
