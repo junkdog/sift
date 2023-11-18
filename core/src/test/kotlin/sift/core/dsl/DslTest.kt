@@ -1402,6 +1402,31 @@ class DslTest {
     }
 
     @Test
+    fun `filter by entity type`() {
+        val a = Entity.Type("a")
+        val b = Entity.Type("b")
+
+        val cns = listOf(SomeController::class, NotAController::class).map(::classNode)
+
+        template {
+            classes {
+                filter("SomeController")
+                entity(a, label("a: \${name}"), property("name", readName()))
+            }
+
+            classes("match classes except those owned by 'a'") {
+                filter(a, invert = true)
+                entity(b, label("b: \${name}"), property("name", readName()))
+            }
+        }.expecting(cns, listOf(a, b), """
+            ── a + b
+               ├─ a: SomeController
+               └─ b: NotAController
+            """
+        )
+    }
+
+    @Test
     fun `read endpoint and construct label`() {
         val endpoint = Entity.Type("endpoint")
 

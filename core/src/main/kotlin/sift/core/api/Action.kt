@@ -993,10 +993,13 @@ sealed class Action<IN, OUT> {
         }
     }
 
-    internal data class EntityFilter<T : Element>(val entity: Entity.Type) : IsoAction<T>() {
+    internal data class EntityFilter<T : Element>(
+        val entity: Entity.Type,
+        val invert: Boolean
+    ) : IsoAction<T>() {
         override fun id() = "filter-entity($entity)"
         override fun execute(ctx: Context, input: Iter<T>): Iter<T> {
-            return input.filter { it in ctx.entityService }
+            return input.filter { (it in ctx.entityService) xor invert }
         }
     }
 

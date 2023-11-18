@@ -1,5 +1,7 @@
 ## Upcoming Release
 
+### New/Tweaks
+- DSL: `filter(Enitity.Type, invert)` filters entities by type, now has an `invert` parameter. 
 - Faster template processing by lazily parsing method parameters. 
 
 ## sift-0.15.0 2023-08-21

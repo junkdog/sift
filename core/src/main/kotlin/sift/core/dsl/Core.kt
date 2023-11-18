@@ -14,9 +14,12 @@ abstract class Core<ELEMENT : Element>(
     private var stack: MutableList<Action<*, *>> = mutableListOf()
 
     /**
-     * Filters elements that belongs to [entity].
+     * Filters elements owned by [entity].
+     *
+     * @param entity the entity to filter elements by
+     * @param invert if true, returns elements which do not belong to [entity]
      */
-    fun filter(entity: Entity.Type) {
-        action += Action.EntityFilter(entity)
+    fun filter(entity: Entity.Type, invert: Boolean = false) {
+        action += Action.EntityFilter(entity, invert)
     }
 }

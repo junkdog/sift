@@ -1,5 +1,8 @@
 [
 {
+  "name":"[B"
+},
+{
   "name":"[C"
 },
 {
@@ -311,6 +314,9 @@
 },
 {
   "name":"kotlin.Boolean"
+},
+{
+  "name":"kotlin.ByteArray"
 },
 {
   "name":"kotlin.Char"
@@ -739,7 +745,11 @@
   "methods":[{"name":"<init>","parameterTypes":["org.objectweb.asm.Type"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.SiftType","int","kotlin.jvm.internal.DefaultConstructorMarker"] }, {"name":"<init>","parameterTypes":["sift.core.dsl.Type"] }]
 },
 {
-  "name":"sift.core.api.Action$InjectClass"
+  "name":"sift.core.api.Action$InjectClass",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":["byte[]"] }, {"name":"<init>","parameterTypes":["byte[]","int","kotlin.jvm.internal.DefaultConstructorMarker"] }]
 },
 {
   "name":"sift.core.api.Action$IntoAnnotations",
