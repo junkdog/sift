@@ -79,28 +79,6 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
 
     override fun template(): Action<Unit, Unit> {
 
-        fun Methods.registerAxonHandlers(
-            ownerType: Entity.Type,  // aggregate|projection
-            handlerAnnotation: Type, // @(Command|Event|Query)Handler
-            handledType: Entity.Type,
-            handler: Entity.Type,
-        ) {
-            annotatedBy(handlerAnnotation)
-            entity(handler,
-                property("dot-id-as", withValue(ownerType)),
-            )
-
-            parameters("register $handledType handlers") {
-                parameter(0)  // 1st parameter is command|event|query
-                property(handler, "type", readType())
-
-                // (re-)register command|event|query entity
-                explodeType(synthesize = true) { // class scope of parameter
-                    entity(handledType)
-                    handledType["received-by"] = handler
-                }
-            }
-        }
 
         fun Classes.registerAggregate(
             aggregate: Entity.Type,
@@ -251,4 +229,29 @@ class SpringBootAxonCqrsTemplate : SystemModelTemplate, SystemModelTemplateServi
         E.projection           to plain(green2),
         E.query                to plain(blue2),
     )
+}
+
+
+
+fun Methods.registerAxonHandlers(
+    ownerType: Entity.Type,  // aggregate|projection
+    handlerAnnotation: Type, // @(Command|Event|Query)Handler
+    handledType: Entity.Type,
+    handler: Entity.Type,
+) {
+    annotatedBy(handlerAnnotation)
+    entity(handler,
+        property("dot-id-as", withValue(ownerType)),
+    )
+
+    parameters("register $handledType handlers") {
+        parameter(0)  // 1st parameter is command|event|query
+        property(handler, "type", readType())
+
+        // (re-)register command|event|query entity
+        explodeType(synthesize = true) { // class scope of parameter
+            entity(handledType)
+            handledType["received-by"] = handler
+        }
+    }
 }

@@ -2,7 +2,9 @@
 
 ### New/Tweaks
 - DSL: `filter(Enitity.Type, invert)` filters entities by type, now has an `invert` parameter. 
-- Faster template processing by lazily parsing method parameters. 
+- Faster template processing by lazily parsing method parameters.
+- DSL: `invocationsOf()` now establishes an additional trace for each invoked method and their owner.
+
 ### Fixes
 - `--list-entity-types` works again, it was broken in 0.15.0.
 

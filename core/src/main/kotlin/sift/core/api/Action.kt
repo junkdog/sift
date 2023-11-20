@@ -774,6 +774,7 @@ sealed class Action<IN, OUT> {
 
                 fun resolveInvocations(elem: MethodNode): Flow<Pair<MethodNode, MethodNode>> {
                     return ctx.methodsInvokedBy(elem)
+                        // todo: heed inheritance
                         .asFlow()
                         .flatMapConcat(::invocations)
                         .filter { it.type in matched }
@@ -787,7 +788,10 @@ sealed class Action<IN, OUT> {
                         .flatMapConcat { mn -> resolveInvocations(mn) }
                             .toList()
                             .distinct()
+                            // associate callee methods with invoked methods
                             .onEach { (old, mn) -> ctx.scopeTransition(old, mn) }
+                            // associate invoked methods with their owners
+                            .onEach { (_, mn) -> ctx.scopeTransition(mn.owner, mn) }
                             .map { (_, mn) -> mn }
 
                 }
