@@ -102,6 +102,11 @@ class MethodNode private constructor(
             .also { mn -> mn.id = -1 }
     }
 
+    internal infix fun extends(other: MethodNode): Boolean {
+        return originalCn == other.cn
+            && name == other.name
+    }
+
     companion object {
         internal fun from(
             cn: ClassNode,

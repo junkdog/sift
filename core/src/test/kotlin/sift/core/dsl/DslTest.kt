@@ -1007,6 +1007,91 @@ class DslTest {
         )
     }
 
+    @Test
+    fun `synthesize polymorphic extension functions`() {
+        val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set4")
+            .getTypesAnnotatedWith(Metadata::class.java)
+            .map(::classNode)
+
+        val repo = Entity.Type("repo")
+        val method = Entity.Type("method")
+        val service = Entity.Type("service")
+
+        template {
+
+            classes("register repo") {
+                filter(Regex("CrudRepositoryImpl$"))
+                entity(repo)
+
+                methods(inherited) {
+                    entity(method)
+                    repo["method"] = method
+                }
+            }
+
+            classes("register service class") {
+                filter("Service")
+                methods {
+                    entity(service)
+                    invocationsOf(repo) {
+//                    invocationsOf(repo, synthesize = true) {
+                        entity(method)
+                        repo["method"] = method
+                        service["invoked-by"] = method
+                    }
+                }
+            }
+        }.expecting(cns, service, """
+            ── service
+               └─ Service::func
+                  ├─ CrudRepositoryImpl::findById
+                  └─ CrudRepositoryImpl::yolo
+            """
+        )
+    }
+
+    @Test
+    fun `resolve inherited polymorphic extension functions`() {
+        val cns: List<ClassNode> =  Reflections("sift.core.api.testdata.set4")
+            .getTypesAnnotatedWith(Metadata::class.java)
+            .map(::classNode)
+
+        val repo = Entity.Type("repo")
+        val method = Entity.Type("method")
+        val service = Entity.Type("service")
+
+        template {
+
+            classes("register repo") {
+                filter(Regex("CrudRepositoryImpl$"))
+                entity(repo)
+
+                methods(inherited) {
+                    entity(method)
+                    repo["method"] = method
+                }
+            }
+
+            classes("register service class") {
+                filter("Service")
+                methods {
+                    entity(service)
+                    invocationsOf(repo) {
+                        entity(method)
+                        repo["method"] = method
+                        service["invoked-by"] = method
+                    }
+                }
+            }
+        }.expecting(cns, service, """
+            ── service
+               └─ Service::func
+                  ├─ CrudRepositoryImpl::findById
+                  └─ CrudRepositoryImpl::yolo
+            """
+        )
+    }
+
     @Test @Disabled("superclass for signatures not yet implemented")
     fun `resolve interface generic type inherited from abstract class`() {
         // interface RepoT<T>

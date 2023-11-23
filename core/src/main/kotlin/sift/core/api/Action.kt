@@ -484,28 +484,9 @@ sealed class Action<IN, OUT> {
             override fun execute(ctx: Context, input: IterClasses): IterMethods {
                 val inheriting = selection.isInheriting
 
-                fun inheritedMethodsOf(input: ClassNode): IterMethods {
-
-                    // resolve inherited methods if they're not already resolved
-                    var inheritedMethods: List<MethodNode>? = input.inheritedMethods
-                    if (inheritedMethods == null) {
-                        inheritedMethods = ctx.inheritance[input.type]!!
-                            .also(Tree<TypeClassNode>::resolveGenerics)
-                            .walk()
-                            .drop(1) // root node is same as `input`
-                            .toList()
-                            .flatMap(Tree<TypeClassNode>::methods)
-                            .map { mn -> mn.copyWithOwner(input) }
-                            .also { input.inheritedMethods = it }
-                            .preferImplementations()
-                    }
-
-                    return inheritedMethods
-                }
-
                 fun methodsOf(input: ClassNode): IterMethods {
                     val methods = when (inheriting) {
-                        true -> (input.methods + inheritedMethodsOf(input)).preferImplementations()
+                        true -> (input.methods + ctx.inheritedMethodsOf(input)).preferImplementations()
                         false -> input.methods
                     }
 
@@ -518,7 +499,8 @@ sealed class Action<IN, OUT> {
             }
 
             companion object {
-                private fun List<MethodNode>.preferImplementations(): List<MethodNode> {
+                // todo: move
+                fun Iterable<MethodNode>.preferImplementations(): List<MethodNode> {
                     return partition { !it.isAbstract }
                         .let { (impl, undef) -> impl + undef }
                         .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
@@ -743,24 +725,26 @@ sealed class Action<IN, OUT> {
 
                 val matched: Set<Type> = ctx.entityService[match]
                     .map { (elem, _) -> typeOf(elem) }
+                    .flatMap { ctx.inheritance[it]!!.walk().map { node -> node.value.type } }
+                    .let { types -> types + types.map(Type::rawType) } // todo: rawType not correct
                     .toSet()
 
                 fun invocations(mn: MethodNode): Flow<Invocation> {
                     val invocationsA = mn.instructions()
                         .mapNotNull { it as? MethodInsnNode }
-                        .map(::Invocation)
+                        .map { Invocation(it, matched) }
                         .toList()
                     val invocationsB = mn.instructions()
                         .mapNotNull { it as? InvokeDynamicInsnNode }
                         .flatMap { ins -> ins.bsmArgs.mapNotNull { it as? Handle } }
-                        .map(::Invocation)
+                        .map { Invocation(it, matched) }
                         .toList()
 
                     return (invocationsA + invocationsB).asFlow()
                 }
 
                 fun methodElementOf(invocation: Invocation): MethodNode? {
-                    val cn = ctx.classByType[invocation.type]
+                    val cn = ctx.classByType[invocation.type.rawType]
                         ?: return null
                     return when (synthesize) {
                         true -> ctx.synthesize(invocation.type, invocation.name, invocation.desc)
@@ -769,15 +753,14 @@ sealed class Action<IN, OUT> {
                             .filterBy(MethodNode::desc, invocation.desc)
                             .also { mns -> require(mns.size < 2) { error("$mns") } }
                             .firstOrNull()
-                    }
+                    }?.let { mn -> ctx.substituteMethodOnInheritance(matched, mn) }
                 }
 
                 fun resolveInvocations(elem: MethodNode): Flow<Pair<MethodNode, MethodNode>> {
                     return ctx.methodsInvokedBy(elem)
-                        // todo: heed inheritance
                         .asFlow()
                         .flatMapConcat(::invocations)
-                        .filter { it.type in matched }
+                        .filter { invocation -> invocation.type in matched }
                         .mapNotNull(::methodElementOf)
                         .map { elem to it }
                 }
@@ -800,12 +783,13 @@ sealed class Action<IN, OUT> {
             internal data class Invocation(
                 val type: Type,
                 val name: String,
-                val desc: String
+                val desc: String,
+                val potentialMatches: Set<Type>
             ) {
-                constructor(ins: MethodInsnNode) :
-                    this(ins.ownerType, ins.name, ins.desc)
-                constructor(handle: Handle) :
-                    this(handle.ownerType, handle.name, handle.desc)
+                constructor(ins: MethodInsnNode, potentialMatches: Set<Type>) :
+                    this(ins.ownerType, ins.name, ins.desc, potentialMatches)
+                constructor(handle: Handle, potentialMatches: Set<Type>) :
+                    this(handle.ownerType, handle.name, handle.desc, potentialMatches)
             }
         }
     }

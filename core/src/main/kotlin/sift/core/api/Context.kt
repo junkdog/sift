@@ -4,8 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import net.onedaybeard.collectionsby.filterBy
+import net.onedaybeard.collectionsby.firstBy
 import sift.core.SynthesisTemplate
 import sift.core.Throw.entityTypeAlreadyBoundToElementType
+import sift.core.api.Action.Class.IntoMethods.Companion.preferImplementations
 import sift.core.api.MeasurementScope.Template
 import sift.core.asm.classNode
 import sift.core.asm.signature.TypeSignature
@@ -132,8 +134,75 @@ internal data class Context(
         methods.forEach(::methodsInvokedBy)
     }
 
+    fun inheritedMethodsOf(cn: ClassNode): List<MethodNode> {
+        if (cn.inheritedMethods != null)
+            return cn.inheritedMethods!!
+
+        fun List<MethodNode>.preferImplementations(): List<MethodNode> {
+            return partition { !it.isAbstract }
+                .let { (impl, undef) -> impl + undef }
+                .distinctBy { Triple(it.name, it.desc, it.rawSignature) }
+        }
+
+        cn.inheritedMethods = inheritance[cn.type]!!
+            .also(Tree<TypeClassNode>::resolveGenerics)
+            .walk()
+            .drop(1) // root node is same as `input`
+            .toList()
+            .flatMap(Tree<TypeClassNode>::methods)
+            .map { mn -> mn.copyWithOwner(cn) }
+            .also { cn.inheritedMethods = it }
+            .preferImplementations()
+
+        return cn.inheritedMethods!!
+    }
+
+    fun substituteMethodOnInheritance(
+        candidateSubTypes: Set<Type>,
+        mn: MethodNode
+    ): MethodNode {
+        return candidateSubTypes.map { type -> substituteMethodOnInheritance(type, mn) }
+            .toSet()
+            .preferImplementations()
+            .also { require(it.size == 1) {
+                "$mn: (originalCn=${mn.originalCn}) ambiguous promotion: $it"
+            } }
+            .first()
+    }
+
+
+    private fun substituteMethodOnInheritance(
+        candidateSubType: Type,
+        mn: MethodNode,
+    ): MethodNode {
+        return mn.takeUnless { isInheritableBy(candidateSubType, mn) }
+            ?: inheritedMethodsOf(classByType[candidateSubType] ?: return mn)
+                .find { inherited -> inherited extends mn }
+                ?: mn
+    }
+
+    private fun isInheritableBy(
+        type: Type,
+        mn: MethodNode,
+    ): Boolean {
+        return (inheritance[type] ?: return false)
+            .walk()
+            .drop(1)
+            .any { tcn -> tcn.value.type.rawType == mn.owner.type.rawType }
+    }
+
     fun methodsInvokedBy(mn: MethodNode): Iterable<MethodNode> {
-        return methodInvocationsCache.getOrPut(mn) { methodsInvokedBy(mn, classByType) }
+        // update invoked method with current mn's owner if the invoked
+        // method is part of its inheritance hierarchy
+        fun resolveInheritance(invoked: MethodNode): MethodNode {
+            return invoked.takeIf { invoked.name != "<init>" }
+                ?: substituteMethodOnInheritance(mn.owner.type, invoked)
+        }
+
+        return methodInvocationsCache.getOrPut(mn) {
+            methodsInvokedBy(mn, classByType)
+                .map(::resolveInheritance) // fixme: probably wrong (should match against types?)
+        }
     }
 
     fun fieldAccessBy(mn: MethodNode): Iterable<FieldNode> {
@@ -144,7 +213,7 @@ internal data class Context(
                 inheritedFields == null    -> fn
                 fieldOwner == type         -> fn
                 fieldOwner !in implemented -> fn
-                else -> inheritedFields!!.first { it.name == fn.name }
+                else -> inheritedFields!!.firstBy(FieldNode::name, fn.name)
             }
         }
 
@@ -345,6 +414,10 @@ internal data class Context(
             }
         }
     }
+}
+
+private operator fun Tree<TypeClassNode>.contains(cn: ClassNode): Boolean {
+    return walk().any { tcn -> tcn.value.cn == cn }
 }
 
 internal fun Context.coercedMethodsOf(type: Entity.Type): Map<MethodNode, Entity> {
