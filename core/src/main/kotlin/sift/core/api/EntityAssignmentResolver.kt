@@ -64,6 +64,15 @@ sealed class EntityAssignmentResolver<T: Element> {
             elements
                 .also(ctx::cacheMethodInvocations)
                 .forEach { registerInvocations(ctx, it, matched, "backtrack", key) }
+
+//            fun register(callee: MethodNode, invoked: MethodNode) {
+//                val parent = ctx.entityService[callee] ?: return
+//                val child = ctx.entityService[invoked] ?: return
+//                parent.addChild("backtrack", child)
+//                child.addChild(key, parent)
+//            }
+//
+//            ctx.resolveAllInvocations(type, elements, false, ::register)
         }
     }
 
@@ -82,6 +91,15 @@ sealed class EntityAssignmentResolver<T: Element> {
             elements
                 .also(ctx::cacheMethodInvocations)
                 .forEach { registerInvocations(ctx, it, matched, key, "backtrack") }
+
+//            fun register(callee: MethodNode, invoked: MethodNode) {
+//                val parent = ctx.entityService[callee] ?: return
+//                val child = ctx.entityService[invoked] ?: return
+//                parent.addChild(key, child)
+//                child.addChild("backtrack", parent)
+//            }
+//
+//            ctx.resolveAllInvocations(type, elements, false, ::register)
         }
     }
 
@@ -127,6 +145,13 @@ sealed class EntityAssignmentResolver<T: Element> {
             elements
                 .also(ctx::cacheMethodInvocations)
                 .forEach { registerInstantiations(ctx, it, types, key, "backtrack") }
+
+//            ctx.resolveAllInstantations(type, elements, false) { mn, cn ->
+//                val parent = ctx.entityService[mn] ?: return@resolveAllInstantations
+//                val child = ctx.entityService[cn] ?: return@resolveAllInstantations
+//                parent.addChild(key, child)
+//                child.addChild("backtrack", parent)
+//            }
         }
     }
 }

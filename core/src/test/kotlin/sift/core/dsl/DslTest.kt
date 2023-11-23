@@ -1063,7 +1063,7 @@ class DslTest {
         template {
 
             classes("register repo") {
-                filter(Regex("CrudRepositoryImpl$"))
+                filter(Regex("CrudRepositoryImpl.?"))
                 entity(repo)
 
                 methods(inherited) {
@@ -1087,7 +1087,8 @@ class DslTest {
             ── service
                └─ Service::func
                   ├─ CrudRepositoryImpl::findById
-                  └─ CrudRepositoryImpl::yolo
+                  ├─ CrudRepositoryImpl::yolo
+                  └─ CrudRepositoryImpl2::findById
             """
         )
     }
@@ -1862,7 +1863,7 @@ class DslTest {
 
         classes {
             methods {
-                filter(Regex("HandlerOfFns\$"))
+                filter("HandlerOfFns")
                 entity(method)
 
                 method["invokes"] = method.invocations

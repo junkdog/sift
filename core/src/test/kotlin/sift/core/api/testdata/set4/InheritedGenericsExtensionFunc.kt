@@ -17,9 +17,16 @@ class CrudRepositoryImpl : CrudRepository<String, Int> {
     override fun yolo() = Unit
 }
 
-class Service(val repo: CrudRepositoryImpl) {
+class CrudRepositoryImpl2 : CrudRepository<String, Int> {
+    override fun findById(id: Int): Optional<String> = Optional("hi")
+    override fun yolo() = Unit
+}
+
+class Service(val repo: CrudRepositoryImpl, val repo2: CrudRepositoryImpl2) {
     fun func() {
         repo.findByIdOrNull(213)
         repo.yolo()
+
+        repo2.findByIdOrNull(0)
     }
 }

@@ -725,8 +725,8 @@ sealed class Action<IN, OUT> {
 
                 val matched: Set<Type> = ctx.entityService[match]
                     .map { (elem, _) -> typeOf(elem) }
-                    .flatMap { ctx.inheritance[it]!!.walk().map { node -> node.value.type } }
-                    .let { types -> types + types.map(Type::rawType) } // todo: rawType not correct
+                    .flatMap { type -> ctx.inheritance[type]?.walk()?.map { node -> node.value.type } ?: sequenceOf(type) }
+                    .let { types -> types + types.map(Type::rawType) } // todo: type + rawType not sufficiently precise?
                     .toSet()
 
                 fun invocations(mn: MethodNode): Flow<Invocation> {
@@ -780,6 +780,7 @@ sealed class Action<IN, OUT> {
                 }
             }
 
+//            // todo: refactor to other package for entity assignment resolvers
             internal data class Invocation(
                 val type: Type,
                 val name: String,
