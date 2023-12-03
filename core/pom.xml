@@ -112,6 +112,13 @@
             <version>0.10.2</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>br.usp.each.saeg</groupId>
+            <artifactId>asm-defuse</artifactId>
+            <version>0.0.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
