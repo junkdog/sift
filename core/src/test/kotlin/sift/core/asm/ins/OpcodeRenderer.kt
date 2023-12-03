@@ -1,5 +1,6 @@
 package sift.core.asm.ins
 
+import com.github.ajalt.mordant.rendering.TextStyle
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.*
@@ -21,7 +22,7 @@ import kotlin.reflect.KProperty
 val labelShortener = TextTransformer.idSequence(Regex("L[0-9]+"))
 
 
-internal fun render(ins: AbstractInsnNode): String {
+internal fun renderInstruction(ins: AbstractInsnNode): String {
     return when (ins) {
         is MethodInsnNode -> when (ins.opcode) {
             Opcodes.INVOKEVIRTUAL   -> "INVOKEVIRTUAL"
@@ -36,7 +37,7 @@ internal fun render(ins: AbstractInsnNode): String {
             Opcodes.PUTFIELD  -> "PUTFIELD"
             Opcodes.PUTSTATIC -> "PUTSTATIC"
             else -> missingOpcodeError(ins)
-        }.let { "$it ${ins.owner}.${ins.name} -> ${ins.desc}" }
+        }.let { "$it ${ins.owner}.${ins.name}: ${ins.desc}" }
         is TableSwitchInsnNode -> when (ins.opcode) {
             Opcodes.TABLESWITCH -> "TABLESWITCH"
             else -> missingOpcodeError(ins)
@@ -79,7 +80,7 @@ internal fun render(ins: AbstractInsnNode): String {
             else -> missingOpcodeError(ins)
         }.let { "$it ${ins.`var`}" }
         is InvokeDynamicInsnNode -> when (ins.opcode) {
-            Opcodes.INVOKEDYNAMIC -> "INVOKEDYNAMIC"
+            Opcodes.INVOKEDYNAMIC -> "INVOKEDYNAMIC ${ins.name} ${ins.desc}"
             else -> missingOpcodeError(ins)
         }
         is FrameNode -> when (ins.type) {
@@ -90,7 +91,7 @@ internal fun render(ins: AbstractInsnNode): String {
             Opcodes.F_SAME -> "F_SAME"
             Opcodes.F_SAME1 -> "F_SAME1"
             else -> missingOpcodeError(ins)
-        }.let { "$it local=${ins.local ?: listOf()} stack=${ins.stack ?: listOf()}" }
+        }.let { "$it local=${ins.local?.map { it.toString().substringAfterLast("/") } ?: listOf()} stack=${ins.stack ?: listOf()}" }
         is JumpInsnNode -> when (ins.opcode) {
             Opcodes.IFEQ -> "IFEQ"
             Opcodes.IFNE -> "IFNE"
@@ -111,7 +112,7 @@ internal fun render(ins: AbstractInsnNode): String {
             Opcodes.IFNULL -> "IFNULL"
             Opcodes.IFNONNULL -> "IFNONNULL"
             else -> missingOpcodeError(ins)
-        }.let { "$it #${labelShortener(ins.label.label.toString())}" }
+        }.let { "$it @${labelShortener(ins.label.label.toString())}" }
         is LookupSwitchInsnNode -> when (ins.opcode) {
             Opcodes.LOOKUPSWITCH -> "LOOKUPSWITCH"
             else -> missingOpcodeError(ins)
@@ -242,20 +243,24 @@ internal fun render(ins: AbstractInsnNode): String {
             else -> missingOpcodeError(ins)
         }
         else -> error("missing case for instruction ${ins::class.simpleName}")
-    }.let { colorize(ins, it) }
+    }
 }
 
 
-private fun colorize(ins: AbstractInsnNode, opcode: String): String {
+internal fun renderTerminal(ins: AbstractInsnNode, opcode: String): String {
     val trimmed = opcode.trim()
 
     val type = trimmed.substringBefore(" ")
         .let { if (ins !is LabelNode) it.padEnd(16, ' ') else it }
 
     val indentation = "    ".takeIf { ins !is LabelNode } ?: ""
-
     val args = trimmed.substringAfter(" ", "")
-    val argsStyle = when (ins) {
+
+    return indentation + ins.labelStyle(type) + " ${ins.argStyle(args)}"
+}
+
+internal val AbstractInsnNode.argStyle: TextStyle
+    get() = when (this) {
         is MethodInsnNode        -> yellow2
         is LabelNode             -> yellow2 + bold
         is JumpInsnNode          -> yellow2 + bold
@@ -263,7 +268,8 @@ private fun colorize(ins: AbstractInsnNode, opcode: String): String {
         else                     -> fg
     }
 
-    return indentation + when (ins) {
+internal val AbstractInsnNode.labelStyle: TextStyle
+    get() = when (this) {
         is MethodInsnNode        -> green1 + inverse
         is FieldInsnNode         -> blue2
         is TableSwitchInsnNode   -> purple1
@@ -279,9 +285,8 @@ private fun colorize(ins: AbstractInsnNode, opcode: String): String {
         is JumpInsnNode          -> yellow2 + inverse
         is LookupSwitchInsnNode  -> yellow1
         is InsnNode              -> fg
-        else -> error("missing case for instruction ${ins::class.simpleName}")
-    }(type) + " ${argsStyle(args)}"
-}
+        else -> error("missing case for instruction ${this::class.simpleName}")
+    }
 
 private fun missingOpcodeError(
     ins: AbstractInsnNode,

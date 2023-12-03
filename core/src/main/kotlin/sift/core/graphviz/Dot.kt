@@ -277,7 +277,7 @@ private fun edgeColors() = listOf(
     Gruvbox.yellow2,
 ).shuffled()
 
-private val TextStyle.hexColor
+internal val TextStyle.hexColor
     get() = color!!.toSRGB().toHex()
 
 @Suppress("EnumEntryName")
