@@ -1,4 +1,4 @@
-name: 🚀 release and deploy sift
+name: yolo test action
 on:
   workflow_dispatch
 
